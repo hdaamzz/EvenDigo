@@ -1,0 +1,245 @@
+<div class="p-2 md:p-5 relative z-1">
+  <div class="bg-gray-100 p-2 md:p-5">
+    <div class="container bg-white rounded-lg shadow-sm p-3 md:p-5">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-5">
+        <div class="mb-6">
+          <h2
+            class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
+            <span
+              class="gradient-text bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Customers</span>
+            <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Management</span>
+          </h2>
+        </div>
+        @if (showVerificationPage) {
+        <button (click)="showVerification()"
+          class="new-badge text-indigo-500 border border-indigo-400 px-4 py-2 rounded-md text-sm font-medium flex items-center transition duration-300 ease-in-out shadow-[0_0_8px_rgba(99,102,241,0.4)] hover:shadow-[0_0_15px_rgba(99,102,241,0.7)] hover:text-indigo-600 hover:border-indigo-500">
+          <i class="fas fa-list mr-2"></i>
+          Customers List
+        </button>
+        } @else {
+        <button (click)="showVerification()"
+          class="new-badge text-green-500 border border-green-400 px-4 py-2 rounded-md text-sm font-medium flex items-center transition duration-300 ease-in-out shadow-[0_0_8px_rgba(74,222,128,0.4)] hover:shadow-[0_0_15px_rgba(74,222,128,0.7)] hover:text-green-600 hover:border-green-500">
+          <i class="fas fa-check-circle mr-2"></i>
+          Verification Requests
+        </button>
+        }
+      </div>
+
+      <!-- Customer List Cards -->
+      @if (!showVerificationPage) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @if (loading) {
+        <div class="col-span-full text-center py-4">Loading...</div>
+        } @else if (usersList.length === 0) {
+        <div class="col-span-full text-center py-4">No users found</div>
+        } @else {
+        @for (user of usersList; track user._id) {
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
+          <div class="flex items-center mb-3">
+            @if (user.profileImg && user.profileImg[8]=='r') {
+            <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" [src]="user.profileImg"
+              alt="">
+
+            }@else {
+            <div
+              [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.name) + ' flex items-center justify-center text-white mr-3'">
+              {{ user.name.charAt(0).toUpperCase() }}
+            </div>
+            }
+
+            <div>
+              <h3 class="font-medium text-gray-800">{{ user.name }}</h3>
+              <p class="text-sm text-gray-500">{{ user.email }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <div class="text-sm">
+              <span class="text-gray-500">Phone:</span>
+              <span class="ml-1 text-gray-700">{{ user.phone || 'N/A' }}</span>
+            </div>
+            <div class="text-sm">
+              <span class="text-gray-500">Gender:</span>
+              <span class="ml-1 text-gray-700">{{ user.gender || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <div>
+              @switch (user.status) {
+              @case ('active') {
+              <span class="status bg-green-100 text-green-600 px-2 py-1 rounded-3xl text-xs">Active</span>
+              }
+              @case ('deactive') {
+              <span class="status bg-yellow-100 text-yellow-600 px-2 py-1 rounded-3xl text-xs">Deactive</span>
+              }
+              @default {
+              <span class="status bg-red-100 text-red-600 px-2 py-1 rounded-3xl text-xs">Blocked</span>
+              }
+              }
+            </div>
+            <p-button class="action-btn text-white rounded transition-all"
+              (click)="showDialog(user._id, isMobile ? 'bottom' : 'right')" label="Details" severity="success"
+              styleClass="p-button-sm">
+            </p-button>
+          </div>
+        </div>
+        }
+        }
+      </div>
+      } @else {
+      <!-- Verification Requests Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @if (loading) {
+        <div class="col-span-full text-center py-4">Loading...</div>
+        } @else if (verificationList.length === 0) {
+        <div class="col-span-full text-center py-4">No users found</div>
+        } @else {
+        @for (verification of verificationList; track verification._id) {
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
+          <div class="flex items-center mb-3">
+            <img [src]="verification.user_id.profileImg" alt="profile.image"
+              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 mr-3" />
+            <div>
+              <h3 class="font-medium text-gray-800">{{ verification.user_id.name }}</h3>
+              <p class="text-sm text-gray-500">{{ verification.user_id.email }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <div class="text-sm">
+              <span class="text-gray-500">Phone:</span>
+              <span class="ml-1 text-gray-700">{{ verification.user_id.phone || 'N/A' }}</span>
+            </div>
+            <div class="text-sm">
+              <span class="text-gray-500">Gender:</span>
+              <span class="ml-1 text-gray-700">{{ verification.user_id.gender || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center flex-wrap gap-2">
+            <div>
+              @switch (verification.status) {
+              @case ('Verified') {
+              <span class="status bg-green-100 text-green-600 px-2 py-1 rounded-3xl text-xs">Verified</span>
+              }
+              @case ('Pending') {
+              <span class="status bg-yellow-100 text-yellow-600 px-2 py-1 rounded-3xl text-xs">Pending</span>
+              }
+              @default {
+              <span class="status bg-red-100 text-red-600 px-2 py-1 rounded-3xl text-xs">Rejected</span>
+              }
+              }
+            </div>
+            @if (verification.status == 'Pending') {
+            <div class="flex items-center space-x-2">
+              <button
+                class="text-green-600 border border-green-600 px-2 py-1 rounded-lg text-xs hover:bg-green-600 hover:text-white transition">
+                Approve
+              </button>
+              <button
+                class="text-red-600 border border-red-600 px-2 py-1 rounded-lg text-xs hover:bg-red-600 hover:text-white transition">
+                Reject
+              </button>
+            </div>
+            }
+            <div class="relative">
+              <p-menu #menu [popup]="true" [model]="getMenuItems(verification)" [appendTo]="'body'"></p-menu>
+              <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-text p-button-rounded p-button-sm"
+                (click)="menu.toggle($event)">
+              </button>
+            </div>
+          </div>
+        </div>
+        }
+        }
+      </div>
+      }
+
+      <!-- User Details Dialog -->
+      <p-dialog header="User Details" [modal]="true" [(visible)]="visible" [position]="isMobile ? 'bottom' : 'right'"
+        [style]="isMobile ? { width: '100%', maxWidth: '100vw', backgroundColor: 'white', color: 'black' } : 
+        { width: '30rem', backgroundColor: 'white', color: 'black' }" styleClass="white-dialog">
+
+        <!-- Profile Section -->
+        <div class="mb-4 header">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Name</span>
+              <p class="font-normal text-black">{{selectedUser.name || 'N/A'}}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Email</span>
+              <p class="font-normal text-black">{{selectedUser.email || 'N/A'}}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Mobile</span>
+              <p class="font-normal text-black">{{selectedUser.phone || 'N/A'}}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Gender</span>
+              <p class="font-normal text-black">{{selectedUser.gender || 'N/A'}}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Date of Birth</span>
+              <p class="font-normal text-black">{{selectedUser.dateOfBirth || 'N/A'}}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Location</span>
+              <p class="font-normal text-black">{{selectedUser.location || 'N/A'}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Section -->
+        <div class="mb-6 stat-card">
+          <h3 class="text-lg font-sans text-black pb-2 mb-4">Account Information</h3>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Verified</span>
+              <p class="font-normal text-black">{{selectedUser.verified?'Yes':'No'}}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Status</span>
+              <p class="font-normal text-black">
+                <span [ngClass]="selectedUser.status === 'active' ? 'text-green-600' : 'text-red-600'">
+                  {{selectedUser.status || 'N/A'}}
+                </span>
+              </p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Rating</span>
+              <p class="font-normal text-black flex items-center">
+                <span>{{selectedUser.rating || 'N/A'}}</span>
+                <i class="pi pi-star-fill text-yellow-400 ml-1" *ngIf="selectedUser.rating"></i>
+              </p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Provider</span>
+              <p class="font-normal text-black">{{selectedUser.provider || 'Default'}}</p>
+            </div>
+            <div class="col-span-2">
+              <span class="text-sm text-gray-500">Member Since</span>
+              <p class="font-normal text-black">{{selectedUser.createdAt | date:'mediumDate'}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex justify-end">
+          <div class="mr-4">
+            @if (selectedUser.status=='active') {
+            <p-button label="Block" severity="danger" (click)="blockUser(selectedUser._id)" />
+            } @else {
+            <p-button label="Unlock" severity="success" (click)="unblockUser(selectedUser._id)" />
+            }
+          </div>
+          <div class="mr-4">
+            <p-button label="Close" severity="secondary" (click)="hideDialog()" />
+          </div>
+        </div>
+      </p-dialog>
+    </div>
+  </div>
+</div>

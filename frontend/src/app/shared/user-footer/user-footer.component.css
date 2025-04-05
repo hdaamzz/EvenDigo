@@ -1,0 +1,13 @@
+.footer-link {
+    transition: all 0.3s ease;
+}
+.footer-link:hover {
+    color: #00ff66;
+    transform: translateX(3px);
+}
+.social-icon {
+    transition: all 0.3s ease;
+}
+.social-icon:hover {
+    color: #00ff66;
+}

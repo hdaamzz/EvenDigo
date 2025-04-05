@@ -1,0 +1,28 @@
+
+
+.shape {
+    animation: float 6s ease-in-out infinite;
+}
+
+.header {
+    animation: slideDown 0.5s ease-out;
+}
+
+.stat-card {
+    animation: slideUp 0.5s ease-out;
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.progress {
+    animation: progressFill 1s ease-out;
+}
+
+.chart-bar {
+    animation: barRise 1s ease-out;
+}
+
+/* font-family: 'Poppins', sans-serif; */
+

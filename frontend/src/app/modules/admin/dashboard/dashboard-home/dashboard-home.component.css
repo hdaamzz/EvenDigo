@@ -1,0 +1,52 @@
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+    100% { transform: translateY(0px) rotate(360deg); }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes progressFill {
+    from { width: 0; }
+}
+
+@keyframes barRise {
+    from { height: 0; }
+}
+
+.shape {
+    animation: float 6s ease-in-out infinite;
+}
+
+.header {
+    animation: slideDown 0.5s ease-out;
+}
+
+.stat-card {
+    animation: slideUp 0.5s ease-out;
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.progress {
+    animation: progressFill 1s ease-out;
+}
+
+.chart-bar {
+    animation: barRise 1s ease-out;
+}

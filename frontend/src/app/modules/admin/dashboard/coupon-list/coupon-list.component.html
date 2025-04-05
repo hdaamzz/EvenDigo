@@ -1,0 +1,296 @@
+<div class="p-2 md:p-5 relative z-1">
+  <div class="bg-gray-100 p-2 md:p-5">
+    <div class="container bg-white rounded-lg shadow-sm p-3 md:p-5">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-5">
+        <div class="mb-6">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
+            <span class="gradient-text bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Coupons</span>
+            <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Management</span>
+          </h2>
+        </div>
+        <p-button (click)="addNewCoupon()" label="Add New Coupon"><i class="fas fa-plus-circle mr-2"></i></p-button>
+      </div>
+
+      <!-- Coupon Form Dialog -->
+      <p-dialog 
+        [header]="selectedCoupon._id ? 'Edit Coupon' : 'Add New Coupon'" 
+        [(visible)]="createDialogVisible" 
+        [modal]="true" 
+        [style]="{ width: isMobile ? '100%' : '30rem' }" 
+        [position]="isMobile ? 'bottom' : 'right'"
+      >
+        <form [formGroup]="couponForm" (ngSubmit)="saveCoupon()" class="p-4">
+          <span class="p-text-secondary block mb-5">{{ selectedCoupon._id ? 'Update coupon details.' : 'Create a new coupon for your customers.' }}</span>
+
+          <!-- Coupon Code -->
+          <div class="p-field p-grid mb-4">
+            <label for="couponCode" class="p-col-fixed font-semibold" style="width: 120px">Coupon Code</label>
+            <div class="p-col">
+              <input 
+                pInputText 
+                id="couponCode" 
+                formControlName="couponCode" 
+                class="p-inputtext p-component w-full" 
+                placeholder="eg: SAVE" 
+                autocomplete="off" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('couponCode')?.touched && couponForm.get('couponCode')?.errors">
+                <span *ngIf="couponForm.get('couponCode')?.errors?.['required']">Coupon code is required.</span>
+                <span *ngIf="couponForm.get('couponCode')?.errors?.['minlength']">Minimum 3 characters.</span>
+                <span *ngIf="couponForm.get('couponCode')?.errors?.['maxlength']">Maximum 20 characters.</span>
+                <span *ngIf="couponForm.get('couponCode')?.errors?.['alphabetsOnly']">Only alphabets allowed.</span>
+              </small>
+            </div>
+          </div>
+
+          <!-- Discount Type -->
+          <div class="p-field p-grid mb-4">
+            <label for="discountType" class="p-col-fixed font-semibold" style="width: 120px">Discount Type</label>
+            <div class="p-col">
+              <p-dropdown 
+                id="discountType" 
+                formControlName="discountType" 
+                [options]="discountTypes" 
+                optionLabel="label" 
+                optionValue="value" 
+                placeholder="Select type" 
+                class="w-full" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('discountType')?.touched && couponForm.get('discountType')?.errors?.['required']">
+                Discount type is required.
+              </small>
+            </div>
+          </div>
+
+          <!-- Discount Value -->
+          <div class="p-field p-grid mb-4">
+            <label for="discount" class="p-col-fixed font-semibold" style="width: 120px">Discount</label>
+            <div class="p-col">
+              <input 
+                pInputText 
+                id="discount" 
+                type="number" 
+                formControlName="discount" 
+                class="p-inputtext p-component w-full" 
+                placeholder="Enter amount" 
+                autocomplete="off" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors">
+                <span *ngIf="couponForm.get('discount')?.errors?.['required']">Discount is required.</span>
+                <span *ngIf="couponForm.get('discount')?.errors?.['min']">Must be at least 1.</span>
+                <span *ngIf="couponForm.get('discount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
+              </small>
+            </div>
+          </div>
+
+          <!-- Minimum Amount -->
+          <div class="p-field p-grid mb-4">
+            <label for="minAmount" class="p-col-fixed font-semibold" style="width: 120px">Min. Amount</label>
+            <div class="p-col">
+              <input 
+                pInputText 
+                id="minAmount" 
+                type="number" 
+                formControlName="minAmount" 
+                class="p-inputtext p-component w-full" 
+                placeholder="Minimum purchase" 
+                autocomplete="off" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('minAmount')?.touched && couponForm.get('minAmount')?.errors">
+                <span *ngIf="couponForm.get('minAmount')?.errors?.['min']">Must be 0 or greater.</span>
+                <span *ngIf="couponForm.get('minAmount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
+              </small>
+            </div>
+          </div>
+
+          <!-- Max Uses -->
+          <div class="p-field p-grid mb-4">
+            <label for="maxUses" class="p-col-fixed font-semibold" style="width: 120px">Max Uses</label>
+            <div class="p-col">
+              <input 
+                pInputText 
+                id="maxUses" 
+                type="number" 
+                formControlName="maxUses" 
+                class="p-inputtext p-component w-full" 
+                placeholder="Usage limit" 
+                autocomplete="off" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('maxUses')?.touched && couponForm.get('maxUses')?.errors">
+                <span *ngIf="couponForm.get('maxUses')?.errors?.['min']">Must be 0 or greater.</span>
+                <span *ngIf="couponForm.get('maxUses')?.errors?.['onlynumbers']">Only numbers allowed.</span>
+              </small>
+            </div>
+          </div>
+
+          <!-- Expiry Date -->
+          <div class="p-field p-grid mb-4">
+            <label for="expiryDate" class="p-col-fixed font-semibold" style="width: 120px">Expiry Date</label>
+            <div class="p-col">
+              <p-calendar 
+                id="expiryDate" 
+                formControlName="expiryDate" 
+                [showIcon]="true" 
+                class="w-full" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('expiryDate')?.touched && couponForm.get('expiryDate')?.errors?.['pastDate']">
+                Expiry date must be in the future.
+              </small>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="p-field p-grid mb-5">
+            <label for="description" class="p-col-fixed font-semibold" style="width: 120px">Description</label>
+            <div class="p-col">
+              <textarea 
+                pInputTextarea 
+                id="description" 
+                formControlName="description" 
+                class="p-inputtext p-component w-full" 
+                rows="3" 
+                placeholder="Coupon details" 
+              ></textarea>
+              <small class="p-error" *ngIf="couponForm.get('description')?.touched && couponForm.get('description')?.errors?.['maxlength']">
+                Maximum 500 characters.
+              </small>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="p-dialog-footer p-d-flex p-jc-end p-gap-2">
+            <p-button 
+              label="Cancel" 
+              severity="secondary" 
+              (click)="hideCouponDialog()" 
+            />
+            <p-button 
+              type="submit" 
+              [label]="selectedCoupon._id ? 'Update Coupon' : 'Create Coupon'" 
+              severity="success" 
+              [disabled]="couponForm.invalid" 
+            />
+          </div>
+        </form>
+      </p-dialog>
+
+      <!-- Coupon Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @if (loading) {
+          <div class="col-span-full text-center py-4">Loading...</div>
+        } @else if (couponsList.length === 0) {
+          <div class="col-span-full text-center py-4">No coupons found</div>
+        } @else {
+          @for (coupon of couponsList; track coupon._id) {
+            <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h3 class="font-medium text-gray-800 text-lg">{{ coupon.code }}</h3>
+                  <p class="text-sm text-gray-500">{{ coupon.description }}</p>
+                </div>
+                <div [class]="coupon.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
+                  class="px-2 py-1 rounded-3xl text-xs">
+                  {{ coupon.status | titlecase }}
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 mb-4">
+                <div class="text-sm">
+                  <span class="text-gray-500">Discount:</span>
+                  <span class="ml-1 font-medium text-gray-800">
+                    {{ coupon.discountType === 'percentage' ? (coupon.discount + '%') : ('$' + coupon.discount) }}
+                  </span>
+                </div>
+                <div class="text-sm">
+                  <span class="text-gray-500">Uses:</span>
+                  <span class="ml-1 font-medium text-gray-800">{{ coupon.usageCount }} / {{ coupon.maxUses }}</span>
+                </div>
+                <div class="text-sm">
+                  <span class="text-gray-500">Expires:</span>
+                  <span class="ml-1 font-medium text-gray-800">{{ coupon.expiryDate | date:'shortDate' }}</span>
+                </div>
+                <div class="text-sm">
+                  <span class="text-gray-500">Min. Amount:</span>
+                  <span class="ml-1 font-medium text-gray-800">₹{{ coupon.minAmount }}</span>
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center">
+                <p-button class="action-btn text-white rounded transition-all"
+                  (click)="showCouponDetails(coupon._id)" label="Details" severity="success" styleClass="p-button-sm">
+                </p-button>
+                <div class="flex space-x-2">
+                  @if (coupon.status === 'active') {
+                    <button class="text-yellow-600 border border-yellow-600 px-2 py-1 rounded-lg text-xs hover:bg-yellow-600 hover:text-white transition"
+                      (click)="deactivateCoupon(coupon._id)">
+                      Deactivate
+                    </button>
+                  } @else {
+                    <button class="text-green-600 border border-green-600 px-2 py-1 rounded-lg text-xs hover:bg-green-600 hover:text-white transition"
+                      (click)="activateCoupon(coupon._id)">
+                      Activate
+                    </button>
+                  }
+                  <button class="text-red-600 border border-red-600 px-2 py-1 rounded-lg text-xs hover:bg-red-600 hover:text-white transition"
+                    (click)="deleteCoupon(coupon._id)">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Coupon Details Dialog -->
+      <p-dialog header="Coupon Details" [modal]="true" [(visible)]="couponDialogVisible"
+        [position]="isMobile ? 'bottom' : 'right'" [style]="isMobile ? { width: '100%', maxWidth: '100vw' } : { width: '30rem' }">
+        <div class="mb-4 card">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div class="col-span-2">
+              <span class="text-sm text-gray-500">Coupon Code</span>
+              <p class="font-normal text-white">{{ selectedCoupon.code }}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Discount</span>
+              <p class="font-normal text-white">
+                {{ selectedCoupon.discountType === 'percentage' ? (selectedCoupon.discount + '%') : ('$' + selectedCoupon.discount) }}
+              </p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Status</span>
+              <p class="font-normal text-white" [ngClass]="selectedCoupon.status === 'active' ? 'text-green-600' : 'text-red-600'">
+                {{ selectedCoupon.status | titlecase }}
+              </p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Minimum Amount</span>
+              <p class="font-normal text-white">₹{{ selectedCoupon.minAmount }}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Usage Limit</span>
+              <p class="font-normal text-white">{{ selectedCoupon.maxUses }}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Times Used</span>
+              <p class="font-normal text-white">{{ selectedCoupon.usageCount }}</p>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <span class="text-sm text-gray-500">Expiry Date</span>
+              <p class="font-normal text-white">{{ selectedCoupon.expiryDate | date:'mediumDate' }}</p>
+            </div>
+            <div class="col-span-2">
+              <span class="text-sm text-gray-500">Description</span>
+              <p class="font-normal text-white">{{ selectedCoupon.description }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <p-button label="Close" severity="secondary" (click)="hideCouponDialog()" styleClass="mr-4" />
+          <p-button label="Edit" severity="success" (click)="editCoupon(selectedCoupon._id)" />
+        </div>
+      </p-dialog>
+    </div>
+  </div>
+</div>

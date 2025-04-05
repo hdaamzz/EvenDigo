@@ -1,0 +1,61 @@
+/* wallet.component.css */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes scaleIn {
+    from { 
+      opacity: 0; 
+      transform: scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -468px 0;
+    }
+    100% {
+      background-position: 468px 0;
+    }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out forwards;
+  }
+  
+  .animate-scaleIn {
+    animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  
+  /* Loading animation for skeleton */
+  .shimmer {
+    background: linear-gradient(to right, #1a1a1a 8%, #333 18%, #1a1a1a 33%);
+    background-size: 800px 104px;
+    animation: shimmer 1.5s infinite linear;
+  }
+  
+  /* Subtle hover effect for transaction rows */
+  tr.hover\:bg-\[\#262626\]:hover {
+    box-shadow: 0 0 0 1px rgba(0, 255, 102, 0.1);
+  }
+  
+  /* Pulse animation for add/withdraw buttons on hover */
+  button:not(:disabled):hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s;
+  }
+  
+  /* Ensure inputs have a nice focus state */
+  input:focus {
+    box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.3);
+  }
+  
+  /* Add click effect for buttons */
+  button:active:not(:disabled) {
+    transform: translateY(1px);
+  }

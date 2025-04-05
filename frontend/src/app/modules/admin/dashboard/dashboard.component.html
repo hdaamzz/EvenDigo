@@ -1,0 +1,97 @@
+<div class="bg-gray-100 min-h-screen overflow-x-hidden ">
+    <div class="fixed w-full h-full z-0 opacity-10">
+        <div class="shape w-24 h-24 bg-green-500 rounded-full absolute top-[10%] left-[10%]"></div>
+        <div class="shape w-36 h-36 bg-green-500 rounded-full absolute bottom-[20%] right-[15%]"></div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden flex items-center justify-between p-4 bg-white shadow-sm fixed top-0 w-full z-20">
+        <div class="logo flex items-center gap-2 text-green-500 text-xl font-bold">
+            <i class="fas fa-ticket-alt"></i>
+            EvenDigo
+        </div>
+        <button (click)="toggleSidebar()" class="text-gray-600 focus:outline-none p-2 block">
+           
+            <svg *ngIf="!sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            
+            <svg *ngIf="sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <div [ngClass]="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}"
+        class="fixed w-64 h-screen bg-white border-r border-gray-200 p-5 z-30 transition-all duration-300 lg:translate-x-0 shadow-lg">
+       
+        <div class="logo flex items-center gap-2 text-green-500 text-2xl font-bold mb-10 lg:flex">
+            <i class="fas fa-ticket-alt"></i>
+            EvenDigo
+        </div>
+
+       
+        <button (click)="toggleSidebar()"
+            class="z-20 absolute top-4 right-4 text-gray-600 lg:hidden w-8 h-8 flex items-center justify-center">
+            <i class="fas fa-times"></i>
+        </button>
+
+       
+        <div (click)="showDashboard(); closeSidebarOnMobile()"
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-chart-line w-5 text-center"></i> Dashboard
+        </div>
+        <div (click)="showUserList(); closeSidebarOnMobile()"
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-users w-5 text-center"></i> Customers
+        </div>
+        <div (click)="showEventsList(); closeSidebarOnMobile()"
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-calendar-alt w-5 text-center"></i> Events
+        </div>
+        <div
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-ticket-alt w-5 text-center"></i> Tickets
+        </div>
+        <div (click)="showCouponList(); closeSidebarOnMobile()"
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-gift w-5 text-center"></i> Coupons
+        </div>
+        <div
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-trophy w-5 text-center"></i> Achievements
+        </div>
+        <div
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-money-bill-wave w-5 text-center"></i> Finance
+        </div>
+        <div
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fas fa-credit-card w-5 text-center"></i> Subscriptions
+        </div>
+        <div (click)="logout()"
+            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
+            <i class="fa-solid fa-cog w-5 text-center"></i> Logout
+        </div>
+    </div>
+
+    
+    <div (click)="toggleSidebar()"
+        [ngClass]="{'opacity-50 pointer-events-auto': sidebarOpen, 'opacity-0 pointer-events-none': !sidebarOpen}"
+        class="fixed inset-0 bg-black z-20 transition-opacity duration-300 lg:hidden "></div>
+
+   
+    <div class="lg:ml-64 pt-16 lg:pt-0 min-h-screen transition-all duration-300">
+        @if (dashBoard) {
+        <app-dashboard-home></app-dashboard-home>
+        }@else if (userList) {
+        <app-users-list></app-users-list>
+        }@else if (eventList) {
+            <app-events-list></app-events-list>
+        }@else if (couponList) {
+            <app-coupon-list></app-coupon-list>
+        }
+    </div>
+</div>

@@ -1,0 +1,228 @@
+<!-- wallet.component.html -->
+
+<div class="container mx-auto px-4 py-6 max-w-6xl">
+  <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+    <p>{{ errorMessage }}</p>
+  </div>
+    <!-- Wallet Card -->
+    <div class="bg-[#01F77E] rounded-lg p-4 md:p-6 shadow-lg text-white mb-6 transform transition-all duration-300 hover:shadow-xl">
+      <div class="mb-2">
+        <h2 class="text-xs md:text-sm font-medium uppercase tracking-wider">CURRENT BALANCE</h2>
+      </div>
+      <div class="mb-4">
+        <h1 class="text-2xl md:text-3xl font-bold">₹{{currentBalance.toLocaleString('en-IN')}}</h1>
+      </div>
+      <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+        <button 
+          (click)="openAddMoneyModal()" 
+          class="bg-white text-[#01F77E] px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white w-full sm:w-auto">
+          Add Money
+        </button>
+        <button 
+          (click)="openWithdrawModal()" 
+          class="bg-[#00cc52] text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-[#00b347] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white w-full sm:w-auto">
+          Withdraw
+        </button>
+      </div>
+      
+    </div>
+  
+    <!-- Transaction History -->
+    <div class="bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-700">
+          <thead class="bg-[#1a1a1a]">
+            <tr *ngFor="let transaction of transactions" 
+            class="hover:bg-[#262626] transition-colors duration-150">
+          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-300">
+            {{ formatDate(transaction.date) }}
+          </td>
+          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-white max-w-[100px] md:max-w-none truncate">
+            {{ transaction.eventName }}
+            <span *ngIf="transaction.description" class="block text-xs text-gray-400 mt-1">
+              {{ transaction.description }}
+            </span>
+          </td>
+          <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+            {{ transaction.transactionId }}
+          </td>
+          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium" 
+              [ngClass]="getTransactionClass(transaction)">
+            {{ formatAmount(transaction.amount) }}
+            <span *ngIf="transaction.status !== 'completed'" class="block text-xs text-gray-400 mt-1">
+              ({{ transaction.status }})
+            </span>
+          </td>
+          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-white">
+            {{ currencySymbol }}{{ transaction.balance.toLocaleString('en-IN') }}
+          </td>
+        </tr>
+          </thead>
+          <tbody class="bg-[#1a1a1a] divide-y divide-gray-800">
+            <tr *ngIf="isLoading">
+              <td colspan="5" class="px-6 py-8 md:py-12 text-center">
+                <div class="flex justify-center items-center">
+                  <div class="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-t-2 border-b-2 border-[#01F77E]"></div>
+                  <span class="ml-3 text-xs md:text-sm text-gray-400">Loading transactions...</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!isLoading && transactions.length === 0">
+              <td colspan="5" class="px-6 py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
+                No transactions found
+              </td>
+            </tr>
+            <tr *ngFor="let transaction of transactions; let i = index" 
+                class="hover:bg-[#262626] transition-colors duration-150"
+                [ngClass]="{'animate-fadeIn': !initialLoadComplete}"
+                [style.animation-delay]="(i * 100) + 'ms'">
+              <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-300">
+                {{transaction.date}}
+              </td>
+              <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-white max-w-[100px] md:max-w-none truncate">
+                {{transaction.description}}
+              </td>
+              <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                {{transaction.transactionId}}
+              </td>
+              <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium" [ngClass]="getAmountClass(transaction.amount)">
+                {{formatAmount(transaction.amount)}}
+              </td>
+              <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-white">
+                ₹{{transaction.balance.toLocaleString('en-IN')}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- Add Money Modal -->
+    <div *ngIf="isAddMoneyModalOpen" 
+         class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 animate-fadeIn p-4"
+         (click)="closeAddMoneyModal()">
+      <div class="bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-4 md:p-6 transform transition-all duration-300 animate-scaleIn" 
+           (click)="$event.stopPropagation()">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h3 class="text-lg md:text-xl font-semibold text-white">Add Money</h3>
+          <button (click)="closeAddMoneyModal()" 
+                  class="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none text-xl md:text-2xl leading-none">
+            ×
+          </button>
+        </div>
+        
+        <div class="mb-4 md:mb-6">
+          <div class="relative">
+            <input 
+              type="number" 
+              [(ngModel)]="amountToAdd" 
+              placeholder="Enter Amount" 
+              class="w-full p-3 md:p-4 rounded-md bg-[#262626] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#01F77E] focus:border-transparent text-center pl-8 md:pl-10"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-400">₹</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mb-6 md:mb-8">
+          <button 
+            *ngFor="let amount of predefinedAmounts"
+            (click)="selectAmount(amount)" 
+            class="bg-[#262626] hover:bg-[#333333] text-white py-2 md:py-3 px-3 md:px-4 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#01F77E] text-xs md:text-sm"
+            [ngClass]="{'bg-[#333333] ring-2 ring-[#01F77E]': amountToAdd === amount}"
+          >
+            ₹{{amount.toLocaleString('en-IN')}}
+          </button>
+        </div>
+        
+        <button 
+          (click)="addMoney()" 
+          [disabled]="!amountToAdd || amountToAdd <= 0 || isLoading"
+          class="w-full bg-[#01F77E] hover:bg-[#00cc52] text-white py-3 md:py-4 rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#01F77E] focus:ring-offset-2 focus:ring-offset-[#1a1a1a]"
+        >
+          <span *ngIf="!isLoading">Add Money</span>
+          <div *ngIf="isLoading" class="flex items-center justify-center">
+            <div class="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-t-2 border-b-2 border-white"></div>
+            <span class="ml-2 text-sm md:text-base">Processing...</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Withdraw Modal -->
+    <div *ngIf="isWithdrawModalOpen" 
+         class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 animate-fadeIn p-4"
+         (click)="closeWithdrawModal()">
+      <div class="bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-4 md:p-6 transform transition-all duration-300 animate-scaleIn" 
+           (click)="$event.stopPropagation()">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h3 class="text-lg md:text-xl font-semibold text-white">Withdraw Money</h3>
+          <button (click)="closeWithdrawModal()" 
+                  class="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none text-xl md:text-2xl leading-none">
+            ×
+          </button>
+        </div>
+        
+        <div class="mb-4 md:mb-6">
+          <div class="relative">
+            <input 
+              type="number" 
+              [(ngModel)]="amountToWithdraw" 
+              placeholder="Enter Amount" 
+              class="w-full p-3 md:p-4 rounded-md bg-[#262626] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#01F77E] focus:border-transparent text-center pl-8 md:pl-10"
+              [max]="currentBalance"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-400">₹</span>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Available balance: ₹{{currentBalance.toLocaleString('en-IN')}}
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mb-6 md:mb-8">
+          <button 
+            *ngFor="let amount of predefinedAmounts"
+            (click)="amountToWithdraw = amount > currentBalance ? currentBalance : amount" 
+            class="bg-[#262626] hover:bg-[#333333] text-white py-2 md:py-3 px-3 md:px-4 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#01F77E] text-xs md:text-sm"
+            [disabled]="amount > currentBalance"
+            [ngClass]="{'bg-[#333333] ring-2 ring-[#01F77E]': amountToWithdraw === amount, 'opacity-50 cursor-not-allowed': amount > currentBalance}"
+          >
+            ₹{{amount.toLocaleString('en-IN')}}
+          </button>
+        </div>
+        
+        <button 
+          (click)="withdrawMoney()" 
+          [disabled]="!amountToWithdraw || amountToWithdraw <= 0 || amountToWithdraw > currentBalance || isLoading"
+          class="w-full bg-[#01F77E] hover:bg-[#00cc52] text-white py-3 md:py-4 rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#01F77E] focus:ring-offset-2 focus:ring-offset-[#1a1a1a]"
+        >
+          <span *ngIf="!isLoading">Withdraw Money</span>
+          <div *ngIf="isLoading" class="flex items-center justify-center">
+            <div class="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-t-2 border-b-2 border-white"></div>
+            <span class="ml-2 text-sm md:text-base">Processing...</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="isLoading && transactions.length === 0">
+    <tr *ngFor="let item of [1,2,3,4,5]">
+      <td colspan="5" class="px-6 py-4">
+        <div class="animate-pulse flex space-x-4">
+          <div class="flex-1 space-y-4 py-1">
+            <div class="h-4 bg-gray-700 rounded w-3/4"></div>
+            <div class="space-y-2">
+              <div class="h-4 bg-gray-700 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </ng-container>

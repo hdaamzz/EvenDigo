@@ -1,0 +1,150 @@
+<div class="p-2 md:p-5">
+  <div class="bg-gray-100 p-2 md:p-5">
+      <div class="container bg-white rounded-lg shadow-sm p-3 md:p-5">
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+              <h2 class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
+                  <span class="bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Events</span>
+                  <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Management</span>
+              </h2>
+              <div class="flex flex-wrap gap-2">
+                  <button class="px-6 py-2 rounded-full border border-purple-400 text-purple-500 hover:bg-purple-50 transition-colors duration-300">Upcoming</button>
+                  <button class="px-6 py-2 rounded-full border border-cyan-400 text-cyan-500 hover:bg-cyan-50 transition-colors duration-300">Live</button>
+                  <button class="px-6 py-2 rounded-full border border-green-400 text-green-500 hover:bg-green-50 transition-colors duration-300">Completed</button>
+              </div>
+          </div>
+
+          <!-- Event List - Card View for all screen sizes -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              @if (loading) {
+                  <div class="col-span-full text-center py-4 text-gray-500">Loading events...</div>
+              } @else if (eventList.length === 0) {
+                  <div class="col-span-full text-center py-4 text-gray-500">No events found</div>
+              } @else {
+                  @for (event of eventList; track event._id) {
+                      <div class="bg-white border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all card">
+                          <div class="flex gap-4 mb-3">
+                              <img [src]="event.mainBanner" [alt]="event.eventTitle" class="w-16 h-16 object-cover rounded border-2 border-gray-200" />
+                              <div class="flex-1">
+                                  <h3 class="font-medium text-gray-800">{{ event.eventTitle | truncate:20:'...':true }}</h3>
+                                  <p class="text-sm text-gray-600">{{ event.eventType }}</p>
+                              </div>
+                          </div>
+
+                          <div class="grid grid-cols-2 gap-2 mb-4">
+                              <div class="text-sm">
+                                  <span class="text-gray-500">Date:</span>
+                                  <span class="ml-1 text-gray-800">{{ event.startDate | date:'MMM d yyyy' }}</span>
+                              </div>
+                              <div class="text-sm">
+                                  <span class="text-gray-500">Time:</span>
+                                  <span class="ml-1 text-gray-800">{{ event.startTime | date:'h:mm a' }}</span>
+                              </div>
+                              <div class="text-sm">
+                                  <span class="text-gray-500">City:</span>
+                                  <span class="ml-1 text-gray-800">{{ event.city }}</span>
+                              </div>
+                              <div class="text-sm">
+                                  <span class="text-gray-500">Organizer:</span>
+                                  <span class="ml-1 text-gray-800">{{ event.user_id.name }}</span>
+                              </div>
+                          </div>
+
+                          <div class="flex justify-between items-center">
+                              <!-- <span 
+                                  [class]="{
+                                      'bg-green-100 text-green-600': event. === 'completed',
+                                      'bg-cyan-100 text-cyan-600': event.status === 'live',
+                                      'bg-purple-100 text-purple-600': event.status === 'upcoming'
+                                  }"
+                                  class="px-2 py-1 rounded-3xl text-xs">
+                                  {{ event.status | titlecase }}
+                              </span> -->
+                              <div class="relative">
+                                  <p-menu #menu [popup]="true" [model]="getMenuItems(event)" [appendTo]="'body'"></p-menu>
+                                  <button 
+                                      pButton 
+                                      type="button" 
+                                      icon="pi pi-ellipsis-v" 
+                                      class="p-button-text p-button-rounded p-button-sm" 
+                                      (click)="menu.toggle($event)">
+                                  </button>
+                              </div>
+                          </div>
+                      </div>
+                  }
+              }
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Event Details Modal (unchanged) -->
+<p-dialog 
+  [(visible)]="displayModal" 
+  [modal]="true" 
+  [style]="{ width: '90vw', 'max-width': '1000px' }" 
+  [baseZIndex]="10000"
+  [draggable]="false" 
+  [resizable]="false" 
+  [showHeader]="false"
+  class="green-white-modal">
+  <div class="bg-white rounded-lg shadow-lg">
+      <div class="md:flex">
+          <!-- Left Side - Banner Image -->
+          <div class="md:w-2/5 relative">
+              <img 
+                  [src]="selectedEvent?.mainBanner" 
+                  [alt]="selectedEvent?.eventTitle"
+                  class="w-full h-64 md:h-[500px] object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none" />
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                  <h2 class="text-xl md:text-2xl font-bold text-white">{{ selectedEvent?.eventTitle }}</h2>
+                  <span class="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-green-500 to-cyan-400 text-white">
+                      {{ selectedEvent?.eventType }}
+                  </span>
+              </div>
+          </div>
+
+          <!-- Right Side - Event Details -->
+          <div class="md:w-3/5 p-4 md:p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-3">
+                      <p class="flex items-center text-gray-700"><i class="pi pi-map-marker mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.city }} | {{ selectedEvent?.venueName }}</p>
+                      <p class="flex items-center text-gray-700"><i class="pi pi-calendar mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.startDate | date:'MMM d yyyy' }}, {{ selectedEvent?.startTime | date:'h:mm a' }}</p>
+                      <p class="flex items-center text-gray-700"><i class="pi pi-clock mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.endingDate | date:'MMM d yyyy' }}, {{ selectedEvent?.endingTime | date:'h:mm a' }}</p>
+                      <p class="flex items-center text-gray-700"><i class="pi pi-user mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.user_id.name }}</p>
+                  </div>
+                  <div class="space-y-3">
+                      <p class="flex items-center text-gray-700"><i class="pi pi-globe mr-2 text-green-600 text-lg"></i>Visibility: {{ selectedEvent?.eventVisibility }}</p>
+                      <p class="flex items-center text-gray-700"><i class="pi pi-id-card mr-2 text-green-600 text-lg"></i>Age Restriction: {{ selectedEvent?.ageRestriction ? 'Yes' : 'No' }}</p>
+                      <p class="flex items-center text-gray-700"><i class="pi pi-envelope mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.user_id.email }}</p>
+                      <p class="flex items-center text-gray-700"><i class="pi pi-calendar-plus mr-2 text-green-600 text-lg"></i>Created: {{ selectedEvent?.createdAt | date:'MMM d yyyy' }}</p>
+                  </div>
+              </div>
+
+              <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 class="text-lg font-semibold text-green-700 mb-2 flex items-center"><i class="pi pi-info-circle mr-2"></i>Description</h3>
+                  <p class="text-gray-700 max-h-32 overflow-y-auto">{{ selectedEvent?.eventDescription }}</p>
+              </div>
+
+              <div class="mt-6 border-t border-gray-200 pt-6">
+                  <h3 class="text-lg font-semibold text-green-700 mb-3 flex items-center"><i class="pi pi-ticket mr-2"></i>Tickets</h3>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      @for (ticket of selectedEvent?.tickets; track ticket) {
+                          <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div class="flex justify-between items-center mb-2">
+                                  <h4 class="font-semibold text-gray-800">{{ ticket.type }}</h4>
+                                  <span class="text-green-600 font-bold">{{ ticket.price }}</span>
+                              </div>
+                              <div class="flex justify-between items-center">
+                                  <span class="text-gray-600 text-sm">Available</span>
+                                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">{{ ticket.quantity }}</span>
+                              </div>
+                          </div>
+                      }
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</p-dialog>

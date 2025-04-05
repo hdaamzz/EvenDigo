@@ -1,0 +1,27 @@
+/* 
+    #menu {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #menu.hidden {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+    }
+    #menu:not(.hidden) {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+    } */
+    .back {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    .trn-link {
+        transition: all 0.3s ease;
+    }
+    .trn-link:hover {
+        color: #00ff66;
+        transform: translateX(3px);
+    }
+    .trans {
+        animation: slideDown 1s ease-out;
+    }

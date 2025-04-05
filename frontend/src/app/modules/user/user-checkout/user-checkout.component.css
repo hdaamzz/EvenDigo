@@ -1,0 +1,57 @@
+/* Base keyframes for animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes slideDown {
+    0% { transform: translateY(-100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Payment Option Cards */
+.payment-card {
+    animation: fadeIn 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect for payment cards */
+.payment-card:hover {
+    transform: translateY(-5px);
+    /* box-shadow: 0 4px 15px rgba(0, 255, 0, 0.2); */
+}
+
+/* Selected state */
+.payment-card.selected {
+    animation: slideUp 0.5s ease-out;
+}
+
+/* Conditional payment details animation */
+.payment-details {
+    animation: slideDown 0.5s ease-out;
+}
+input {
+    transition: all 0.3s ease;
+}
+input:focus {
+    transform: scale(1.02);
+    /* box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); */
+}
+
+.order-summary-button {
+    transition: all 0.3s ease;
+}
+.order-summary-button:hover {
+    transform: scale(1.05);
+}

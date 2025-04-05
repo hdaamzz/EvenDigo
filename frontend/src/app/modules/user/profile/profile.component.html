@@ -1,0 +1,88 @@
+<div class="flex min-h-screen bg-[#121212]">
+  <!-- Sidebar -->
+  <aside
+    #sidebarRef
+    class="fixed top-0 left-0 m-4 rounded-2xl bg-[#1E1E1E] transition-all duration-400"
+    [ngClass]="{
+      'w-[85px]': isCollapsed,
+      'w-[270px]': !isCollapsed,
+      'max-lg:h-auto max-lg:overflow-y-auto z-50': isMenuActive,
+      'max-lg:h-14 max-lg:overflow-y-hidden': !isMenuActive,
+      'lg:h-[calc(100vh-32px)] max-lg:w-[calc(100%-26px)] max-lg:m-3': true
+    }"
+  >
+  <header class="flex items-center justify-between p-6 max-lg:p-2 max-lg:sticky max-lg:top-0 max-lg:z-20 max-lg:bg-[#151A2D]">
+    <a routerLink="/" class="header-logo">
+      <img 
+        src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318747/user.icon_slz5l0.png" 
+        alt="Logo" 
+        class="h-10 w-10 object-contain rounded-full max-lg:h-10 max-lg:w-10"
+      />
+    </a>
+    
+    <button 
+      class="h-9 w-9 flex items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer hover:bg-[#00ff66] max-lg:hidden absolute right-5"
+      [ngClass]="{'transform translate-x-[-4px] translate-y-[65px]': isCollapsed}"
+      (click)="toggleSidebar()"
+    >
+      <i class="fa fa-chevron-left transition-transform duration-400" [ngClass]="{'rotate-180': isCollapsed}"></i>
+    </button>
+    
+    <button 
+      class="h-8 w-8 hidden max-lg:flex items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer"
+      (click)="toggleMenu()"
+    >
+      <i class="fa" [ngClass]="isMenuActive ? 'fa-times' : 'fa-bars'"></i>
+    </button>
+  </header>
+    
+
+    <nav class="sidebar-nav">
+      <ul class="list-none flex flex-col gap-1 px-4 transform transition-transform max-lg:px-3"
+          [ngClass]="{'translate-y-16': isCollapsed, 'translate-y-4': !isCollapsed}">
+        @for (item of navItems; track item.path) {
+          <li class="relative start-card hover:translate-x-2 transition-all">
+            <a 
+              [routerLink]="item.path"
+              routerLinkActive="text-[#151A2D]"
+              class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
+            >
+              <span class="nav-icon">
+                <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
+              </span>
+              <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed}"> 
+                {{item.label}}
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+
+      <ul class="list-none flex flex-col gap-1 px-4 absolute bottom-8 w-full max-lg:relative max-lg:bottom-0 max-lg:my-10 max-lg:mb-8 max-lg:px-3">
+        @for (item of secondaryNavItems; track item.path) {
+          <li class="relative start-card hover:translate-x-2 transition-all">
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="text-[#151A2D]"
+              class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
+            >
+              <span class="nav-icon">
+                <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
+              </span>
+              <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed}"> 
+                {{item.label}}
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+    
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 p-4 transition-all duration-400 "
+        [ngClass]="{'ml-[117px] ': isCollapsed, 'ml-[0px] pt-15 lg:ml-[300px]': !isCollapsed}">
+    <router-outlet></router-outlet>
+  </main>
+</div>

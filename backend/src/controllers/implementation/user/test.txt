@@ -1,0 +1,18 @@
+{
+  eventTitle: 'title ',
+  eventDescription: 'description',
+  eventType: 'Exhibition',
+  startDate: 2025-03-17T18:30:00.000Z,
+  startTime: 'Wed Mar 12 2025 17:49:06 GMT+0530 (India Standard Time)',
+  endingDate: 2025-03-18T18:30:00.000Z,
+  endingTime: 'Wed Mar 12 2025 15:49:08 GMT+0530 (India Standard Time)',
+  eventVisibility: 'Public',
+  venueName: 'qwwq',
+  venueAddress: 'qqqqw',
+  city: 'Ahmedabad',
+  ageRestriction: true,
+  tickets: [ { type: 'Gold', price: 1299, quantity: 199 } ],
+  user_id: new ObjectId('67b450c51a5ec2a392739ab9'),
+  mainBanner: 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741778576/events/etk7gaaorwdhmqijzszi.jpg',
+  promotionalImage: 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741778576/events/w7ep0vof2jcafzzvkwzg.jpg'
+}

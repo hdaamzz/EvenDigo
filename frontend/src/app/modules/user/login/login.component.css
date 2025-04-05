@@ -1,0 +1,17 @@
+/* .back {
+    background: linear-gradient(145deg, #0a0a0a 0%, #1a1a1a 100%);
+} */
+
+.trn-link {
+    transition: all 0.3s ease;
+}
+
+.trn-link:hover {
+    transform: translateX(3px);
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

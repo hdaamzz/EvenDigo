@@ -1,0 +1,252 @@
+<div class="w-full min-h-[calc(100vh-40px)] bg-[#121212] text-white p-4 md:p-6">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-white mb-2">Profile Details</h1>
+      <p class="text-gray-400">Manage your personal information and account settings</p>
+    </div>
+
+    <!-- Profile Section -->
+    @if (user) {
+    <div class="bg-[#1E1E1E] rounded-2xl p-4 md:p-6 mb-6 ">
+      <div class="flex flex-col md:flex-row gap-6">
+        <!-- Profile Picture Section -->
+        <div class="flex flex-col items-center">
+          <div class="relative">
+            <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" 
+              alt="Profile picture"
+              class="h-32 w-32 rounded-full object-cover border-2 border-[#00ff66]" />
+            <button (click)="openFileSelector()"
+              class="absolute bottom-0 right-0 bg-[#00ff66] text-[#151A2D] h-8 w-8 rounded-full flex items-center justify-center hover:bg-[#00cc52] transition-colors duration-200">
+              <i class="fa fa-camera"></i>
+            </button>
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
+          </div>
+          <div class="mt-2 text-center">
+            <h3 class="font-semibold text-lg">{{user.name}}</h3>
+            
+            <div class="mt-2 flex items-center justify-center">
+            </div>
+            @if (user.name && user.email && user.phone && user.bio && user.location && user.dateOfBirth && verificationData.status=='') {
+              <button (click)="sendVereficationRequest()" class="bg-[#01ff66] hover:bg-green-600 px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
+                Send Verification Request
+              </button>
+            }@else if (verificationData.status=='Pending') {
+              <button class="bg-[#f2ff00] text-black px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
+               Verification is Pending
+              </button>
+            }@else if (verificationData.status=='Verified') {
+              <button  class="bg-[#00ff66] hover:bg-green-600 px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
+                Verified
+              </button>
+            }@else if (verificationData.status=='Rejected') {
+              <button  class="bg-red-600 hover:bg-green-600 px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
+                Verification Rejected
+              </button>
+            }
+            
+          </div>
+        </div>
+
+        <!-- User Info Section -->
+        <div class="flex-1">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <p class="text-gray-400 text-sm">Email</p>
+              <p class="font-medium">{{user.email}}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-gray-400 text-sm">Bio</p>
+              <p class="font-medium">{{user.bio || 'Not provided'}}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-gray-400 text-sm">Date Of Birth</p>
+              <p class="font-medium">{{user.dateOfBirth | date:'mediumDate'}}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-gray-400 text-sm">Phone</p>
+              <p class="font-medium">{{user.phone ||'Not-Provided'}}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-gray-400 text-sm">Location</p>
+              <p class="font-medium">{{user.location || 'Not-Provided'}}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-gray-400 text-sm">Gender</p>
+              <p class="font-medium">{{user.gender || 'Not-Provided'}}</p>
+            </div>
+          </div>
+          
+          
+          @if (!editMode) {
+            <p-button (click)="editMode=true" label="Update your information" />
+          }
+          
+          
+            
+          <p-dialog header="Edit Profile" [(visible)]="editMode" [style]="{ width: '40rem' }">
+            <span class="p-text-secondary block mb-8">Update your information.</span>
+            <form [formGroup]="userForm" (ngSubmit)="updateProfile()">
+              <!-- Name field -->
+              <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-4">
+                  <label for="username" class="font-semibold w-24">Name</label>
+                  <input pInputText id="username" class="flex-auto" formControlName="name" />
+                </div>
+                <div class="ml-24 text-red-500 text-sm">
+                  @if (userForm.get('name')?.invalid && (userForm.get('name')?.dirty || userForm.get('name')?.touched)) {
+                    @if (hasError('name', 'required')) {
+                      <div>Name is required</div>
+                    }
+                    @if (hasError('name', 'minlength')) {
+                      <div>Name must be at least 3 characters</div>
+                    }
+                    @if (hasError('name', 'alphabetsOnly')) {
+                      <div>Name should contain only alphabets</div>
+                    }
+                    @if (hasError('name', 'noSpaces')) {
+                      <div>Name should not contain spaces at beginning or end</div>
+                    }
+                    @if (hasError('name', 'repeatedCharacters')) {
+                      <div>Name contains too many repeated characters</div>
+                    }
+                  }
+                </div>
+              </div>
+          
+              <!-- Phone field -->
+              <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-4">
+                  <label for="phone" class="font-semibold w-24">Phone</label>
+                  <input pInputText id="phone" class="flex-auto" formControlName="phone" />
+                </div>
+                <div class="ml-24 text-red-500 text-sm">
+                  @if (userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)) {
+                    @if (hasError('phone', 'required')) {
+                      <div>Phone number is required</div>
+                    }
+                    @if (hasError('phone', 'invalidMobile')) {
+                      <div>Please enter a valid mobile number</div>
+                    }
+                  }
+                </div>
+              </div>
+              
+              <!-- Location field -->
+              <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-4">
+                  <label for="location" class="font-semibold w-24">Location</label>
+                  <p-autoComplete 
+                    id="location" 
+                    [suggestions]="indianCities"
+                    (completeMethod)="filterCities($event)"
+                    [dropdown]="true"
+                    formControlName="location"
+                    [minLength]="1"
+                    placeholder="Select your city"
+                    styleClass="flex-auto"
+                  ></p-autoComplete>
+                </div>
+                <div class="ml-24 text-red-500 text-sm">
+                  @if (userForm.get('location')?.invalid && (userForm.get('location')?.dirty || userForm.get('location')?.touched)) {
+                    @if (hasError('location', 'required')) {
+                      <div>Location is required</div>
+                    }
+                    @if (hasError('location', 'minlength')) {
+                      <div>Location must be at least 2 characters</div>
+                    }
+                    @if (hasError('location', 'alphabetsOnly')) {
+                      <div>Location should contain only alphabets</div>
+                    }
+                  }
+                </div>
+              </div>
+          
+              <!-- Bio field -->
+              <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-4">
+                  <label for="bio" class="font-semibold w-24">Bio</label>
+                  <textarea pInputText id="bio" class="flex-auto" formControlName="bio"></textarea>
+                </div>
+                <div class="ml-24 text-red-500 text-sm">
+                  @if (userForm.get('bio')?.invalid && (userForm.get('bio')?.dirty || userForm.get('bio')?.touched)) {
+                    @if (hasError('bio', 'minlength')) {
+                      <div>Bio must be at least 3 characters</div>
+                    }
+                    @if (hasError('bio', 'alphabetsOnly')) {
+                      <div>Bio should contain only alphabets</div>
+                    }
+                  }
+                </div>
+              </div>
+          
+              <!-- Gender field -->
+              <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-4">
+                  <label for="gender" class="font-semibold w-24">Gender</label>
+                  <select
+                    id="gender"
+                    class="flex-auto p-2 border border-gray-500 rounded-md focus:outline-none bg-[#121212]"
+                    formControlName="gender"
+                  >
+                    <option value="" disabled>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+                <div class="ml-24 text-red-500 text-sm">
+                  @if (userForm.get('gender')?.invalid && (userForm.get('gender')?.dirty || userForm.get('gender')?.touched)) {
+                    @if (hasError('gender', 'required')) {
+                      <div>Gender is required</div>
+                    }
+                    @if (hasError('gender', 'alphabetsOnly')) {
+                      <div>Gender should contain only alphabets</div>
+                    }
+                  }
+                </div>
+              </div>
+          
+              <!-- Date of Birth field -->
+              <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-4">
+                  <label for="dateofbirth" class="font-semibold w-24">Date Of Birth</label>
+                  <div class="flex-auto">
+                    <p-datePicker
+                        id="dateofbirth"
+                        formControlName="dateOfBirth"
+                        [showIcon]="true"
+                        dateFormat="dd/mm/yy"
+                        [maxDate]="maxDate"
+                        [showButtonBar]="true"
+                        placeholder="Select Date"
+                        inputId="dateofbirth"
+                        [style]="{'width':'100%'}"
+                        appendTo="body"
+                      ></p-datePicker>
+                  </div>
+                </div>
+                <div class="ml-24 text-red-500 text-sm">
+                  @if (userForm.get('dateOfBirth')?.invalid && (userForm.get('dateOfBirth')?.dirty || userForm.get('dateOfBirth')?.touched)) {
+                    @if (hasError('dateOfBirth', 'required')) {
+                      <div>Date of birth is required</div>
+                    }
+                  }
+                </div>
+              </div>
+          
+              <!-- Form buttons -->
+              <div class="flex justify-end gap-2">
+                <p-button label="Cancel" severity="secondary" (click)="cancelEdit()" />
+                <p-button label="Save" type="submit" [disabled]="isLoading || userForm.invalid" />
+              </div>
+            </form>
+          </p-dialog>
+      
+        </div>
+
+      </div>
+    </div>
+    }
+
+  </div>
+</div>

@@ -1,0 +1,61 @@
+/* Ensure the modal content is compact */
+.max-w-3xl {
+    max-width: 42rem; /* Reduced from max-w-5xl (which is ~80rem) */
+  }
+  
+  /* Adjust font sizes for smaller modal */
+  .text-base {
+    font-size: 0.875rem; /* 14px */
+  }
+  
+  .text-lg {
+    font-size: 1rem; /* 16px */
+  }
+  
+  .text-sm {
+    font-size: 0.75rem; /* 12px */
+  }
+  
+  .text-xs {
+    font-size: 0.625rem; /* 10px */
+  }
+  
+  /* Ensure the right section scrolls if needed */
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #1a1a1a;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  
+  /* Adjust icon sizes for buttons */
+  button svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Specific adjustments for the calendar and map pin icons */
+  .text-blue-400 {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Adjust the +/- buttons in the ticket counter */
+  .ticket-counter button {
+    font-size: 0.75rem; /* Smaller +/- symbols */
+  }
