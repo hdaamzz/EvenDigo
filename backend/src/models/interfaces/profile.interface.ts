@@ -11,10 +11,19 @@ export interface AuthenticatedRequest extends Request {
     file?: Express.Multer.File;
   }
 
+  export interface ProfileServiceResponse<T> {
+    success: boolean;
+    message: string;
+    data?: {
+      updatedBooking: T;
+      refundAmount: number;
+    };
+  }
+  
 
 
 export interface IVerification{
-    user_id:Schema.Types.ObjectId | string;
+    user_id:Schema.Types.ObjectId | string| IUser;
     status:string;
     note?:string;
 

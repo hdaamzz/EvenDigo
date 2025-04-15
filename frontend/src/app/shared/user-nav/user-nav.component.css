@@ -1,27 +1,57 @@
-/* 
-    #menu {
-        transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-    #menu.hidden {
-        opacity: 0;
-        transform: translateY(-10px);
-        pointer-events: none;
-    }
-    #menu:not(.hidden) {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: all;
-    } */
-    .back {
-        font-family: 'Times New Roman', Times, serif;
-    }
-    .trn-link {
-        transition: all 0.3s ease;
-    }
-    .trn-link:hover {
-        color: #00ff66;
-        transform: translateX(3px);
-    }
-    .trans {
-        animation: slideDown 1s ease-out;
-    }
+.back {
+    font-family: 'Times New Roman', Times, serif;
+    background-color: #121212; /* Add this if it's not defined elsewhere */
+}
+
+.trn-link {
+    transition: all 0.3s ease;
+}
+
+.trn-link:hover {
+    color: #00ff66;
+    transform: translateX(3px);
+}
+
+/* Navbar animations */
+nav {
+    transition: transform 0.4s cubic-bezier(0.215, 0.61, 0.355, 1); /* Improved easing function */
+    will-change: transform; /* Performance optimization for animations */
+}
+
+/* Use these specific classes for the navbar hide/show */
+.transform.translate-y-0 {
+    transform: translateY(0);
+}
+
+.transform.-translate-y-full {
+    transform: translateY(-100%);
+}
+
+/* Add subtle shadow when navbar is visible */
+nav.transform.translate-y-0 {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown animations */
+#userDropdown {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    will-change: opacity, transform;
+}
+
+/* Mobile menu transitions */
+.trans {
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform;
+}
+
+/* Add this to make sure the mobile menu animation works properly */
+.sm\:hidden.absolute {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+}
+
+.sm\:hidden.absolute:not(.hidden) {
+    max-height: 300px; /* Adjust as needed */
+    opacity: 1;
+}

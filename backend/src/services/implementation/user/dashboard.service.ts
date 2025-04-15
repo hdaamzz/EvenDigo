@@ -11,7 +11,7 @@ export class DashboardService implements IDashboardService{
     @inject("DashboardRepository") private dashboardRepository: IDashboardRepository,
   ) {}
 
-  async createEvent(eventData: any): Promise<EventDocument> {
+  async createEvent(eventData: Partial<EventDocument>): Promise<EventDocument> {
     return this.dashboardRepository.createEvent(eventData);
   }
 
@@ -23,7 +23,7 @@ export class DashboardService implements IDashboardService{
     return this.dashboardRepository.findEventById(eventId);
   }
 
-  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: any): Promise<EventDocument | null> {
+  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {
     return this.dashboardRepository.updateEvent(eventId, updateData);
   }
 

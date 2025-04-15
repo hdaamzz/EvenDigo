@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { IEvent } from '../../../models/event.interface';
+import { AllEventResponse, EventResponse, IEvent } from '../../../models/event.interface';
 
 
 @Injectable({
@@ -14,34 +14,24 @@ export class UserDashboardService {
   constructor(private http: HttpClient) {}
 
   // Create a new event
-  createEvent(eventData: FormData): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}user/dashboard/events`, eventData, {
+  createEvent(eventData: FormData): Observable<EventResponse> {
+    return this.http.post<EventResponse>(`${this.baseUrl}user/dashboard/events`, eventData, {
       withCredentials: true,
     });
   }
 
   // // Get all events for logged in user
-  getUserEvents(): Observable<any> {
-    return this.http.get<IEvent[]>(`${this.baseUrl}user/dashboard/events`,{
+  getUserEvents(): Observable<AllEventResponse> {
+    return this.http.get<AllEventResponse>(`${this.baseUrl}user/dashboard/events`,{
       withCredentials: true,
     });
   }
 
   // // Get event by ID
-  getEventById(eventId: string): Observable<any> {
-    return this.http.get<IEvent>(`${this.baseUrl}user/dashboard/events/${eventId}`,{
+  getEventById(eventId: string): Observable<EventResponse> {
+    return this.http.get<EventResponse>(`${this.baseUrl}user/dashboard/events/${eventId}`,{
       withCredentials: true,
     });
   }
-
-  // // Update event
-  // updateEvent(eventId: string, eventData: FormData): Observable<any> {
-  //   return this.http.put<any>(`${this.apiUrl}/${eventId}`, eventData);
-  // }
-
-  // // Delete event
-  // deleteEvent(eventId: string): Observable<any> {
-  //   return this.http.delete<any>(`${this.apiUrl}/${eventId}`);
-  // }
 }
 

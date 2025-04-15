@@ -40,6 +40,7 @@ const ticketSchema = new Schema({
     status:{
         type:String,
         required:true,
+        default:'Success'
     }
 });
 
@@ -83,6 +84,10 @@ const bookingSchema = new Schema({
         default: null
     },
     stripeSessionId:{
+        type:String,
+        optional:true
+    },
+    paymentStatus:{
         type:String,
         optional:true
     }

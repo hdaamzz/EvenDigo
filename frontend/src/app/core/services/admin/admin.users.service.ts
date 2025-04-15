@@ -61,24 +61,24 @@ export class AdminUsersService {
     );
   }
 
-  blockUser(id:string):Observable<any>{
-    return this.http.patch(`${this.baseUrl}admin/users/block-user`,{id},{
+  blockUser(id:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/block-user`,{id},{
       withCredentials:true
     });
   }
-  unblockUser(id:string):Observable<any>{
-    return this.http.patch(`${this.baseUrl}admin/users/unblock-user`,{id},{
+  unblockUser(id:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/unblock-user`,{id},{
       withCredentials:true
     });
   }
 
-  approveUser(id:string):Observable<any>{
-    return this.http.patch(`${this.baseUrl}admin/users/approve-user`,{id},{
+  approveUser(id:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/approve-user`,{id},{
       withCredentials:true
     });
   }
-  rejectUser(id:string):Observable<any>{
-    return this.http.patch(`${this.baseUrl}admin/users/reject-user`,{id},{
+  rejectUser(id:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/reject-user`,{id},{
       withCredentials:true
     });
   }

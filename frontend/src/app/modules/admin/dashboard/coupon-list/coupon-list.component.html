@@ -63,26 +63,7 @@
             </div>
           </div>
 
-          <!-- Discount Value -->
-          <div class="p-field p-grid mb-4">
-            <label for="discount" class="p-col-fixed font-semibold" style="width: 120px">Discount</label>
-            <div class="p-col">
-              <input 
-                pInputText 
-                id="discount" 
-                type="number" 
-                formControlName="discount" 
-                class="p-inputtext p-component w-full" 
-                placeholder="Enter amount" 
-                autocomplete="off" 
-              />
-              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors">
-                <span *ngIf="couponForm.get('discount')?.errors?.['required']">Discount is required.</span>
-                <span *ngIf="couponForm.get('discount')?.errors?.['min']">Must be at least 1.</span>
-                <span *ngIf="couponForm.get('discount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
-              </small>
-            </div>
-          </div>
+         
 
           <!-- Minimum Amount -->
           <div class="p-field p-grid mb-4">
@@ -100,6 +81,33 @@
               <small class="p-error" *ngIf="couponForm.get('minAmount')?.touched && couponForm.get('minAmount')?.errors">
                 <span *ngIf="couponForm.get('minAmount')?.errors?.['min']">Must be 0 or greater.</span>
                 <span *ngIf="couponForm.get('minAmount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
+              </small>
+            </div>
+          </div>
+
+           <!-- Discount Value -->
+           <div class="p-field p-grid mb-4">
+            <label for="discount" class="p-col-fixed font-semibold" style="width: 120px">Discount</label>
+            <div class="p-col">
+              <input 
+                pInputText 
+                id="discount" 
+                type="number" 
+                formControlName="discount" 
+                class="p-inputtext p-component w-full" 
+                placeholder="Enter amount" 
+                autocomplete="off" 
+              />
+              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors">
+                <span *ngIf="couponForm.get('discount')?.errors?.['required']">Discount is required.</span>
+                <span *ngIf="couponForm.get('discount')?.errors?.['min']">Must be at least 1.</span>
+                <span *ngIf="couponForm.get('discount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
+              </small>
+              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors?.['maxPercentage']">
+                Percentage discount cannot exceed 80%.
+              </small>
+              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors?.['exceedsMinAmount']">
+                Discount amount cannot exceed minimum purchase amount.
               </small>
             </div>
           </div>
@@ -134,10 +142,11 @@
                 [showIcon]="true" 
                 class="w-full" 
               />
-              <small class="p-error" *ngIf="couponForm.get('expiryDate')?.touched && couponForm.get('expiryDate')?.errors?.['pastDate']">
-                Expiry date must be in the future.
-              </small>
             </div>
+            <small class="p-error" *ngIf="couponForm.get('expiryDate')?.touched && couponForm.get('expiryDate')?.errors?.['pastDate']">
+              Expiry date must be in the future.
+            </small>
+            <span *ngIf="couponForm.get('expiryDate')?.errors?.['required']">Expire date is required.</span>
           </div>
 
           <!-- Description -->
@@ -169,17 +178,17 @@
               type="submit" 
               [label]="selectedCoupon._id ? 'Update Coupon' : 'Create Coupon'" 
               severity="success" 
-              [disabled]="couponForm.invalid" 
+              
             />
           </div>
         </form>
       </p-dialog>
 
-      <!-- Coupon Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @if (loading) {
+       <!-- Coupon Cards -->
+       <div #couponsContainer class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @if (loading && couponsList.length === 0) {
           <div class="col-span-full text-center py-4">Loading...</div>
-        } @else if (couponsList.length === 0) {
+        } @else if (couponsList.length === 0 && !loading) {
           <div class="col-span-full text-center py-4">No coupons found</div>
         } @else {
           @for (coupon of couponsList; track coupon._id) {
@@ -187,7 +196,7 @@
               <div class="flex justify-between items-start mb-3">
                 <div>
                   <h3 class="font-medium text-gray-800 text-lg">{{ coupon.code }}</h3>
-                  <p class="text-sm text-gray-500">{{ coupon.description }}</p>
+                  <p class="text-sm text-gray-500">{{ coupon.description | slice:0:50 }}{{ coupon.description?.length > 50 ? '...' : '' }}</p>
                 </div>
                 <div [class]="coupon.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
                   class="px-2 py-1 rounded-3xl text-xs">
@@ -199,7 +208,7 @@
                 <div class="text-sm">
                   <span class="text-gray-500">Discount:</span>
                   <span class="ml-1 font-medium text-gray-800">
-                    {{ coupon.discountType === 'percentage' ? (coupon.discount + '%') : ('$' + coupon.discount) }}
+                    {{ coupon.discountType === 'percentage' ? (coupon.discount + '%') : ('₹' + coupon.discount) }}
                   </span>
                 </div>
                 <div class="text-sm">
@@ -243,6 +252,16 @@
         }
       </div>
 
+      <!-- Loading Spinner for infinite scroll -->
+      <div *ngIf="loading && couponsList.length > 0" class="flex justify-center py-4">
+        <div class="loader"></div>
+      </div>
+
+      <!-- End of results message -->
+      <div *ngIf="allLoaded && couponsList.length > 0" class="text-center text-gray-500 py-4">
+        No more coupons to load
+      </div>
+
       <!-- Coupon Details Dialog -->
       <p-dialog header="Coupon Details" [modal]="true" [(visible)]="couponDialogVisible"
         [position]="isMobile ? 'bottom' : 'right'" [style]="isMobile ? { width: '100%', maxWidth: '100vw' } : { width: '30rem' }">
@@ -255,7 +274,7 @@
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Discount</span>
               <p class="font-normal text-white">
-                {{ selectedCoupon.discountType === 'percentage' ? (selectedCoupon.discount + '%') : ('$' + selectedCoupon.discount) }}
+                {{ selectedCoupon.discountType === 'percentage' ? (selectedCoupon.discount + '%') : ('₹' + selectedCoupon.discount) }}
               </p>
             </div>
             <div class="col-span-2 md:col-span-1">

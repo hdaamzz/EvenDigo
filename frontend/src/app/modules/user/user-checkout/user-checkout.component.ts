@@ -11,8 +11,8 @@ import Notiflix from 'notiflix';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
-import { ICoupon } from '../../../core/models/admin/admin.interface';
 import { AdminCouponService } from '../../../core/services/admin/admin-coupon.service';
+import { PayloadData } from '../../../core/models/booking.interface';
 
 interface TicketData {
   eventId: string;
@@ -39,6 +39,7 @@ export class UserCheckoutComponent implements OnInit {
   couponsList:any[]=[];
   appliedCoupon: any = null;
   couponLoading=false
+  proceedLoading:boolean=false
 
   constructor(
     private router: Router,
@@ -46,17 +47,21 @@ export class UserCheckoutComponent implements OnInit {
     private exploreService: UserExploreService,
     private couponService: AdminCouponService
   ) {
-    if (!history.state.ticketData || !history.state.ticketData.eventId) {
+    const ticketState = history?.state?.ticketData;
+    if (!ticketState || !ticketState.eventId) {
       this.router.navigate(['/']);
       return;
     }
-    this.ticketData = history.state.ticketData;
+  
+    this.ticketData = ticketState;
     this.showEventDetails(this.ticketData.eventId);
   }
 
   async ngOnInit() {
-    this.basePrice = this.ticketData.totalAmount;
-    this.loadCoupons()
+    if (!this.ticketData) return;
+  
+    this.basePrice = this.ticketData.totalAmount ?? 0;
+    this.loadCoupons();
     this.stripe = await loadStripe(environment.stripePublishKey);
     if (!this.stripe) {
       Notiflix.Notify.failure('Payment service unavailable. Please try again later.');
@@ -65,7 +70,12 @@ export class UserCheckoutComponent implements OnInit {
 
   showEventDetails(id: string) {
     this.dashboardService.getEventById(id).pipe(
-      tap((response) => this.event = response.data),
+      tap((response) =>{
+        if(response.data){
+          this.event = response.data
+        }
+      }    
+    ),
       catchError((error) => {
         console.error('Error fetching event:', error);
         Notiflix.Notify.failure('Error fetching event details');
@@ -82,7 +92,7 @@ export class UserCheckoutComponent implements OnInit {
   }
 
   getTicketBreakdown(): { type: string, count: number }[] {
-    return Object.entries(this.ticketData.tickets)
+    return Object.entries(this.ticketData?.tickets)
       .filter(([_, count]) => count > 0)
       .map(([type, count]) => ({ type, count }));
   }
@@ -133,8 +143,10 @@ export class UserCheckoutComponent implements OnInit {
   }
 
   getTicketCount(): number {
+    if (!this.ticketData || !this.ticketData.tickets) return 0;
     return Object.values(this.ticketData.tickets).reduce((sum, count) => sum + (count as number), 0);
   }
+  
 
   applyCouponFromList(coupon: any) {
     if (this.canApplyCoupon(coupon)) {
@@ -167,16 +179,18 @@ export class UserCheckoutComponent implements OnInit {
   }
 
   async completePurchase() {
+    this.proceedLoading=true
     if (!this.stripe) {
       Notiflix.Notify.failure('Payment service not initialized. Please refresh the page.');
       return;
     }
-  
-    const payload = {
+    console.log('origin',window.location.origin);
+    
+    const payload:PayloadData = {
       eventId: this.ticketData.eventId,
       tickets: this.ticketData.tickets,
       amount: this.calculateTotal(),
-      successUrl: window.location.origin + '/payement/success',
+      successUrl: window.location.origin + '/payment/success',
       cancelUrl: window.location.origin + '/checkout',
       paymentMethod: this.selectedPaymentMethod,
       couponCode: this.appliedCoupon ? this.appliedCoupon.code : null,
@@ -188,7 +202,9 @@ export class UserCheckoutComponent implements OnInit {
         
       } else {
         const response = await firstValueFrom(this.exploreService.createStripeCheckoutSession(payload));
+
         const sessionId = response.data.sessionId;
+        this.proceedLoading=false
         console.log('Stripe Session ID:', sessionId);
   
         const { error } = await this.stripe.redirectToCheckout({ sessionId });

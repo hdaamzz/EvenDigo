@@ -29,6 +29,9 @@ export class UserNavComponent implements OnInit, OnDestroy {
   isDropdownOpen = false;
   private destroy$ = new Subject<void>();
   
+
+  lastScrollTop = 0;
+  isNavbarVisible = true;
   constructor(
     private store: Store<AppState>,
     private router: Router,
@@ -42,16 +45,31 @@ export class UserNavComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.user$
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (user) => console.log('User state updated:', user),
-        error: (error) => console.error('Error in user$ subscription:', error)
-      });
+      .subscribe();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (currentScrollTop > this.lastScrollTop && currentScrollTop > 80) {
+      if (this.isNavbarVisible && currentScrollTop - this.lastScrollTop > 10) {
+        this.isNavbarVisible = false;
+      }
+    } else {
+      if (!this.isNavbarVisible || currentScrollTop <= 20) {
+        this.isNavbarVisible = true;
+      }
+    }
+    
+    this.lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
+  }
+
+
   getInitialColor(name: string): string {
     const colors = [
       'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-red-600',

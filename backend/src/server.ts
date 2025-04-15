@@ -7,14 +7,14 @@ import * as admin from 'firebase-admin';
 import serviceAccount from './configs/serviceAccountKey.json';
 import dotenv from 'dotenv';
 dotenv.config();
+// import session from "express-session";
 import './configs/container';
 import connectDB from './configs/db';
 import cookieParser from 'cookie-parser';
 import router from './routes/router';
+import stripeWebhookRouter from "./routes/user/webhook.routes";
 
 const PORT: string | undefined = process.env.PORT;
-
-
 
 const app=express();
 const corsOptions={
@@ -23,7 +23,9 @@ const corsOptions={
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,  
 };
+// stripe listen --forward-to localhost:3000/webhooks/stripe
 
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
 
 //Middlewares
 app.use(cors(corsOptions));
@@ -31,7 +33,6 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
-
 
 //Database Connection
 connectDB();

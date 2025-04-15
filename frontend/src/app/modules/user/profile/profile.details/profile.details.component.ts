@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UserProfileService } from '../../../../core/services/user/user.profile.service';
 import { Dialog } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -10,6 +9,7 @@ import {AutoCompleteModule } from 'primeng/autocomplete'
 import { DatePickerModule } from 'primeng/datepicker';
 import { alphabetsValidator, mobileNumberValidator, repeateCharacterValidator, spacesValidator } from '../../../../validators/formValidators';
 import { CloudinaryService } from '../../../../core/services/utility/cloudinary.service';
+import { UserProfileService } from '../../../../core/services/user/profile/user.profile.service';
 
 
 @Component({

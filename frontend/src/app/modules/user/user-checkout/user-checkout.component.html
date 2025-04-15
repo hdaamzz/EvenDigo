@@ -1,6 +1,6 @@
 <app-user-nav></app-user-nav>
 
-<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 p-8 text-white min-h-screen">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 p-8 text-white min-h-screen pt-20">
   <!-- Payment Details -->
   @if (event) {
   <div class="md:col-span-2">
@@ -66,29 +66,27 @@
 
     <!-- Offers Section -->
     <div class="bg-[#1E1E1E] rounded-xl p-6">
-      <h3 class="text-lg font-semibold mb-4 text-white">Available Offers</h3>
+      <!-- <h3 class="text-lg font-semibold mb-4 text-white">Available Offers</h3>
 
-      <!-- Loading State -->
       <div *ngIf="couponLoading" class="text-center text-gray-400 py-4">
         Loading coupons...
       </div>
 
-      <!-- No Coupons Available -->
       <div *ngIf="!couponLoading && couponsList.length === 0" class="text-center text-gray-400 py-4">
         No offers available at this time.
-      </div>
+      </div> -->
 
       <!-- Coupons List -->
-      <div *ngIf="!couponLoading && couponsList.length > 0" class="space-y-4 mb-5">
+      <!-- <div *ngIf="!couponLoading && couponsList.length > 0" class="space-y-4 mb-5">
         <div *ngFor="let coupon of couponsList; let i = index"
           class="bg-[#121212] p-4 rounded-lg flex justify-between items-center">
           <div>
             <h3 class="text-green-500 font-semibold">{{ coupon.code }}</h3>
             <p class="text-gray-300 text-sm">{{ coupon.description }}</p>
             <div class="text-gray-400 text-xs mt-1">
-              <span>{{ coupon.discountType === 'percentage' ? coupon.discount + '%' : '$' + coupon.discount }}
+              <span>{{ coupon.discountType === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount }}
                 off</span>
-              <span *ngIf="coupon.minAmount > 0"> (Min. ${{ coupon.minAmount }})</span>
+              <span *ngIf="coupon.minAmount > 0"> (Min. ₹{{ coupon.minAmount }})</span>
               <span *ngIf="coupon.expiryDate"> | Expires: {{ coupon.expiryDate | date:'mediumDate' }}</span>
               <span> | Uses: {{ coupon.usageCount }}/{{ coupon.maxUses }}</span>
             </div>
@@ -102,7 +100,7 @@
             Applied
           </span>
         </div>
-      </div>
+      </div> -->
 
       <!-- Coupon Input -->
       <div class="flex gap-2">
@@ -122,7 +120,7 @@
       <!-- Applied Coupon Summary -->
       <div *ngIf="appliedCoupon" class="mt-4 text-gray-300 text-sm">
         <p>Applied: <span class="text-green-500 font-semibold">{{ appliedCoupon.code }}</span> -
-          {{ appliedCoupon.discountType === 'percentage' ? appliedCoupon.discount + '%' : '$' + appliedCoupon.discount
+          {{ appliedCoupon.discountType === 'percentage' ? appliedCoupon.discount + '%' : '₹' + appliedCoupon.discount
           }} off</p>
       </div>
     </div>
@@ -165,9 +163,22 @@
         <span>₹{{ calculateTotal().toFixed(2) }}</span>
       </div>
     </div>
-    <button (click)="completePurchase()"
-      class="w-full bg-green-500 text-white py-4 rounded-lg mt-5 order-summary-button text-lg font-semibold">
-      Proceed to Pay
-    </button>
+    @if (proceedLoading) {
+      <div class="w-full  text-white py-4 rounded-lg mt-5 flex justify-center items-center">
+        <div class="flex items-center">
+          <svg class="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="text-lg font-semibold">Processing...</span>
+        </div>
+      </div>
+    } @else {
+      <button (click)="completePurchase()" 
+        class="w-full bg-green-500 text-white py-4 rounded-lg mt-5 order-summary-button text-lg font-semibold hover:bg-green-600 transition-colors">
+        Proceed to Pay
+      </button>
+    }
+
   </div>
 </div>

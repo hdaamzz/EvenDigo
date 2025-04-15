@@ -2,7 +2,7 @@
 import { IUser, ServiceResponse } from '../../../models/interfaces/auth.interface';
 import cloudinary from '../../../configs/cloudinary';
 import { Readable } from 'stream';
-import { CloudinaryUploadResult } from '../../../models/interfaces/profile.interface';
+import { CloudinaryUploadResult, ProfileServiceResponse } from '../../../models/interfaces/profile.interface';
 import {  IBookingRepository } from '../../../repositories/booking.repository';
 import { IWallet, TransactionType } from '../../../models/interfaces/wallet.interface';
 import { Schema } from 'mongoose';
@@ -11,6 +11,9 @@ import { IProfileService } from '../../../../src/services/interfaces/IProfile.se
 import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
 import { IVerificationRepository } from '../../../../src/repositories/interfaces/IVerification.repository';
 import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
+import { IDashboardRepository } from 'src/repositories/interfaces/IEvent.repository';
+import { IBooking } from 'src/models/interfaces/booking.interface';
+import { EventDocument } from 'src/models/interfaces/event.interface';
 
 
 
@@ -21,6 +24,7 @@ export class ProfileService implements IProfileService{
     @inject("BookingRepository") private bookingRepository:IBookingRepository,
     @inject("WalletRepository") private walletRepository:IWalletRepository,
     @inject("VerificationRepository") private verificationRepository:IVerificationRepository,
+    @inject("DashboardRepository") private dashboardRespository :IDashboardRepository,
   ) {}
   async fetchUserById(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IUser>> {
     try {
@@ -132,18 +136,12 @@ export class ProfileService implements IProfileService{
           resolve(result as CloudinaryUploadResult);
         }
       );
-
-
-
       const readableStream = new Readable({
         read() {
           this.push(buffer);
           this.push(null);
         }
       });
-
-
-
       readableStream.pipe(uploadStream);
     });
   }
@@ -152,14 +150,21 @@ export class ProfileService implements IProfileService{
     return cloudinary.uploader.destroy(publicId);
   }
 
-
-
-  //event section
-  async getUserBookings(userId:  Schema.Types.ObjectId | string): Promise<any[]> {
+  async getUserEvents(userId:  Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     try {
-      console.log('controller');
+      const events = await this.dashboardRespository.findEventByUserId(userId);
 
-      const bookings = await this.bookingRepository.findByUserId(userId);
+      return events;
+    } catch (error) {
+      throw new Error(`Failed to fetch user bookings: ${(error as Error).message}`);
+    }
+  }
+
+
+  //Booking section
+  async getUserBookings(userId:  Schema.Types.ObjectId | string): Promise<IBooking[]> {
+    try {
+      const bookings = await this.bookingRepository.findBookingByUserId(userId);
 
       return bookings;
     } catch (error) {
@@ -168,105 +173,7 @@ export class ProfileService implements IProfileService{
   }
 
 
-  //wallet section
-  async addMoneyToWallet(userId:  Schema.Types.ObjectId | string, amount: number, reference?: string): Promise<ServiceResponse<IWallet>> {
-    try {
-      if (amount <= 0) {
-        return {
-          success: false,
-          message: "Amount must be greater than zero"
-        };
-      }
-
-      let wallet = await this.walletRepository.findWalletById(userId);
-      if (!wallet) {
-        wallet = await this.walletRepository.createWallet({
-          userId,
-          walletBalance: 0,
-          transactions: []
-        });
-      }
-
-      const updatedWallet = await this.walletRepository.addTransaction(userId, {
-        eventName: 'Wallet Top-up',
-        eventId: 'wallet_topup',
-        amount,
-        type: TransactionType.CREDIT,
-        description: 'Added money to wallet',
-        reference
-      });
-
-      if (!updatedWallet) {
-        return {
-          success: false,
-          message: "Failed to add money to wallet"
-        };
-      }
-
-      return {
-        success: true,
-        message: "Money added to wallet successfully",
-        data: updatedWallet
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: (error as Error).message || "Failed to add money to wallet"
-      };
-    }
-  }
-
-  async withdrawMoneyFromWallet(userId:  Schema.Types.ObjectId | string, amount: number): Promise<ServiceResponse<IWallet>> {
-    try {
-      if (amount <= 0) {
-        return {
-          success: false,
-          message: "Amount must be greater than zero"
-        };
-      }
-
-      const wallet = await this.walletRepository.findWalletById(userId);
-      if (!wallet) {
-        return {
-          success: false,
-          message: "Wallet not found"
-        };
-      }
-
-      if (wallet.walletBalance < amount) {
-        return {
-          success: false,
-          message: "Insufficient balance"
-        };
-      }
-
-      const updatedWallet = await this.walletRepository.addTransaction(userId, {
-        eventName: 'Wallet Withdrawal',
-        eventId: 'wallet_withdrawal',
-        amount,
-        type: TransactionType.WITHDRAWAL,
-        description: 'Withdrawn money from wallet'
-      });
-
-      if (!updatedWallet) {
-        return {
-          success: false,
-          message: "Failed to withdraw money from wallet"
-        };
-      }
-
-      return {
-        success: true,
-        message: "Money withdrawn from wallet successfully",
-        data: updatedWallet
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: (error as Error).message || "Failed to withdraw money from wallet"
-      };
-    }
-  }
+  
 
   async getWalletDetails(userId:  Schema.Types.ObjectId | string): Promise<ServiceResponse<IWallet>> {
     try {
@@ -293,6 +200,117 @@ export class ProfileService implements IProfileService{
       return {
         success: false,
         message: (error as Error).message || "Failed to get wallet details"
+      };
+    }
+  }
+
+  async cancelTicket(
+    userId: Schema.Types.ObjectId | string,
+    bookingId: string,
+    ticketUniqueId: string
+  ): Promise<ProfileServiceResponse<IBooking>> {
+    try {
+      const booking = await this.bookingRepository.findBookingById(bookingId);
+      
+      if (!booking) {
+        return {
+          success: false,
+          message: "Booking not found"
+        };
+      }
+      
+      if (booking.userId.toString() !== userId.toString()) {
+        return {
+          success: false,
+          message: "You are not authorized to cancel this ticket"
+        };
+      }
+      
+      const ticketToCancel = booking.tickets.find(ticket => ticket.uniqueId === ticketUniqueId);
+      
+      if (!ticketToCancel) {
+        return {
+          success: false,
+          message: "Ticket not found in this booking"
+        };
+      }
+      
+      if (ticketToCancel.status === 'Cancelled') {
+        return {
+          success: false,
+          message: "This ticket has already been cancelled"
+        };
+      }
+  
+      const refundAmount =Math.floor( ticketToCancel.price * ticketToCancel.quantity * 0.9);
+      
+      console.log("refundAmount",refundAmount,
+        "bookingId",bookingId,
+        "ticketUniqueId",ticketUniqueId,
+
+      );
+      
+
+      const updatedBooking = await this.bookingRepository.updateTicketStatus(
+        bookingId,
+        ticketUniqueId,
+        'Cancelled'
+      );
+      
+      if (!updatedBooking) {
+        return {
+          success: false,
+          message: "Failed to update ticket status"
+        };
+      }
+      
+      const eventName ='Event';
+      const eventId = booking.eventId.toString();
+      let wallet =await this.walletRepository.findWalletById(userId)
+      if(!wallet){
+        await this.walletRepository.createWallet({
+          userId,
+          walletBalance: 0,
+          transactions: []
+        });
+      }
+      
+      const walletUpdate = await this.walletRepository.addTransaction(
+        userId,
+        {
+          eventName,
+          eventId,
+          amount: refundAmount,
+          type: TransactionType.REFUND,
+          description: `Refund for cancelled ${ticketToCancel.type} ticket(s)`,
+          metadata: {
+            bookingId,
+            ticketType: ticketToCancel.type,
+            quantity: ticketToCancel.quantity,
+            originalPrice: ticketToCancel.price * ticketToCancel.quantity,
+            cancellationFee: Math.floor(ticketToCancel.price * ticketToCancel.quantity * 0.1)
+          }
+        }
+      );
+      
+      if (!walletUpdate) {
+        // Log the error but don't fail the operation since the ticket is already cancelled
+        console.error('Failed to add refund to wallet for user:', userId);
+      }
+      
+      return {
+        success: true,
+        message: `Ticket cancelled successfully. ₹${refundAmount.toFixed(2)} has been credited to your wallet.`,
+        data: {
+          updatedBooking,
+          refundAmount
+        }
+      };
+    } catch (error) {
+      console.error('Error in cancelTicket service:', error);
+      return {
+        success: false,
+        message: (error as Error).message || "Failed to cancel ticket"
       };
     }
   }

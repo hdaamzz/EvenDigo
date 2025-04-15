@@ -1,7 +1,10 @@
-<div class="bg-[#1E1E1E] text-white p-8">
+<app-user-nav></app-user-nav>
+
+
+<div class="bg-[#1E1E1E] text-white p-8 pt-20">
   <div class="max-w-7xl mx-auto mb-8 bg-green-500 p-5 rounded-xl text-center">
       <h1 class="text-2xl mb-2 font-semibold">Booking Confirmed!</h1>
-      <p>Your tickets for GLOW Night Party have been confirmed. Order ID: #GLW24789</p>
+      <p>Your tickets for {{booking?.eventId?.eventTitle}} have been confirmed. Booking ID: #{{booking?.bookingId}}</p>
   </div>
 
   <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -14,19 +17,21 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                   <div class="bg-[#1E1E1E] p-4 rounded-lg">
                       <h3 class="text-gray-300 text-sm mb-1">Event Date & Time</h3>
-                      <p class="text-base">26 February 2024, 8:00 PM</p>
+                      <p class="text-base">{{ booking?.eventId?.startDate | date:'MMMM d, yyyy' }}, {{ booking?.eventId?.startTime | date:'h:mm a' }} IST</p>
                   </div>
                   <div class="bg-[#1E1E1E] p-4 rounded-lg">
                       <h3 class="text-gray-300 text-sm mb-1">Venue</h3>
-                      <p class="text-base">Techno Park, Calicut</p>
+                      <p class="text-base">{{booking?.eventId?.venueName}}, {{booking?.eventId?.city}}</p>
                   </div>
                   <div class="bg-[#1E1E1E] p-4 rounded-lg">
                       <h3 class="text-gray-300 text-sm mb-1">Ticket Type</h3>
-                      <p class="text-base">Regular (2 tickets)</p>
+                      @for (ticket of booking?.tickets; track $index) {
+                      <p class="text-base">{{ticket.type}} ({{ticket.quantity}} tickets)</p>
+                      }
                   </div>
                   <div class="bg-[#1E1E1E] p-4 rounded-lg">
                       <h3 class="text-gray-300 text-sm mb-1">Payment Method</h3>
-                      <p class="text-base">Card</p>
+                      <p class="text-base">{{booking?.paymentType}}</p>
                   </div>
               </div>
 
@@ -41,10 +46,12 @@
                               <p class="text-gray-300 text-sm">Download your tickets (PDF)</p>
                           </div>
                       </div>
-                      <button class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white">
-                          <i class="fas fa-download"></i>
-                          Download
-                      </button>
+                      <button class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white" 
+                      (click)="downloadTickets()" 
+                      [disabled]="isLoading">
+                  <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+                  Download
+              </button>
                   </div>
 
                   <div class="bg-[#1E1E1E] p-5 rounded-lg mb-4 flex justify-between items-center">
@@ -57,24 +64,13 @@
                               <p class="text-gray-300 text-sm">Download payment invoice (PDF)</p>
                           </div>
                       </div>
-                      <button class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white">
-                          <i class="fas fa-download"></i>
-                          Download
-                      </button>
+                      <button class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white" 
+                      (click)="downloadInvoice()" 
+                      [disabled]="isLoading">
+                  <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+                  Download
+              </button>
                   </div>
-              </div>
-          </div>
-
-          <div class="bg-[#121212] rounded-xl p-6 mb-5">
-              <h2 class="text-xl mb-5 text-green-500 flex items-center gap-2">
-                  <i class="fas fa-calendar-check"></i>
-                  Event Reminders
-              </h2>
-              <div class="bg-[#1E1E1E] p-5 rounded-lg text-center">
-                  <p>Never miss the event! Add it to your calendar and get timely reminders.</p>
-                  <button class="mt-4 border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white py-2 px-4 rounded">
-                      Add to Calendar
-                  </button>
               </div>
           </div>
 
@@ -94,7 +90,13 @@
                   <i class="fas fa-qrcode"></i>
                   Entry Pass
               </h2>
-              <img src="/api/placeholder/200/200" alt="Event QR Code" class="w-48 h-48 mx-auto bg-white p-2 rounded-lg mb-4">
+              @for (ticket of booking?.tickets; track $index) {
+                <h4 class="text-xl mb-5 text-green-500 flex items-center justify-center gap-2">
+                    
+                    {{ticket.type | uppercase}}
+                </h4>
+              <img [src]="ticket.uniqueQrCode" alt="Event QR Code" class="w-48 h-48 mx-auto bg-white p-2 rounded-lg mb-4">
+              }
               <p>Show this QR code at the venue entrance</p>
               
               <div class="flex justify-center gap-4 mt-5">

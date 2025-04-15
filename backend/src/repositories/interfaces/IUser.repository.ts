@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import { IUser } from '../../models/interfaces/auth.interface';
 
 export interface IUserRepository {
-  findByIdWithoutPassword(id: Schema.Types.ObjectId | string): Promise<IUser | null>;
+  findUserByIdWithoutPassword(id: Schema.Types.ObjectId | string): Promise<IUser | null>;
   createUser(userData: IUser): Promise<IUser>;
   findUserById(id: Schema.Types.ObjectId | string): Promise<IUser | null>;
   findUserByEmail(email: string): Promise<IUser | null>;

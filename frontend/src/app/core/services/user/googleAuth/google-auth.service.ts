@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Auth, signInWithPopup, GoogleAuthProvider, UserCredential } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import Notiflix from 'notiflix';
-import { AuthService } from '../auth.service';
 import { Store } from '@ngrx/store';
 import { AuthActions } from '../../../store/auth/auth.actions';
 import { from, map, mergeMap, Observable } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 
 
 

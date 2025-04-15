@@ -11,6 +11,13 @@ export interface UsersResponse {
     data: User[];
   }
 
+export interface IAdminLoginResponse {
+  message:string;
+  success:boolean;
+  token:string
+  user:User
+}
+  
  export interface SuccessResponse {
     success: true; 
     data: User[];
@@ -36,19 +43,6 @@ export interface UsersResponse {
  export enum DiscountType {
   PERCENTAGE = 'percentage',
   FIXED_AMOUNT = 'fixed_amount'
-}
-
- export interface ICoupon {
-  _id:string
-  couponCode: string;         
-  discountType: DiscountType; 
-  discount: number;           
-  minAmount?: number;         
-  maxUses?: number;           
-  expiryDate?: Date;          
-  description?: string;       
-  isActive?: boolean;        
-  currentUses?: number;      
 }
  export type EventsApiResponse = EventSuccessResponse | ErrorResponse;
 

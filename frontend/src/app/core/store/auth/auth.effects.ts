@@ -5,12 +5,11 @@ import { of } from 'rxjs';
 import { filter, map, mergeMap, catchError, tap, switchMap } from 'rxjs/operators';
 import { Router, NavigationStart } from '@angular/router';
 import { AuthActions } from "./auth.actions";
-import { AuthService } from "../../services/user/auth.service";
 import { routerNavigatedAction, routerNavigationAction } from '@ngrx/router-store';
-
 import Notiflix from "notiflix";
 import { GoogleAuthService } from "../../services/user/googleAuth/google-auth.service";
 import { AdminAuthService } from "../../services/admin/admin.auth.service";
+import { AuthService } from "../../services/user/auth/auth.service";
 
 
 
@@ -117,6 +116,8 @@ export class AuthEffects {
             switchMap(({ email, password }) =>
                 this.adminAuthService.adminLogin({ email, password }).pipe(
                     map(response => {
+                        console.log("adminLogin",response);
+                        
                         if (response.success) {
                             Notiflix.Notify.success('Welcome to EvenDigo');
                            

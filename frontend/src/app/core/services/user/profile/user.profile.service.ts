@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
 import { catchError, delay, Observable, of, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { User } from '../../models/userModel';
+
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { User, VerificationRequestResponse } from '../../../models/userModel';
+import { UpdateProfileResponse } from '../../../models/profile.interfaces';
+import { AllEventResponse } from '../../../models/event.interface';
+import { AllBookingResponse } from '../../../models/booking.interface';
 interface Transaction {
   date: string;
   eventDetails: string;
@@ -41,12 +45,12 @@ export class UserProfileService {
         })
       );
   }
-  updateUserProfile(userId: string | undefined, userData: any): Observable<any> {
+  updateUserProfile(userId: string | undefined, userData: Partial<User>): Observable<UpdateProfileResponse> {
     if (!userId) {
       return throwError(() => new Error('User ID is missing'));
     }
     
-    return this.http.post<any>(`${this.baseUrl}user/profile/update`, {
+    return this.http.post<UpdateProfileResponse>(`${this.baseUrl}user/profile/update`, {
       userId: userId,
       ...userData
     }, {
@@ -59,8 +63,8 @@ export class UserProfileService {
     );
   }
 
-  verificationRequest(id:string):Observable<any>{
-    return this.http.post(`${this.baseUrl}user/profile/verification-request`,{id},{
+  verificationRequest(id:string):Observable<VerificationRequestResponse>{
+    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{id},{
       withCredentials: true,
     }).pipe(
       catchError(error => {
@@ -78,13 +82,19 @@ export class UserProfileService {
       })
     )
   }
-  getUserEvents(): Observable<any> {
-    return this.http.get<{ success: boolean; data: any[] }>(`${this.baseUrl}user/profile/events`, {
+  getUserEvents(): Observable<AllEventResponse> {
+    return this.http.get<AllEventResponse>(`${this.baseUrl}user/profile/events`, {
       withCredentials: true,
     });
   }
-  cancelTicket(bookingId: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/profile/events/cancel`, { bookingId }, {
+
+  getUserBookings(): Observable<AllBookingResponse> {
+    return this.http.get<AllBookingResponse>(`${this.baseUrl}user/profile/bookings`, {
+      withCredentials: true,
+    });
+  }
+  cancelTicket(bookingId: string, ticketUniqueId: string): Observable<void> {    
+    return this.http.post<void>(`${this.baseUrl}user/profile/events/cancel`, { bookingId,ticketUniqueId }, {
       withCredentials: true
     });
   }

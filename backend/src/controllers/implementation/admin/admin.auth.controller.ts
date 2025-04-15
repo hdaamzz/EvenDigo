@@ -3,6 +3,7 @@ import { ILogin } from '../../../models/interfaces/auth.interface';
 import { IAuthAdminController } from '../../../../src/controllers/interfaces/IAuth.admin.controller';
 import { inject, injectable } from 'tsyringe';
 import { IAuthAdminService } from '../../../../src/services/interfaces/IAuth.admin.service';
+import StatusCode from '../../../../src/types/statuscode';
 // import * as jwt from 'jsonwebtoken';
 
 @injectable()
@@ -16,7 +17,7 @@ export class AdminAuthController implements IAuthAdminController{
         try {
           const loginData: ILogin = req.body;
           if (!loginData.email || !loginData.password) {
-            res.status(400).json({
+            res.status(StatusCode.BAD_REQUEST).json({
               success: false,
               message: 'Email and password are required'
             });
@@ -25,7 +26,7 @@ export class AdminAuthController implements IAuthAdminController{
     
           const result = await this.adminAuthService.login(loginData);
           if (!result.success) {
-            res.status(401).json(result);
+            res.status(StatusCode.UNAUTHORIZED).json(result);
             return;
           }
     
@@ -40,10 +41,10 @@ export class AdminAuthController implements IAuthAdminController{
             domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined 
           });
     
-          res.status(200).json(result);
+          res.status(StatusCode.OK).json(result);
         } catch (error) {
           console.error('Login error:', error);
-          res.status(500).json({
+          res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Internal server error'
           });

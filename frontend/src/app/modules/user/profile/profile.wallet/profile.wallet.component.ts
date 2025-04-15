@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { UserProfileService } from '../../../../core/services/user/user.profile.service';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { WalletService } from '../../../../core/services/user/wallet/wallet.service';
+
 interface Transaction {
   date: Date;
   eventName: string;
@@ -15,10 +14,12 @@ interface Transaction {
   balance: number;
   status?: 'pending' | 'completed' | 'failed';
   description?: string;
+  metadata?: any;
 }
+
 @Component({
   selector: 'app-profile.wallet',
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.wallet.component.html',
   styleUrl: './profile.wallet.component.css',
   animations: [
@@ -40,14 +41,6 @@ interface Transaction {
   ]
 })
 export class ProfileWalletComponent implements OnInit {
-  // currentBalance: number = 0;
-  // transactions: Transaction[] = [];
-  // isAddMoneyModalOpen: boolean = false;
-  // isWithdrawModalOpen: boolean = false;
-  // amountToAdd: number | null = null;
-  // amountToWithdraw: number | null = null;
-  // predefinedAmounts: number[] = [1000, 2000, 5000, 10000, 20000, 50000];
-  // isLoading: boolean = true;
   initialLoadComplete: boolean = false;
   currentBalance: number = 0;
   transactions: Transaction[] = [];
@@ -55,6 +48,7 @@ export class ProfileWalletComponent implements OnInit {
   // Modal states
   isAddMoneyModalOpen = false;
   isWithdrawModalOpen = false;
+  selectedTransaction: Transaction | null = null;
 
   // Form values
   amountToAdd: number | null = null;
@@ -82,9 +76,12 @@ export class ProfileWalletComponent implements OnInit {
 
     this.walletService.getWalletDetails().subscribe({
       next: (response) => {
+        console.log(response);
+        
         if (response.success) {
           this.currentBalance = response.data.walletBalance;
           this.transactions = response.data.transactions;
+          this.initialLoadComplete = true;
         } else {
           this.errorMessage = response.message || 'Failed to load wallet data';
         }
@@ -120,6 +117,18 @@ export class ProfileWalletComponent implements OnInit {
 
   closeWithdrawModal(): void {
     this.isWithdrawModalOpen = false;
+    // Restore scrolling
+    document.body.style.overflow = 'auto';
+  }
+
+  openTransactionDetails(transaction: Transaction): void {
+    this.selectedTransaction = transaction;
+    // Prevent scrolling on the body when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeTransactionDetails(): void {
+    this.selectedTransaction = null;
     // Restore scrolling
     document.body.style.overflow = 'auto';
   }
@@ -175,6 +184,7 @@ export class ProfileWalletComponent implements OnInit {
       }
     });
   }
+
   private validateAmount(amount: number | null): boolean {
     if (!amount || amount <= 0) {
       this.errorMessage = 'Please enter a valid amount';
@@ -210,8 +220,21 @@ export class ProfileWalletComponent implements OnInit {
       year: 'numeric'
     });
   }
+
   get filteredTransactions(): Transaction[] {
     if (this.selectedType === 'all') return this.transactions;
     return this.transactions.filter(t => t.type === this.selectedType);
+  }
+
+  // Helper methods for transaction details
+  getMetadataKeys(transaction: Transaction): string[] {
+    return transaction.metadata ? Object.keys(transaction.metadata) : [];
+  }
+
+  formatKey(key: string): string {
+    // Convert camelCase to Title Case with spaces
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase());
   }
 }

@@ -49,3 +49,8 @@ export interface CloudinaryResponse {
     imageUrl?: string;
     publicId?: string;
   }
+
+  export interface VerificationRequestResponse {
+    success: boolean;
+    message: string;
+  }

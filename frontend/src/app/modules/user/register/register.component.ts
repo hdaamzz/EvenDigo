@@ -6,9 +6,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { alphabetsValidator ,emailValidator ,mobileNumberValidator,spacesValidator } from '../../../validators/formValidators';
 import { onlyNumbersValidator,passwordMatchValidator,passwordValidator,repeateCharacterValidator } from '../../../validators/formValidators';
-import { AuthService } from '../../../core/services/user/auth.service';
 import Notiflix from 'notiflix';  
 import { GoogleAuthService } from '../../../core/services/user/googleAuth/google-auth.service';
+import { AuthService } from '../../../core/services/user/auth/auth.service';
 
 @Component({
   selector: 'app-register',

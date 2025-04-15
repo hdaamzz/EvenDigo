@@ -1,9 +1,9 @@
-// src/app/services/admin-coupon.service.ts
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { AllCouponResponse, CouponResponse, ICoupon } from '../../models/admin/coupon.interfacce';
 
 @Injectable({
   providedIn: 'root'
@@ -14,33 +14,44 @@ export class AdminCouponService {
   constructor(private http: HttpClient) {}
 
   // Fetch all coupons
-  getCoupons(): Observable<any[]> {
-    return this.http.get<any>(`${this.baseUrl}admin/coupon`, { withCredentials: true })
-      .pipe(map((response: any) => response.data));
+  getCoupons(): Observable<ICoupon[]> {
+    return this.http.get<AllCouponResponse>(`${this.baseUrl}admin/coupon`, { withCredentials: true })
+      .pipe(map((response) => response.data));
   }
+  getCouponsWithPagination(page: number = 1, limit: number = 10): Observable<AllCouponResponse> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    
+    return this.http.get<AllCouponResponse>(`${this.baseUrl}admin/coupon`, { 
+      params,
+      withCredentials: true 
+    });
+  }
+  
 
   // Create a new coupon
-  createCoupon(coupon: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}admin/coupon`, coupon, { withCredentials: true })
-      .pipe(map((response: any) => response.data));
+  createCoupon(coupon: ICoupon): Observable<ICoupon> {
+    return this.http.post<CouponResponse>(`${this.baseUrl}admin/coupon`, coupon, { withCredentials: true })
+      .pipe(map((response: CouponResponse) => response.data));
   }
 
   // Update an existing coupon
-  updateCoupon(couponId: string, coupon: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}admin/coupon/${couponId}`, coupon, { withCredentials: true })
-      .pipe(map((response: any) => response.data));
+  updateCoupon(couponId: string, coupon: Partial<ICoupon>): Observable<ICoupon> {
+    return this.http.put<CouponResponse>(`${this.baseUrl}admin/coupon/${couponId}`, coupon, { withCredentials: true })
+      .pipe(map((response: CouponResponse) => response.data));
   }
 
   // Activate a coupon
-  activateCoupon(couponId: string): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}admin/coupon/active/${couponId}`, {}, { withCredentials: true })
-      .pipe(map((response: any) => response.data));
+  activateCoupon(couponId: string): Observable<ICoupon> {
+    return this.http.patch<CouponResponse>(`${this.baseUrl}admin/coupon/active/${couponId}`, {}, { withCredentials: true })
+      .pipe(map((response: CouponResponse) => response.data));
   }
 
   // Deactivate a coupon
-  deactivateCoupon(couponId: string): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}admin/coupon/deactivate/${couponId}`, {}, { withCredentials: true })
-      .pipe(map((response: any) => response.data));
+  deactivateCoupon(couponId: string): Observable<ICoupon> {
+    return this.http.patch<CouponResponse>(`${this.baseUrl}admin/coupon/deactivate/${couponId}`, {}, { withCredentials: true })
+      .pipe(map((response: CouponResponse) => response.data));
   }
 
   // Delete a coupon

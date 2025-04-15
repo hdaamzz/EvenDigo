@@ -1,18 +1,137 @@
-{
-  eventTitle: 'title ',
-  eventDescription: 'description',
-  eventType: 'Exhibition',
-  startDate: 2025-03-17T18:30:00.000Z,
-  startTime: 'Wed Mar 12 2025 17:49:06 GMT+0530 (India Standard Time)',
-  endingDate: 2025-03-18T18:30:00.000Z,
-  endingTime: 'Wed Mar 12 2025 15:49:08 GMT+0530 (India Standard Time)',
-  eventVisibility: 'Public',
-  venueName: 'qwwq',
-  venueAddress: 'qqqqw',
-  city: 'Ahmedabad',
-  ageRestriction: true,
-  tickets: [ { type: 'Gold', price: 1299, quantity: 199 } ],
-  user_id: new ObjectId('67b450c51a5ec2a392739ab9'),
-  mainBanner: 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741778576/events/etk7gaaorwdhmqijzszi.jpg',
-  promotionalImage: 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741778576/events/w7ep0vof2jcafzzvkwzg.jpg'
-}
+ // profileRouter.post('/wallet/add-money', authMiddleware, (req, res) => profileController.addMoneyToWallet(req, res));
+// profileRouter.post('/wallet/withdraw-money', authMiddleware, (req, res) => profileController.withdrawMoneyFromWallet(req, res));
+ 
+ 
+   // addMoneyToWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
+  // withdrawMoneyFromWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
+ 
+ // async addMoneyToWallet(req: Request, res: Response): Promise<void> {
+  //   const userId = req.user._id.toString();
+  //   const { amount, reference } = req.body;
+
+  //   const response = await this.profileService.addMoneyToWallet(userId, amount, reference);
+  //   if (response.success) {
+  //     res.status(StatusCode.OK).json(response);
+  //   } else {
+  //     res.status(StatusCode.BAD_REQUEST).json(response);
+  //   }
+  // }
+
+  // async withdrawMoneyFromWallet(req: Request, res: Response): Promise<void> {
+  //   const userId = req.user._id.toString();
+  //   const { amount } = req.body;
+
+  //   const response = await this.profileService.withdrawMoneyFromWallet(userId, amount);
+  //   if (response.success) {
+  //     res.status(StatusCode.OK).json(response);
+  //   } else {
+  //     res.status(StatusCode.BAD_REQUEST).json(response);
+  //   }
+  // }
+
+
+  //profileService
+
+  //wallet section
+  // async addMoneyToWallet(userId:  Schema.Types.ObjectId | string, amount: number, reference?: string): Promise<ServiceResponse<IWallet>> {
+  //   try {
+  //     if (amount <= 0) {
+  //       return {
+  //         success: false,
+  //         message: "Amount must be greater than zero"
+  //       };
+  //     }
+
+  //     let wallet = await this.walletRepository.findWalletById(userId);
+  //     if (!wallet) {
+  //       wallet = await this.walletRepository.createWallet({
+  //         userId,
+  //         walletBalance: 0,
+  //         transactions: []
+  //       });
+  //     }
+
+  //     const updatedWallet = await this.walletRepository.addTransaction(userId, {
+  //       eventName: 'Wallet Top-up',
+  //       eventId: 'wallet_topup',
+  //       amount,
+  //       type: TransactionType.CREDIT,
+  //       description: 'Added money to wallet',
+  //       reference
+  //     });
+
+  //     if (!updatedWallet) {
+  //       return {
+  //         success: false,
+  //         message: "Failed to add money to wallet"
+  //       };
+  //     }
+
+  //     return {
+  //       success: true,
+  //       message: "Money added to wallet successfully",
+  //       data: updatedWallet
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: (error as Error).message || "Failed to add money to wallet"
+  //     };
+  //   }
+  // }
+
+  // async withdrawMoneyFromWallet(userId:  Schema.Types.ObjectId | string, amount: number): Promise<ServiceResponse<IWallet>> {
+  //   try {
+  //     if (amount <= 0) {
+  //       return {
+  //         success: false,
+  //         message: "Amount must be greater than zero"
+  //       };
+  //     }
+
+  //     const wallet = await this.walletRepository.findWalletById(userId);
+  //     if (!wallet) {
+  //       return {
+  //         success: false,
+  //         message: "Wallet not found"
+  //       };
+  //     }
+
+  //     if (wallet.walletBalance < amount) {
+  //       return {
+  //         success: false,
+  //         message: "Insufficient balance"
+  //       };
+  //     }
+
+  //     const updatedWallet = await this.walletRepository.addTransaction(userId, {
+  //       eventName: 'Wallet Withdrawal',
+  //       eventId: 'wallet_withdrawal',
+  //       amount,
+  //       type: TransactionType.WITHDRAWAL,
+  //       description: 'Withdrawn money from wallet'
+  //     });
+
+  //     if (!updatedWallet) {
+  //       return {
+  //         success: false,
+  //         message: "Failed to withdraw money from wallet"
+  //       };
+  //     }
+
+  //     return {
+  //       success: true,
+  //       message: "Money withdrawn from wallet successfully",
+  //       data: updatedWallet
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: (error as Error).message || "Failed to withdraw money from wallet"
+  //     };
+  //   }
+  // }
+
+
+  // addMoneyToWallet(userId: Schema.Types.ObjectId | string, amount: number, reference?: string): Promise<ServiceResponse<IWallet>>;
+  // withdrawMoneyFromWallet(userId: Schema.Types.ObjectId | string, amount: number): Promise<ServiceResponse<IWallet>>;

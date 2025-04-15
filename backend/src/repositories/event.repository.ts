@@ -7,7 +7,7 @@ import { injectable } from 'tsyringe';
 
 @injectable()
 export class DashboardRepository implements IDashboardRepository {
-  async createEvent(eventData: any): Promise<EventDocument> {
+  async createEvent(eventData: Partial<EventDocument>): Promise<EventDocument> {
     const event = new EventModel(eventData);
     return await event.save();
   }
@@ -17,14 +17,14 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async findAllEventWithoutCurrentUser(id: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    return await EventModel.find({ user_id: { $ne: id } }).sort({ createdAt: -1 });
+    return await EventModel.find({ user_id: { $ne: id },status:true }).sort({ createdAt: -1 });
   }
 
   async findEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
     return await EventModel.findById({ _id: eventId }).populate('user_id');
   }
 
-  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: any): Promise<EventDocument | null> {
+  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {
     return await EventModel.findByIdAndUpdate(
       eventId,
       updateData,
@@ -37,6 +37,16 @@ export class DashboardRepository implements IDashboardRepository {
     return !!result;
   }
   async findAllEvents(): Promise<EventDocument[]> {
-    return EventModel.find({}).populate('user_id')
+    return EventModel.find({}).sort({ createdAt: -1 }).populate('user_id')
+  }
+
+  async findAllEventsWithPagination(page: number = 1, limit: number = 9): Promise<EventDocument[]> {
+    const skip = (page - 1) * limit;
+    
+    return EventModel.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('user_id');
   }
 }

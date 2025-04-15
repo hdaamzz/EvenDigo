@@ -1,8 +1,9 @@
-import { IUser, ServiceResponse } from "../../../models/interfaces/auth.interface";
+import { IUser, ServiceResponse, ServiceResponseWithMessage } from "../../../models/interfaces/auth.interface";
 import { inject, injectable } from "tsyringe";
 import { IUsersAdminService } from "../../../../src/services/interfaces/IUsers.admin.service";
 import { IUserRepository } from "../../../../src/repositories/interfaces/IUser.repository";
 import { IVerificationRepository } from "../../../../src/repositories/interfaces/IVerification.repository";
+import { IVerification } from "src/models/interfaces/profile.interface";
 
 
 @injectable()
@@ -33,7 +34,7 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async fetchAllVerificationUsers(): Promise<ServiceResponse<IUser[]>> {
+  async fetchAllVerificationUsers(): Promise<ServiceResponse<IVerification[]>> {
     try {
       const users = await this.varificationRepository.findAllVerificationUsers();
       
@@ -74,7 +75,7 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async blockUser(id:string):Promise<any>{
+  async blockUser(id:string):Promise<ServiceResponseWithMessage>{
     try {
       const user=await this.userRepository.blockUserById(id);
       if(!user){
@@ -94,7 +95,7 @@ export class AdminUsersService implements IUsersAdminService {
       };
     }
   }
-  async unblockUser(id:string):Promise<any>{
+  async unblockUser(id:string):Promise<ServiceResponseWithMessage>{
     try {
       const user=await this.userRepository.unblockUserById(id);
       if(!user){
@@ -115,7 +116,7 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async approveUser(id:string):Promise<any>{
+  async approveUser(id:string):Promise<ServiceResponseWithMessage>{
     try {
       await this.userRepository.approveUserStatusChange(id)
       const requestedUser=await this.varificationRepository.approveUser(id);
@@ -137,7 +138,7 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async rejectUser(id:string):Promise<any>{
+  async rejectUser(id:string):Promise<ServiceResponseWithMessage>{
     try {
       const requestedUser=await this.varificationRepository.rejectUser(id);
       if(!requestedUser){

@@ -1,11 +1,12 @@
-import { IUser, ServiceResponse } from "../../models/interfaces/auth.interface";
+import { IVerification } from "src/models/interfaces/profile.interface";
+import { IUser, ServiceResponse, ServiceResponseWithMessage } from "../../models/interfaces/auth.interface";
 
 export interface IUsersAdminService {
   fetchAllUsers(): Promise<ServiceResponse<IUser[]>>;
-  fetchAllVerificationUsers(): Promise<ServiceResponse<IUser[]>>;
+  fetchAllVerificationUsers(): Promise<ServiceResponse<IVerification[]>>;
   fetchUserById(userId: string): Promise<ServiceResponse<IUser>>;
-  blockUser(id: string): Promise<any>;
-  unblockUser(id: string): Promise<any>;
-  approveUser(id: string): Promise<any>;
-  rejectUser(id: string): Promise<any>;
+  blockUser(id: string): Promise<ServiceResponseWithMessage>;
+  unblockUser(id: string): Promise<ServiceResponseWithMessage>;
+  approveUser(id: string): Promise<ServiceResponseWithMessage>;
+  rejectUser(id: string): Promise<ServiceResponseWithMessage>;
 }

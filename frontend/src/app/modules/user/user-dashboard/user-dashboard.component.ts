@@ -2,7 +2,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select'; 
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -14,10 +14,16 @@ import { UserDashboardService } from '../../../core/services/user/dashboard/user
 import Notiflix from 'notiflix';
 import { dateRangeValidator, futureDateValidator } from '../../../validators/formValidators';
 import { IEvent } from '../../../core/models/event.interface';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, Observable, of, tap } from 'rxjs';
 import { cities } from '../../../helpers/helpers';
 import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
+import { Store } from '@ngrx/store';
+import { AuthState, User } from '../../../core/models/userModel';
+import { selectUser } from '../../../core/store/auth/auth.selectors';
 
+interface AppState {
+  auth: AuthState;
+}
 
 interface TicketItem {
   type: string;
@@ -46,11 +52,21 @@ interface TicketItem {
   ]
 })
 export class UserDashboardComponent implements OnInit {
-  eventList:IEvent[]=[]
+
+  //user credentials
+  user$: Observable<User | null>;
+  currentUser: User | null = null;
+  isUserVerified: boolean = false;
+
+
+  //event list 
+  eventList:IEvent[] | undefined=[]
   eventLoading=false;
   selectedEvent!:IEvent;
   filters: string[] = ["Category", "Type", "Custom", "Filter"];
   isOpen = false;
+
+  //event form 
   eventForm!: FormGroup;
   mainBannerPreview: string | null = null;
   promotionalImagePreview: string | null = null;
@@ -60,8 +76,21 @@ export class UserDashboardComponent implements OnInit {
     { label: 'Workshop', value: 'Workshop' },
     { label: 'Exhibition', value: 'Exhibition' },
     { label: 'Meetup', value: 'Meetup' },
-    { label: 'Party', value: 'Party' }
-  ];  
+    { label: 'Party', value: 'Party' },
+    { label: 'Show', value: 'Show' },
+    { label: 'Webinar', value: 'Webinar' },
+    { label: 'Seminar', value: 'Seminar' },
+    { label: 'Networking Event', value: 'Networking Event' },
+    { label: 'Hackathon', value: 'Hackathon' },
+    { label: 'Launch Event', value: 'Launch Event' },
+    { label: 'Award Ceremony', value: 'Award Ceremony' },
+    { label: 'Sports Event', value: 'Sports Event' },
+    { label: 'Open Mic', value: 'Open Mic' },
+    { label: 'Training Session', value: 'Training Session' },
+    { label: 'Entertainment', value: 'Entertainment' },
+
+  ];
+  
   visibilityOptions = [
     { label: 'Public', value: 'Public' },
     { label: 'Private', value: 'Private' }
@@ -89,22 +118,52 @@ export class UserDashboardComponent implements OnInit {
   loading = false;
   today = new Date();
 
-  showDialog() {
-    this.visible = true;
-  }
+
+  //event success
+  successDialogVisible: boolean = false;
+  createdEvent: IEvent | null = null;
+
 
   constructor(
     private fb: FormBuilder,
     private dashboardService: UserDashboardService,
-    private router: Router,
-  ) {}
+    private store: Store<AppState>
+  ) {
+      this.user$ = this.store.select(selectUser);
+      console.log(this.user$);
+  }
+
 
   ngOnInit(): void {
+    this.user$
+      .pipe(
+        tap(user => {
+          this.currentUser = user;
+          this.isUserVerified = user?.verified || false;
+          console.log('User verified status:', this.isUserVerified);
+        })
+      )
+      .subscribe();
     this.fetchAllEvents();
     this.initForm();
   }
+
   tabChange(tab: string) {
     this.tabSwitch = (tab === 'participated');
+  }
+
+  showDialog() {
+    if (!this.currentUser) {
+      Notiflix.Notify.failure('You must be logged in to create an event');
+      return;
+    }
+    
+    if (!this.isUserVerified) {
+      Notiflix.Notify.info('You Need To Verify Before Creating Events , Update Your Details In Profile Section');
+      return;
+    }
+    
+    this.visible = true;
   }
   
   initForm(): void {
@@ -208,14 +267,11 @@ export class UserDashboardComponent implements OnInit {
  
   submitForm(): void {
     if (this.eventForm.invalid) {
-      // Mark all fields as touched to trigger validation messages
       Object.keys(this.eventForm.controls).forEach(key => {
         this.eventForm.get(key)?.markAsTouched();
       });
       return;
     }
-    
-    
     if (this.ticketsList.length === 0) {
       Notiflix.Notify.info('Please add at least one ticket type');
       return;
@@ -228,18 +284,14 @@ export class UserDashboardComponent implements OnInit {
     
     this.loading = true;
     
-    // Create form data for file uploads
     const formData = new FormData();
     
-    // Add form values
     Object.keys(this.eventForm.value).forEach(key => {
       formData.append(key, this.eventForm.value[key]);
     });
     
-    // Add tickets as JSON string
     formData.append('tickets', JSON.stringify(this.ticketsList));
     
-    // Add files
     if (this.mainBannerFile) {
       formData.append('mainBanner', this.mainBannerFile);
     }
@@ -248,14 +300,24 @@ export class UserDashboardComponent implements OnInit {
       formData.append('promotionalImage', this.promotionalImageFile);
     }
 
-    
     this.dashboardService.createEvent(formData).subscribe({
-      next: (response: void) => {
-        this.loading = false;
-        this.isOpen = false;
-        document.body.classList.remove('overflow-hidden');
+      next: (response) => {
         this.initForm()
-        Notiflix.Notify.success('Event created successfully!')
+        this.loading = false;
+        this.visible = false;
+        this.promotionalImageFile=null;
+        this.promotionalImagePreview=null;
+        this.mainBannerPreview = null;
+        this.mainBannerFile = null
+        this.currentTicketType = '';
+        this.currentTicketPrice= null;
+        this.currentTicketQuantity = 0;
+        this.ticketsList= [];
+        if (response.data) {
+        this.createdEvent = response.data;
+        this.successDialogVisible = true;
+        }
+        Notiflix.Notify.success('Event created successfully!');
       },
       error: (error: any) => {
         this.loading = false;
@@ -288,20 +350,21 @@ export class UserDashboardComponent implements OnInit {
     return Math.min(...event.tickets.map(ticket => ticket.price));
   }
 
-  showEventDetails(id:string){
-    this.dashboardService.getEventById(id).pipe(
-      tap((response) => {
-          this.selectedEvent = response.data;
-          this.displayEventDialog = true;
-          
-      }),
-      catchError((error) => {
-        console.error('Error fetching users:', error);
-        Notiflix.Notify.failure('Error fetching users');
-        return of(null);
-      })
-    ).subscribe();
-  }
+  // showEventDetails(id:string){
+  //   this.dashboardService.getEventById(id).pipe(
+  //     tap((response) => {
+  //       if(response.data){
+  //         this.selectedEvent = response.data;
+  //         this.displayEventDialog = true;
+  //       }
+  //     }),
+  //     catchError((error) => {
+  //       console.error('Error fetching users:', error);
+  //       Notiflix.Notify.failure('Error fetching users');
+  //       return of(null);
+  //     })
+  //   ).subscribe();
+  // }
 
   removeTicketType(index: number) {
     this.ticketsList.splice(index, 1);

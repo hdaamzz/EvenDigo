@@ -32,8 +32,10 @@ export class UserExploreComponent implements OnInit{
     this.eventListLoading = true;
     this.exploreService.getAllEvents().pipe(
       tap((response) => {
-        this.eventList = response.data;
-        this.eventListLoading = false;
+        if(response.data){
+          this.eventList = response.data;
+          this.eventListLoading = false;
+        }
       }),
       catchError((error) => {
         console.error('Error fetching events:', error);

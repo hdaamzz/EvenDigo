@@ -40,7 +40,7 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: UserDashboardService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.showEventDetails(this.id);
@@ -55,16 +55,17 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.dashboardService.getEventById(id).pipe(
       tap((response) => {
-        this.eventData = response.data;
-        this.isLoading = false;
-        // Initialize ticket counts based on available ticket types
-        this.eventData.tickets.forEach((ticket: any) => {
-          const type = ticket.type.toLowerCase();
-          if (!this.ticketCounts[type]) {
-            this.ticketCounts[type] = 0;
-          }
-        });
-        console.log(this.eventData);
+        if (response.data) {
+          this.eventData = response.data;
+          this.isLoading = false;
+          this.eventData.tickets.forEach((ticket: any) => {
+            const type = ticket.type.toLowerCase();
+            if (!this.ticketCounts[type]) {
+              this.ticketCounts[type] = 0;
+            }
+          });
+        }
+
       }),
       catchError((error) => {
         console.error('Error fetching event:', error);
@@ -131,9 +132,9 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
       eventId: this.id,
       eventTitle: this.eventData.eventTitle,
     };
-    // Navigate to checkout page with ticket data
+
     this.router.navigate(['/checkout'], { state: { ticketData: ticketFormData } });
-    this.handleClose(); 
+    this.handleClose();
   }
 
   readonly X = X;

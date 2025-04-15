@@ -7,7 +7,7 @@ interface Ticket {
 }
 
 export interface EventDocument extends Document {
-  user_id: Schema.Types.ObjectId;
+  user_id: Schema.Types.ObjectId ;
   eventTitle: string;
   eventDescription: string;
   eventType: string;
@@ -23,6 +23,7 @@ export interface EventDocument extends Document {
   ageRestriction: boolean;
   mainBanner: string;
   promotionalImage: string;
+  status?:boolean;
   createdAt: Date;
   updatedAt: Date;
 }

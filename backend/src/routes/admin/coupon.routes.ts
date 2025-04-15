@@ -7,7 +7,7 @@ const couponController = container.resolve(CouponController);
 const couponRouter = Router();
 
 // Routes for coupon management
-couponRouter.get('/', (req, res) => couponController.fetchAllCoupons(req, res));
+couponRouter.get('/', (req, res) => couponController.fetchAllCouponsWithPagination(req, res));
 couponRouter.post('/', (req, res) => couponController.createCoupon(req, res));
 couponRouter.put('/:id', (req, res) => couponController.updateCoupon(req, res));
 couponRouter.patch('/active/:id', (req, res) => couponController.activateCoupon(req, res));

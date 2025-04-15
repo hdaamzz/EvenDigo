@@ -17,12 +17,25 @@ export interface IEvent {
     endingTime: string;
     eventVisibility: string;
     venueName: string;
-    venueAddress: string;
+    venueAddress?: string;
     city: string;
     tickets: Ticket[];
     ageRestriction: boolean;
     mainBanner: string;
-    promotionalImage: string;
+    promotionalImage?: string;
+    status?:boolean
     createdAt: Date;
     updatedAt: Date;
   }
+
+export interface EventResponse{
+  success:boolean;
+  error?:string;
+  data?:IEvent
+}
+
+export interface AllEventResponse{
+  success:boolean;
+  error?:string;
+  data?:IEvent[]
+}

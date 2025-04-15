@@ -10,7 +10,7 @@ import { injectable } from "tsyringe";
 export class UserRepository implements IUserRepository {
 
 
-    async findByIdWithoutPassword(id: Schema.Types.ObjectId | string): Promise<IUser | null> {
+    async findUserByIdWithoutPassword(id: Schema.Types.ObjectId | string): Promise<IUser | null> {
         return UserModel.findById({ id }, { password: 0 });
     }
 
@@ -20,7 +20,7 @@ export class UserRepository implements IUserRepository {
             const savedUser = await user.save();
             return savedUser;
         } catch (error: unknown) {
-            if (error instanceof MongoError && (error as any).code === 11000) {
+            if (error instanceof MongoError && (error).code === 11000) {
                 throw new Error('Email already exists');
             }
             console.error("Error while creating user:", error);
@@ -53,17 +53,17 @@ export class UserRepository implements IUserRepository {
 
 
     async findAllUsers(): Promise<IUser[]> {
-        return UserModel.find({ role: 'user' })
+        return UserModel.find({ role: 'user' }).sort({ createdAt: -1 })
     }
 
-    async blockUserById(userId: Schema.Types.ObjectId | string): Promise<any> {
+    async blockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
         return UserModel.findByIdAndUpdate(
             userId,
             { $set: { status: "blocked" } },
             { new: true }
         );
     }
-    async unblockUserById(userId: Schema.Types.ObjectId | string): Promise<any> {
+    async unblockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
         return UserModel.findByIdAndUpdate(
             userId,
             { $set: { status: "active" } },

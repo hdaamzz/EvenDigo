@@ -5,9 +5,8 @@ import * as admin from 'firebase-admin';
 import * as jwt from 'jsonwebtoken';
 import { IAuthController } from '../../../../src/controllers/interfaces/IAuth.controller';
 import { inject, injectable } from 'tsyringe';
-// import { TYPES } from '../../../../src/types/types';
-// import { IAuthService } from '../../../../src/services/interfaces/IAuth.service';
 import { AuthService } from '../../../../src/services/implementation/user/auth.service';
+import StatusCode from '../../../../src/types/statuscode';
 
 interface AuthenticatedRequest extends Request {
   user?: IUser;
@@ -28,10 +27,11 @@ export class AuthController implements IAuthController {
         email,
         password,
       });
-
-      res.status(200).json(result);
+      // console.log("sendOTP,result",result);
+      
+      res.status(StatusCode.OK).json(result);
     } catch (error) {
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Failed to send OTP'
       });
@@ -45,9 +45,9 @@ export class AuthController implements IAuthController {
 
       const result = await this.authService.verifyOTP(email, otp);
 
-      res.status(result.success ? 200 : 400).json(result);
+      res.status(result.success ? StatusCode.OK : StatusCode.BAD_REQUEST).json(result);
     } catch (error) {
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Failed to verify OTP'
       });
@@ -58,7 +58,7 @@ export class AuthController implements IAuthController {
     try {
       const loginData: ILogin = req.body;
       if (!loginData.email || !loginData.password) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           success: false,
           message: 'Email and password are required'
         });
@@ -67,7 +67,7 @@ export class AuthController implements IAuthController {
 
       const result = await this.authService.login(loginData);
       if (!result.success) {
-        res.status(401).json(result);
+        res.status(StatusCode.UNAUTHORIZED).json(result);
         return;
       }
 
@@ -76,16 +76,17 @@ export class AuthController implements IAuthController {
 
       res.cookie('session', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true, 
+        sameSite: 'none', 
         maxAge: 24 * 60 * 60 * 1000,
-        domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined
+        domain: process.env.NODE_ENV === 'production' ? '' : 'localhost'
       });
+      
 
-      res.status(200).json(result);
+      res.status(StatusCode.OK).json(result);
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Internal server error'
       });
@@ -99,14 +100,14 @@ export class AuthController implements IAuthController {
       const result = await this.authService.sendForgotPasswordEmail(email);
       
       if (result.success) {
-        res.status(200).json(result);
+        res.status(StatusCode.OK).json(result);
       } else {
-        res.status(400).json(result);
+        res.status(StatusCode.BAD_REQUEST).json(result);
       }
       
     } catch (error) {
       console.error('Forgot password error:', error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Internal server error'
       });
@@ -121,14 +122,14 @@ export class AuthController implements IAuthController {
       const result = await this.authService.resetPassword(email, token, newPassword);
       
       if (result.success) {
-        res.status(200).json(result);
+        res.status(StatusCode.OK).json(result);
       } else {
-        res.status(400).json(result);
+        res.status(StatusCode.BAD_REQUEST).json(result);
       }
       
     } catch (error) {
       console.error('Reset password error:', error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Internal server error'
       });
@@ -141,7 +142,7 @@ export class AuthController implements IAuthController {
     try {
       if (!req.user) {
 
-        res.status(401).json({
+        res.status(StatusCode.UNAUTHORIZED).json({
           isAuthenticated: false,
           message: 'User not authenticated'
         });
@@ -150,7 +151,7 @@ export class AuthController implements IAuthController {
 
       let currentUser = await this.authService.findUserByEmail(req.user.email);
 
-      res.status(200).json({
+      res.status(StatusCode.OK).json({
         isAuthenticated: true,
         user: req.user,
         token: req.cookies.session,
@@ -158,7 +159,7 @@ export class AuthController implements IAuthController {
       });
     } catch (error) {
       console.error('Auth check  error:', error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Authentication check failed. Please try again later.'
       });
@@ -172,7 +173,7 @@ export class AuthController implements IAuthController {
 
       // Input validation
       if (!idToken || !name) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           success: false,
           message: 'ID token and name are required'
         });
@@ -183,7 +184,7 @@ export class AuthController implements IAuthController {
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
       if (!decodedToken.email) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           success: false,
           message: 'Email is required for authentication'
         });
@@ -238,14 +239,14 @@ export class AuthController implements IAuthController {
       // Exclude sensitive data from response
       const { firebaseUid, createdAt, updatedAt, ...safeUser } = user;
 
-      res.status(200).json({
+      res.status(StatusCode.OK).json({
         success: true,
         message: 'Authentication successful',
         user: safeUser
       });
     } catch (error) {
       console.error('Firebase authentication error:', error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Authentication failed. Please try again later.'
       });
@@ -255,10 +256,10 @@ export class AuthController implements IAuthController {
   isLogout = (_req: Request, res: Response): void => {
     try {
       res.clearCookie('session');
-      res.status(200).json({ success: true });
+      res.status(StatusCode.OK).json({ success: true });
     } catch (error) {
       console.error('Logout error:', error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Failed to logout'
       });

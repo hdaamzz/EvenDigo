@@ -3,6 +3,8 @@ import { IUser, ServiceResponse } from "../../../models/interfaces/auth.interfac
 import { inject, injectable } from "tsyringe";
 import { IUsersAdminController } from "../../../../src/controllers/interfaces/IUsers.admin.controller";
 import { IUsersAdminService } from "../../../../src/services/interfaces/IUsers.admin.service";
+import StatusCode from "../../../../src/types/statuscode";
+import { IVerification } from "src/models/interfaces/profile.interface";
 
 
 @injectable()
@@ -15,19 +17,19 @@ export class AdminUsersController implements IUsersAdminController{
   async fetchAllUsers(_req: Request, res: Response): Promise<void> {
     const response: ServiceResponse<IUser[]> = await this.adminUsersService.fetchAllUsers();
     if (response.success) {
-      res.status(200).json(response.data);
+      res.status(StatusCode.OK).json(response.data);
     } else {
-      res.status(500).json(response);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
     }
 
 
   }
   async fetchAllRequestedUsers(_req: Request, res: Response): Promise<void> {
-    const response: ServiceResponse<IUser[]> = await this.adminUsersService.fetchAllVerificationUsers();
+    const response: ServiceResponse<IVerification[]> = await this.adminUsersService.fetchAllVerificationUsers();
     if (response.success) {
-      res.status(200).json(response.data);
+      res.status(StatusCode.OK).json(response.data);
     } else {
-      res.status(500).json(response);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
     }
 
 
@@ -38,21 +40,20 @@ export class AdminUsersController implements IUsersAdminController{
     
     const response: ServiceResponse<IUser> = await this.adminUsersService.fetchUserById(userId);
     if (response.success) {
-      res.status(200).json(response.data);
+      res.status(StatusCode.OK).json(response.data);
     } else {
-      res.status(500).json(response);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
     }
   }
 
   async blockAndUnblockUser(req:Request, res:Response):Promise<void>{
     const{id}=req.body;
-    console.log(id);
     
     const response=await this.adminUsersService.blockUser(id)
     if(response.success){
-      res.status(200).json(response)
+      res.status(StatusCode.OK).json(response)
     }else{
-      res.status(500).json(response)
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response)
     }
   }
 
@@ -61,9 +62,9 @@ export class AdminUsersController implements IUsersAdminController{
     const{id}=req.body;    
     const response=await this.adminUsersService.unblockUser(id)
     if(response.success){
-      res.status(200).json(response)
+      res.status(StatusCode.OK).json(response)
     }else{
-      res.status(500).json(response)
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response)
     }
   }
   async approveUser(req:Request, res:Response):Promise<void>{
@@ -71,9 +72,9 @@ export class AdminUsersController implements IUsersAdminController{
     
     const response=await this.adminUsersService.approveUser(id)
     if(response.success){
-      res.status(200).json(response)
+      res.status(StatusCode.OK).json(response)
     }else{
-      res.status(500).json(response)
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response)
     }
   }
 
@@ -82,9 +83,9 @@ export class AdminUsersController implements IUsersAdminController{
     
     const response=await this.adminUsersService.rejectUser(id)
     if(response.success){
-      res.status(200).json(response)
+      res.status(StatusCode.OK).json(response)
     }else{
-      res.status(500).json(response)
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response)
     }
   }
 

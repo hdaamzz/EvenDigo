@@ -4,9 +4,9 @@ import { UserFooterComponent } from '../../../shared/user-footer/user-footer.com
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../../core/services/user/auth.service';
 import Notiflix from 'notiflix';
 import { passwordValidator } from '../../../validators/formValidators';
+import { AuthService } from '../../../core/services/user/auth/auth.service';
 
 @Component({
   selector: 'app-reset-password',

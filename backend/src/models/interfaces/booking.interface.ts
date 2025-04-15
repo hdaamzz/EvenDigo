@@ -10,6 +10,7 @@ export interface ITicket {
     totalPrice: number;    
     uniqueId: string;       
     uniqueQrCode: string;   
+    status?:string;
 }
 
 export interface IBooking extends Document {
@@ -22,6 +23,8 @@ export interface IBooking extends Document {
     discount?: number;
     coupon?: string | null;
     stripeSessionId?: string; 
+    paymentStatus?:string;
+    
   }
 
   export interface IBookingResponce extends Document {
@@ -34,4 +37,6 @@ export interface IBooking extends Document {
     discount?: number;
     coupon?: string | null;
     stripeSessionId?: string; 
+    paymentStatus:string;
+
   }

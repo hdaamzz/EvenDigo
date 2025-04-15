@@ -1,4 +1,5 @@
 import { Schema } from "mongoose";
+import { IBooking } from "./booking.interface";
 
 export interface IUser {
   _id?: Schema.Types.ObjectId | string;
@@ -41,6 +42,16 @@ export interface ServiceResponse<T> {
   success: boolean;
   message: string;
   data?: T;
+}
+export interface ServiceResponseWithMessage {
+  success: boolean;
+  message: string;
+}
+
+export interface ServiceResponseWithError {
+  success: boolean;
+  error?:string;
+  data?:IBooking
 }
 
 export interface OTPVerificationData {

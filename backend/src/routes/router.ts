@@ -12,6 +12,7 @@ import adminAuthRouter from './admin/auth.routes';
 
 const router = express.Router();
 
+
 router.use(express.json());
 
 router.use('/user/auth',authRouter);

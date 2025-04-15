@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { AuthState, User } from '../../../core/models/userModel';
+import { AuthState } from '../../../core/models/userModel';
 import { Store } from '@ngrx/store';
 import { selectUser } from '../../../core/store/auth/auth.selectors';
-import { UserProfileService } from '../../../core/services/user/user.profile.service';
+import { UserProfileService } from '../../../core/services/user/profile/user.profile.service';
 interface AppState {
   auth: AuthState;
 }
@@ -27,7 +27,8 @@ export class ProfileComponent implements OnInit, OnDestroy{
   
   navItems = [
     { icon: 'fa-user', label: 'Profile', path: '/profile/details', exact: true },
-    { icon: 'fa-code-branch', label: 'My events', path: '/profile/events' },
+    { icon: 'fa-code-branch', label: 'My Events', path: '/profile/events' },
+    { icon: 'fa-ticket-alt', label: 'My Bookings', path: '/profile/bookings' },
     { icon: 'fa-wallet', label: 'Wallet', path: '/profile/wallet' }
   ];
 

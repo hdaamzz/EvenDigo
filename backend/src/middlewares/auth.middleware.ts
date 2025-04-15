@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 // import { AuthService } from '../services/implementation/user/auth.service';
 import { UserModel } from '../../src/models/UserModel';
+import Stripe from 'stripe';
+import StatusCode from '../../src/types/statuscode';
 
 // const authService = new AuthService();
 
@@ -16,7 +18,7 @@ export const authenticateToken = (
 ): void => {
   const token = req.cookies.session;  
   if (!token) {
-    res.status(401).json({
+    res.status(StatusCode.UNAUTHORIZED).json({
       isAuthenticated: false,
       message: 'No authentication token provided'
     });
@@ -31,7 +33,7 @@ export const authenticateToken = (
     next();
   } catch (error) {
     console.error('Token verification failed:', error);
-    res.status(401).json({
+    res.status(StatusCode.UNAUTHORIZED).json({
       isAuthenticated: false,
       message: 'Invalid authentication token'
     });
@@ -41,7 +43,7 @@ export const authenticateToken = (
 export function validateFirebaseSignInRequest(req: Request, res: Response, next: NextFunction): void {
   const { idToken } = req.body;
   if (!idToken) {
-    res.status(400).json({
+    res.status(StatusCode.BAD_REQUEST).json({
       success: false,
       message: 'ID token is required'
     });
@@ -53,7 +55,7 @@ export function validateFirebaseSignInRequest(req: Request, res: Response, next:
 // export async function validateSession(req: Request, res: Response, next: NextFunction): Promise<void> {
 //   const token = req.cookies.session;
 //   if (!token) {
-//     res.status(401).json({
+//     res.status(StatusCode.UNAUTHORIZED).json({
 //       success: false,
 //       message: 'No session found'
 //     });
@@ -63,7 +65,7 @@ export function validateFirebaseSignInRequest(req: Request, res: Response, next:
 //   try {
 //     const user = await authService.validateSession(token);
 //     if (!user) {
-//       res.status(401).json({
+//       res.status(StatusCode.UNAUTHORIZED).json({
 //         success: false,
 //         message: 'Invalid session'
 //       });
@@ -74,7 +76,7 @@ export function validateFirebaseSignInRequest(req: Request, res: Response, next:
 //     next(); 
 //   } catch (error) {
 //     console.error('Session validation error:', error);
-//     res.status(500).json({
+//     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
 //       success: false,
 //       message: 'Internal server error'
 //     });
@@ -86,6 +88,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: any;
+      stripeEvent?: Stripe.Event;
     }
   }
 }
@@ -96,7 +99,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const token = req.cookies.session;
     
     if (!token) {
-      return res.status(401).json({ success: false, error: 'No authentication token, access denied' });
+      return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'No authentication token, access denied' });
     }
     
     // Verify token
@@ -106,18 +109,18 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     // Find user by id
     const user = await UserModel.findById(decoded.userId).select('-password');    
     if (!user) {
-      return res.status(401).json({ success: false, error: 'Token is valid, but user not found' });
+      return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user not found' });
     }
     if (user.status=='blocked') {
-      return res.status(401).json({ success: false, error: 'Token is valid, but user has blocked' });
+      return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user has blocked' });
     }
   
     
-    // Add user to request
+    // Adding user to request
     req.user = user;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    res.status(401).json({ success: false, error: 'Authentication failed' });
+    res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Authentication failed' });
   }
 };

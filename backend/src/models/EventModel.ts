@@ -18,7 +18,6 @@ const eventSchema = new Schema({
     },
     eventType: {
       type: String,
-      enum: ['Conference', 'Concert', 'Workshop', 'Exhibition', 'Meetup', 'Party'],
       required: true
     },
     // Schedule
@@ -82,6 +81,10 @@ const eventSchema = new Schema({
     },
     promotionalImage: {
       type: String
+    },
+    status: {
+      type: Boolean,
+      default:true
     }
   }, {
     timestamps: true,

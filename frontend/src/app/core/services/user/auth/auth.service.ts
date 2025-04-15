@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { ILogin, IRegister, User } from '../../models/userModel';
 import { catchError, Observable, of } from 'rxjs';
+import { ILogin, IRegister, User } from '../../../models/userModel';
+import { environment } from '../../../../environments/environment';
+import { CommonResponse } from '../../../models/user.auth.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,8 @@ export class AuthService {
   private baseUrl = environment.baseUrl;
   constructor(private http: HttpClient) { }
 
-  userRegister(userData: IRegister): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/auth/send-otp`, userData).pipe(
+  userRegister(userData: IRegister): Observable<CommonResponse> {
+    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/send-otp`, userData).pipe(
       catchError((error) => {
         console.error('Registration error:', error);
         return of({ success: false, message: 'Registration failed. Please try again.' });
@@ -20,8 +21,8 @@ export class AuthService {
     );
   }
 
-  verifyOTP(email: string, otp: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/auth/verify-otp`, { email, otp }).pipe(
+  verifyOTP(email: string, otp: string): Observable<CommonResponse> {
+    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/verify-otp`, { email, otp }).pipe(
       catchError((error) => {
         console.error('OTP verification error:', error);
         return of({ success: false, message: 'OTP verification failed. Please try again.' });
@@ -47,13 +48,6 @@ export class AuthService {
     );
   }
 
-  checkUserRole(): Observable<any> {
-    return this.http.get(
-      `${this.baseUrl}user/auth/role`,
-      { withCredentials: true }
-    );
-  }
-
 
   loginWithFirebase(idToken: string, name?: string | null, email?: string | null, profileImg?: string | null): Observable<any> {
     const payload = {
@@ -69,15 +63,15 @@ export class AuthService {
     });
   }
 
-  forgotPassword(formData:any):Observable<any>{
-    return this.http.post(`${this.baseUrl}user/auth/forgot-password`,formData)
+  forgotPassword(formData: {email:string}): Observable<CommonResponse> {
+    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/forgot-password`, formData)
   }
-  resetPassword(resetData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/auth/reset-password`, resetData);
+  resetPassword(resetData: {email:string,newPassword:string,token:string}): Observable<CommonResponse> {
+    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/reset-password`, resetData);
   }
 
-  logout(): Observable<any> {
-    return this.http.get(`${this.baseUrl}user/auth/logout`, {
+  logout(): Observable<CommonResponse> {
+    return this.http.get<CommonResponse>(`${this.baseUrl}user/auth/logout`, {
       withCredentials: true,
     }).pipe(
       catchError((error) => {

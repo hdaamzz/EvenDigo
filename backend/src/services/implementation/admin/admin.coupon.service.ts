@@ -13,9 +13,11 @@ export class CouponService implements ICouponAdminService{
     async getAllCoupons(): Promise<ICoupon[]> {
         return this.couponRepository.findAllCoupons();
     }
+    async getAllCouponsWithPagination(page: number = 1, limit: number = 10): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}> {
+        return this.couponRepository.findAllCouponsPagination(page, limit);
+    }
 
     async createCoupon(couponData: Partial<ICoupon>): Promise<ICoupon> {
-        // Add validation if needed (e.g., check if couponCode is unique)
         const existingCoupon = await this.couponRepository.findCouponByCode(couponData.couponCode!);
         if (existingCoupon) {
             throw new Error('Coupon code already exists');

@@ -9,7 +9,7 @@ import { inject, injectable } from 'tsyringe';
     @inject("BookingModel") private bookingModel: Model<IBooking>
   ) {}
 
-  async create(bookingData: Partial<IBooking>): Promise<IBooking> {
+  async createBooking(bookingData: Partial<IBooking>): Promise<IBooking> {
     try {
       const booking = new this.bookingModel(bookingData);
       return await booking.save();
@@ -18,7 +18,7 @@ import { inject, injectable } from 'tsyringe';
     }
   }
 
-  async findById(bookingId: Schema.Types.ObjectId | string): Promise<IBooking | null> {
+  async findBookingById(bookingId: Schema.Types.ObjectId | string): Promise<IBooking | null> {
     try {
       return await this.bookingModel.findOne({ bookingId }).exec();
     } catch (error) {
@@ -26,7 +26,7 @@ import { inject, injectable } from 'tsyringe';
     }
   }
 
-  async update(bookingId: Schema.Types.ObjectId | string, updateData: Partial<IBooking>): Promise<IBooking | null> {
+  async updateBookingDetails(bookingId: Schema.Types.ObjectId | string, updateData: Partial<IBooking>): Promise<IBooking | null> {
     try {
       return await this.bookingModel.findOneAndUpdate(
         { bookingId },
@@ -37,12 +37,10 @@ import { inject, injectable } from 'tsyringe';
       throw new Error(`Failed to update booking: ${(error as Error).message}`);
     }
   }
-  async findByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
+  async findBookingByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
     try {
-      console.log('Fetching bookings for user:', userId);
-
       const bookings = await this.bookingModel
-        .find({ userId })
+        .find({ userId,paymentStatus:"Completed" }).sort({ createdAt: -1 })
         .populate('userId')
         .populate('eventId')
         .populate('eventId.user_id')
@@ -55,12 +53,40 @@ import { inject, injectable } from 'tsyringe';
       throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
     }
   }
-  async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<any> {
+  async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> {
     return this.bookingModel.findByIdAndUpdate(
       bookingId,
       { status },
       { new: true }
     ).exec();
+  }
+  async findByStripeSessionId(sessionId: string): Promise<IBooking | null> {
+    const booking = await this.bookingModel.findOne({ stripeSessionId: sessionId })
+    .populate('userId')
+    .populate('eventId')
+    .populate('eventId.user_id')
+    .exec();    
+    return booking;
+  }
+  
+  async updateTicketStatus(
+    bookingId: string,
+    ticketUniqueId: string,
+    status: string
+  ): Promise<IBooking |null> {
+    return this.bookingModel.findOneAndUpdate(
+      { 
+        bookingId,
+        'tickets.uniqueId': ticketUniqueId 
+      },
+      { 
+        $set: { 'tickets.$.status': status } 
+      },
+      { new: true }
+    )
+    .populate('eventId')
+    .populate('userId')
+    .exec();
   }
 }
 

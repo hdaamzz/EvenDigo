@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { UserFooterComponent } from '../../../shared/user-footer/user-footer.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../../core/services/user/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { emailValidator, passwordValidator, spacesValidator } from '../../../validators/formValidators';
 import { AsyncPipe, CommonModule } from '@angular/common';
@@ -12,6 +11,7 @@ import { AuthActions } from '../../../core/store/auth/auth.actions';
 import { Observable } from 'rxjs';
 import { GoogleAuthService } from '../../../core/services/user/googleAuth/google-auth.service';
 import Notiflix from 'notiflix';
+import { AuthService } from '../../../core/services/user/auth/auth.service';
 
 @Component({
   selector: 'app-login',

@@ -10,8 +10,8 @@ export interface IProfileController {
   verificationRequestDetails(req: Request, res: Response): Promise<void>;
   uploadProfileImage(req: FileRequest & AuthenticatedRequest, res: Response): Promise<void>;
   getUserEvents(req: AuthenticatedRequest, res: Response): Promise<void>;
-  cancelTicket(req: AuthenticatedRequest, res: Response): Promise<void>;
+  getUserBookings(req: AuthenticatedRequest, res: Response): Promise<void>;
+  cancelTicket(req: Request, res: Response): Promise<void>;
   getUserWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
-  addMoneyToWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
-  withdrawMoneyFromWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
+
 }

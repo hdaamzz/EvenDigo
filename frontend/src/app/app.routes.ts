@@ -15,6 +15,7 @@ import { UserExploreComponent } from './modules/user/user-explore/user-explore.c
 import { UserCheckoutComponent } from './modules/user/user-checkout/user-checkout.component';
 import { PaymentSuccessComponent } from './modules/user/user-checkout/payment-success/payment-success.component';
 import { ProfileWalletComponent } from './modules/user/profile/profile.wallet/profile.wallet.component';
+import { ProfileBookingsComponent } from './modules/user/profile/profile.bookings/profile.bookings.component';
 
 export const routes: Routes = [
     //user - side 
@@ -50,6 +51,10 @@ export const routes: Routes = [
             {
                 path: 'details',
                 component: ProfileDetailsComponent
+            },
+            {
+                path: 'bookings',
+                component: ProfileBookingsComponent
             },
             {
                 path: 'events',
