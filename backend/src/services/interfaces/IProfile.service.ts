@@ -16,6 +16,7 @@ export interface IProfileService {
   uploadImage(buffer: Buffer, folder?: string): Promise<CloudinaryUploadResult>;
   deleteImage(publicId: string): Promise<any>;
   getUserEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
+  getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null>;
   getUserBookings(userId: Schema.Types.ObjectId | string): Promise<IBooking[]>;
   getWalletDetails(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IWallet>>;
   cancelTicket(userId: Schema.Types.ObjectId | string,bookingId: string,ticketUniqueId: string): Promise<ProfileServiceResponse<IBooking>> ;

@@ -141,3 +141,36 @@ export function otpPattern(): ValidatorFn {
   }
 
   
+  export function positiveNumberValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null; 
+      }
+      
+      const isValid = /^\d+$/.test(control.value) && parseInt(control.value, 10) > 0;
+      return isValid ? null : { positiveNumber: true };
+    };
+  }
+  
+  export function titleValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null; 
+      }
+      
+      const isValid = /^[a-zA-Z0-9\s\-_]{3,50}$/.test(control.value);
+      return isValid ? null : { invalidTitle: true };
+    };
+  }
+  
+  // Custom validator function to check if threshold is within reasonable limits
+  export function thresholdRangeValidator(min: number, max: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null; 
+      }
+      
+      const value = parseInt(control.value, 10);
+      return (value >= min && value <= max) ? null : { thresholdRange: { min, max } };
+    };
+  }

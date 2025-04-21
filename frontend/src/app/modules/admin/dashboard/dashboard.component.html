@@ -59,7 +59,7 @@
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-gift w-5 text-center"></i> Coupons
         </div>
-        <div
+        <div (click)="showAchievements(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-trophy w-5 text-center"></i> Achievements
         </div>
@@ -92,6 +92,8 @@
             <app-events-list></app-events-list>
         }@else if (couponList) {
             <app-coupon-list></app-coupon-list>
+        }@else if(achievements){
+            <app-achievements></app-achievements>
         }
     </div>
 </div>

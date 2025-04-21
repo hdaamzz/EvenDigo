@@ -17,6 +17,7 @@ profileRouter.post('/verification-request',(req,res)=>profileController.sendVeri
 profileRouter.get('/verification-request/:id',(req,res)=>profileController.verificationRequestDetails(req,res));
 profileRouter.post('/image',authMiddleware,upload.single('profileImage'),(req, res) => profileController.uploadProfileImage(req as FileRequest, res));
 profileRouter.get('/events', authMiddleware, (req, res) => profileController.getUserEvents(req, res));
+profileRouter.get('/events/:eventId', authMiddleware, (req, res) => profileController.getEvent(req, res));
 profileRouter.get('/bookings', authMiddleware, (req, res) => profileController.getUserBookings(req, res));
 profileRouter.post('/events/cancel', authMiddleware, (req, res) => profileController.cancelTicket(req, res));
 profileRouter.get('/wallet', authMiddleware, (req, res) => profileController.getUserWallet(req, res));

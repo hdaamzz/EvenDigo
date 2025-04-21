@@ -160,6 +160,16 @@ export class ProfileService implements IProfileService{
     }
   }
 
+  async getEvent(eventId:  Schema.Types.ObjectId | string): Promise<EventDocument | null> {
+    try {
+      const events = await this.dashboardRespository.findEventById(eventId);
+
+      return events;
+    } catch (error) {
+      throw new Error(`Failed to fetch user bookings: ${(error as Error).message}`);
+    }
+  }
+
 
   //Booking section
   async getUserBookings(userId:  Schema.Types.ObjectId | string): Promise<IBooking[]> {

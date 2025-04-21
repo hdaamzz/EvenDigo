@@ -7,10 +7,11 @@ import { AuthActions } from '../../../core/store/auth/auth.actions';
 import Notiflix from 'notiflix';
 import { EventsListComponent } from "./events-list/events-list.component";
 import { CouponListComponent } from './coupon-list/coupon-list.component';
+import { AchievementsComponent } from "./achievements/achievements.component";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DashboardHomeComponent, UsersListComponent, CommonModule, EventsListComponent,CouponListComponent],
+  imports: [DashboardHomeComponent, UsersListComponent, CommonModule, EventsListComponent, CouponListComponent, AchievementsComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -20,6 +21,8 @@ export class DashboardComponent implements OnInit {
   eventList: boolean = false;
   couponList:boolean =false;
   sidebarOpen: boolean = false;
+  achievements:boolean = false;
+
 
   constructor(private store: Store) { }
 
@@ -52,12 +55,23 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  showAchievements(): void {
+    if (!this.achievements) {
+      this.eventList=false
+      this.userList = false;
+      this.couponList = false;
+      this.dashBoard = false;
+      this.achievements=true;
+    }
+  }
+
   showUserList(): void {
     if (!this.userList) {
       this.dashBoard = false;
       this.userList = true;
       this.eventList=false;
       this.couponList = false;
+      this.achievements=false;
     }
   }
 
@@ -67,6 +81,7 @@ export class DashboardComponent implements OnInit {
       this.userList = false;
       this.eventList=true;
       this.couponList=false;
+      this.achievements=false;
     }
   }
   showCouponList(): void {
@@ -75,6 +90,8 @@ export class DashboardComponent implements OnInit {
       this.dashBoard = false;
       this.userList = false;
       this.eventList=false;
+      this.achievements=false;
+
     }
   }
   logout(): void {
