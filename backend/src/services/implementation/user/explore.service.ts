@@ -12,6 +12,9 @@ type PDFDocument = PDFKit.PDFDocument;
 import QRCode from 'qrcode';
 import { IUserRepository } from "src/repositories/interfaces/IUser.repository";
 import { IUser } from "src/models/interfaces/auth.interface";
+import { IWalletRepository } from "src/repositories/interfaces/IWallet.repository";
+import { IWallet, TransactionType } from "../../../../src/models/interfaces/wallet.interface";
+import { error } from "console";
 
 
 @injectable()
@@ -22,6 +25,7 @@ export class ExploreService implements IExploreService{
     @inject("DashboardRepository") private dashboardRepository :IDashboardRepository,
     @inject("BookingRepository") private bookingRepository:IBookingRepository,
     @inject("UserRepository") private userRepository:IUserRepository,
+    @inject("WalletRepository") private walletRepository:IWalletRepository
   ) {
     const stripeKey = process.env.STRIPE_KEY;
     if (!stripeKey) {
@@ -30,14 +34,14 @@ export class ExploreService implements IExploreService{
     this.stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' });
   }
 
-  async getEvents(id: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    if (!id) throw new Error('ID is required');
-    return this.dashboardRepository.findAllEventWithoutCurrentUser(id);
+  async getEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    if (!userId) throw new Error('ID is required');
+    return this.dashboardRepository.findAllEventWithoutCurrentUser(userId);
   }
   
-  async getEvent(id: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
-    if (!id) throw new Error('ID is required');
-    return this.dashboardRepository.findEventById(id);
+  async getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
+    if (!eventId) throw new Error('ID is required');
+    return this.dashboardRepository.findEventById(eventId);
   }
 
   async booking(
@@ -51,17 +55,14 @@ export class ExploreService implements IExploreService{
     discount: number
   ): Promise<Stripe.Checkout.Session> {
     try {
-      // Validation
       if (!eventId || !userId) throw new Error('Event ID is required');
       if (!Object.keys(tickets).length) throw new Error('At least one ticket is required');
       if (amount <= 0) throw new Error('Amount must be greater than 0');
       if (!successUrl || !cancelUrl) throw new Error('Success and cancel URLs are required');
 
-      // Prepare ticket details for storage
       
       let genaratedBookingId=`BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
       const ticketDetails = await this.prepareTicketDetails(eventId, tickets,genaratedBookingId);
-      // Create Stripe session
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -82,7 +83,6 @@ export class ExploreService implements IExploreService{
         metadata: { userId: userId.toString(), eventId, couponCode: couponCode || '' },
       });
 
-      // Save booking
       await this.bookingRepository.createBooking({
         bookingId: genaratedBookingId,
         userId,
@@ -102,7 +102,93 @@ export class ExploreService implements IExploreService{
     }
   }
 
-  // New method to construct Stripe event from webhook
+  async walletBooking(
+    eventId: string,
+    tickets: { [type: string]: number },
+    amount: number,
+    userId: string,
+    couponCode: string | null,
+    discount: number
+  ): Promise<IBooking> {
+    try {
+      const wallet: IWallet | null = await this.walletRepository.findWalletById(userId);
+      
+      if (!wallet) {
+        throw new Error('Wallet not found for this user');
+      }
+      
+      if (wallet.walletBalance < amount) {
+        throw new Error('Insufficient wallet balance');
+      }
+      
+      if (!eventId || !userId) throw new Error('Event ID and User ID are required');
+      if (!Object.keys(tickets).length) throw new Error('At least one ticket is required');
+      if (amount <= 0) throw new Error('Amount must be greater than 0');
+      
+      const generatedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
+      
+      const ticketDetails = await this.prepareTicketDetails(eventId, tickets, generatedBookingId);
+      
+      const event = await this.dashboardRepository.findEventById(eventId);
+      if (!event) {
+        throw new Error('Event not found');
+      }
+      
+      const booking: Partial<IBooking> = {
+        bookingId: generatedBookingId,
+        userId,
+        eventId,
+        tickets: ticketDetails,
+        totalAmount: amount,
+        paymentType: 'wallet',
+        discount,
+        coupon: couponCode,
+        paymentStatus: "Pending",
+      };
+      
+      return booking as IBooking;
+    } catch (error) {
+      console.error('Wallet booking error:', error);
+      throw new Error(`Wallet booking failed: ${(error as Error).message}`);
+    }
+  }
+
+  async processWalletPayment(bookingData: Partial<IBooking>): Promise<IBooking> {
+    try {
+      const booking = await this.bookingRepository.createBooking({
+        ...bookingData,
+        paymentStatus: 'Completed'
+      });
+      if(!bookingData.userId || !bookingData.tickets){
+        throw error
+      }
+
+      
+
+      await this.walletRepository.addTransaction(
+        bookingData.userId,
+        {
+          eventId: bookingData.eventId,
+          amount: bookingData.totalAmount,
+          type: TransactionType.DEBIT,
+          description: `Payment for booking #${bookingData.bookingId}`,
+          metadata: {
+            bookingId: bookingData.bookingId,
+            tickets: bookingData.tickets.map((ticket: ITicket) => ({
+              type: ticket.type,
+              quantity: ticket.quantity
+            }))
+          }
+        }
+      );
+      
+      return booking;
+    } catch (error) {
+      console.error('Error processing wallet payment:', error);
+      throw new Error(`Failed to process wallet payment: ${(error as Error).message}`);
+    }
+  }
+
   constructStripeEvent(payload: Buffer, signature: string, secret: string): Stripe.Event {
     try {
       return this.stripe.webhooks.constructEvent(payload, signature, secret);
@@ -111,7 +197,6 @@ export class ExploreService implements IExploreService{
     }
   }
 
-  // New method to process Stripe webhooks
   async processStripeWebhook(event: Stripe.Event): Promise<void> {
     try {      
       switch (event.type) {
@@ -127,6 +212,7 @@ export class ExploreService implements IExploreService{
       throw new Error(`Error processing webhook: ${(error as Error).message}`);
     }
   }
+
   // Helper method to update booking payment status
   private async updateBookingPaymentStatus(sessionId: string): Promise<void> {
     try {
@@ -136,7 +222,6 @@ export class ExploreService implements IExploreService{
         console.log("No booking found with session ID:", sessionId);
         throw new Error(`No booking found with session ID: ${sessionId}`);
       }
-      // Update payment status
       booking.paymentStatus = 'Completed';
       await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
     } catch (error) {
@@ -160,7 +245,6 @@ export class ExploreService implements IExploreService{
   
     for (const [type, quantity] of Object.entries(tickets)) {
       if (quantity > 0) {
-        // Make case-insensitive comparison
         const ticketInfo = event.tickets.find(
           ticket => ticket.type.toLowerCase() === type.toLowerCase()
         );
@@ -199,25 +283,20 @@ export class ExploreService implements IExploreService{
 
   async generateTicketsPdf(bookingId: string, userId: string): Promise<PDFDocument | null> {
     try {
-      // Get booking details from repository
       const booking = await this.bookingRepository.findBookingById(bookingId);
       
-      // Check if booking exists and belongs to user
       if (!booking || booking.userId.toString() !== userId.toString()) {
         return null;
       }
       
-      // Get event details
       const event = await this.dashboardRepository.findEventById(booking.eventId);
       
       if (!event) {
         throw new Error('Event not found');
       }
       
-      // Create a PDF document
       const doc = new PDFDocument({ size: 'A4', margin: 50 });
       
-      // Add content to the PDF
       doc.fontSize(25).text('Event Tickets', { align: 'center' });
       doc.moveDown();
       doc.fontSize(15).text(`Event: ${event.eventTitle}`, { align: 'left' });
@@ -226,14 +305,12 @@ export class ExploreService implements IExploreService{
       doc.fontSize(12).text(`Venue: ${event.venueName}, ${event.city}`, { align: 'left' });
       doc.moveDown();
       
-      // Add tickets
       for (let i = 0; i < booking.tickets.length; i++) {
         const ticket = booking.tickets[i];
         doc.fontSize(14).text(`Ticket Type: ${ticket.type}`, { align: 'left' });
         doc.fontSize(12).text(`Quantity: ${ticket.quantity}`, { align: 'left' });
         doc.fontSize(12).text(`Price: ₹${ticket.price}`, { align: 'left' });
   
-        // Add QR code for each ticket
         if (ticket.uniqueQrCode) {
           const qrBuffer = await QRCode.toBuffer(ticket.uniqueQrCode);
           doc.image(qrBuffer, {
@@ -245,7 +322,6 @@ export class ExploreService implements IExploreService{
         
         doc.moveDown();
         
-        // Add a page break between tickets if not the last ticket
         if (i < booking.tickets.length - 1) {
           doc.addPage();
         }
@@ -260,53 +336,42 @@ export class ExploreService implements IExploreService{
 
   async generateInvoicePdf(bookingId: string, userId: string): Promise<PDFDocument | null> {
     try {
-      // Get booking details from repository
       const booking = await this.bookingRepository.findBookingById(bookingId);
       
-      // Check if booking exists and belongs to user
       if (!booking || booking.userId.toString() !== userId.toString()) {
         return null;
       }
       
-      // Get event details
       const event = await this.dashboardRepository.findEventById(booking.eventId);
       
       if (!event) {
         throw new Error('Event not found');
       }
       
-      // Get user details
       const user:IUser |null = await this.userRepository.findUserById(booking.userId);
       
       if (!user) {
         throw new Error('User not found');
       }
       
-      // Create a PDF document
       const doc = new PDFDocument({ size: 'A4', margin: 50 });
       
-      // Add content to the PDF
       doc.fontSize(25).text('Invoice', { align: 'center' });
       doc.moveDown();
       
-      // Add invoice header
       doc.fontSize(15).text(`Invoice #${booking.bookingId}`, { align: 'left' });
-      // doc.fontSize(12).text(`Date: ${new Date(booking.createdAt).toLocaleDateString()}`, { align: 'left' });
       doc.fontSize(12).text(`Customer: ${user.name}`, { align: 'left' });
       doc.fontSize(12).text(`Customer Mail Id: ${user.email}`, { align: 'left' });
       doc.moveDown();
       
-      // Add event details
       doc.fontSize(14).text(`Event: ${event.eventTitle}`, { align: 'left' });
       doc.fontSize(12).text(`Date: ${new Date(event.startDate).toLocaleDateString()}`, { align: 'left' });
       doc.fontSize(12).text(`Time: ${new Date(`1970-01-01T${event.startTime}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, { align: 'left' });
       doc.moveDown();
       
-      // Add ticket details table
       doc.fontSize(14).text('Order Details:', { align: 'left' });
       doc.moveDown(0.5);
       
-      // Table headers
       const tableTop = doc.y;
       doc.fontSize(10).text('Item', 50, doc.y);
       doc.text('Quantity', 200, tableTop);
@@ -314,11 +379,9 @@ export class ExploreService implements IExploreService{
       doc.text('Total', 350, tableTop);
       doc.moveDown();
       
-      // Draw a line
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
       doc.moveDown(0.5);
       
-      // Table content and calculations
       let totalAmount = 0;
       
       booking.tickets.forEach(ticket => {
@@ -333,11 +396,9 @@ export class ExploreService implements IExploreService{
         doc.moveDown();
       });
       
-      // Add subtotal, tax, and total
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
       doc.moveDown(0.5);
       
-      // Assumed tax rate of 10% - adjust as needed
       const taxRate = 0.1;
       const taxAmount = totalAmount * taxRate;
       const grandTotal = totalAmount + taxAmount;
@@ -356,14 +417,11 @@ export class ExploreService implements IExploreService{
       doc.text(`₹${grandTotal.toFixed(2)}`, rightAlignX, doc.y);
       doc.moveDown();
       
-      // Payment info
       doc.moveDown();
       doc.fontSize(12).text('Payment Information', { align: 'left' });
       doc.fontSize(10).text(`Payment Method: ${booking.paymentType}`, { align: 'left' });
-      // doc.fontSize(10).text(`Payment Date: ${new Date(booking.createdAt).toLocaleDateString()}`, { align: 'left' });
       doc.fontSize(10).text(`Payment Status: ${booking.paymentStatus}`, { align: 'left' });
       
-      // Footer
       doc.fontSize(10).text('Thank you for your purchase!', 50, 700, { align: 'center' });
       
       return doc;

@@ -24,6 +24,9 @@ import { AdminAuthController } from "../../src/controllers/implementation/admin/
 import { CouponController } from "../../src/controllers/implementation/admin/admin.coupon.controller";
 import { AdminEventsController } from "../../src/controllers/implementation/admin/admin.events.controller";
 import { AdminUsersController } from "../../src/controllers/implementation/admin/admin.users.controller";
+import { AchievementRepository } from "../../src/repositories/achievements.repository";
+import { AchievementService } from "../../src/services/implementation/admin/admin.achievements";
+import { AchievementController } from "../../src/controllers/implementation/admin/admin.achievements.controller";
 
 // Register repositories and services directly with their string token as the identifier
 container.register("UserRepository", { useClass: UserRepository });
@@ -33,6 +36,7 @@ container.register("CouponRepository", { useClass: CouponRepository });
 container.register("DashboardRepository", { useClass: DashboardRepository });
 container.register("VerificationRepository", { useClass: VerificationRepository });
 container.register("WalletRepository", { useClass: WalletRepository });
+container.register("AchievementRepository",{useClass: AchievementRepository})
 
 
 //SERVICES
@@ -48,6 +52,7 @@ container.register("AdminAuthService",{useClass:AdminAuthService})
 container.register("CouponService",{useClass:CouponService})
 container.register("AdminEventsService",{useClass:AdminEventsService})
 container.register("AdminUsersService",{useClass:AdminUsersService})
+container.register("AchievementService",{useClass:AchievementService })
 
 
 
@@ -66,6 +71,7 @@ container.register("AdminAuthController", { useClass: AdminAuthController });
 container.register("CouponController", { useClass: CouponController });
 container.register("AdminEventsController", { useClass: AdminEventsController });
 container.register("AdminUsersController", { useClass: AdminUsersController });
+container.register("AchievementController",{useClass:AchievementController})
 
 
 

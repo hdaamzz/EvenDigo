@@ -1,0 +1,34 @@
+
+.card {
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .card {
+      padding: 1rem;
+    }
+    
+    .p-dialog {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }

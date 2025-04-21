@@ -1,0 +1,307 @@
+<app-user-nav></app-user-nav>
+
+<div class="min-h-screen bg-[#121212] text-white p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-[#00c853]">Edit Event</h1>
+            <p class="text-gray-400 mt-2">Update your event details and settings</p>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div *ngIf="loadingEvent" class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+
+        <!-- Event Form -->
+        <form *ngIf="!loadingEvent" [formGroup]="eventForm" (ngSubmit)="submitForm()" class="bg-[#1E1E1E] rounded-lg p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <!-- Basic Information Section -->
+                <div class="space-y-4">
+                    <h3 class="text-[#00c853] text-lg font-medium mb-4">Basic Information</h3>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">Event Title <span class="text-red-500">*</span></label>
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">
+                                <i class="pi pi-tag"></i>
+                            </span>
+                            <input type="text" pInputText formControlName="eventTitle" placeholder="Enter event title">
+                        </div>
+                        <small class="text-red-500" *ngIf="hasError('eventTitle', 'required')">
+                            Event title is required
+                        </small>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm text-gray-300">Event Description <span
+                                class="text-red-500">*</span></label>
+                        <textarea pInputTextarea formControlName="eventDescription" rows="4"
+                            placeholder="Enter event description"
+                            class="w-full bg-[#222] border border-gray-600 rounded text-white p-3 focus:border-[#00c853] focus:ring-1 focus:ring-[#00c853] transition-all"></textarea>
+                        <small class="text-red-500" *ngIf="hasError('eventDescription', 'required')">
+                            Event description is required
+                        </small>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">Event Type <span class="text-red-500">*</span></label>
+                        <p-select formControlName="eventType" [options]="eventTypes" placeholder="Select Event type"
+                            [showClear]="true" styleClass="w-full"></p-select>
+                        <small class="text-red-500" *ngIf="hasError('eventType', 'required')">
+                            Event type is required
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Schedule Section -->
+                <div class="space-y-4">
+                    <h3 class="text-[#00c853] text-lg font-medium mb-4">Schedule</h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm">Start Date <span class="text-red-500">*</span></label>
+                            <div class="p-inputgroup">
+                                <span class="p-inputgroup-addon">
+                                    <i class="pi pi-calendar"></i>
+                                </span>
+                                <p-datepicker formControlName="startDate" dateFormat="dd - mm - yy"
+                                    [minDate]="today"></p-datepicker>
+                            </div>
+                            <small class="text-red-500" *ngIf="hasError('startDate', 'required')">
+                                Start date is required
+                            </small>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">Start Time <span class="text-red-500">*</span></label>
+                            <div class="p-inputgroup">
+                                <span class="p-inputgroup-addon">
+                                    <i class="pi pi-clock"></i>
+                                </span>
+                                <p-datepicker formControlName="startTime" [timeOnly]="true"></p-datepicker>
+                            </div>
+                            <small class="text-red-500" *ngIf="hasError('startTime', 'required')">
+                                Start time is required
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm">End Date <span class="text-red-500">*</span></label>
+                            <div class="p-inputgroup">
+                                <span class="p-inputgroup-addon">
+                                    <i class="pi pi-calendar"></i>
+                                </span>
+                                <p-datepicker formControlName="endingDate" dateFormat="dd - mm - yy"
+                                    [minDate]="today"></p-datepicker>
+                            </div>
+                            <small class="text-red-500" *ngIf="hasError('endingDate', 'required')">
+                                End date is required
+                            </small>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">End Time</label>
+                            <div class="p-inputgroup">
+                                <span class="p-inputgroup-addon">
+                                    <i class="pi pi-clock"></i>
+                                </span>
+                                <p-datepicker formControlName="endingTime" [timeOnly]="true"></p-datepicker>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visibility & Location -->
+                <div class="space-y-4">
+                    <h3 class="text-[#00c853] text-lg font-medium mb-4">Visibility & Location</h3>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">Event Visibility <span class="text-red-500">*</span></label>
+                        <p-select formControlName="eventVisibility" [options]="visibilityOptions" placeholder="Select visibility"
+                            [showClear]="true" styleClass="w-full"></p-select>
+                        <small class="text-red-500" *ngIf="hasError('eventVisibility', 'required')">
+                            Event visibility is required
+                        </small>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">Venue Name <span class="text-red-500">*</span></label>
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">
+                                <i class="pi pi-map-marker"></i>
+                            </span>
+                            <input type="text" pInputText formControlName="venueName" placeholder="Enter venue name">
+                        </div>
+                        <small class="text-red-500" *ngIf="hasError('venueName', 'required')">
+                            Venue name is required
+                        </small>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">Venue Address</label>
+                        <textarea pInputTextarea formControlName="venueAddress" rows="2"
+                            placeholder="Enter venue address"
+                            class="w-full bg-[#222] border border-gray-600 rounded text-white p-3 focus:border-[#00c853] focus:ring-1 focus:ring-[#00c853] transition-all"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">City <span class="text-red-500">*</span></label>
+                        <p-select formControlName="city" [options]="cities" placeholder="Select city"
+                            [showClear]="true" styleClass="w-full"></p-select>
+                        <small class="text-red-500" *ngIf="hasError('city', 'required')">
+                            City is required
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Tickets & Restrictions -->
+                <div class="space-y-4">
+                    <h3 class="text-[#00c853] text-lg font-medium mb-4">Tickets & Restrictions</h3>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm">Age Restriction <span class="text-red-500">*</span></label>
+                        <p-select formControlName="ageRestriction" [options]="ageRestrictionOptions" placeholder="Age restricted?"
+                            [showClear]="true" styleClass="w-full"></p-select>
+                        <small class="text-red-500" *ngIf="hasError('ageRestriction', 'required')">
+                            Age restriction selection is required
+                        </small>
+                    </div>
+
+                    <!-- Ticket Management -->
+                    <div class="mt-6 space-y-4">
+                        <h4 class="text-lg font-medium">Ticket Types</h4>
+                        
+                        <div class="flex items-end gap-3 flex-wrap">
+                            <div>
+                                <label class="block text-sm mb-1">Type</label>
+                                <p-select [(ngModel)]="currentTicketType" [options]="availableTicketTypes" placeholder="Select type"
+                                    [showClear]="true" styleClass="w-full" [ngModelOptions]="{standalone: true}"></p-select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm mb-1">Price (₹)</label>
+                                <p-inputNumber [(ngModel)]="currentTicketPrice" [ngModelOptions]="{standalone: true}" mode="currency" 
+                                    currency="INR" locale="en-IN" [min]="0"></p-inputNumber>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm mb-1">Quantity</label>
+                                <p-inputNumber [(ngModel)]="currentTicketQuantity" [ngModelOptions]="{standalone: true}" 
+                                    [showButtons]="true" [min]="0" [max]="1000"></p-inputNumber>
+                            </div>
+                            
+                            <button type="button" (click)="addTicketType()" class="bg-[#00c853] text-black px-4 py-2 rounded-lg h-10">
+                                Add
+                            </button>
+                        </div>
+                        
+                        <!-- Ticket List -->
+                        <div class="mt-4">
+                            <div *ngIf="ticketsList.length === 0" class="text-gray-400 text-sm py-2">
+                                No tickets added yet. Please add at least one ticket type.
+                            </div>
+                            
+                            <div *ngIf="ticketsList.length > 0" class="space-y-2">
+                                <div class="text-sm">Total tickets: <span class="font-semibold">{{getTotalTickets()}}</span></div>
+                                
+                                <div class="bg-[#2A2A2A] rounded-lg overflow-hidden">
+                                    <div class="grid grid-cols-4 text-sm font-medium bg-[#333] p-3">
+                                        <div>Type</div>
+                                        <div>Price</div>
+                                        <div>Quantity</div>
+                                        <div class="text-right">Action</div>
+                                    </div>
+                                    
+                                    <ng-container *ngFor="let ticket of ticketsList; let i = index">
+                                        <div class="grid grid-cols-4 p-3 border-t border-gray-700 items-center">
+                                            <div>{{ticket.type}}</div>
+                                            <div>₹{{ticket.price}}</div>
+                                            <div>{{ticket.quantity}}</div>
+                                            <div class="text-right">
+                                                <button type="button" (click)="removeTicketType(i)" 
+                                                    class="text-red-400 hover:text-red-300">
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-[#00c853] text-lg font-medium mb-4">Main Event Banner</h3>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer"
+                        (click)="uploadMainBanner()">
+                        
+                        <div *ngIf="!mainBannerPreview" class="py-8">
+                            <div class="flex justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <p class="text-gray-400">Click to upload main banner image</p>
+                            <p class="text-gray-500 text-sm mt-1">Recommended size: 1920 x 1080px</p>
+                        </div>
+                        
+                        <div *ngIf="mainBannerPreview" class="relative">
+                            <img [src]="mainBannerPreview" alt="Event banner preview" class="w-full h-48 object-cover rounded">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                <p class="text-white">Click to change image</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-[#00c853] text-lg font-medium mb-4">Promotional Image (Optional)</h3>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer"
+                        (click)="uploadPromotionalImage()">
+                        
+                        <div *ngIf="!promotionalImagePreview" class="py-8">
+                            <div class="flex justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <p class="text-gray-400">Click to upload promotional image</p>
+                            <p class="text-gray-500 text-sm mt-1">Recommended size: 800 x 600px</p>
+                        </div>
+                        
+                        <div *ngIf="promotionalImagePreview" class="relative">
+                            <img [src]="promotionalImagePreview" alt="Promotional image preview" class="w-full h-48 object-cover rounded">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                <p class="text-white">Click to change image</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="mt-10 flex justify-end space-x-4">
+                <button type="button" (click)="cancelEdit()" class="px-6 py-2 border border-gray-600 rounded-lg">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-[#00c853] text-black font-medium rounded-lg" [disabled]="loading">
+                    <span *ngIf="!loading">Save Changes</span>
+                    <span *ngIf="loading" class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

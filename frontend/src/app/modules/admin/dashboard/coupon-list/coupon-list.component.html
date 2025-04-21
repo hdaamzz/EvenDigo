@@ -48,7 +48,7 @@
           <div class="p-field p-grid mb-4">
             <label for="discountType" class="p-col-fixed font-semibold" style="width: 120px">Discount Type</label>
             <div class="p-col">
-              <p-dropdown 
+              <p-select 
                 id="discountType" 
                 formControlName="discountType" 
                 [options]="discountTypes" 
@@ -136,7 +136,7 @@
           <div class="p-field p-grid mb-4">
             <label for="expiryDate" class="p-col-fixed font-semibold" style="width: 120px">Expiry Date</label>
             <div class="p-col">
-              <p-calendar 
+              <p-datePicker 
                 id="expiryDate" 
                 formControlName="expiryDate" 
                 [showIcon]="true" 

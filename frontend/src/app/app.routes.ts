@@ -16,6 +16,7 @@ import { UserCheckoutComponent } from './modules/user/user-checkout/user-checkou
 import { PaymentSuccessComponent } from './modules/user/user-checkout/payment-success/payment-success.component';
 import { ProfileWalletComponent } from './modules/user/profile/profile.wallet/profile.wallet.component';
 import { ProfileBookingsComponent } from './modules/user/profile/profile.bookings/profile.bookings.component';
+import { EventEditComponent } from './modules/user/profile/profile.events/event-edit/event-edit.component';
 
 export const routes: Routes = [
     //user - side 
@@ -60,6 +61,11 @@ export const routes: Routes = [
                 path: 'events',
                 component: ProfileEventsComponent
             },
+            {
+                path: 'edit-event/:id',
+                component: EventEditComponent
+              }
+              ,
             {
                 path:'wallet',
                 component:ProfileWalletComponent

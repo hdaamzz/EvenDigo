@@ -13,5 +13,6 @@ export interface IProfileController {
   getUserBookings(req: AuthenticatedRequest, res: Response): Promise<void>;
   cancelTicket(req: Request, res: Response): Promise<void>;
   getUserWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
+  getEvent(req: Request, res: Response): Promise<void>
 
 }

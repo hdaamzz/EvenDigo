@@ -19,6 +19,15 @@ export interface IExploreService {
     couponCode: string | null,
     discount: number
   ): Promise<Stripe.Checkout.Session>;
+  walletBooking(
+      eventId: string,
+      tickets: { [type: string]: number },
+      amount: number,
+      userId: string,
+      couponCode: string | null,
+      discount: number
+    ): Promise<IBooking> 
+  processWalletPayment(bookingData: any): Promise<IBooking>
   constructStripeEvent(payload: Buffer, signature: string, secret: string): Stripe.Event;
   processStripeWebhook(event: Stripe.Event): Promise<void>;
   getBookingDetails(sessionId:string):Promise<IBooking | null>;

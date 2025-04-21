@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { User, VerificationRequestResponse } from '../../../models/userModel';
 import { UpdateProfileResponse } from '../../../models/profile.interfaces';
-import { AllEventResponse } from '../../../models/event.interface';
+import { AllEventResponse, EventResponse, IEvent } from '../../../models/event.interface';
 import { AllBookingResponse } from '../../../models/booking.interface';
 interface Transaction {
   date: string;
@@ -26,6 +26,9 @@ interface WalletDetails {
   providedIn: 'root'
 })
 export class UserProfileService {
+
+
+
   private userIdSource = new BehaviorSubject<string | undefined>(undefined);
   currentUserId = this.userIdSource.asObservable();
 
@@ -35,6 +38,8 @@ export class UserProfileService {
   updateUserId(userId: string | undefined) {
     this.userIdSource.next(userId);
   }
+
+  
   userDetails(id: string): Observable<User> {
       return this.http.post<User>(`${this.baseUrl}user/profile/user-details`, { userId: id }, {
         withCredentials: true,
@@ -95,6 +100,20 @@ export class UserProfileService {
   }
   cancelTicket(bookingId: string, ticketUniqueId: string): Observable<void> {    
     return this.http.post<void>(`${this.baseUrl}user/profile/events/cancel`, { bookingId,ticketUniqueId }, {
+      withCredentials: true
+    });
+  }
+
+  deleteEvent(eventId: string):Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}user/profile/events/${eventId}`);
+  }
+  updateEvent(eventId: string, formData: FormData):Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}user/profile/events/`, { eventId,formData }, {
+      withCredentials: true
+    });
+  }
+  getEventById(eventId: string) :Observable<EventResponse>{
+    return this.http.get<EventResponse>(`${this.baseUrl}user/profile/events/${eventId}`,{
       withCredentials: true
     });
   }

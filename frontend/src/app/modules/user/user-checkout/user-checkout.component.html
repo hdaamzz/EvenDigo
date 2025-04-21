@@ -21,7 +21,7 @@
       <!-- Wallet Balance -->
       <div class="bg-[#121212] p-4 rounded-lg mb-5 text-center">
         <h3 class="text-lg font-semibold">Available Balance</h3>
-        <div class="text-2xl text-green-500 my-2">₹0.00</div>
+        <div class="text-2xl text-green-500 my-2">{{ wallet.walletBalance | currency:'INR':'symbol' }}</div>
         <p class="text-gray-300 text-sm">Event Credits</p>
       </div>
 
@@ -48,20 +48,8 @@
       <!-- Conditional Payment Details -->
       <div *ngIf="selectedPaymentMethod === 'wallet'" class="bg-[#121212] p-5 rounded-lg mb-5 payment-details">
         <h3 class="text-lg font-semibold mb-4">Wallet Payment</h3>
-        <p>Available Balance: ₹1,500.00</p>
+        <p>Available Balance: {{ wallet.walletBalance | currency:'INR':'symbol' }}</p>
       </div>
-
-      <!-- <div *ngIf="selectedPaymentMethod === 'card'" class="bg-[#121212] p-5 rounded-lg mb-5 payment-details">
-        <h3 class="text-lg font-semibold mb-4">Card Payment</h3>
-        <input type="text" placeholder="Card Number"
-          class="w-full p-3 bg-[#a4a4a441] rounded-md text-white border-none focus:outline-none mb-4">
-        <div class="flex gap-4">
-          <input type="text" placeholder="MM/YY"
-            class="flex-1 p-3 bg-[#a4a4a441] rounded-md text-white border-none focus:outline-none">
-          <input type="text" placeholder="CVV"
-            class="flex-1 p-3 bg-[#a4a4a441] rounded-md text-white border-none focus:outline-none">
-        </div>
-      </div> -->
     </div>
 
     <!-- Offers Section -->
@@ -145,15 +133,6 @@
         <span>Convenience Fee</span>
         <span>₹{{ convenienceFee.toFixed(2) }}</span>
       </div>
-      <div *ngIf="earlyBirdDiscount > 0" class="flex justify-between text-gray-300">
-        <span>Early Bird Discount</span>
-        <span>-₹{{ earlyBirdDiscount.toFixed(2) }}</span>
-      </div>
-      <div *ngIf="walletCashback > 0" class="flex justify-between text-gray-300">
-        <span>Wallet Cashback</span>
-        <span>-₹{{ walletCashback.toFixed(2) }}</span>
-      </div>
-      <!-- Add Coupon Discount Line -->
       <div *ngIf="appliedCoupon" class="flex justify-between text-gray-300">
         <span>Coupon Discount ({{ appliedCoupon.code }})</span>
         <span>-₹{{ getCouponDiscount().toFixed(2) }}</span>

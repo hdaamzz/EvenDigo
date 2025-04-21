@@ -102,6 +102,17 @@ export class ProfileController {
     }
   }
 
+
+  async getEvent(req: Request, res: Response): Promise<void> {
+    const eventId = req.params.eventId.toString();
+    try {
+      const event= await this.profileService.getEvent(eventId)
+      res.status(StatusCode.OK).json({ success: true, data: event });
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: (error as Error).message });
+    }
+  }
+
   async getUserBookings(req: Request, res: Response): Promise<void> {
     const userId = req.user._id.toString();
     try {

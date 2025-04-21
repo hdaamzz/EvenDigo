@@ -26,17 +26,36 @@ export class ExploreController implements IExploreController {
   checkout = async (req: Request, res: Response): Promise<void> => {
     const { eventId, tickets, amount, successUrl, cancelUrl, paymentMethod, couponCode, discount } = req.body;
     const userId = req.user._id;
-
+  
     try {
       if (paymentMethod === 'wallet') {
-
+        const bookingResult = await this.exploreService.walletBooking(
+          eventId, tickets, amount, userId, couponCode, discount
+        );
+        
+        if (bookingResult) {
+          const booking = await this.exploreService.processWalletPayment(bookingResult);
+          res.status(StatusCode.OK).json({ 
+            success: true, 
+            data: booking,
+            message: 'Booking successful! Payment completed from wallet.'
+          });
+        } else {
+          res.status(StatusCode.BAD_REQUEST).json({ 
+            success: false, 
+            error: 'Failed to create booking'
+          });
+        }
       } else {
         const session = await this.exploreService.booking(eventId, tickets, amount, successUrl, cancelUrl, userId, couponCode, discount);
         res.status(StatusCode.OK).json({ success: true, data: { sessionId: session.id } });
       }
     } catch (error) {
       console.error('Error in checkout:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: (error as Error).message || 'Failed to process checkout' });
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
+        success: false, 
+        error: (error as Error).message || 'Failed to process checkout' 
+      });
     }
   };
 

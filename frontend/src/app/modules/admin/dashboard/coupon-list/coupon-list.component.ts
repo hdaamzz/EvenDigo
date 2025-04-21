@@ -5,8 +5,8 @@ import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { DropdownModule } from 'primeng/dropdown';
-import { CalendarModule } from 'primeng/calendar';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { AdminCouponService } from '../../../../core/services/admin/admin-coupon.service';
 import { alphabetsValidator, onlyNumbersValidator, futureDateValidator } from '../../../../validators/formValidators';
 import Notiflix from 'notiflix';
@@ -18,8 +18,8 @@ import { takeUntil, debounceTime, filter } from 'rxjs/operators';
   selector: 'app-coupon-list',
   standalone: true,
   imports: [
-    DialogModule, ButtonModule, MenuModule, CommonModule, CalendarModule,
-    InputTextModule, FormsModule, ReactiveFormsModule, DropdownModule
+    DialogModule, ButtonModule, MenuModule, CommonModule, SelectModule,
+    InputTextModule, FormsModule, ReactiveFormsModule,DatePickerModule
   ],
   templateUrl: './coupon-list.component.html',
   styleUrls: ['./coupon-list.component.css']

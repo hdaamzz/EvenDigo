@@ -22,4 +22,12 @@ export class UserExploreService {
     const respo=this.http.post<{ success: boolean, data: { sessionId: string } }>(`${this.baseUrl}user/explore/checkout`, data, { withCredentials: true });
     return respo
   }
+
+  createWalletCheckout(payload: PayloadData): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}user/explore/checkout`, 
+      payload, 
+      { withCredentials: true }
+    );
+  }
 }

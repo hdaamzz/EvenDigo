@@ -13,6 +13,8 @@ import { environment } from '../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 import { AdminCouponService } from '../../../core/services/admin/admin-coupon.service';
 import { PayloadData } from '../../../core/models/booking.interface';
+import { WalletService } from '../../../core/services/user/wallet/wallet.service';
+import { IWallet } from '../../../core/models/wallet.interface';
 
 interface TicketData {
   eventId: string;
@@ -28,6 +30,7 @@ interface TicketData {
 })
 export class UserCheckoutComponent implements OnInit {
   event!: IEvent;
+  wallet!:IWallet;
   ticketData!: TicketData;
   basePrice: number = 0;
   convenienceFee: number = 40;
@@ -45,7 +48,8 @@ export class UserCheckoutComponent implements OnInit {
     private router: Router,
     private dashboardService: UserDashboardService,
     private exploreService: UserExploreService,
-    private couponService: AdminCouponService
+    private couponService: AdminCouponService,
+    private walletService:WalletService
   ) {
     const ticketState = history?.state?.ticketData;
     if (!ticketState || !ticketState.eventId) {
@@ -62,14 +66,31 @@ export class UserCheckoutComponent implements OnInit {
   
     this.basePrice = this.ticketData.totalAmount ?? 0;
     this.loadCoupons();
+    this.getUserWallet();
     this.stripe = await loadStripe(environment.stripePublishKey);
     if (!this.stripe) {
       Notiflix.Notify.failure('Payment service unavailable. Please try again later.');
     }
   }
 
-  showEventDetails(id: string) {
-    this.dashboardService.getEventById(id).pipe(
+  getUserWallet(){
+    this.walletService.getWalletDetails().pipe(
+      tap((response) =>{
+        if(response.data){
+          this.wallet = response.data
+        }
+      }    
+    ),
+      catchError((error) => {
+        console.error('Error fetching event:', error);
+        Notiflix.Notify.failure('Error fetching event details');
+        return of(null);
+      })
+    ).subscribe();
+  }
+
+  showEventDetails(eventId: string) {
+    this.dashboardService.getEventById(eventId).pipe(
       tap((response) =>{
         if(response.data){
           this.event = response.data
@@ -184,7 +205,6 @@ export class UserCheckoutComponent implements OnInit {
       Notiflix.Notify.failure('Payment service not initialized. Please refresh the page.');
       return;
     }
-    console.log('origin',window.location.origin);
     
     const payload:PayloadData = {
       eventId: this.ticketData.eventId,
@@ -199,7 +219,29 @@ export class UserCheckoutComponent implements OnInit {
   
     try {
       if (this.selectedPaymentMethod === 'wallet') {
-        
+        this.exploreService.createWalletCheckout(payload).subscribe(
+          (response) => {
+            this.proceedLoading = false;
+            
+            if (response.success) {
+              // Navigate to success page with booking data
+              this.router.navigate(['/payment/success'], { 
+                queryParams: { 
+                  booking_id: response.data.bookingId 
+                }
+              });
+              Notiflix.Notify.success('Payment successful! Your booking is confirmed.');
+            } else {
+              Notiflix.Notify.failure(response.error || 'Payment failed. Please try again.');
+            }
+          },
+          (error) => {
+            this.proceedLoading = false;
+            console.error('Wallet payment error:', error);
+            Notiflix.Notify.failure(error.error?.error || 'Payment failed. Please try again.');
+          }
+        );
+
       } else {
         const response = await firstValueFrom(this.exploreService.createStripeCheckoutSession(payload));
 
@@ -218,6 +260,8 @@ export class UserCheckoutComponent implements OnInit {
       Notiflix.Notify.failure(`Checkout failed: ${error.message || 'Please try again.'}`);
     }
   }
+
+  
 
   private canApplyCoupon(coupon: any): boolean {
     if (coupon.usageCount >= coupon.maxUses && coupon.maxUses !== 'Unlimited') {
