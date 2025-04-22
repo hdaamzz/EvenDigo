@@ -75,9 +75,9 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async blockUser(id:string):Promise<ServiceResponseWithMessage>{
+  async blockUser(userId:string):Promise<ServiceResponseWithMessage>{
     try {
-      const user=await this.userRepository.blockUserById(id);
+      const user=await this.userRepository.blockUserById(userId);
       if(!user){
         return {
           success:false,
@@ -95,9 +95,9 @@ export class AdminUsersService implements IUsersAdminService {
       };
     }
   }
-  async unblockUser(id:string):Promise<ServiceResponseWithMessage>{
+  async unblockUser(userId:string):Promise<ServiceResponseWithMessage>{
     try {
-      const user=await this.userRepository.unblockUserById(id);
+      const user=await this.userRepository.unblockUserById(userId);
       if(!user){
         return {
           success:false,
@@ -116,10 +116,10 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async approveUser(id:string):Promise<ServiceResponseWithMessage>{
+  async approveUser(userId:string):Promise<ServiceResponseWithMessage>{
     try {
-      await this.userRepository.approveUserStatusChange(id)
-      const requestedUser=await this.varificationRepository.approveUser(id);
+      await this.userRepository.approveUserStatusChange(userId)
+      const requestedUser=await this.varificationRepository.approveUser(userId);
       if(!requestedUser){
         return {
           success:false,
@@ -138,9 +138,9 @@ export class AdminUsersService implements IUsersAdminService {
     }
   }
 
-  async rejectUser(id:string):Promise<ServiceResponseWithMessage>{
+  async rejectUser(userId:string):Promise<ServiceResponseWithMessage>{
     try {
-      const requestedUser=await this.varificationRepository.rejectUser(id);
+      const requestedUser=await this.varificationRepository.rejectUser(userId);
       if(!requestedUser){
         return {
           success:false,

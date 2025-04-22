@@ -12,5 +12,5 @@ dashboardRouter.post('/events', authMiddleware, upload.fields([ { name: 'mainBan
     (req, res) => dashboardController.createEvent(req, res)
   );
 dashboardRouter.get('/events',authMiddleware,(req,res)=>dashboardController.getUserEvents(req,res))
-dashboardRouter.get('/events/:id',authMiddleware,(req,res)=>dashboardController.getEventById(req,res))
+dashboardRouter.get('/events/:eventId',authMiddleware,(req,res)=>dashboardController.getEventById(req,res))
 export default dashboardRouter;

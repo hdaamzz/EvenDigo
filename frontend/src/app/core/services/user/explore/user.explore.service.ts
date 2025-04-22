@@ -13,7 +13,6 @@ export class UserExploreService {
 
   constructor(private http: HttpClient) {}
 
-  // Get all events 
   getAllEvents(): Observable<AllEventResponse> {
     return this.http.get<AllEventResponse>(`${this.baseUrl}user/explore`,{withCredentials: true});
   }

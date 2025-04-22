@@ -4,7 +4,7 @@ import { IUser } from '../../models/interfaces/auth.interface';
 export interface IUserRepository {
   findUserByIdWithoutPassword(id: Schema.Types.ObjectId | string): Promise<IUser | null>;
   createUser(userData: IUser): Promise<IUser>;
-  findUserById(id: Schema.Types.ObjectId | string): Promise<IUser | null>;
+  findUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null>;
   findUserByEmail(email: string): Promise<IUser | null>;
   updateUserLastLogin(userId: Schema.Types.ObjectId | string): Promise<void>;
   updateUser(userId: Schema.Types.ObjectId | string, updateData: Partial<IUser>): Promise<IUser | null>;

@@ -40,6 +40,8 @@ export class DashboardComponent implements OnInit {
   }
   @HostListener('window:resize', ['$event'])
   onResize(event: any): void {
+    console.log(event);
+    
     if (event.target.innerWidth >= 1024) {
       this.sidebarOpen = true;
     } else {

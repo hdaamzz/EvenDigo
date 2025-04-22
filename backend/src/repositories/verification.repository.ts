@@ -42,9 +42,9 @@ async approveUser(userId: Schema.Types.ObjectId | string): Promise<IVerification
       }
   
       
-      async getVerificationRequest(user_id:Schema.Types.ObjectId | string): Promise<IVerification | null> {
+      async getVerificationRequest(userId:Schema.Types.ObjectId | string): Promise<IVerification | null> {
           try {
-              return VerificationModel.findOne({user_id})
+              return VerificationModel.findOne({userId})
           } catch (error: unknown) {
               console.error("Error while creating varefication request", error);
               throw new Error('Failed to create varefication request');

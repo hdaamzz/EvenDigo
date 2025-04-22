@@ -20,5 +20,6 @@ export interface IProfileService {
   getUserBookings(userId: Schema.Types.ObjectId | string): Promise<IBooking[]>;
   getWalletDetails(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IWallet>>;
   cancelTicket(userId: Schema.Types.ObjectId | string,bookingId: string,ticketUniqueId: string): Promise<ProfileServiceResponse<IBooking>> ;
-  
+  updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null>;
+  deleteEvent(eventId: Schema.Types.ObjectId | string): Promise<boolean>;
 }

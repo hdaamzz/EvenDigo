@@ -66,8 +66,7 @@ export class DashboardController implements IDashboardController{
 
   getEventById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const eventId = req.params.id;
-      // const userId = req.user._id;
+      const eventId = req.params.eventId;
       
       const event = await this.dashboardService.getEventById(eventId);
       

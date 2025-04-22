@@ -10,8 +10,8 @@ import { injectable } from "tsyringe";
 export class UserRepository implements IUserRepository {
 
 
-    async findUserByIdWithoutPassword(id: Schema.Types.ObjectId | string): Promise<IUser | null> {
-        return UserModel.findById({ id }, { password: 0 });
+    async findUserByIdWithoutPassword(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
+        return UserModel.findById({ userId }, { password: 0 });
     }
 
     async createUser(userData: IUser): Promise<IUser> {
@@ -29,8 +29,8 @@ export class UserRepository implements IUserRepository {
     }
 
 
-    async findUserById(id: Schema.Types.ObjectId | string): Promise<IUser | null> {
-        return UserModel.findById(id);
+    async findUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
+        return UserModel.findById(userId);
     }
 
 

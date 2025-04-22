@@ -5,8 +5,8 @@ export interface IUsersAdminService {
   fetchAllUsers(): Promise<ServiceResponse<IUser[]>>;
   fetchAllVerificationUsers(): Promise<ServiceResponse<IVerification[]>>;
   fetchUserById(userId: string): Promise<ServiceResponse<IUser>>;
-  blockUser(id: string): Promise<ServiceResponseWithMessage>;
-  unblockUser(id: string): Promise<ServiceResponseWithMessage>;
-  approveUser(id: string): Promise<ServiceResponseWithMessage>;
-  rejectUser(id: string): Promise<ServiceResponseWithMessage>;
+  blockUser(userId: string): Promise<ServiceResponseWithMessage>;
+  unblockUser(userId: string): Promise<ServiceResponseWithMessage>;
+  approveUser(userId: string): Promise<ServiceResponseWithMessage>;
+  rejectUser(userId: string): Promise<ServiceResponseWithMessage>;
 }
