@@ -324,4 +324,22 @@ export class ProfileService implements IProfileService{
       };
     }
   }
+  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {
+    try {
+      
+      const updatedEvent = await this.dashboardRespository.updateEvent(eventId, updateData);
+      return updatedEvent;
+    } catch (error) {
+      throw new Error(`Failed to update event: ${(error as Error).message}`);
+    }
+  }
+  
+  async deleteEvent(eventId: Schema.Types.ObjectId | string): Promise<boolean> {
+    try {
+      const result = await this.dashboardRespository.deleteEvent(eventId);
+      return result;
+    } catch (error) {
+      throw new Error(`Failed to delete event: ${(error as Error).message}`);
+    }
+  }
 }

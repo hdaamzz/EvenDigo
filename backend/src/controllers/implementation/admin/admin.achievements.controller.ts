@@ -42,7 +42,7 @@ export class AchievementController implements IAchievementAdminController {
 
     async getAchievementById(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.id;
+            const achievementId = req.params.acheivementId;
             const achievement = await this.achievementService.getAchievementById(achievementId);
             res.status(StatusCode.OK).json({ success: true, data: achievement });
         } catch (error) {
@@ -62,7 +62,7 @@ export class AchievementController implements IAchievementAdminController {
 
     async updateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.id;
+            const achievementId = req.params.acheivementId;
             const updateData = req.body;
             const updatedAchievement = await this.achievementService.updateAchievement(achievementId, updateData);
             res.status(StatusCode.OK).json({ success: true, data: updatedAchievement });
@@ -73,7 +73,7 @@ export class AchievementController implements IAchievementAdminController {
 
     async activateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.id;
+            const achievementId = req.params.acheivementId;
             const updatedAchievement = await this.achievementService.activateAchievement(achievementId);
             res.status(StatusCode.OK).json({ success: true, data: updatedAchievement });
         } catch (error) {
@@ -83,7 +83,7 @@ export class AchievementController implements IAchievementAdminController {
 
     async deactivateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.id;
+            const achievementId = req.params.acheivementId;
             const updatedAchievement = await this.achievementService.deactivateAchievement(achievementId);
             res.status(StatusCode.OK).json({ success: true, data: updatedAchievement });
         } catch (error) {
@@ -93,7 +93,7 @@ export class AchievementController implements IAchievementAdminController {
 
     async deleteAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.id;
+            const achievementId = req.params.acheivementId;
             await this.achievementService.deleteAchievement(achievementId);
             res.status(StatusCode.NO_CONTENT).send();
         } catch (error) {

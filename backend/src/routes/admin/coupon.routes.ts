@@ -9,9 +9,9 @@ const couponRouter = Router();
 // Routes for coupon management
 couponRouter.get('/', (req, res) => couponController.fetchAllCouponsWithPagination(req, res));
 couponRouter.post('/', (req, res) => couponController.createCoupon(req, res));
-couponRouter.put('/:id', (req, res) => couponController.updateCoupon(req, res));
-couponRouter.patch('/active/:id', (req, res) => couponController.activateCoupon(req, res));
-couponRouter.patch('/deactivate/:id', (req, res) => couponController.deactivateCoupon(req, res));
-couponRouter.delete('/:id', (req, res) => couponController.deleteCoupon(req, res));
+couponRouter.put('/:couponId', (req, res) => couponController.updateCoupon(req, res));
+couponRouter.patch('/active/:couponId', (req, res) => couponController.activateCoupon(req, res));
+couponRouter.patch('/deactivate/:couponId', (req, res) => couponController.deactivateCoupon(req, res));
+couponRouter.delete('/:couponId', (req, res) => couponController.deleteCoupon(req, res));
 
 export default couponRouter;

@@ -16,15 +16,15 @@ export class DashboardRepository implements IDashboardRepository {
     return await EventModel.find({ user_id: userId }).sort({ createdAt: -1 });
   }
 
-  async findAllEventWithoutCurrentUser(id: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    return await EventModel.find({ user_id: { $ne: id },status:true }).sort({ createdAt: -1 });
+  async findAllEventWithoutCurrentUser(eventId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    return await EventModel.find({ user_id: { $ne: eventId },status:true }).sort({ createdAt: -1 });
   }
 
   async findEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
     return await EventModel.findById({ _id: eventId }).populate('user_id');
   }
 
-  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {
+  async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {    
     return await EventModel.findByIdAndUpdate(
       eventId,
       updateData,

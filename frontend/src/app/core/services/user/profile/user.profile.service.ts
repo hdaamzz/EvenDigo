@@ -40,8 +40,8 @@ export class UserProfileService {
   }
 
   
-  userDetails(id: string): Observable<User> {
-      return this.http.post<User>(`${this.baseUrl}user/profile/user-details`, { userId: id }, {
+  userDetails(userId: string): Observable<User> {
+      return this.http.post<User>(`${this.baseUrl}user/profile/user-details`, { userId: userId }, {
         withCredentials: true,
       }).pipe(
         catchError(error => {
@@ -68,8 +68,8 @@ export class UserProfileService {
     );
   }
 
-  verificationRequest(id:string):Observable<VerificationRequestResponse>{
-    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{id},{
+  verificationRequest(userId:string):Observable<VerificationRequestResponse>{
+    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{userId},{
       withCredentials: true,
     }).pipe(
       catchError(error => {
@@ -79,8 +79,8 @@ export class UserProfileService {
     )
   }
 
-  verificationRequestDetails(id:string):Observable<any>{
-    return this.http.get(`${this.baseUrl}user/profile/verification-request/${id}`,{withCredentials: true}).pipe(
+  verificationRequestDetails(userId:string):Observable<any>{
+    return this.http.get(`${this.baseUrl}user/profile/verification-request/${userId}`,{withCredentials: true}).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
         return throwError(() => new Error('Failed to fetch user details'));
@@ -105,10 +105,12 @@ export class UserProfileService {
   }
 
   deleteEvent(eventId: string):Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}user/profile/events/${eventId}`);
+    return this.http.delete<void>(`${this.baseUrl}user/profile/events/${eventId}`,{withCredentials:true});
   }
-  updateEvent(eventId: string, formData: FormData):Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}user/profile/events/`, { eventId,formData }, {
+  updateEvent(eventId: string, formData: FormData): Observable<void> {
+    formData.append('eventId', eventId);
+    
+    return this.http.put<void>(`${this.baseUrl}user/profile/events`, formData, {
       withCredentials: true
     });
   }

@@ -50,8 +50,8 @@ export class AdminUsersService {
     );
   }
 
-  userDetails(id: string): Observable<User> {    
-    return this.http.post<User>(`${this.baseUrl}admin/users/get-details`, { userId: id }, {
+  userDetails(userId: string): Observable<User> {    
+    return this.http.post<User>(`${this.baseUrl}admin/users/get-details`, { userId: userId }, {
       withCredentials: true,
     }).pipe(
       catchError(error => {
@@ -61,24 +61,24 @@ export class AdminUsersService {
     );
   }
 
-  blockUser(id:string):Observable<User>{
-    return this.http.patch<User>(`${this.baseUrl}admin/users/block-user`,{id},{
+  blockUser(userId:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/block-user`,{userId},{
       withCredentials:true
     });
   }
-  unblockUser(id:string):Observable<User>{
-    return this.http.patch<User>(`${this.baseUrl}admin/users/unblock-user`,{id},{
+  unblockUser(userId:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/unblock-user`,{userId},{
       withCredentials:true
     });
   }
 
-  approveUser(id:string):Observable<User>{
-    return this.http.patch<User>(`${this.baseUrl}admin/users/approve-user`,{id},{
+  approveUser(userId:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/approve-user`,{userId},{
       withCredentials:true
     });
   }
-  rejectUser(id:string):Observable<User>{
-    return this.http.patch<User>(`${this.baseUrl}admin/users/reject-user`,{id},{
+  rejectUser(userId:string):Observable<User>{
+    return this.http.patch<User>(`${this.baseUrl}admin/users/reject-user`,{userId},{
       withCredentials:true
     });
   }

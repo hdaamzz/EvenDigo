@@ -100,8 +100,8 @@ export class EventEditComponent {
   ];
   
   ageRestrictionOptions = [
-    { label: 'Yes', value: 'Yes' },
-    { label: 'No', value: 'No' }
+    { label: 'Yes', value: 'true' },
+    { label: 'No', value: 'false' }
   ];
 
   constructor(
@@ -159,9 +159,32 @@ export class EventEditComponent {
 
   populateForm(event: IEvent): void {
     const startDate = event.startDate ? new Date(event.startDate) : null;
-    const startTime = event.startTime ? new Date(event.startTime) : null;
     const endingDate = event.endingDate ? new Date(event.endingDate) : null;
-    const endingTime = event.endingTime ? new Date(event.endingTime) : null;
+    
+    let startTime = null;
+    let endingTime = null;
+    
+   if (typeof event.startTime === 'string') {
+      if (event.startTime.includes('GMT')) {
+        startTime = new Date(event.startTime);
+      } else {
+        const today = new Date();
+        const [hours, minutes] = event.startTime.split(':');
+        today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
+        startTime = today;
+      }
+    }
+    
+    if (typeof event.endingTime === 'string') {
+      if (event.endingTime.includes('GMT')) {
+        endingTime = new Date(event.endingTime);
+      } else {
+        const today = new Date();
+        const [hours, minutes] = event.endingTime.split(':');
+        today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
+        endingTime = today;
+      }
+    }
     
     this.eventForm.patchValue({
       eventTitle: event.eventTitle,
@@ -317,7 +340,7 @@ export class EventEditComponent {
       next: (response) => {
         this.loading = false;
         Notiflix.Notify.success('Event updated successfully!');
-        this.router.navigate(['/user/profile/events']);
+        this.router.navigate(['/profile/events']);
       },
       error: (error: any) => {
         this.loading = false;
@@ -328,6 +351,6 @@ export class EventEditComponent {
   }
 
   cancelEdit(): void {
-    this.router.navigate(['/user/profile/events']);
+    this.router.navigate(['/profile/events']);
   }
 }

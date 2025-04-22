@@ -39,7 +39,7 @@ export interface PayloadData  {
     successUrl: string;
     cancelUrl: string;
     paymentMethod: "wallet" | "card" | null;
-    couponCode: any;
+    couponCode: string;
     discount: number;
 }
 

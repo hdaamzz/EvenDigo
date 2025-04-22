@@ -53,7 +53,7 @@ export class CouponController implements ICouponAdminController{
 
     async updateCoupon(req: Request, res: Response): Promise<void> {
         try {
-            const couponId = req.params.id;
+            const couponId = req.params.couponId;
             const updateData = req.body;
             const updatedCoupon = await this.couponService.updateCoupon(couponId, updateData);
             res.status(StatusCode.OK).json({ success: true, data: updatedCoupon });
@@ -64,7 +64,7 @@ export class CouponController implements ICouponAdminController{
 
     async activateCoupon(req: Request, res: Response): Promise<void> {
         try {
-            const couponId = req.params.id;
+            const couponId = req.params.couponId;
             const updatedCoupon = await this.couponService.activateCoupon(couponId);
             res.status(StatusCode.OK).json({ success: true, data: updatedCoupon });
         } catch (error) {
@@ -74,7 +74,7 @@ export class CouponController implements ICouponAdminController{
 
     async deactivateCoupon(req: Request, res: Response): Promise<void> {
         try {
-            const couponId = req.params.id;
+            const couponId = req.params.couponId;
             const updatedCoupon = await this.couponService.deactivateCoupon(couponId);
             res.status(StatusCode.OK).json({ success: true, data: updatedCoupon });
         } catch (error) {
@@ -84,9 +84,9 @@ export class CouponController implements ICouponAdminController{
 
     async deleteCoupon(req: Request, res: Response): Promise<void> {
         try {
-            const couponId = req.params.id;
+            const couponId = req.params.couponId;
             await this.couponService.deleteCoupon(couponId);
-            res.status(StatusCode.NO_CONTENT).send(); // No content on successful deletion
+            res.status(StatusCode.NO_CONTENT).send(); 
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
         }

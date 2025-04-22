@@ -26,7 +26,7 @@ export class AdminEventsController implements IEventsAdminController{
 
     async updateEventStatus(req: Request, res: Response): Promise<void> {
         try {
-            const eventId = req.params.id;
+            const eventId = req.params.eventId;
             const { status } = req.body;
             
             // Validate input

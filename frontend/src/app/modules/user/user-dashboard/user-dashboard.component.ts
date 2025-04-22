@@ -130,7 +130,6 @@ export class UserDashboardComponent implements OnInit {
     private store: Store<AppState>
   ) {
       this.user$ = this.store.select(selectUser);
-      console.log(this.user$);
   }
 
 
@@ -140,7 +139,6 @@ export class UserDashboardComponent implements OnInit {
         tap(user => {
           this.currentUser = user;
           this.isUserVerified = user?.verified || false;
-          console.log('User verified status:', this.isUserVerified);
         })
       )
       .subscribe();
