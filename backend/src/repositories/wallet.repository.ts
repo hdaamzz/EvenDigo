@@ -71,4 +71,6 @@ export class WalletRepository implements IWalletRepository{
             .sort({ 'transactions.date': -1 })
             .exec();
     }
+
+    
 }

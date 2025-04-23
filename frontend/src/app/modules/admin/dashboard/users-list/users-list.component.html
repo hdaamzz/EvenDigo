@@ -92,67 +92,54 @@
       <!-- Verification Requests Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @if (loading) {
-        <div class="col-span-full text-center py-4">Loading...</div>
-        } @else if (verificationList.length === 0) {
-        <div class="col-span-full text-center py-4">No users found</div>
+          <div class="col-span-full text-center py-4">Loading...</div>
+        } @else if (usersList.length === 0) {
+          <div class="col-span-full text-center py-4">No users found</div>
         } @else {
-        @for (verification of verificationList; track verification._id) {
-        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
-          <div class="flex items-center mb-3">
-            <img [src]="verification.user_id.profileImg" alt="profile.image"
-              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 mr-3" />
-            <div>
-              <h3 class="font-medium text-gray-800">{{ verification.user_id.name }}</h3>
-              <p class="text-sm text-gray-500">{{ verification.user_id.email }}</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 mb-3">
-            <div class="text-sm">
-              <span class="text-gray-500">Phone:</span>
-              <span class="ml-1 text-gray-700">{{ verification.user_id.phone || 'N/A' }}</span>
-            </div>
-            <div class="text-sm">
-              <span class="text-gray-500">Gender:</span>
-              <span class="ml-1 text-gray-700">{{ verification.user_id.gender || 'N/A' }}</span>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center flex-wrap gap-2">
-            <div>
-              @switch (verification.status) {
-              @case ('Verified') {
-              <span class="status bg-green-100 text-green-600 px-2 py-1 rounded-3xl text-xs">Verified</span>
-              }
-              @case ('Pending') {
-              <span class="status bg-yellow-100 text-yellow-600 px-2 py-1 rounded-3xl text-xs">Pending</span>
-              }
-              @default {
-              <span class="status bg-red-100 text-red-600 px-2 py-1 rounded-3xl text-xs">Rejected</span>
-              }
-              }
-            </div>
-            @if (verification.status == 'Pending') {
-            <div class="flex items-center space-x-2">
-              <button
-                class="text-green-600 border border-green-600 px-2 py-1 rounded-lg text-xs hover:bg-green-600 hover:text-white transition">
-                Approve
-              </button>
-              <button
-                class="text-red-600 border border-red-600 px-2 py-1 rounded-lg text-xs hover:bg-red-600 hover:text-white transition">
-                Reject
-              </button>
-            </div>
-            }
-            <div class="relative">
-              <p-menu #menu [popup]="true" [model]="getMenuItems(verification)" [appendTo]="'body'"></p-menu>
-              <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-text p-button-rounded p-button-sm"
-                (click)="menu.toggle($event)">
-              </button>
-            </div>
-          </div>
-        </div>
-        }
+          @for (user of usersList; track user._id) {
+            <app-admin-card
+              [statusBadge]="getUserStatusBadge(user)" 
+              [menuItems]="getUserMenuItems(user)"
+              (cardClick)="showDialog(user._id, isMobile ? 'bottom' : 'right')">
+              
+              <!-- Card Header Content -->
+              <div card-header class="flex items-center">
+                @if (user.profileImg && user.profileImg[8]=='r') {
+                  <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" 
+                      [src]="user.profileImg" alt="">
+                } @else {
+                  <div [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.name) + ' flex items-center justify-center text-white mr-3'">
+                    {{ user.name.charAt(0).toUpperCase() }}
+                  </div>
+                }
+      
+                <div>
+                  <h3 class="font-medium text-gray-800">{{ user.name }}</h3>
+                  <p class="text-sm text-gray-500">{{ user.email }}</p>
+                </div>
+              </div>
+              
+              <!-- Card Body Content -->
+              <div card-body class="grid grid-cols-2 gap-2">
+                <div class="text-sm">
+                  <span class="text-gray-500">Phone:</span>
+                  <span class="ml-1 text-gray-700">{{ user.phone || 'N/A' }}</span>
+                </div>
+                <div class="text-sm">
+                  <span class="text-gray-500">Gender:</span>
+                  <span class="ml-1 text-gray-700">{{ user.gender || 'N/A' }}</span>
+                </div>
+              </div>
+              
+              <!-- Card Actions -->
+              <div card-actions>
+                <p-button class="action-btn text-white rounded transition-all"
+                  (click)="showDialog(user._id, isMobile ? 'bottom' : 'right')" 
+                  label="Details" severity="success" styleClass="p-button-sm">
+                </p-button>
+              </div>
+            </app-admin-card>
+          }
         }
       </div>
       }

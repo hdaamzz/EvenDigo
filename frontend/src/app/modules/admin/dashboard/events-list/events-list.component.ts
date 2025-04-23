@@ -9,10 +9,11 @@ import { TruncatePipe } from "../../../../core/pipes/truncate.pipe";
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.component";
 
 @Component({
   selector: 'app-events-list',
-  imports: [CommonModule, TruncatePipe, MenuModule, ButtonModule,DialogModule],
+  imports: [CommonModule, TruncatePipe, MenuModule, ButtonModule, DialogModule, AdminCardComponent],
   templateUrl: './events-list.component.html',
   styleUrl: './events-list.component.css'
 })
@@ -160,6 +161,11 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy{
     ).subscribe();
   }
 
+  getEventStatusBadge(event: IEvent): { text: string, classes: string } {
+    return event.status 
+      ? { text: 'Listed', classes: 'bg-green-100 text-green-600' }
+      : { text: 'Unlisted', classes: 'bg-gray-100 text-gray-600' };
+  }
 
 
 }

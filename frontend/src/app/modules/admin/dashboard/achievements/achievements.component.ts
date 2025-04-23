@@ -12,11 +12,13 @@ import { IAchievement } from '../../../../core/models/admin/achievements.interfa
 import { debounceTime, filter, fromEvent, Subject, takeUntil } from 'rxjs';
 import { AdminAchievementService } from '../../../../core/services/admin/achievements/admin-achievement.service';
 import { positiveNumberValidator, thresholdRangeValidator, titleValidator } from '../../../../validators/formValidators';
+import { MenuItem } from 'primeng/api';
+import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.component";
 
 @Component({
   selector: 'app-achievements',
   imports: [DialogModule, ButtonModule, MenuModule, CommonModule,
-    InputTextModule, FormsModule, ReactiveFormsModule,SelectModule,CheckboxModule],
+    InputTextModule, FormsModule, ReactiveFormsModule, SelectModule, CheckboxModule, AdminCardComponent],
   templateUrl: './achievements.component.html',
   styleUrl: './achievements.component.css'
 })
@@ -318,6 +320,39 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getIconClass(iconValue: string): string {
     return iconValue || 'fas fa-award'; 
+  }
+
+  getAchievementStatusBadge(achievement: any): { text: string, classes: string } {
+    return achievement.isActive 
+      ? { text: 'Active', classes: 'bg-green-100 text-green-600' } 
+      : { text: 'Inactive', classes: 'bg-red-100 text-red-600' };
+  }
+  
+  getAchievementMenuItems(achievement: any): MenuItem[] {
+    return [
+      {
+        label: 'View Details',
+        icon: 'fas fa-eye',
+        command: () => this.showAchievementDetails(achievement._id)
+      },
+      {
+        label: 'Edit Achievement',
+        icon: 'fas fa-edit',
+        command: () => this.editAchievement(achievement._id)
+      },
+      {
+        label: achievement.isActive ? 'Deactivate' : 'Activate',
+        icon: achievement.isActive ? 'fas fa-ban' : 'fas fa-check-circle',
+        command: () => achievement.isActive 
+          ? this.deactivateAchievement(achievement._id) 
+          : this.activateAchievement(achievement._id)
+      },
+      {
+        label: 'Delete',
+        icon: 'fas fa-trash',
+        command: () => this.deleteAchievement(achievement._id)
+      }
+    ];
   }
 
 }

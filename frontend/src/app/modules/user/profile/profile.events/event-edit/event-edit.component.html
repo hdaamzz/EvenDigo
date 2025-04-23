@@ -2,21 +2,17 @@
 
 <div class="min-h-screen bg-[#121212] text-white p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
         <div class="mb-8">
             <h1 class="text-2xl md:text-3xl font-bold text-[#00c853]">Edit Event</h1>
             <p class="text-gray-400 mt-2">Update your event details and settings</p>
         </div>
         
-        <!-- Loading Indicator -->
         <div *ngIf="loadingEvent" class="flex justify-center items-center py-20">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
         </div>
 
-        <!-- Event Form -->
         <form *ngIf="!loadingEvent" [formGroup]="eventForm" (ngSubmit)="submitForm()" class="bg-[#1E1E1E] rounded-lg p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <!-- Basic Information Section -->
                 <div class="space-y-4">
                     <h3 class="text-[#00c853] text-lg font-medium mb-4">Basic Information</h3>
 
@@ -54,7 +50,6 @@
                     </div>
                 </div>
 
-                <!-- Schedule Section -->
                 <div class="space-y-4">
                     <h3 class="text-[#00c853] text-lg font-medium mb-4">Schedule</h3>
 
@@ -156,7 +151,6 @@
                     </div>
                 </div>
 
-                <!-- Tickets & Restrictions -->
                 <div class="space-y-4">
                     <h3 class="text-[#00c853] text-lg font-medium mb-4">Tickets & Restrictions</h3>
 
@@ -169,7 +163,6 @@
                         </small>
                     </div>
 
-                    <!-- Ticket Management -->
                     <div class="mt-6 space-y-4">
                         <h4 class="text-lg font-medium">Ticket Types</h4>
                         
@@ -197,7 +190,6 @@
                             </button>
                         </div>
                         
-                        <!-- Ticket List -->
                         <div class="mt-4">
                             <div *ngIf="ticketsList.length === 0" class="text-gray-400 text-sm py-2">
                                 No tickets added yet. Please add at least one ticket type.
@@ -234,7 +226,6 @@
                 </div>
             </div>
 
-            <!-- Image Upload Section -->
             <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h3 class="text-[#00c853] text-lg font-medium mb-4">Main Event Banner</h3>
@@ -285,7 +276,6 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
             <div class="mt-10 flex justify-end space-x-4">
                 <button type="button" (click)="cancelEdit()" class="px-6 py-2 border border-gray-600 rounded-lg">
                     Cancel

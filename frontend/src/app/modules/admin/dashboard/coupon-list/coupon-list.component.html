@@ -63,8 +63,6 @@
             </div>
           </div>
 
-         
-
           <!-- Minimum Amount -->
           <div class="p-field p-grid mb-4">
             <label for="minAmount" class="p-col-fixed font-semibold" style="width: 120px">Min. Amount</label>
@@ -85,8 +83,8 @@
             </div>
           </div>
 
-           <!-- Discount Value -->
-           <div class="p-field p-grid mb-4">
+          <!-- Discount Value -->
+          <div class="p-field p-grid mb-4">
             <label for="discount" class="p-col-fixed font-semibold" style="width: 120px">Discount</label>
             <div class="p-col">
               <input 
@@ -178,76 +176,68 @@
               type="submit" 
               [label]="selectedCoupon._id ? 'Update Coupon' : 'Create Coupon'" 
               severity="success" 
-              
             />
           </div>
         </form>
       </p-dialog>
 
-       <!-- Coupon Cards -->
-       <div #couponsContainer class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Coupon Cards with Reusable AdminCardComponent -->
+      <div #couponsContainer class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @if (loading && couponsList.length === 0) {
           <div class="col-span-full text-center py-4">Loading...</div>
         } @else if (couponsList.length === 0 && !loading) {
           <div class="col-span-full text-center py-4">No coupons found</div>
         } @else {
           @for (coupon of couponsList; track coupon._id) {
-            <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
-              <div class="flex justify-between items-start mb-3">
-                <div>
-                  <h3 class="font-medium text-gray-800 text-lg">{{ coupon.code }}</h3>
-                  <p class="text-sm text-gray-500">{{ coupon.description | slice:0:50 }}{{ coupon.description?.length > 50 ? '...' : '' }}</p>
-                </div>
-                <div [class]="coupon.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
-                  class="px-2 py-1 rounded-3xl text-xs">
-                  {{ coupon.status | titlecase }}
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 mb-4">
-                <div class="text-sm">
-                  <span class="text-gray-500">Discount:</span>
-                  <span class="ml-1 font-medium text-gray-800">
-                    {{ coupon.discountType === 'percentage' ? (coupon.discount + '%') : ('₹' + coupon.discount) }}
-                  </span>
-                </div>
-                <div class="text-sm">
-                  <span class="text-gray-500">Uses:</span>
-                  <span class="ml-1 font-medium text-gray-800">{{ coupon.usageCount }} / {{ coupon.maxUses }}</span>
-                </div>
-                <div class="text-sm">
-                  <span class="text-gray-500">Expires:</span>
-                  <span class="ml-1 font-medium text-gray-800">{{ coupon.expiryDate | date:'shortDate' }}</span>
-                </div>
-                <div class="text-sm">
-                  <span class="text-gray-500">Min. Amount:</span>
-                  <span class="ml-1 font-medium text-gray-800">₹{{ coupon.minAmount }}</span>
+            <app-admin-card 
+              [statusBadge]="getCouponStatusBadge(coupon)"
+              [menuItems]="getCouponMenuItems(coupon)"
+              (cardClick)="showCouponDetails(coupon._id)"
+            >
+              <!-- Card Header Content -->
+              <div card-header>
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="font-medium text-gray-800 text-lg">{{ coupon.code }}</h3>
+                    <p class="text-sm text-gray-500">{{ coupon.description | slice:0:50 }}{{ coupon.description?.length > 50 ? '...' : '' }}</p>
+                  </div>
                 </div>
               </div>
 
-              <div class="flex justify-between items-center">
-                <p-button class="action-btn text-white rounded transition-all"
-                  (click)="showCouponDetails(coupon._id)" label="Details" severity="success" styleClass="p-button-sm">
-                </p-button>
-                <div class="flex space-x-2">
-                  @if (coupon.status === 'active') {
-                    <button class="text-yellow-600 border border-yellow-600 px-2 py-1 rounded-lg text-xs hover:bg-yellow-600 hover:text-white transition"
-                      (click)="deactivateCoupon(coupon._id)">
-                      Deactivate
-                    </button>
-                  } @else {
-                    <button class="text-green-600 border border-green-600 px-2 py-1 rounded-lg text-xs hover:bg-green-600 hover:text-white transition"
-                      (click)="activateCoupon(coupon._id)">
-                      Activate
-                    </button>
-                  }
-                  <button class="text-red-600 border border-red-600 px-2 py-1 rounded-lg text-xs hover:bg-red-600 hover:text-white transition"
-                    (click)="deleteCoupon(coupon._id)">
-                    Delete
-                  </button>
+              <!-- Card Body Content -->
+              <div card-body>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="text-sm">
+                    <span class="text-gray-500">Discount:</span>
+                    <span class="ml-1 font-medium text-gray-800">
+                      {{ coupon.discountType === 'percentage' ? (coupon.discount + '%') : ('₹' + coupon.discount) }}
+                    </span>
+                  </div>
+                  <div class="text-sm">
+                    <span class="text-gray-500">Uses:</span>
+                    <span class="ml-1 font-medium text-gray-800">{{ coupon.usageCount }} / {{ coupon.maxUses }}</span>
+                  </div>
+                  <div class="text-sm">
+                    <span class="text-gray-500">Expires:</span>
+                    <span class="ml-1 font-medium text-gray-800">{{ coupon.expiryDate | date:'shortDate' }}</span>
+                  </div>
+                  <div class="text-sm">
+                    <span class="text-gray-500">Min. Amount:</span>
+                    <span class="ml-1 font-medium text-gray-800">₹{{ coupon.minAmount }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+
+              <!-- Card Actions -->
+              <div card-actions>
+                <p-button 
+                  label="Details" 
+                  severity="success" 
+                  styleClass="p-button-sm"
+                  (click)="showCouponDetails(coupon._id)"
+                ></p-button>
+              </div>
+            </app-admin-card>
           }
         }
       </div>
@@ -269,39 +259,39 @@
           <div class="grid grid-cols-2 gap-x-4 gap-y-3">
             <div class="col-span-2">
               <span class="text-sm text-gray-500">Coupon Code</span>
-              <p class="font-normal text-white">{{ selectedCoupon.code }}</p>
+              <p class="font-normal">{{ selectedCoupon.code }}</p>
             </div>
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Discount</span>
-              <p class="font-normal text-white">
+              <p class="font-normal">
                 {{ selectedCoupon.discountType === 'percentage' ? (selectedCoupon.discount + '%') : ('₹' + selectedCoupon.discount) }}
               </p>
             </div>
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Status</span>
-              <p class="font-normal text-white" [ngClass]="selectedCoupon.status === 'active' ? 'text-green-600' : 'text-red-600'">
+              <p class="font-normal" [ngClass]="selectedCoupon.status === 'active' ? 'text-green-600' : 'text-red-600'">
                 {{ selectedCoupon.status | titlecase }}
               </p>
             </div>
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Minimum Amount</span>
-              <p class="font-normal text-white">₹{{ selectedCoupon.minAmount }}</p>
+              <p class="font-normal">₹{{ selectedCoupon.minAmount }}</p>
             </div>
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Usage Limit</span>
-              <p class="font-normal text-white">{{ selectedCoupon.maxUses }}</p>
+              <p class="font-normal">{{ selectedCoupon.maxUses }}</p>
             </div>
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Times Used</span>
-              <p class="font-normal text-white">{{ selectedCoupon.usageCount }}</p>
+              <p class="font-normal">{{ selectedCoupon.usageCount }}</p>
             </div>
             <div class="col-span-2 md:col-span-1">
               <span class="text-sm text-gray-500">Expiry Date</span>
-              <p class="font-normal text-white">{{ selectedCoupon.expiryDate | date:'mediumDate' }}</p>
+              <p class="font-normal">{{ selectedCoupon.expiryDate | date:'mediumDate' }}</p>
             </div>
             <div class="col-span-2">
               <span class="text-sm text-gray-500">Description</span>
-              <p class="font-normal text-white">{{ selectedCoupon.description }}</p>
+              <p class="font-normal">{{ selectedCoupon.description }}</p>
             </div>
           </div>
         </div>

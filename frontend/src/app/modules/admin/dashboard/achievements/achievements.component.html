@@ -3,11 +3,14 @@
         <div class="container bg-white rounded-lg shadow-sm p-3 md:p-5">
             <div class="flex justify-between items-center mb-5">
                 <div class="mb-6">
-                    <h2 class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
-                      <span class="gradient-text bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Achievement</span>
-                      <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Management</span>
+                    <h2
+                        class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
+                        <span
+                            class="gradient-text bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Achievement</span>
+                        <span
+                            class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Management</span>
                     </h2>
-                  </div>
+                </div>
                 <p-button (click)="addNewAchievement()" label="Add New Achievement"><i
                         class="fas fa-plus-circle mr-2"></i></p-button>
             </div>
@@ -137,6 +140,7 @@
                 </form>
             </p-dialog>
 
+            <!-- Achievements List with Reusable Card -->
             <div #achievementsContainer class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @if (loading && achievementsList.length === 0) {
                 <div class="col-span-full text-center py-4">Loading...</div>
@@ -144,69 +148,47 @@
                 <div class="col-span-full text-center py-4">No achievements found</div>
                 } @else {
                 @for (achievement of achievementsList; track achievement._id) {
-                <div
-                    class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
-                    <div class="flex justify-between items-start mb-3">
+                <app-admin-card [statusBadge]="getAchievementStatusBadge(achievement)"
+                    [menuItems]="getAchievementMenuItems(achievement)"
+                    (cardClick)="showAchievementDetails(achievement._id)">
+
+                    <!-- Card Header Content -->
+                    <div card-header class="flex items-center justify-between mb-1">
                         <div class="flex items-center">
-                            <i [class]="getIconClass(achievement.icon)" class="text-blue-500 text-xl mr-2"></i>
+                            <div class="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-full mr-3">
+                                <i [class]="getIconClass(achievement.icon)" class="text-blue-500 text-xl"></i>
+                            </div>
                             <div>
-                                <h3 class="font-medium text-gray-800 text-lg">{{ achievement.title }}</h3>
-                                <p class="text-sm text-gray-500">{{ achievement.description | slice:0:50 }}{{
-                                    achievement.description?.length > 50 ? '...' : '' }}</p>
+                                <h3 class="font-medium text-gray-800">{{ achievement.title }}</h3>
+                                <p class="text-sm text-gray-500">{{ getCategoryLabel(achievement.category) }}</p>
                             </div>
                         </div>
-                        <div [class]="achievement.isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
-                            class="px-2 py-1 rounded-3xl text-xs">
-                            {{ achievement.isActive ? 'Active' : 'Inactive' }}
+                    </div>
+
+                    <!-- Card Body Content -->
+                    <div card-body>
+                        <p class="text-sm text-gray-700 mb-3">{{ achievement.description | slice:0:80 }}{{
+                            achievement.description?.length > 80 ? '...' : '' }}</p>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="text-sm">
+                                <span class="text-gray-500">Criteria:</span>
+                                <span class="ml-1 font-medium text-gray-800">{{ achievement.criteria }}</span>
+                            </div>
+                            <div class="text-sm">
+                                <span class="text-gray-500">Threshold:</span>
+                                <span class="ml-1 font-medium text-gray-800">{{ achievement.threshold }}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <div class="text-sm">
-                            <span class="text-gray-500">Category:</span>
-                            <span class="ml-1 font-medium text-gray-800">{{ getCategoryLabel(achievement.category)
-                                }}</span>
-                        </div>
-                        <div class="text-sm">
-                            <span class="text-gray-500">Criteria:</span>
-                            <span class="ml-1 font-medium text-gray-800">{{ achievement.criteria }}</span>
-                        </div>
-                        <div class="text-sm">
-                            <span class="text-gray-500">Threshold:</span>
-                            <span class="ml-1 font-medium text-gray-800">{{ achievement.threshold }}</span>
-                        </div>
-                        <div class="text-sm">
-                            <span class="text-gray-500">Created:</span>
-                            <span class="ml-1 font-medium text-gray-800">{{ achievement.createdAt | date:'short'
-                                }}</span>
-                        </div>
+                    <!-- Card Actions -->
+                    <div card-actions>
+                        <p-button (click)="editAchievement(achievement._id)" icon="fas fa-edit"
+                            styleClass="p-button-sm p-button-outlined p-button-info" pTooltip="Edit Achievement">
+                        </p-button>
                     </div>
-
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                        <p-button (click)="showAchievementDetails(achievement._id)" label="View" severity="secondary"
-                            size="small" icon="fas fa-eye" styleClass="p-button-sm p-button-outlined"></p-button>
-
-                        <div class="flex space-x-2">
-                            <p-button (click)="editAchievement(achievement._id)" icon="fas fa-edit" size="small"
-                                styleClass="p-button-sm p-button-outlined p-button-info"
-                                pTooltip="Edit Achievement"></p-button>
-
-                            @if (!achievement.isActive) {
-                            <p-button (click)="activateAchievement(achievement._id)" icon="fas fa-check-circle"
-                                size="small" styleClass="p-button-sm p-button-outlined p-button-success"
-                                pTooltip="Activate Achievement"></p-button>
-                            } @else {
-                            <p-button (click)="deactivateAchievement(achievement._id)" icon="fas fa-ban" size="small"
-                                styleClass="p-button-sm p-button-outlined p-button-warning"
-                                pTooltip="Deactivate Achievement"></p-button>
-                            }
-
-                            <p-button (click)="deleteAchievement(achievement._id)" icon="fas fa-trash" size="small"
-                                styleClass="p-button-sm p-button-outlined p-button-danger"
-                                pTooltip="Delete Achievement"></p-button>
-                        </div>
-                    </div>
-                </div>
+                </app-admin-card>
                 }
                 }
             </div>

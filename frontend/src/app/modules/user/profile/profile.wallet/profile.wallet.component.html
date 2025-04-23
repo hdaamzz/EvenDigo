@@ -1,11 +1,10 @@
-<!-- wallet.component.html -->
 
 <div class="container mx-auto px-4 py-6 max-w-6xl">
   <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
     <p>{{ errorMessage }}</p>
   </div>
 
-  <!-- Wallet Card -->
+  
   <div
     class="bg-[#00ff66] rounded-lg p-4 md:p-6 shadow-lg text-white mb-6 transform transition-all duration-300 hover:shadow-xl">
     <div class="mb-2">
@@ -14,28 +13,18 @@
     <div class="mb-4">
       <h1 class="text-2xl md:text-3xl font-bold">₹{{currentBalance.toLocaleString('en-IN')}}</h1>
     </div>
-    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-      <button (click)="openAddMoneyModal()"
-        class="bg-white text-[#00ff66] px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white w-full sm:w-auto">
-        Add Money
-      </button>
-      <button (click)="openWithdrawModal()"
-        class="bg-[#00cc52] text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-[#00b347] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white w-full sm:w-auto">
-        Withdraw
-      </button>
-    </div>
   </div>
 
-  <!-- Transaction Filters -->
+  
   <div class="mb-4 flex flex-wrap gap-2">
-    <button *ngFor="let type of transactionTypes" (click)="selectedType = type"
+    <button *ngFor="let type of transactionTypes" (click)="selectedType = type; onFilterChange(); currentPage = 1;"
       class="px-3 py-1 text-xs md:text-sm rounded-md transition-all duration-200"
       [ngClass]="selectedType === type ? 'bg-[#00ff66] text-black' : 'bg-[#262626] text-gray-300 hover:bg-[#333333]'">
       {{ type | titlecase }}
     </button>
   </div>
 
-  <!-- Transaction History -->
+ 
   <div class="bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-700">
@@ -121,109 +110,70 @@
         </tbody>
       </table>
     </div>
-  </div>
 
-  <!-- Add Money Modal -->
-  <div *ngIf="isAddMoneyModalOpen"
-    class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 animate-fadeIn p-4"
-    (click)="closeAddMoneyModal()">
-    <div
-      class="bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-4 md:p-6 transform transition-all duration-300 animate-scaleIn"
-      (click)="$event.stopPropagation()">
-      <div class="flex justify-between items-center mb-4 md:mb-6">
-        <h3 class="text-lg md:text-xl font-semibold text-white">Add Money</h3>
-        <button (click)="closeAddMoneyModal()"
-          class="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none text-xl md:text-2xl leading-none">
-          ×
+    <div *ngIf="totalPages > 1" class="px-4 py-3 flex items-center justify-between border-t border-gray-700">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+          [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-[#262626] hover:bg-[#333333]">
+          Previous
+        </button>
+        <div class="mx-2 flex items-center text-gray-400 text-sm">
+          Page {{ currentPage }} of {{ totalPages }}
+        </div>
+        <button
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+          [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-[#262626] hover:bg-[#333333]">
+          Next
         </button>
       </div>
-
-      <div class="mb-4 md:mb-6">
-        <div class="relative">
-          <input type="number" [(ngModel)]="amountToAdd" placeholder="Enter Amount"
-            class="w-full p-3 md:p-4 rounded-md bg-[#262626] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent text-center pl-8 md:pl-10">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-gray-400">₹</span>
-          </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-400">
+            Showing page <span class="font-medium">{{ currentPage }}</span> of <span class="font-medium">{{ totalPages }}</span>
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-[#262626] text-sm font-medium text-gray-400 hover:bg-[#333333]">
+              <span class="sr-only">Previous</span>
+              <!-- Heroicon name: solid/chevron-left -->
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            
+            <button *ngFor="let page of getPageNumbers()"
+              (click)="goToPage(page)"
+              [ngClass]="{'bg-[#00ff66] text-black': currentPage === page, 'bg-[#262626] text-gray-300 hover:bg-[#333333]': currentPage !== page}"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium">
+              {{ page }}
+            </button>
+            
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-[#262626] text-sm font-medium text-gray-400 hover:bg-[#333333]">
+              <span class="sr-only">Next</span>
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </nav>
         </div>
       </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mb-6 md:mb-8">
-        <button *ngFor="let amount of predefinedAmounts" (click)="selectAmount(amount)"
-          class="bg-[#262626] hover:bg-[#333333] text-white py-2 md:py-3 px-3 md:px-4 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00ff66] text-xs md:text-sm"
-          [ngClass]="{'bg-[#333333] ring-2 ring-[#00ff66]': amountToAdd === amount}">
-          ₹{{amount.toLocaleString('en-IN')}}
-        </button>
-      </div>
-
-      <button (click)="addMoney()" [disabled]="!amountToAdd || amountToAdd <= 0 || isLoading"
-        class="w-full bg-[#00ff66] hover:bg-[#00cc52] text-white py-3 md:py-4 rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-offset-2 focus:ring-offset-[#1a1a1a]">
-        <span *ngIf="!isLoading">Add Money</span>
-        <div *ngIf="isLoading" class="flex items-center justify-center">
-          <div class="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-t-2 border-b-2 border-white"></div>
-          <span class="ml-2 text-sm md:text-base">Processing...</span>
-        </div>
-      </button>
     </div>
   </div>
 
-  <!-- Withdraw Modal -->
-  <div *ngIf="isWithdrawModalOpen"
-    class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 animate-fadeIn p-4"
-    (click)="closeWithdrawModal()">
-    <div
-      class="bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-4 md:p-6 transform transition-all duration-300 animate-scaleIn"
-      (click)="$event.stopPropagation()">
-      <div class="flex justify-between items-center mb-4 md:mb-6">
-        <h3 class="text-lg md:text-xl font-semibold text-white">Withdraw Money</h3>
-        <button (click)="closeWithdrawModal()"
-          class="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none text-xl md:text-2xl leading-none">
-          ×
-        </button>
-      </div>
-
-      <div class="mb-4 md:mb-6">
-        <div class="relative">
-          <input type="number" [(ngModel)]="amountToWithdraw" placeholder="Enter Amount"
-            class="w-full p-3 md:p-4 rounded-md bg-[#262626] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent text-center pl-8 md:pl-10"
-            [max]="currentBalance">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-gray-400">₹</span>
-          </div>
-        </div>
-        <p class="text-xs text-gray-400 mt-2 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Available balance: ₹{{currentBalance.toLocaleString('en-IN')}}
-        </p>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mb-6 md:mb-8">
-        <button *ngFor="let amount of predefinedAmounts"
-          (click)="amountToWithdraw = amount > currentBalance ? currentBalance : amount"
-          class="bg-[#262626] hover:bg-[#333333] text-white py-2 md:py-3 px-3 md:px-4 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00ff66] text-xs md:text-sm"
-          [disabled]="amount > currentBalance"
-          [ngClass]="{'bg-[#333333] ring-2 ring-[#00ff66]': amountToWithdraw === amount, 'opacity-50 cursor-not-allowed': amount > currentBalance}">
-          ₹{{amount.toLocaleString('en-IN')}}
-        </button>
-      </div>
-
-      <button (click)="withdrawMoney()"
-        [disabled]="!amountToWithdraw || amountToWithdraw <= 0 || amountToWithdraw > currentBalance || isLoading"
-        class="w-full bg-[#00ff66] hover:bg-[#00cc52] text-white py-3 md:py-4 rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-offset-2 focus:ring-offset-[#1a1a1a]">
-        <span *ngIf="!isLoading">Withdraw Money</span>
-        <div *ngIf="isLoading" class="flex items-center justify-center">
-          <div class="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-t-2 border-b-2 border-white"></div>
-          <span class="ml-2 text-sm md:text-base">Processing...</span>
-        </div>
-      </button>
-    </div>
-  </div>
-
-  <!-- Transaction Details Modal -->
   @if(selectedTransaction){
   <div class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 animate-fadeIn p-4"
     (click)="closeTransactionDetails()">
@@ -297,7 +247,6 @@
           </div>
         </div>
 
-        <!-- Show metadata if available -->
         <div *ngIf="selectedTransaction.metadata" class="pt-2">
           <h4 class="text-gray-400 mb-2">Additional Details</h4>
           <div *ngFor="let key of getMetadataKeys(selectedTransaction)" class="pb-2 pl-2">
@@ -311,5 +260,4 @@
     </div>
   </div>
   }
-
 </div>

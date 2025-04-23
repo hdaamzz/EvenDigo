@@ -13,13 +13,16 @@ import Notiflix from 'notiflix';
 import { ICoupon } from '../../../../core/models/admin/coupon.interfacce';
 import { Subject, fromEvent } from 'rxjs';
 import { takeUntil, debounceTime, filter } from 'rxjs/operators';
+import { MenuItem } from 'primeng/api';
+import { AdminCardComponent } from '../../../../shared/admin-card/admin-card.component';
 
 @Component({
   selector: 'app-coupon-list',
   standalone: true,
   imports: [
     DialogModule, ButtonModule, MenuModule, CommonModule, SelectModule,
-    InputTextModule, FormsModule, ReactiveFormsModule,DatePickerModule
+    InputTextModule, FormsModule, ReactiveFormsModule, DatePickerModule,
+    AdminCardComponent
   ],
   templateUrl: './coupon-list.component.html',
   styleUrls: ['./coupon-list.component.css']
@@ -77,8 +80,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => {
         this.isMobile = window.innerWidth < 768;
       });
-
-      
   }
   
   ngAfterViewInit() {
@@ -165,6 +166,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   hideCouponDialog() {
     this.couponDialogVisible = false;
+    this.createDialogVisible = false;
   }
 
   addNewCoupon() {
@@ -209,20 +211,20 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         },
         error: (err) => {
           console.error('Error updating coupon:', err);
-          Notiflix.Notify.failure('Failed to update coupon: ' + (err.message || 'Unknown error')); // Error notification
+          Notiflix.Notify.failure('Failed to update coupon: ' + (err.message || 'Unknown error'));
         }
       });
     } else {
       // Create new coupon
       this.couponService.createCoupon(couponData).subscribe({
         next: () => {
-          this.loadCoupons(true); // Reload from first page
+          this.loadCoupons(true);
           Notiflix.Notify.success('Coupon Created Successfully')
           this.createDialogVisible = false;
         },
         error: (err) => {
           console.error('Error creating coupon:', err);
-          Notiflix.Notify.failure('Failed to create coupon: ' + (err.message || 'Unknown error')); // Error notification
+          Notiflix.Notify.failure('Failed to create coupon: ' + (err.message || 'Unknown error'));
         }
       });
     }
@@ -308,7 +310,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  //costom validaton method 
+  //custom validation method 
   customValidators(): ValidatorFn {
     return (formGroup: AbstractControl): ValidationErrors | null => {
       const discountType = formGroup.get('discountType')?.value;
@@ -328,5 +330,37 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   
       return Object.keys(errors).length > 0 ? errors : null;
     };
+  }
+
+  // Helper methods for the reusable card component
+  getCouponStatusBadge(coupon: any): { text: string, classes: string } {
+    return coupon.status === 'active' 
+      ? { text: 'Active', classes: 'bg-green-100 text-green-600' }
+      : { text: 'Inactive', classes: 'bg-red-100 text-red-600' };
+  }
+
+  getCouponMenuItems(coupon: any): MenuItem[] {
+    return [
+      {
+        label: 'View Details',
+        icon: 'pi pi-eye',
+        command: () => this.showCouponDetails(coupon._id)
+      },
+      {
+        label: 'Edit Coupon',
+        icon: 'pi pi-pencil',
+        command: () => this.editCoupon(coupon._id)
+      },
+      {
+        label: coupon.status === 'active' ? 'Deactivate' : 'Activate',
+        icon: coupon.status === 'active' ? 'pi pi-power-off' : 'pi pi-check',
+        command: () => coupon.status === 'active' ? this.deactivateCoupon(coupon._id) : this.activateCoupon(coupon._id)
+      },
+      {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+        command: () => this.deleteCoupon(coupon._id)
+      }
+    ];
   }
 }
