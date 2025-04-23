@@ -43,7 +43,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
   categoryOptions = [
     { label: 'Event', value: 'event' },
     { label: 'User', value: 'user' },
-    { label: 'Sales', value: 'sales' },
     { label: 'Engagement', value: 'engagement' },
     { label: 'Other', value: 'other' }
   ];
@@ -58,6 +57,25 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     { label: 'Badge', value: 'fas fa-badge' },
     { label: 'Check', value: 'fas fa-check-circle' }
   ];
+
+  criteriaOptions = [
+    { label: 'Events Attended', value: 'events_attended' },
+    { label: 'Events Created', value: 'events_created' },
+    { label: 'VIP Events Taker', value: 'vip_events_taker' },
+    { label: 'Gold Events Taker', value: 'gold_events_taker' },
+    { label: 'Comments Posted', value: 'comments_posted' },
+    { label: 'Likes Received', value: 'likes_received' },
+    { label: 'Referrals Made', value: 'referrals_made' },
+    { label: 'Profile Completion', value: 'profile_completion' },
+    { label: 'Consecutive Logins', value: 'consecutive_logins' },
+    { label: 'Days Active', value: 'days_active' },
+    { label: 'Posts Created', value: 'posts_created' },
+    { label: 'Badges Earned', value: 'badges_earned' },
+    { label: 'Community Points', value: 'community_points' },
+    { label: 'Feedback Submitted', value: 'feedback_submitted' }
+  ];
+
+
 
   constructor(
     private fb: FormBuilder,
@@ -159,6 +177,11 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         Notiflix.Notify.failure('Failed to load achievements');
       }
     });
+  }
+
+  getCriteriaLabel(value: string): string {
+    const criteria = this.criteriaOptions.find(option => option.value === value);
+    return criteria ? criteria.label : value;
   }
   
   loadMoreAchievements() {

@@ -35,12 +35,20 @@
                 placeholder="eg: SAVE" 
                 autocomplete="off" 
               />
-              <small class="p-error" *ngIf="couponForm.get('couponCode')?.touched && couponForm.get('couponCode')?.errors">
-                <span *ngIf="couponForm.get('couponCode')?.errors?.['required']">Coupon code is required.</span>
-                <span *ngIf="couponForm.get('couponCode')?.errors?.['minlength']">Minimum 3 characters.</span>
-                <span *ngIf="couponForm.get('couponCode')?.errors?.['maxlength']">Maximum 20 characters.</span>
-                <span *ngIf="couponForm.get('couponCode')?.errors?.['alphabetsOnly']">Only alphabets allowed.</span>
-              </small>
+              @if (couponForm.get('couponCode')?.touched && couponForm.get('couponCode')?.errors) {
+                @if (couponForm.get('couponCode')?.errors?.['required']) {
+                  <small class="p-error">Coupon code is required.</small>
+                }
+                @if (couponForm.get('couponCode')?.errors?.['minlength']) {
+                  <small class="p-error">Minimum 3 characters.</small>
+                }
+                @if (couponForm.get('couponCode')?.errors?.['maxlength']) {
+                  <small class="p-error">Maximum 20 characters.</small>
+                }
+                @if (couponForm.get('couponCode')?.errors?.['alphabetsOnly']) {
+                  <small class="p-error">Only alphabets allowed.</small>
+                }
+              }
             </div>
           </div>
 
@@ -57,9 +65,9 @@
                 placeholder="Select type" 
                 class="w-full" 
               />
-              <small class="p-error" *ngIf="couponForm.get('discountType')?.touched && couponForm.get('discountType')?.errors?.['required']">
-                Discount type is required.
-              </small>
+              @if (couponForm.get('discountType')?.touched && couponForm.get('discountType')?.errors?.['required']) {
+                <small class="p-error">Discount type is required.</small>
+              }
             </div>
           </div>
 
@@ -76,10 +84,14 @@
                 placeholder="Minimum purchase" 
                 autocomplete="off" 
               />
-              <small class="p-error" *ngIf="couponForm.get('minAmount')?.touched && couponForm.get('minAmount')?.errors">
-                <span *ngIf="couponForm.get('minAmount')?.errors?.['min']">Must be 0 or greater.</span>
-                <span *ngIf="couponForm.get('minAmount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
-              </small>
+              @if (couponForm.get('minAmount')?.touched && couponForm.get('minAmount')?.errors) {
+                @if (couponForm.get('minAmount')?.errors?.['min']) {
+                  <small class="p-error">Must be 0 or greater.</small>
+                }
+                @if (couponForm.get('minAmount')?.errors?.['onlynumbers']) {
+                  <small class="p-error">Only numbers allowed.</small>
+                }
+              }
             </div>
           </div>
 
@@ -96,17 +108,23 @@
                 placeholder="Enter amount" 
                 autocomplete="off" 
               />
-              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors">
-                <span *ngIf="couponForm.get('discount')?.errors?.['required']">Discount is required.</span>
-                <span *ngIf="couponForm.get('discount')?.errors?.['min']">Must be at least 1.</span>
-                <span *ngIf="couponForm.get('discount')?.errors?.['onlynumbers']">Only numbers allowed.</span>
-              </small>
-              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors?.['maxPercentage']">
-                Percentage discount cannot exceed 80%.
-              </small>
-              <small class="p-error" *ngIf="couponForm.get('discount')?.touched && couponForm.get('discount')?.errors?.['exceedsMinAmount']">
-                Discount amount cannot exceed minimum purchase amount.
-              </small>
+              @if (couponForm.get('discount')?.touched && couponForm.get('discount')?.errors) {
+                @if (couponForm.get('discount')?.errors?.['required']) {
+                  <small class="p-error">Discount is required.</small>
+                }
+                @if (couponForm.get('discount')?.errors?.['min']) {
+                  <small class="p-error">Must be at least 1.</small>
+                }
+                @if (couponForm.get('discount')?.errors?.['onlynumbers']) {
+                  <small class="p-error">Only numbers allowed.</small>
+                }
+              }
+              @if (couponForm.get('discount')?.touched && couponForm.get('discount')?.errors?.['maxPercentage']) {
+                <small class="p-error">Percentage discount cannot exceed 80%.</small>
+              }
+              @if (couponForm.get('discount')?.touched && couponForm.get('discount')?.errors?.['exceedsMinAmount']) {
+                <small class="p-error">Discount amount cannot exceed minimum purchase amount.</small>
+              }
             </div>
           </div>
 
@@ -123,10 +141,14 @@
                 placeholder="Usage limit" 
                 autocomplete="off" 
               />
-              <small class="p-error" *ngIf="couponForm.get('maxUses')?.touched && couponForm.get('maxUses')?.errors">
-                <span *ngIf="couponForm.get('maxUses')?.errors?.['min']">Must be 0 or greater.</span>
-                <span *ngIf="couponForm.get('maxUses')?.errors?.['onlynumbers']">Only numbers allowed.</span>
-              </small>
+              @if (couponForm.get('maxUses')?.touched && couponForm.get('maxUses')?.errors) {
+                @if (couponForm.get('maxUses')?.errors?.['min']) {
+                  <small class="p-error">Must be 0 or greater.</small>
+                }
+                @if (couponForm.get('maxUses')?.errors?.['onlynumbers']) {
+                  <small class="p-error">Only numbers allowed.</small>
+                }
+              }
             </div>
           </div>
 
@@ -141,10 +163,12 @@
                 class="w-full" 
               />
             </div>
-            <small class="p-error" *ngIf="couponForm.get('expiryDate')?.touched && couponForm.get('expiryDate')?.errors?.['pastDate']">
-              Expiry date must be in the future.
-            </small>
-            <span *ngIf="couponForm.get('expiryDate')?.errors?.['required']">Expire date is required.</span>
+            @if (couponForm.get('expiryDate')?.touched && couponForm.get('expiryDate')?.errors?.['pastDate']) {
+              <small class="p-error">Expiry date must be in the future.</small>
+            }
+            @if (couponForm.get('expiryDate')?.errors?.['required']) {
+              <span>Expire date is required.</span>
+            }
           </div>
 
           <!-- Description -->
@@ -159,9 +183,9 @@
                 rows="3" 
                 placeholder="Coupon details" 
               ></textarea>
-              <small class="p-error" *ngIf="couponForm.get('description')?.touched && couponForm.get('description')?.errors?.['maxlength']">
-                Maximum 500 characters.
-              </small>
+              @if (couponForm.get('description')?.touched && couponForm.get('description')?.errors?.['maxlength']) {
+                <small class="p-error">Maximum 500 characters.</small>
+              }
             </div>
           </div>
 
@@ -181,7 +205,6 @@
         </form>
       </p-dialog>
 
-      <!-- Coupon Cards with Reusable AdminCardComponent -->
       <div #couponsContainer class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @if (loading && couponsList.length === 0) {
           <div class="col-span-full text-center py-4">Loading...</div>
@@ -204,7 +227,6 @@
                 </div>
               </div>
 
-              <!-- Card Body Content -->
               <div card-body>
                 <div class="grid grid-cols-2 gap-2">
                   <div class="text-sm">
@@ -228,7 +250,7 @@
                 </div>
               </div>
 
-              <!-- Card Actions -->
+              
               <div card-actions>
                 <p-button 
                   label="Details" 
@@ -243,14 +265,18 @@
       </div>
 
       <!-- Loading Spinner for infinite scroll -->
-      <div *ngIf="loading && couponsList.length > 0" class="flex justify-center py-4">
-        <div class="loader"></div>
-      </div>
+      @if (loading && couponsList.length > 0) {
+        <div class="flex justify-center py-4">
+          <div class="loader"></div>
+        </div>
+      }
 
       <!-- End of results message -->
-      <div *ngIf="allLoaded && couponsList.length > 0" class="text-center text-gray-500 py-4">
-        No more coupons to load
-      </div>
+      @if (allLoaded && couponsList.length > 0) {
+        <div class="text-center text-gray-500 py-4">
+          No more coupons to load
+        </div>
+      }
 
       <!-- Coupon Details Dialog -->
       <p-dialog header="Coupon Details" [modal]="true" [(visible)]="couponDialogVisible"
