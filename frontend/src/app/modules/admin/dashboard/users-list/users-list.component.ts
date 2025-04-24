@@ -9,11 +9,11 @@ import { catchError, finalize, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
-import { style } from '@angular/animations';
+import { AdminCardComponent } from '../../../../shared/admin-card/admin-card.component';
 
 @Component({
   selector: 'app-users-list',
-  imports: [CommonModule, DialogModule, ButtonModule,MenuModule],
+  imports: [CommonModule, DialogModule, ButtonModule,MenuModule,AdminCardComponent],
   templateUrl: './users-list.component.html',
   styleUrl: './users-list.component.css'
 })
@@ -205,5 +205,30 @@ export class UsersListComponent implements OnInit {
     }
     
     return items;
+  }
+
+  getUserStatusBadge(user: User): { text: string, classes: string } {
+    switch (user.status) {
+      case 'active':
+        return { text: 'Active', classes: 'bg-green-100 text-green-600' };
+      case 'deactive':
+        return { text: 'Deactive', classes: 'bg-yellow-100 text-yellow-600' };
+      default:
+        return { text: 'Blocked', classes: 'bg-red-100 text-red-600' };
+    }
+  }
+  getUserMenuItems(user: User): MenuItem[] {
+    return [
+      {
+        label: 'View Details',
+        icon: 'pi pi-eye',
+        command: () => this.showDialog(user._id, this.isMobile ? 'bottom' : 'right')
+      },
+      {
+        label: user.status === 'active' ? 'Block User' : 'Unblock User',
+        icon: user.status === 'active' ? 'pi pi-lock' : 'pi pi-unlock',
+        command: () => user.status === 'active' ? this.blockUser(user._id) : this.unblockUser(user._id)
+      }
+    ];
   }
 }

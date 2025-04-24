@@ -1,5 +1,4 @@
 <div class="min-h-screen text-white p-4">
-    <!-- Header section -->
     <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 class="text-2xl font-bold text-[#00c853]">My Events</h2>
         <div class="flex items-center gap-3 w-full md:w-auto">  
@@ -12,17 +11,14 @@
         </div>
     </div>
 
-    <!-- Event Count -->
     <div class="text-sm text-gray-400 mb-4">
         Showing {{eventList.length}} events
     </div>
 
-    <!-- Loading indicator -->
     <div *ngIf="eventListLoading" class="flex justify-center items-center py-10">
         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
     </div>
 
-    <!-- No events message -->
     <div *ngIf="!eventListLoading && eventList.length === 0" class="text-center py-10">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -30,12 +26,9 @@
         <p class="text-lg text-gray-400">You haven't created any events yet</p>
     </div>
 
-    <!-- Events List -->
     <div class="space-y-6" *ngIf="!eventListLoading && eventList.length > 0">
-        <!-- Event Card -->
         <div *ngFor="let event of eventList" class="bg-[#1E1E1E] rounded-lg overflow-hidden border border-gray-600">
             <div class="flex flex-col md:flex-row">
-                <!-- Event Image -->
                 <div class="relative w-full md:w-48 h-48 md:h-auto">
                     <img [src]="event.mainBanner" alt="Event Image" class="w-full h-full object-cover">
                     <div class="absolute top-2 left-2 bg-green-500 text-xs font-medium px-2 py-1 rounded text-white">
@@ -46,15 +39,13 @@
                     </div>
                 </div>
                 
-                <!-- Event Details -->
                 <div class="flex-1 p-4">
                     <div class="flex justify-between items-start">
                         <div class="w-full">
                             <h3 class="text-xl font-semibold">{{event.eventTitle}}</h3>
                             
-                            <!-- Date, Time, and Location -->
                             <div class="mt-2 flex items-center text-gray-400 text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <p>{{ event.startDate | date:'MMM d, y' }} at {{ event.startTime | date:'shortTime' }}</p>
@@ -69,17 +60,14 @@
                                 <span>{{event.venueName}}<span *ngIf="event.venueAddress">, {{event.venueAddress}}</span>, {{event.city}}</span>
                             </div>
                             
-                            <!-- Age Restriction -->
                             <div *ngIf="event.ageRestriction" class="mt-2 inline-block bg-red-500 bg-opacity-20 text-white text-xs px-2 py-1 rounded">
                                 Age Restricted
                             </div>
 
-                            <!-- Description -->
                             <div class="mt-3 text-sm text-gray-300">
                                 <p class="line-clamp-2">{{event.eventDescription}}</p>
                             </div>
 
-                            <!-- Tickets -->
                             <div class="mt-3">
                                 <div class="text-sm font-medium mb-1">Tickets</div>
                                 <div class="flex flex-wrap gap-2">
@@ -93,7 +81,6 @@
                     </div>
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="bg-[#121212] p-4 flex md:flex-col justify-center items-center gap-3">
                     <button (click)="editEvent(event._id)" class="bg-[#00ff66] hover:bg-green-600 text-black font-medium w-full px-4 py-2 rounded-lg flex items-center justify-center">
                         Edit 

@@ -1,16 +1,13 @@
 <div class="w-full min-h-[calc(100vh-40px)] bg-[#121212] text-white p-4 md:p-6">
   <div class="max-w-4xl mx-auto">
-    <!-- Header -->
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-white mb-2">Profile Details</h1>
       <p class="text-gray-400">Manage your personal information and account settings</p>
     </div>
 
-    <!-- Profile Section -->
     @if (user) {
     <div class="bg-[#1E1E1E] rounded-2xl p-4 md:p-6 mb-6 ">
       <div class="flex flex-col md:flex-row gap-6">
-        <!-- Profile Picture Section -->
         <div class="flex flex-col items-center">
           <div class="relative">
             <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" 
@@ -48,7 +45,6 @@
           </div>
         </div>
 
-        <!-- User Info Section -->
         <div class="flex-1">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-1">
@@ -87,7 +83,6 @@
           <p-dialog header="Edit Profile" [(visible)]="editMode" [style]="{ width: '40rem' }">
             <span class="p-text-secondary block mb-8">Update your information.</span>
             <form [formGroup]="userForm" (ngSubmit)="updateProfile()">
-              <!-- Name field -->
               <div class="flex flex-col gap-2 mb-4">
                 <div class="flex items-center gap-4">
                   <label for="username" class="font-semibold w-24">Name</label>
@@ -114,7 +109,6 @@
                 </div>
               </div>
           
-              <!-- Phone field -->
               <div class="flex flex-col gap-2 mb-4">
                 <div class="flex items-center gap-4">
                   <label for="phone" class="font-semibold w-24">Phone</label>
@@ -132,7 +126,6 @@
                 </div>
               </div>
               
-              <!-- Location field -->
               <div class="flex flex-col gap-2 mb-4">
                 <div class="flex items-center gap-4">
                   <label for="location" class="font-semibold w-24">Location</label>
@@ -162,7 +155,6 @@
                 </div>
               </div>
           
-              <!-- Bio field -->
               <div class="flex flex-col gap-2 mb-4">
                 <div class="flex items-center gap-4">
                   <label for="bio" class="font-semibold w-24">Bio</label>
@@ -180,7 +172,6 @@
                 </div>
               </div>
           
-              <!-- Gender field -->
               <div class="flex flex-col gap-2 mb-4">
                 <div class="flex items-center gap-4">
                   <label for="gender" class="font-semibold w-24">Gender</label>
@@ -206,7 +197,6 @@
                 </div>
               </div>
           
-              <!-- Date of Birth field -->
               <div class="flex flex-col gap-2 mb-4">
                 <div class="flex items-center gap-4">
                   <label for="dateofbirth" class="font-semibold w-24">Date Of Birth</label>
@@ -234,7 +224,6 @@
                 </div>
               </div>
           
-              <!-- Form buttons -->
               <div class="flex justify-end gap-2">
                 <p-button label="Cancel" severity="secondary" (click)="cancelEdit()" />
                 <p-button label="Save" type="submit" [disabled]="isLoading || userForm.invalid" />

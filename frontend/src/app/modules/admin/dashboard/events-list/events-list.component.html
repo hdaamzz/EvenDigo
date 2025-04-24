@@ -12,61 +12,51 @@
             <!-- Event List - Card  -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @if (loading && eventList.length === 0) {
-                    <div class="col-span-full text-center py-4 text-gray-500">Loading events...</div>
+                  <div class="col-span-full text-center py-4 text-gray-500">Loading events...</div>
                 } @else if (eventList.length === 0) {
-                    <div class="col-span-full text-center py-4 text-gray-500">No events found</div>
+                  <div class="col-span-full text-center py-4 text-gray-500">No events found</div>
                 } @else {
-                    @for (event of eventList; track event._id) {
-                        <div class="bg-white border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all card">
-                            <div class="flex gap-4 mb-3">
-                                <img [src]="event.mainBanner" [alt]="event.eventTitle" class="w-16 h-16 object-cover rounded border-2 border-gray-200" />
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h3 class="font-medium text-gray-800">{{ event.eventTitle | truncate:20:'...':true }}</h3>
-                                        <span class="inline-block px-2 py-1 text-xs rounded-full" 
-                                              [ngClass]="event.status ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'">
-                                            {{ event.status ? 'Listed' : 'Unlisted' }}
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-gray-600">{{ event.eventType }}</p>
-                                </div>
-                            </div>
-  
-                            <div class="grid grid-cols-2 gap-2 mb-4">
-                                <div class="text-sm">
-                                    <span class="text-gray-500">Date:</span>
-                                    <span class="ml-1 text-gray-800">{{ event.startDate | date:'MMM d yyyy' }}</span>
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-gray-500">Time:</span>
-                                    <span class="ml-1 text-gray-800">{{ event.startTime | date:'h:mm a' }}</span>
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-gray-500">City:</span>
-                                    <span class="ml-1 text-gray-800">{{ event.city }}</span>
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-gray-500">Organizer:</span>
-                                    <span class="ml-1 text-gray-800">{{ event.user_id.name }}</span>
-                                </div>
-                            </div>
-  
-                            <div class="flex justify-between items-center">
-                                <div class="relative">
-                                    <p-menu #menu [popup]="true" [model]="getMenuItems(event)" [appendTo]="'body'"></p-menu>
-                                    <button 
-                                        pButton 
-                                        type="button" 
-                                        icon="pi pi-ellipsis-v" 
-                                        class="p-button-text p-button-rounded p-button-sm" 
-                                        (click)="menu.toggle($event)">
-                                    </button>
-                                </div>
-                            </div>
+                  @for (event of eventList; track event._id) {
+                    <app-admin-card 
+                      [statusBadge]="getEventStatusBadge(event)" 
+                      [menuItems]="getMenuItems(event)"
+                      (cardClick)="viewDetails(event)">
+                      
+                      <!-- Card Header Content -->
+                      <div card-header class="flex gap-4">
+                        <img [src]="event.mainBanner" [alt]="event.eventTitle" 
+                            class="w-16 h-16 object-cover rounded border-2 border-gray-200" />
+                        <div class="flex-1">
+                          <div class="flex items-center justify-between">
+                            <h3 class="font-medium text-gray-800">{{ event.eventTitle | truncate:20:'...':true }}</h3>
+                          </div>
+                          <p class="text-sm text-gray-600">{{ event.eventType }}</p>
                         </div>
-                    }
+                      </div>
+                      
+                      <!-- Card Body Content -->
+                      <div card-body class="grid grid-cols-2 gap-2">
+                        <div class="text-sm">
+                          <span class="text-gray-500">Date:</span>
+                          <span class="ml-1 text-gray-800">{{ event.startDate | date:'MMM d yyyy' }}</span>
+                        </div>
+                        <div class="text-sm">
+                          <span class="text-gray-500">Time:</span>
+                          <span class="ml-1 text-gray-800">{{ event.startTime | date:'h:mm a' }}</span>
+                        </div>
+                        <div class="text-sm">
+                          <span class="text-gray-500">City:</span>
+                          <span class="ml-1 text-gray-800">{{ event.city }}</span>
+                        </div>
+                        <div class="text-sm">
+                          <span class="text-gray-500">Organizer:</span>
+                          <span class="ml-1 text-gray-800">{{ event.user_id.name }}</span>
+                        </div>
+                      </div>
+                    </app-admin-card>
+                  }
                 }
-            </div>
+              </div>
             
             <!-- Loading indicator and intersection observer target -->
             <div class="mt-6 text-center" #endOfList>

@@ -12,11 +12,13 @@ import { IAchievement } from '../../../../core/models/admin/achievements.interfa
 import { debounceTime, filter, fromEvent, Subject, takeUntil } from 'rxjs';
 import { AdminAchievementService } from '../../../../core/services/admin/achievements/admin-achievement.service';
 import { positiveNumberValidator, thresholdRangeValidator, titleValidator } from '../../../../validators/formValidators';
+import { MenuItem } from 'primeng/api';
+import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.component";
 
 @Component({
   selector: 'app-achievements',
   imports: [DialogModule, ButtonModule, MenuModule, CommonModule,
-    InputTextModule, FormsModule, ReactiveFormsModule,SelectModule,CheckboxModule],
+    InputTextModule, FormsModule, ReactiveFormsModule, SelectModule, CheckboxModule, AdminCardComponent],
   templateUrl: './achievements.component.html',
   styleUrl: './achievements.component.css'
 })
@@ -41,7 +43,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
   categoryOptions = [
     { label: 'Event', value: 'event' },
     { label: 'User', value: 'user' },
-    { label: 'Sales', value: 'sales' },
     { label: 'Engagement', value: 'engagement' },
     { label: 'Other', value: 'other' }
   ];
@@ -56,6 +57,25 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     { label: 'Badge', value: 'fas fa-badge' },
     { label: 'Check', value: 'fas fa-check-circle' }
   ];
+
+  criteriaOptions = [
+    { label: 'Events Attended', value: 'events_attended' },
+    { label: 'Events Created', value: 'events_created' },
+    { label: 'VIP Events Taker', value: 'vip_events_taker' },
+    { label: 'Gold Events Taker', value: 'gold_events_taker' },
+    { label: 'Comments Posted', value: 'comments_posted' },
+    { label: 'Likes Received', value: 'likes_received' },
+    { label: 'Referrals Made', value: 'referrals_made' },
+    { label: 'Profile Completion', value: 'profile_completion' },
+    { label: 'Consecutive Logins', value: 'consecutive_logins' },
+    { label: 'Days Active', value: 'days_active' },
+    { label: 'Posts Created', value: 'posts_created' },
+    { label: 'Badges Earned', value: 'badges_earned' },
+    { label: 'Community Points', value: 'community_points' },
+    { label: 'Feedback Submitted', value: 'feedback_submitted' }
+  ];
+
+
 
   constructor(
     private fb: FormBuilder,
@@ -157,6 +177,11 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         Notiflix.Notify.failure('Failed to load achievements');
       }
     });
+  }
+
+  getCriteriaLabel(value: string): string {
+    const criteria = this.criteriaOptions.find(option => option.value === value);
+    return criteria ? criteria.label : value;
   }
   
   loadMoreAchievements() {
@@ -318,6 +343,39 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getIconClass(iconValue: string): string {
     return iconValue || 'fas fa-award'; 
+  }
+
+  getAchievementStatusBadge(achievement: any): { text: string, classes: string } {
+    return achievement.isActive 
+      ? { text: 'Active', classes: 'bg-green-100 text-green-600' } 
+      : { text: 'Inactive', classes: 'bg-red-100 text-red-600' };
+  }
+  
+  getAchievementMenuItems(achievement: any): MenuItem[] {
+    return [
+      {
+        label: 'View Details',
+        icon: 'fas fa-eye',
+        command: () => this.showAchievementDetails(achievement._id)
+      },
+      {
+        label: 'Edit Achievement',
+        icon: 'fas fa-edit',
+        command: () => this.editAchievement(achievement._id)
+      },
+      {
+        label: achievement.isActive ? 'Deactivate' : 'Activate',
+        icon: achievement.isActive ? 'fas fa-ban' : 'fas fa-check-circle',
+        command: () => achievement.isActive 
+          ? this.deactivateAchievement(achievement._id) 
+          : this.activateAchievement(achievement._id)
+      },
+      {
+        label: 'Delete',
+        icon: 'fas fa-trash',
+        command: () => this.deleteAchievement(achievement._id)
+      }
+    ];
   }
 
 }

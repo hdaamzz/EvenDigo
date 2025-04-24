@@ -41,28 +41,24 @@ interface Transaction {
   ]
 })
 export class ProfileWalletComponent implements OnInit {
+
   initialLoadComplete: boolean = false;
   currentBalance: number = 0;
   transactions: Transaction[] = [];
 
-  // Modal states
-  isAddMoneyModalOpen = false;
-  isWithdrawModalOpen = false;
   selectedTransaction: Transaction | null = null;
 
-  // Form values
-  amountToAdd: number | null = null;
-  amountToWithdraw: number | null = null;
-
-  // UI states
   isLoading = false;
   errorMessage: string | null = null;
 
-  // Constants
-  readonly predefinedAmounts = [1000, 2000, 5000, 10000, 20000, 50000];
   readonly currencySymbol = '₹';
   transactionTypes = ['all', 'credit', 'debit', 'refund', 'withdrawal'];
   selectedType = 'all';
+
+  // Pagination variables
+  currentPage = 1;
+  pageSize = 5;
+  totalPages = 1;
 
   constructor(private walletService: WalletService) { }
 
@@ -81,6 +77,7 @@ export class ProfileWalletComponent implements OnInit {
         if (response.success) {
           this.currentBalance = response.data.walletBalance;
           this.transactions = response.data.transactions;
+          this.calculateTotalPages();
           this.initialLoadComplete = true;
         } else {
           this.errorMessage = response.message || 'Failed to load wallet data';
@@ -95,103 +92,24 @@ export class ProfileWalletComponent implements OnInit {
     });
   }
 
-  openAddMoneyModal(): void {
-    this.amountToAdd = null;
-    this.isAddMoneyModalOpen = true;
-    // Prevent scrolling on the body when modal is open
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeAddMoneyModal(): void {
-    this.isAddMoneyModalOpen = false;
-    // Restore scrolling
-    document.body.style.overflow = 'auto';
-  }
-
-  openWithdrawModal(): void {
-    this.amountToWithdraw = null;
-    this.isWithdrawModalOpen = true;
-    // Prevent scrolling on the body when modal is open
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeWithdrawModal(): void {
-    this.isWithdrawModalOpen = false;
-    // Restore scrolling
-    document.body.style.overflow = 'auto';
+  private calculateTotalPages(): void {
+    const filteredCount = this.getFilteredTransactions().length;
+    this.totalPages = Math.max(1, Math.ceil(filteredCount / this.pageSize));
+    
+    // Reset to page 1 if current page is out of bounds
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = 1;
+    }
   }
 
   openTransactionDetails(transaction: Transaction): void {
     this.selectedTransaction = transaction;
-    // Prevent scrolling on the body when modal is open
     document.body.style.overflow = 'hidden';
   }
 
   closeTransactionDetails(): void {
     this.selectedTransaction = null;
-    // Restore scrolling
     document.body.style.overflow = 'auto';
-  }
-
-  selectAmount(amount: number): void {
-    this.amountToAdd = amount;
-  }
-
-  addMoney(): void {
-    if (!this.validateAmount(this.amountToAdd)) return;
-
-    this.isLoading = true;
-    this.walletService.addMoney(this.amountToAdd!).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.loadWalletData();
-          this.closeAddMoneyModal();
-        } else {
-          this.errorMessage = response.message || 'Failed to add money';
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error adding money:', error);
-        this.errorMessage = 'Transaction failed';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  withdrawMoney(): void {
-    if (!this.validateAmount(this.amountToWithdraw)) return;
-    if (this.amountToWithdraw! > this.currentBalance) {
-      this.errorMessage = 'Insufficient balance';
-      return;
-    }
-
-    this.isLoading = true;
-    this.walletService.withdrawMoney(this.amountToWithdraw!).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.loadWalletData();
-          this.closeWithdrawModal();
-        } else {
-          this.errorMessage = response.message || 'Withdrawal failed';
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error withdrawing money:', error);
-        this.errorMessage = 'Transaction failed';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  private validateAmount(amount: number | null): boolean {
-    if (!amount || amount <= 0) {
-      this.errorMessage = 'Please enter a valid amount';
-      return false;
-    }
-    this.errorMessage = null;
-    return true;
   }
 
   getAmountClass(amount: number): string {
@@ -221,18 +139,76 @@ export class ProfileWalletComponent implements OnInit {
     });
   }
 
-  get filteredTransactions(): Transaction[] {
+  // Returns all transactions that match the current filter
+  private getFilteredTransactions(): Transaction[] {
     if (this.selectedType === 'all') return this.transactions;
     return this.transactions.filter(t => t.type === this.selectedType);
   }
 
-  // Helper methods for transaction details
+  // Returns only the transactions for the current page
+  get filteredTransactions(): Transaction[] {
+    const filtered = this.getFilteredTransactions();
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  // Recalculate pages when filter changes
+  onFilterChange(): void {
+    this.calculateTotalPages();
+  }
+
+  // Pagination methods
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    // Show maximum 5 page numbers
+    const maxPages = 5;
+    
+    if (this.totalPages <= maxPages) {
+      // Show all pages if total pages is less than or equal to maxPages
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Calculate start and end page numbers to display
+      let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
+      let endPage = startPage + maxPages - 1;
+      
+      if (endPage > this.totalPages) {
+        endPage = this.totalPages;
+        startPage = Math.max(1, endPage - maxPages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
+  }
+
   getMetadataKeys(transaction: Transaction): string[] {
     return transaction.metadata ? Object.keys(transaction.metadata) : [];
   }
 
   formatKey(key: string): string {
-    // Convert camelCase to Title Case with spaces
     return key
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, str => str.toUpperCase());
