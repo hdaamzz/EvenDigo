@@ -1,9 +1,9 @@
 import { UserModel } from "../models/UserModel";
-import { IUser } from "../models/interfaces/auth.interface";
 import { MongoError } from 'mongodb';
 import { Schema } from "mongoose";
 import { IUserRepository } from "./interfaces/IUser.repository";
 import { injectable } from "tsyringe";
+import { IUser } from "../../src/models/interfaces/auth.interface";
 
 
 @injectable()

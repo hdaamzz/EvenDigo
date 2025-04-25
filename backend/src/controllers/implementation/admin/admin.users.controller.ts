@@ -47,9 +47,8 @@ export class AdminUsersController implements IUsersAdminController{
   }
 
   async blockAndUnblockUser(req:Request, res:Response):Promise<void>{
-    const{id}=req.body;
-    
-    const response=await this.adminUsersService.blockUser(id)
+    const{userId}=req.body;    
+    const response=await this.adminUsersService.blockUser(userId)
     if(response.success){
       res.status(StatusCode.OK).json(response)
     }else{
@@ -59,8 +58,8 @@ export class AdminUsersController implements IUsersAdminController{
 
 
   async unblockAndUnblockUser(req:Request, res:Response):Promise<void>{
-    const{id}=req.body;    
-    const response=await this.adminUsersService.unblockUser(id)
+    const{userId}=req.body;    
+    const response=await this.adminUsersService.unblockUser(userId)
     if(response.success){
       res.status(StatusCode.OK).json(response)
     }else{
@@ -68,9 +67,9 @@ export class AdminUsersController implements IUsersAdminController{
     }
   }
   async approveUser(req:Request, res:Response):Promise<void>{
-    const{id}=req.body;
+    const{userId}=req.body;
     
-    const response=await this.adminUsersService.approveUser(id)
+    const response=await this.adminUsersService.approveUser(userId)
     if(response.success){
       res.status(StatusCode.OK).json(response)
     }else{
@@ -79,9 +78,9 @@ export class AdminUsersController implements IUsersAdminController{
   }
 
   async rejectUser(req:Request, res:Response):Promise<void>{
-    const{id}=req.body;
+    const{userId}=req.body;
     
-    const response=await this.adminUsersService.rejectUser(id)
+    const response=await this.adminUsersService.rejectUser(userId)
     if(response.success){
       res.status(StatusCode.OK).json(response)
     }else{
