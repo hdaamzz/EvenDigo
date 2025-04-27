@@ -12,6 +12,7 @@ export interface TableColumn {
 export interface PageEvent {
   pageIndex: number;
   pageSize: number;
+  page?: number; // Optional for backward compatibility
 }
 
 @Component({
@@ -28,15 +29,19 @@ export class ReusableTableComponent {
   @Input() searchPlaceholder: string = "Search...";
   @Input() showPagination: boolean = true;
   @Input() showFilters: boolean = false;
-  
+  @Input() currentPage: number = 1;
+  @Input() totalItems: number = 0;
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() searchChange = new EventEmitter<string>();
+  @Output() rowClick = new EventEmitter<any>();
   
   searchTerm: string = '';
-  currentPage: number = 1;
   
   get filteredData(): any[] {
-    // Apply search filter
+    if (this.totalItems > 0) {
+      return this.data;
+    }
+    
     let filtered = this.data;
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
@@ -47,13 +52,12 @@ export class ReusableTableComponent {
       );
     }
     
-    // Apply pagination
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
   
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.data.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
   }
   
   getPageArray(): number[] {
@@ -70,13 +74,18 @@ export class ReusableTableComponent {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.pageChange.emit({
-      pageIndex: this.currentPage - 1,
-      pageSize: this.pageSize
+      pageIndex: this.currentPage - 1, // Send 0-based index
+      pageSize: this.pageSize,
+      page: this.currentPage // For backward compatibility
     });
   }
   
   onSearch(): void {
     this.currentPage = 1; 
     this.searchChange.emit(this.searchTerm);
+  }
+  
+  onRowClick(item: any): void {
+    this.rowClick.emit(item);
   }
 }

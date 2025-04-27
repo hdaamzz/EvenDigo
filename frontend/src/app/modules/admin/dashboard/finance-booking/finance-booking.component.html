@@ -1,1 +1,157 @@
-<p>finance-booking works!</p>
+<div class="p-5 relative z-1">
+  <div class="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+      <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
+        <span class="bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Finance Dashboard</span>
+        <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Bookings</span>
+      </h3>
+
+
+    </div>
+
+    <!-- Revenue Stats Cards -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+        <h2 class="text-xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1">
+          Bookings Overview
+        </h2>
+      </div>
+      
+      <div class="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let stat of statCards" 
+          class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-sm text-gray-500 mb-2">{{ stat.title }}</div>
+          <div class="text-2xl font-semibold text-gray-800 mb-2">{{ stat.value }}</div>
+          <div [ngClass]="stat.isNegative ? 'text-red-500' : 'text-green-500'" class="text-sm flex items-center gap-1">
+            <span>{{ stat.isNegative ? '↓' : '↑' }}</span>
+            <span>{{ stat.change }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Transaction History -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Transaction History</h2>
+        
+        <!-- Advanced Filters -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Date Range Filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+              <select [(ngModel)]="selectedDateRange" (change)="onDateRangeChange(selectedDateRange)" 
+                class="w-full px-3 py-2 border text-gray-800 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                <option *ngFor="let range of dateRangeOptions" [value]="range">{{ range }}</option>
+              </select>
+            </div>
+            
+            <!-- Custom Date Range (shown when Custom Range is selected) -->
+            <div *ngIf="showCustomDateRange" class="lg:col-span-2 grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input type="date" [(ngModel)]="customStartDate" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input type="date" [(ngModel)]="customEndDate" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+              <select [(ngModel)]="filters.paymentType" (change)="onPaymentTypeChange(filters.paymentType)" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                <option *ngFor="let type of paymentTypeOptions" [value]="type">{{ type }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Filter Action Buttons -->
+          <div class="flex justify-start mt-4 gap-2">
+            <button *ngIf="showCustomDateRange" (click)="applyCustomDateRange()" 
+              class="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors">
+              Apply Date Range
+            </button>
+            <button (click)="resetFilters()" 
+              class="px-4 py-2 bg-red-500 border border-gray-300 rounded-md text-sm hover:bg-red-600 transition-colors">
+              Reset Filters
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Loading Indicator -->
+      <div *ngIf="loading" class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+      </div>
+      
+      <!-- Table -->
+      <app-reusable-table *ngIf="!loading"
+        [columns]="tableColumns"
+        [data]="transactions"
+        [pageSize]="itemsPerPage"
+        [totalItems]="totalItems"
+        [currentPage]="currentPage"
+        [showSearch]="true"
+        searchPlaceholder="Search..."
+        (pageChange)="onPageChange($event)"
+        (searchChange)="onSearchChange($event)"
+        (rowClick)="viewBookingDetails($event)"
+      >
+        <!-- Custom Cell Templates -->
+        <ng-template #bookingIdCell let-item>
+          <span class="font-medium text-gray-900">{{ item.bookingId }}</span>
+        </ng-template>
+        
+        <ng-template #statusCell let-item>
+          <span [ngClass]="item.statusClass" class="px-2 py-1 rounded-full text-xs font-medium">
+            {{ item.status }}
+          </span>
+        </ng-template>
+        
+        <ng-template #paymentTypeCell let-item>
+          <div class="flex items-center">
+            <span *ngIf="item.paymentType === 'card'" class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              Card
+            </span>
+            <span *ngIf="item.paymentType === 'upi'" class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              UPI
+            </span>
+            <span *ngIf="item.paymentType !== 'card' && item.paymentType !== 'upi'">
+              {{ item.paymentType }}
+            </span>
+          </div>
+        </ng-template>
+        
+        <ng-template #amountCell let-item>
+          <span class="font-medium text-green-600">₹{{ item.amount }}</span>
+        </ng-template>
+      </app-reusable-table>
+      
+      <!-- Empty State -->
+      <div *ngIf="!loading && transactions.length === 0" class="text-center py-8">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No transactions found</h3>
+        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter parameters.</p>
+        <div class="mt-6">
+          <button (click)="resetFilters()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            Reset Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
