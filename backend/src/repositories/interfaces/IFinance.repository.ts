@@ -6,5 +6,5 @@ export interface IFinanceRepository {
     findYesterdayRevenue(): Promise<number>;
     findCurrentMonthRevenue(): Promise<number>;
     findPreviousMonthRevenue(): Promise<number>;
-    findRevenueByDateRange(startDate: Date, endDate: Date): Promise<any[]>;
+    findTransactionsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string ): Promise<any> 
   }

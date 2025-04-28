@@ -19,5 +19,5 @@ export interface RevenueTransactions {
 export interface IFinanceService {
   getRevenueTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
   getRevenueStats(): Promise<ServiceResponse<RevenueStats>>;
-  getRevenueByDateRange(startDate: Date, endDate: Date, paymentStatus?: string, paymentType?: string): Promise<ServiceResponse<any>>;
+  getTransactionsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
 }

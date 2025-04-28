@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ReusableTableComponent, TableColumn } from '../../../../shared/reusable-table/reusable-table.component';
 import { Subscription } from 'rxjs';
 import { FinanceService, RevenueStats, Transaction } from '../../../../core/services/admin/finance/finance.service';
+import { DatePickerModule } from 'primeng/datepicker';
+
 
 interface StatCard {
   title: string;
@@ -21,7 +23,7 @@ interface Filter {
 
 @Component({
   selector: 'app-finance-booking',
-  imports: [CommonModule, FormsModule, ReusableTableComponent],
+  imports: [CommonModule, FormsModule, ReusableTableComponent,DatePickerModule],
   templateUrl: './finance-booking.component.html',
   styleUrl: './finance-booking.component.css'
 })
@@ -78,6 +80,8 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   selectedDateRange: string = 'This Month';
   customStartDate: string = '';
   customEndDate: string = '';
+  startDateValue: Date | null = null;
+  endDateValue: Date | null = null;
   showCustomDateRange: boolean = false;
   
   private subscriptions: Subscription = new Subscription();
@@ -85,9 +89,16 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   constructor(private financeService: FinanceService) {}
 
   ngOnInit(): void {
+    if (this.customStartDate) {
+      this.startDateValue = new Date(this.customStartDate);
+    }
+    if (this.customEndDate) {
+      this.endDateValue = new Date(this.customEndDate);
+    }
     this.initDateFilters();
     this.fetchRevenueStats();
     this.fetchRevenue();
+
   }
   
   ngOnDestroy(): void {
@@ -169,16 +180,15 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.subscriptions.add(sub);
   }
   
-  // Fixed pagination handler
+
   onPageChange(event: any): void {
-    this.currentPage = event.pageIndex + 1; // Convert from 0-based to 1-based
+    this.currentPage = event.pageIndex + 1;
     this.fetchRevenue();
   }
   
-  // Fixed search handler
   onSearchChange(searchTerm: string): void {
     this.searchTerm = searchTerm;
-    this.currentPage = 1; // Reset to first page when searching
+    this.currentPage = 1; 
     this.fetchRevenue();
   }
   
@@ -186,19 +196,12 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.selectedDateRange = range;
     const today = new Date();
     
-    // Reset custom date fields
     this.showCustomDateRange = range === 'Custom Range';
     
     switch(range) {
       case 'Today':
         this.filters.startDate = today.toISOString().split('T')[0];
         this.filters.endDate = today.toISOString().split('T')[0];
-        break;
-      case 'Yesterday':
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        this.filters.startDate = yesterday.toISOString().split('T')[0];
-        this.filters.endDate = yesterday.toISOString().split('T')[0];
         break;
       case 'This Week':
         const firstDayOfWeek = new Date(today);
@@ -213,18 +216,18 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
         this.filters.startDate = firstDayOfMonth.toISOString().split('T')[0];
         this.filters.endDate = today.toISOString().split('T')[0];
         break;
-      case 'Last Month':
-        const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        this.filters.startDate = firstDayOfLastMonth.toISOString().split('T')[0];
-        this.filters.endDate = lastDayOfLastMonth.toISOString().split('T')[0];
-        break;
       case 'Custom Range':
-        // Don't apply filters yet for custom range
         return;
     }
     
     this.applyFilters();
+  }
+  onStartDateSelect(event: any): void {
+    this.customStartDate = event.toISOString().split('T')[0];
+  }
+  
+  onEndDateSelect(event: any): void {
+    this.customEndDate = event.toISOString().split('T')[0];
   }
   
   onPaymentStatusChange(status: string): void {
@@ -250,20 +253,15 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.fetchFilteredRevenue();
   }
   
-  // Improved method to fetch filtered data
   fetchFilteredRevenue(): void {
     this.loading = true;
     
     const startDate = this.filters.startDate;
     const endDate = this.filters.endDate;
-    const paymentStatus = this.filters.paymentStatus !== 'All' ? this.filters.paymentStatus : undefined;
-    const paymentType = this.filters.paymentType !== 'All' ? this.filters.paymentType : undefined;
     
-    const sub = this.financeService.getRevenueByDateRange(startDate, endDate, paymentStatus, paymentType).subscribe({
+    const sub = this.financeService.getTransactionByDateRange(startDate, endDate).subscribe({
       next: (response) => {
         console.log("date",response.data);
-        
-        // Process the data
         this.transactions = response.data.map((item: any) => {
           const ticketDetails = item.tickets.map((ticket: any) => 
             `${ticket.type} (${ticket.quantity}x)`
@@ -306,8 +304,6 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   }
   
   viewBookingDetails(booking: any): void {
-    // Implement a modal or navigate to detail page
     console.log('View booking details:', booking.rawData);
-    // Could implement a modal service to show details
   }
 }

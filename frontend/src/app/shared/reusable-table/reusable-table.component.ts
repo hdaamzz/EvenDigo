@@ -12,7 +12,7 @@ export interface TableColumn {
 export interface PageEvent {
   pageIndex: number;
   pageSize: number;
-  page?: number; // Optional for backward compatibility
+  page?: number; 
 }
 
 @Component({
@@ -74,9 +74,9 @@ export class ReusableTableComponent {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.pageChange.emit({
-      pageIndex: this.currentPage - 1, // Send 0-based index
+      pageIndex: this.currentPage - 1, 
       pageSize: this.pageSize,
-      page: this.currentPage // For backward compatibility
+      page: this.currentPage 
     });
   }
   
