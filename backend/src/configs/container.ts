@@ -29,6 +29,7 @@ import { AchievementService } from "../../src/services/implementation/admin/admi
 import { AchievementController } from "../../src/controllers/implementation/admin/admin.achievements.controller";
 import { FinanceService } from "../../src/services/implementation/admin/admin.revenue.service";
 import { FinanceRepository } from "../../src/repositories/finance.repository";
+import { WalletModel } from "../../src/models/WalletModel";
 
 // Register repositories and services directly with their string token as the identifier
 container.register("UserRepository", { useClass: UserRepository });
@@ -80,6 +81,7 @@ container.register("AchievementController",{useClass:AchievementController})
 
 
 container.register("BookingModel", { useValue: BookingsModel });
+container.register("WalletModel", { useValue: WalletModel });
 
 
 

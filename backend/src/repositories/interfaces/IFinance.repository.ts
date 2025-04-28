@@ -7,4 +7,7 @@ export interface IFinanceRepository {
     findCurrentMonthRevenue(): Promise<number>;
     findPreviousMonthRevenue(): Promise<number>;
     findTransactionsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string ): Promise<any> 
+    findRefundTransactions(page: number, limit: number, search?: string): Promise<any>;
+    findRefundByTransactionId(transactionId: string): Promise<any>;
+    findRefundsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<any>;
   }
