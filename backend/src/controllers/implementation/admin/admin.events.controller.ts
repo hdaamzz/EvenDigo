@@ -29,7 +29,6 @@ export class AdminEventsController implements IEventsAdminController{
             const eventId = req.params.eventId;
             const { status } = req.body;
             
-            // Validate input
             if (status === undefined || typeof status !== 'boolean') {
                 res.status(StatusCode.BAD_REQUEST).json({
                     success: false,
@@ -52,5 +51,4 @@ export class AdminEventsController implements IEventsAdminController{
             });
         }
     }
-
 }

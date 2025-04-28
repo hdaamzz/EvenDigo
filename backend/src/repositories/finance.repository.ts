@@ -2,11 +2,14 @@ import { Model } from 'mongoose';
 import { inject, injectable } from 'tsyringe';
 import { IFinanceRepository } from './interfaces/IFinance.repository';
 import { IBooking } from '../models/interfaces/booking.interface';
+import { IWallet, TransactionType } from '../../src/models/interfaces/wallet.interface';
 
 @injectable()
 export class FinanceRepository implements IFinanceRepository {
   constructor(
-    @inject("BookingModel") private bookingModel: Model<IBooking>
+    @inject("BookingModel") private bookingModel: Model<IBooking>,
+    @inject("WalletModel") private walletModel: Model<IWallet>
+
   ) { }
 
   async findRevenueTransactions(page: number, limit: number, search: string = ''): Promise<any> {
@@ -233,6 +236,146 @@ export class FinanceRepository implements IFinanceRepository {
       };
     } catch (error) {
       throw new Error(`Error finding revenue transactions by date range: ${(error as Error).message}`);
+    }
+  }
+
+  async findRefundTransactions(page: number, limit: number, search: string = ''): Promise<any> {
+    try {
+      const skip = (page - 1) * limit;
+      
+      const wallets = await this.walletModel.find({
+        'transactions.type': TransactionType.REFUND
+      });
+      
+      const allRefunds: any[] = [];
+      
+      wallets.forEach(wallet => {
+        const refunds = wallet.transactions
+          .filter(t => t.type === TransactionType.REFUND)
+          .map(refund => {
+            return {
+              transactionId: refund.transactionId,
+              date: refund.date,
+              description: refund.description,
+              amount: refund.amount,
+              type: refund.type,
+              status: refund.status,
+              metadata: refund.metadata || {},
+              userId: wallet.userId,
+            };
+          });
+        
+        allRefunds.push(...refunds);
+      });
+      
+      let filteredRefunds = allRefunds;
+      if (search) {
+        filteredRefunds = allRefunds.filter(refund => 
+          refund.transactionId?.includes(search) || 
+          (refund.metadata?.bookingId && refund.metadata.bookingId.includes(search))
+        );
+      }
+      
+      filteredRefunds.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      const paginatedRefunds = filteredRefunds.slice(skip, skip + limit);
+      
+      return {
+        data: paginatedRefunds,
+        totalItems: filteredRefunds.length,
+        currentPage: page,
+        totalPages: Math.ceil(filteredRefunds.length / limit)
+      };
+    } catch (error) {
+      throw new Error(`Error finding refund transactions: ${(error as Error).message}`);
+    }
+  }
+  async findRefundByTransactionId(transactionId: string): Promise<any> {
+    try {
+      const wallet = await this.walletModel.findOne({
+        'transactions.transactionId': transactionId
+      });
+  
+      if (!wallet) {
+        throw new Error("Refund transaction not found");
+      }
+  
+      const transaction = wallet.transactions.find(t => 
+        t.transactionId === transactionId && t.type === TransactionType.REFUND
+      );
+  
+      if (!transaction) {
+        throw new Error("Refund transaction not found");
+      }
+  
+      return {
+        ...transaction,
+        userId: wallet.userId
+      };
+    } catch (error) {
+      throw new Error(`Error finding refund details: ${(error as Error).message}`);
+    }
+  }
+  
+  async findRefundsByDateRange(
+    startDate: Date,
+    endDate: Date,
+    page: number,
+    limit: number,
+    search: string = ''
+  ): Promise<any> {
+    try {
+      const skip = (page - 1) * limit;
+      
+      const wallets = await this.walletModel.find({
+        'transactions.type': TransactionType.REFUND
+      });
+      
+      const allRefunds: any[] = [];
+      
+      wallets.forEach(wallet => {
+        const refunds = wallet.transactions
+          .filter(t => 
+            t.type === TransactionType.REFUND && 
+            new Date(t.date) >= startDate && 
+            new Date(t.date) <= endDate
+          )
+          .map(refund => {
+            return {
+              transactionId: refund.transactionId,
+              date: refund.date,
+              description: refund.description,
+              amount: refund.amount,
+              type: refund.type,
+              status: refund.status,
+              metadata: refund.metadata || {},
+              userId: wallet.userId,
+            };
+          });
+        
+        allRefunds.push(...refunds);
+      });
+      
+      let filteredRefunds = allRefunds;
+      if (search) {
+        filteredRefunds = allRefunds.filter(refund => 
+          refund.transactionId?.includes(search) || 
+          (refund.metadata?.bookingId && refund.metadata.bookingId.includes(search))
+        );
+      }
+      
+      filteredRefunds.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      const paginatedRefunds = filteredRefunds.slice(skip, skip + limit);
+      
+      return {
+        data: paginatedRefunds,
+        totalItems: filteredRefunds.length,
+        currentPage: page,
+        totalPages: Math.ceil(filteredRefunds.length / limit)
+      };
+    } catch (error) {
+      throw new Error(`Error finding refunds by date range: ${(error as Error).message}`);
     }
   }
 }

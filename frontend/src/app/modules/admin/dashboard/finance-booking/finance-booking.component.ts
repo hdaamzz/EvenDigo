@@ -5,20 +5,11 @@ import { ReusableTableComponent, TableColumn } from '../../../../shared/reusable
 import { Subscription } from 'rxjs';
 import { FinanceService, RevenueStats, Transaction } from '../../../../core/services/admin/finance/finance.service';
 import { DatePickerModule } from 'primeng/datepicker';
-
-
-interface StatCard {
-  title: string;
-  value: string;
-  change: string;
-  isNegative: boolean;
-}
+import { StatCard } from '../../../../core/models/admin/finance.interfaces';
 
 interface Filter {
   startDate: string;
   endDate: string;
-  paymentStatus: string;
-  paymentType: string;
 }
 
 @Component({
@@ -64,16 +55,11 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   loading: boolean = false;
   
-  // Filter options
-  paymentTypeOptions: string[] = ['All', 'card', 'wallet'];
   dateRangeOptions: string[] = ['Today','This Week', 'This Month', 'Custom Range'];
   
-  // Active filters
   filters: Filter = {
     startDate: '',
     endDate: '',
-    paymentStatus: 'All',
-    paymentType: 'All'
   };
   
   // Date range filter
@@ -150,10 +136,9 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   
   fetchRevenue(): void {
     this.loading = true;
-    const sub = this.financeService.fetchRevenue(this.currentPage, this.itemsPerPage, this.searchTerm).subscribe({
+    const sub = this.financeService.fetchRevenue(this.currentPage, this.itemsPerPage).subscribe({
       next: (response) => {
         this.transactions = response.data.map((item: any) => {
-          // Calculate ticket details
           const ticketDetails = item.tickets.map((ticket: any) => 
             `${ticket.type} (${ticket.quantity}x)`
           ).join(', ');
@@ -230,16 +215,6 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.customEndDate = event.toISOString().split('T')[0];
   }
   
-  onPaymentStatusChange(status: string): void {
-    this.filters.paymentStatus = status;
-    this.applyFilters();
-  }
-  
-  onPaymentTypeChange(type: string): void {
-    this.filters.paymentType = type;
-    this.applyFilters();
-  }
-  
   applyCustomDateRange(): void {
     if (this.customStartDate && this.customEndDate) {
       this.filters.startDate = this.customStartDate;
@@ -292,8 +267,6 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.filters = {
       startDate: '',
       endDate: '',
-      paymentStatus: 'All',
-      paymentType: 'All'
     };
     
     this.selectedDateRange = 'This Month';

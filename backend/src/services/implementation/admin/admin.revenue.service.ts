@@ -31,15 +31,12 @@ export class FinanceService implements IFinanceService {
       const totalRevenue = await this.financeRepository.findTotalRevenue();
       const previousMonthTotalRevenue = await this.financeRepository.findTotalRevenueForPreviousMonth();
 
-      // Get today's revenue data
       const todayRevenue = await this.financeRepository.findTodayRevenue();
       const yesterdayRevenue = await this.financeRepository.findYesterdayRevenue();
 
-      // Get current month revenue data
       const currentMonthRevenue = await this.financeRepository.findCurrentMonthRevenue();
       const previousMonthRevenue = await this.financeRepository.findPreviousMonthRevenue();
 
-      // Calculate percentage changes
       const totalRevenueChange = previousMonthTotalRevenue > 0
         ? ((totalRevenue - previousMonthTotalRevenue) / previousMonthTotalRevenue) * 100
         : 0;
@@ -103,5 +100,50 @@ export class FinanceService implements IFinanceService {
     }
   }
 
+  async getRefundTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>> {
+    try {
+      const result = await this.financeRepository.findRefundTransactions(page, limit, search);
+      
+      return {
+        success: true,
+        message: "Refund transactions fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch refund transactions: ${(error as Error).message}`
+      };
+    }
+  }
+  
+  async getRefundsByDateRange(
+    startDate: Date,
+    endDate: Date,
+    page: number,
+    limit: number,
+    search?: string 
+  ): Promise<ServiceResponse<any>> {
+    try {
+      const result = await this.financeRepository.findRefundsByDateRange(
+        startDate,
+        endDate,
+        page,
+        limit,
+        search
+      );
+  
+      return {
+        success: true,
+        message: "Refunds by date range fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch refunds by date range: ${(error as Error).message}`
+      };
+    }
+  }
 
 }

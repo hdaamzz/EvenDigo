@@ -57,15 +57,11 @@ export class FinanceService {
   
   constructor(private http: HttpClient) { }
 
-  fetchRevenue(page: number = 1, limit: number = 10, searchTerm: string = ''): Observable<any> {
+  fetchRevenue(page: number = 1, limit: number = 10): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
-    
-    if (searchTerm) {
-      params = params.set('search', searchTerm);
-    }
-    
+
     return this.http.get(`${this.baseUrl}admin/finance/revenue`, { params, withCredentials: true });
   }
   
@@ -88,5 +84,25 @@ export class FinanceService {
   getRevenueAnalytics(period: 'daily' | 'weekly' | 'monthly' = 'monthly'): Observable<any> {
     const params = new HttpParams().set('period', period);
     return this.http.get(`${this.baseUrl}admin/finance/analytics`, { params, withCredentials: true });
+  }
+
+  getRefundTransactions(page: number = 1, limit: number = 5): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    return this.http.get(`${this.baseUrl}admin/finance/refunds`, { params, withCredentials: true });
+  }
+  getRefundsByDateRange(startDate: string, endDate: string, page: number = 1, limit: number = 5, search: string = ''): Observable<any> {
+    let params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    
+    if (search) {
+      params = params.set('search', search);
+    }
+    
+    return this.http.get(`${this.baseUrl}admin/finance/refunds/range`, { params, withCredentials: true });
   }
 }
