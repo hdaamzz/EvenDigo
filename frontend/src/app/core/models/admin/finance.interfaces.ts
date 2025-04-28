@@ -4,3 +4,8 @@ export interface StatCard {
     change: string;
     isNegative: boolean;
   }
+
+ export interface Filter {
+    startDate: string;
+    endDate: string;
+  }

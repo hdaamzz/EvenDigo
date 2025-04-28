@@ -7,13 +7,9 @@
   import { DatePickerModule } from 'primeng/datepicker';
   import { DialogModule } from 'primeng/dialog';
   import { ButtonModule } from 'primeng/button';
+import { Filter } from '../../../../core/models/admin/finance.interfaces';
 
-  interface Filter {
-    startDate: string;
-    endDate: string;
-    refundStatus: string;
-    paymentType: string;
-  }
+ 
   @Component({
     selector: 'app-finance-refund',
     imports: [CommonModule, FormsModule, ReusableTableComponent, DatePickerModule, DialogModule, ButtonModule],
@@ -47,8 +43,6 @@
     filters: Filter = {
       startDate: '',
       endDate: '',
-      refundStatus: 'All',
-      paymentType: 'All'
     };
     
     selectedDateRange: string = 'This Month';
@@ -176,12 +170,7 @@
     onEndDateSelect(event: any): void {
       this.customEndDate = event.toISOString().split('T')[0];
     }
-    
-    onStatusChange(status: string): void {
-      this.filters.refundStatus = status;
-      this.applyFilters();
-    }
-    
+
     applyCustomDateRange(): void {
       if (this.customStartDate && this.customEndDate) {
         this.filters.startDate = this.customStartDate;
@@ -238,8 +227,6 @@
       this.filters = {
         startDate: '',
         endDate: '',
-        refundStatus: 'All',
-        paymentType: 'All'
       };
       
       this.selectedDateRange = 'This Month';

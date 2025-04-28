@@ -88,6 +88,20 @@ import { inject, injectable } from 'tsyringe';
     .populate('userId')
     .exec();
   }
+
+  async findBookingsByEventId(
+    eventId: Schema.Types.ObjectId | string, 
+    filters: Record<string, any> = {}
+  ): Promise<IBooking[]> {
+    try {
+      return await this.bookingModel.find({
+        eventId,
+        ...filters
+      }).exec();
+    } catch (error) {
+      throw new Error(`Failed to find bookings by event ID: ${(error as Error).message}`);
+    }
+  }
 }
 
 export { IBookingRepository, BookingRepository };

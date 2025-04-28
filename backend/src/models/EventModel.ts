@@ -55,7 +55,6 @@ const eventSchema = new Schema({
       type: String,
       required: true
     },
-    // Ticket Details
     tickets: [{
       type: {
         type: String,
