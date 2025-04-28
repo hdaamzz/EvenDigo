@@ -2,7 +2,7 @@ import { Schema } from "mongoose";
 import { VerificationModel } from "../../src/models/VerificationModel";
 import { IVerificationRepository } from "./interfaces/IVerification.repository";
 import { injectable } from "tsyringe";
-import { IVerification } from "src/models/interfaces/profile.interface";
+import { IVerification } from "../../src/models/interfaces/profile.interface";
 
 @injectable()
 export class VerificationRepository implements IVerificationRepository{
@@ -42,9 +42,9 @@ async approveUser(userId: Schema.Types.ObjectId | string): Promise<IVerification
       }
   
       
-      async getVerificationRequest(userId:Schema.Types.ObjectId | string): Promise<IVerification | null> {
+      async getVerificationRequest(user_id:Schema.Types.ObjectId | string): Promise<IVerification | null> {
           try {
-              return VerificationModel.findOne({userId})
+              return VerificationModel.findOne({user_id})
           } catch (error: unknown) {
               console.error("Error while creating varefication request", error);
               throw new Error('Failed to create varefication request');

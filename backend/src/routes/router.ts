@@ -9,6 +9,7 @@ import adminEventsRouter from './admin/events.routes';
 import adminUsersRouter from './admin/users.routes';
 import adminAuthRouter from './admin/auth.routes';
 import achievementRouter from './admin/achievements.routes';
+import financeRouter from './admin/revenue.routes';
 
 
 const router = express.Router();
@@ -30,7 +31,7 @@ router.use('/admin/coupon',couponRouter);
 router.use('/admin/events',adminEventsRouter);
 router.use('/admin/users',adminUsersRouter);
 router.use('/admin/achievements', achievementRouter);
-
+router.use('/admin/finance', financeRouter);
 
 
 

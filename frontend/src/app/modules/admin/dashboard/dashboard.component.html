@@ -11,12 +11,12 @@
             EvenDigo
         </div>
         <button (click)="toggleSidebar()" class="text-gray-600 focus:outline-none p-2 block">
-           
+
             <svg *ngIf="!sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-            
+
             <svg *ngIf="sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -26,44 +26,77 @@
 
     <div [ngClass]="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}"
         class="fixed w-64 h-screen bg-white border-r border-gray-200 p-5 z-30 transition-all duration-300 lg:translate-x-0 shadow-lg">
-       
+
         <div class="logo flex items-center gap-2 text-green-500 text-2xl font-bold mb-10 lg:flex">
             <i class="fas fa-ticket-alt"></i>
             EvenDigo
         </div>
 
-       
+
         <button (click)="toggleSidebar()"
             class="z-20 absolute top-4 right-4 text-gray-600 lg:hidden w-8 h-8 flex items-center justify-center">
             <i class="fas fa-times"></i>
         </button>
 
-       
-        <div (click)="showDashboard(); closeSidebarOnMobile()"
+
+        <div [ngClass]="{'bg-green-500 text-white': dashBoard}" (click)="showDashboard(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-chart-line w-5 text-center"></i> Dashboard
         </div>
-        <div (click)="showUserList(); closeSidebarOnMobile()"
+
+        <div [ngClass]="{'bg-green-500 text-white': userList}" (click)="showUserList(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-users w-5 text-center"></i> Customers
         </div>
-        <div (click)="showEventsList(); closeSidebarOnMobile()"
+
+        <div [ngClass]="{'bg-green-500 text-white': eventList}" (click)="showEventsList(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-calendar-alt w-5 text-center"></i> Events
         </div>
-        <div (click)="showCouponList(); closeSidebarOnMobile()"
+
+        <div [ngClass]="{'bg-green-500 text-white': couponList}" (click)="showCouponList(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-gift w-5 text-center"></i> Coupons
         </div>
-        <div (click)="showAchievements(); closeSidebarOnMobile()"
+
+        <div [ngClass]="{'bg-green-500 text-white': achievements}" (click)="showAchievements(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-trophy w-5 text-center"></i> Achievements
         </div>
-        <div
-            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
-            <i class="fas fa-money-bill-wave w-5 text-center"></i> Finance
+        <div class="relative">
+            <div [ngClass]="{'bg-green-500 text-white': finance}" (click)="toggleFinanceDropdown()"
+                class="nav-item flex items-center justify-between p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all cursor-pointer">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Finance
+                </div>
+                <i class="fas fa-chevron-down transition-transform duration-300"
+                    [ngClass]="{'transform rotate-180': financeDropdownOpen}"></i>
+            </div>
+
+            <div class="overflow-hidden transition-all duration-300 max-h-0"
+                [ngClass]="{'max-h-48': financeDropdownOpen}">
+                <div class="pl-8 space-y-1 mt-1">
+                    <div [ngClass]="{'bg-green-100 text-green-600': finance && financeSection === 'revenue'}"
+                        (click)="navigateToFinanceSection('revenue'); closeSidebarOnMobile()"
+                        class="flex items-center gap-2 p-2 rounded-lg text-gray-600 hover:bg-green-100 hover:text-green-600 transition-all">
+                        <i class="fas fa-chart-line w-5 text-center"></i> Revenue Transactions
+                    </div>
+                    <div [ngClass]="{'bg-green-100 text-green-600': finance && financeSection === 'refunds'}"
+                        (click)="navigateToFinanceSection('refunds'); closeSidebarOnMobile()"
+                        class="flex items-center gap-2 p-2 rounded-lg text-gray-600 hover:bg-green-100 hover:text-green-600 transition-all">
+                        <i class="fas fa-undo-alt w-5 text-center"></i> Refund History
+                    </div>
+                    <div [ngClass]="{'bg-green-100 text-green-600': finance && financeSection === 'bookings'}"
+                        (click)="navigateToFinanceSection('bookings'); closeSidebarOnMobile()"
+                        class="flex items-center gap-2 p-2 rounded-lg text-gray-600 hover:bg-green-100 hover:text-green-600 transition-all">
+                        <i class="fas fa-bookmark w-5 text-center"></i> Booking History
+                    </div>
+                </div>
+            </div>
         </div>
-        <div
+
+        <div [ngClass]="{'bg-green-500 text-white': subscription}"
+            (click)="showSubscriptionList(); closeSidebarOnMobile()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-credit-card w-5 text-center"></i> Subscriptions
         </div>
@@ -73,23 +106,32 @@
         </div>
     </div>
 
-    
+
     <div (click)="toggleSidebar()"
         [ngClass]="{'opacity-50 pointer-events-auto': sidebarOpen, 'opacity-0 pointer-events-none': !sidebarOpen}"
         class="fixed inset-0 bg-black z-20 transition-opacity duration-300 lg:hidden "></div>
 
-   
+
     <div class="lg:ml-64 pt-16 lg:pt-0 min-h-screen transition-all duration-300">
         @if (dashBoard) {
         <app-dashboard-home></app-dashboard-home>
         }@else if (userList) {
         <app-users-list></app-users-list>
         }@else if (eventList) {
-            <app-events-list></app-events-list>
+        <app-events-list></app-events-list>
         }@else if (couponList) {
-            <app-coupon-list></app-coupon-list>
+        <app-coupon-list></app-coupon-list>
         }@else if(achievements){
-            <app-achievements></app-achievements>
+        <app-achievements></app-achievements>
+        }@else if(finance && financeSection=='revenue'){
+        <app-finance-revenue></app-finance-revenue>
+        }@else if(finance && financeSection=='refunds'){
+        <app-finance-refund></app-finance-refund>
+        }@else if(finance && financeSection=='bookings'){
+        <app-finance-booking></app-finance-booking>
+        }@else if(subscription){
+        <app-subscription></app-subscription>
         }
+
     </div>
 </div>

@@ -29,7 +29,7 @@ export const appConfig: ApplicationConfig = {
 };
 
 Notiflix.Notify.init({
-  position: 'right-top',
+  position: 'right-bottom',
   distance: '10px',
   opacity: 1,
   borderRadius: '8px',
