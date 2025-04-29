@@ -9,13 +9,11 @@ const transactionSchema = new Schema({
   },
   eventId: {
     type: Schema.Types.ObjectId,
-    ref: 'Event',
-    required: true
-  },
+    ref: 'Event'
+   },
   transactionId: {
     type: String,
     required: true,
-    unique: true
   },
   amount: {
     type: Number,

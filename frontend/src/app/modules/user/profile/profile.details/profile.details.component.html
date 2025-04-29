@@ -1,241 +1,367 @@
-<div class="w-full min-h-[calc(100vh-40px)] bg-[#121212] text-white p-4 md:p-6">
-  <div class="max-w-4xl mx-auto">
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-white mb-2">Profile Details</h1>
-      <p class="text-gray-400">Manage your personal information and account settings</p>
+<div class="min-h-screen bg-[#121212] text-white p-4 md:p-6">
+  <div class="max-w-5xl mx-auto">
+    <!-- Header section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">Profile Dashboard</h1>
+      <p class="text-gray-400">Manage your personal information and customize your experience</p>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-400 text-sm">Events Attended</span>
+          <div class="bg-indigo-900 p-2 rounded-lg">
+            <i class="fas fa-calendar text-indigo-300"></i>
+          </div>
+        </div>
+        <h3 class="text-3xl font-bold mt-2">12</h3>
+      </div>
+      
+      <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-400 text-sm">Achievements</span>
+          <div class="bg-yellow-900 p-2 rounded-lg">
+            <i class="fas fa-trophy text-yellow-300"></i>
+          </div>
+        </div>
+        <h3 class="text-3xl font-bold mt-2">4</h3>
+      </div>
+      
+      <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-400 text-sm">Reward Points</span>
+          <div class="bg-green-900 p-2 rounded-lg">
+            <i class="fas fa-coins text-green-300"></i>
+          </div>
+        </div>
+        <h3 class="text-3xl font-bold mt-2">2500</h3>
+      </div>
+      
+      <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-400 text-sm">Followed Events</span>
+          <div class="bg-pink-900 p-2 rounded-lg">
+            <i class="fas fa-heart text-pink-300"></i>
+          </div>
+        </div>
+        <h3 class="text-3xl font-bold mt-2">8</h3>
+      </div>
     </div>
 
     @if (user) {
-    <div class="bg-[#1E1E1E] rounded-2xl p-4 md:p-6 mb-6 ">
-      <div class="flex flex-col md:flex-row gap-6">
-        <div class="flex flex-col items-center">
-          <div class="relative">
-            <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" 
-              alt="Profile picture"
-              class="h-32 w-32 rounded-full object-cover border-2 border-[#00ff66]" />
-            <button (click)="openFileSelector()"
-              class="absolute bottom-0 right-0 bg-[#00ff66] text-[#151A2D] h-8 w-8 rounded-full flex items-center justify-center hover:bg-[#00cc52] transition-colors duration-200">
-              <i class="fa fa-camera"></i>
-            </button>
-            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
-          </div>
-          <div class="mt-2 text-center">
-            <h3 class="font-semibold text-lg">{{user.name}}</h3>
-            
-            <div class="mt-2 flex items-center justify-center">
+    <!-- User profile card -->
+    <div class="bg-black opacity-70 rounded-2xl shadow-xl overflow-hidden mb-8 ">
+
+
+      <div class="flex flex-col md:flex-row p-6">
+        <!-- Profile image section -->
+        <div class="flex flex-col items-center mb-6 md:mb-0 md:mr-8">
+          <div class="relative group">
+            <div class="absolute -inset-0.5 rounded-full opacity-75 group-hover:opacity-100 blur group-hover:blur-md transition duration-500"></div>
+            <div class="relative">
+              <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" 
+                alt="Profile picture"
+                class="h-36 w-36 rounded-full object-cover border-2 border-[#00ff66]" />
+              
+              <button (click)="openFileSelector()"
+                class="absolute bottom-1 right-1 bg-[#00ff66] text-black h-8 w-8 rounded-full flex items-center justify-center hover:bg-white transition-colors duration-300">
+                <i class="fas fa-camera"></i>
+              </button>
+              <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
             </div>
-            @if (user.name && user.email && user.phone && user.bio && user.location && user.dateOfBirth && verificationData.status=='') {
-              <button (click)="sendVereficationRequest()" class="bg-[#01ff66] hover:bg-green-600 px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
-                Send Verification Request
-              </button>
-            }@else if (verificationData.status=='Pending') {
-              <button class="bg-[#f2ff00] text-black px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
-               Verification is Pending
-              </button>
-            }@else if (verificationData.status=='Verified') {
-              <button  class="bg-[#00ff66] hover:bg-green-600 px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
-                Verified
-              </button>
-            }@else if (verificationData.status=='Rejected') {
-              <button  class="bg-red-600 hover:bg-green-600 px-2 py-1 rounded-md text-xs font-semibold shadow-md transition duration-300">
-                Verification Rejected
-              </button>
-            }
-            
+          </div>
+          
+          <div class="mt-4 text-center">
+            <h3 class="font-bold text-xl mb-1">{{user.name}}</h3>
+            <div class="flex items-center justify-center space-x-2">
+              <!-- Verification badge -->
+              @if (verificationData.status=='Verified') {
+                <div class="flex items-center bg-gradient-to-r from-green-600 to-[#00ff66] rounded-full px-3 py-1">
+                  <i class="fas fa-check-circle mr-1"></i>
+                  <span class="text-xs font-bold">Verified</span>
+                </div>
+              } @else if (verificationData.status=='Pending') {
+                <div class="flex items-center bg-gradient-to-r from-yellow-600 to-yellow-400 text-black rounded-full px-3 py-1">
+                  <i class="fas fa-clock mr-1"></i>
+                  <span class="text-xs font-bold">Pending</span>
+                </div>
+              } @else if (verificationData.status=='Rejected') {
+                <div class="flex items-center bg-gradient-to-r from-red-700 to-red-500 rounded-full px-3 py-1">
+                  <i class="fas fa-times-circle mr-1"></i>
+                  <span class="text-xs font-bold">Rejected</span>
+                </div>
+              } @else {
+                @if (user.name && user.email && user.phone && user.bio && user.location && user.dateOfBirth) {
+                  <button (click)="sendVerificationRequest()" 
+                    class="bg-gradient-to-r from-blue-500 to-[#00ff66] hover:from-[#00ff66] hover:to-blue-500 text-black rounded-full px-3 py-1 font-semibold text-xs transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Verify Account
+                  </button>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Badges section -->
+          <div class="mt-6 w-full">
+            <h4 class="text-sm font-semibold text-gray-400 mb-2 text-center">Achievement Badges</h4>
+            <div class="flex flex-wrap justify-center gap-2">
+              <div class="group relative">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                  <i class="fas fa-star text-white"></i>
+                </div>
+                <div class="absolute -bottom-1 right-0 w-4 h-4 bg-yellow-500 rounded-full border-2 border-gray-800 flex items-center justify-center text-[10px] font-bold">1</div>
+                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">Early Adopter</span>
+              </div>
+              <div class="group relative">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center opacity-50">
+                  <i class="fas fa-medal text-white"></i>
+                </div>
+                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">Event Master</span>
+              </div>
+              <div class="group relative">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center opacity-50">
+                  <i class="fas fa-fire text-white"></i>
+                </div>
+                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">Hot Streak</span>
+              </div>
+              <div class="group relative">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center opacity-50">
+                  <i class="fas fa-crown text-white"></i>
+                </div>
+                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">VIP Member</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="flex-1">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <p class="text-gray-400 text-sm">Email</p>
-              <p class="font-medium">{{user.email}}</p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-gray-400 text-sm">Bio</p>
-              <p class="font-medium">{{user.bio || 'Not provided'}}</p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-gray-400 text-sm">Date Of Birth</p>
-              <p class="font-medium">{{user.dateOfBirth | date:'mediumDate'}}</p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-gray-400 text-sm">Phone</p>
-              <p class="font-medium">{{user.phone ||'Not-Provided'}}</p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-gray-400 text-sm">Location</p>
-              <p class="font-medium">{{user.location || 'Not-Provided'}}</p>
-            </div>
-            <div class="space-y-1">
-              <p class="text-gray-400 text-sm">Gender</p>
-              <p class="font-medium">{{user.gender || 'Not-Provided'}}</p>
+          <div class="bg-[#1a1a1a] opacity-80 rounded-xl p-4 mb-4 ">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1 p-2 rounded-lg hover:bg-[#262626] transition">
+                <p class="text-gray-400 text-xs">Email</p>
+                <p class="font-medium flex items-center">
+                  <i class="fas fa-envelope mr-2 text-blue-400"></i>
+                  {{user.email}}
+                </p>
+              </div>
+              <div class="space-y-1 p-2 rounded-lg hover:bg-[#262626] transition">
+                <p class="text-gray-400 text-xs">Phone</p>
+                <p class="font-medium flex items-center">
+                  <i class="fas fa-phone mr-2 text-green-400"></i>
+                  {{user.phone || 'Not provided'}}
+                </p>
+              </div>
+              <div class="space-y-1 p-2 rounded-lg hover:bg-[#262626] transition">
+                <p class="text-gray-400 text-xs">Date Of Birth</p>
+                <p class="font-medium flex items-center">
+                  <i class="fas fa-birthday-cake mr-2 text-pink-400"></i>
+                  {{user.dateOfBirth | date:'mediumDate'}}
+                </p>
+              </div>
+              <div class="space-y-1 p-2 rounded-lg hover:bg-[#262626] transition">
+                <p class="text-gray-400 text-xs">Location</p>
+                <p class="font-medium flex items-center">
+                  <i class="fas fa-map-marker-alt mr-2 text-red-400"></i>
+                  {{user.location || 'Not provided'}}
+                </p>
+              </div>
+              <div class="space-y-1 p-2 rounded-lg hover:bg-[#262626] transition">
+                <p class="text-gray-400 text-xs">Gender</p>
+                <p class="font-medium flex items-center">
+                  <i class="fas fa-venus-mars mr-2 text-purple-400"></i>
+                  {{user.gender || 'Not provided'}}
+                </p>
+              </div>
+              <div class="space-y-1 p-2 rounded-lg hover:bg-[#262626] transition md:col-span-2">
+                <p class="text-gray-400 text-xs">Bio</p>
+                <p class="font-medium flex">
+                  <i class="fas fa-info-circle mr-2 text-yellow-400 mt-1"></i>
+                  <span>{{user.bio || 'Not provided'}}</span>
+                </p>
+              </div>
             </div>
           </div>
           
-          
+          <!-- Edit button -->
           @if (!editMode) {
-            <p-button (click)="editMode=true" label="Update your information" />
+            <button (click)="editMode=true" 
+              class="w-full bg-gradient-to-r from-[#00ff66] to-[#00aa44] hover:from-[#00aa44] hover:to-[#00ff66] text-black font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-opacity-50 shadow-lg">
+              <i class="fas fa-edit mr-2"></i>
+              Update Your Information
+            </button>
           }
-          
-          
-            
-          <p-dialog header="Edit Profile" [(visible)]="editMode" [style]="{ width: '40rem' }">
-            <span class="p-text-secondary block mb-8">Update your information.</span>
-            <form [formGroup]="userForm" (ngSubmit)="updateProfile()">
-              <div class="flex flex-col gap-2 mb-4">
-                <div class="flex items-center gap-4">
-                  <label for="username" class="font-semibold w-24">Name</label>
-                  <input pInputText id="username" class="flex-auto" formControlName="name" />
-                </div>
-                <div class="ml-24 text-red-500 text-sm">
-                  @if (userForm.get('name')?.invalid && (userForm.get('name')?.dirty || userForm.get('name')?.touched)) {
-                    @if (hasError('name', 'required')) {
-                      <div>Name is required</div>
-                    }
-                    @if (hasError('name', 'minlength')) {
-                      <div>Name must be at least 3 characters</div>
-                    }
-                    @if (hasError('name', 'alphabetsOnly')) {
-                      <div>Name should contain only alphabets</div>
-                    }
-                    @if (hasError('name', 'noSpaces')) {
-                      <div>Name should not contain spaces at beginning or end</div>
-                    }
-                    @if (hasError('name', 'repeatedCharacters')) {
-                      <div>Name contains too many repeated characters</div>
-                    }
-                  }
-                </div>
-              </div>
-          
-              <div class="flex flex-col gap-2 mb-4">
-                <div class="flex items-center gap-4">
-                  <label for="phone" class="font-semibold w-24">Phone</label>
-                  <input pInputText id="phone" class="flex-auto" formControlName="phone" />
-                </div>
-                <div class="ml-24 text-red-500 text-sm">
-                  @if (userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)) {
-                    @if (hasError('phone', 'required')) {
-                      <div>Phone number is required</div>
-                    }
-                    @if (hasError('phone', 'invalidMobile')) {
-                      <div>Please enter a valid mobile number</div>
-                    }
-                  }
-                </div>
-              </div>
-              
-              <div class="flex flex-col gap-2 mb-4">
-                <div class="flex items-center gap-4">
-                  <label for="location" class="font-semibold w-24">Location</label>
-                  <p-autoComplete 
-                    id="location" 
-                    [suggestions]="indianCities"
-                    (completeMethod)="filterCities($event)"
-                    [dropdown]="true"
-                    formControlName="location"
-                    [minLength]="1"
-                    placeholder="Select your city"
-                    styleClass="flex-auto"
-                  ></p-autoComplete>
-                </div>
-                <div class="ml-24 text-red-500 text-sm">
-                  @if (userForm.get('location')?.invalid && (userForm.get('location')?.dirty || userForm.get('location')?.touched)) {
-                    @if (hasError('location', 'required')) {
-                      <div>Location is required</div>
-                    }
-                    @if (hasError('location', 'minlength')) {
-                      <div>Location must be at least 2 characters</div>
-                    }
-                    @if (hasError('location', 'alphabetsOnly')) {
-                      <div>Location should contain only alphabets</div>
-                    }
-                  }
-                </div>
-              </div>
-          
-              <div class="flex flex-col gap-2 mb-4">
-                <div class="flex items-center gap-4">
-                  <label for="bio" class="font-semibold w-24">Bio</label>
-                  <textarea pInputText id="bio" class="flex-auto" formControlName="bio"></textarea>
-                </div>
-                <div class="ml-24 text-red-500 text-sm">
-                  @if (userForm.get('bio')?.invalid && (userForm.get('bio')?.dirty || userForm.get('bio')?.touched)) {
-                    @if (hasError('bio', 'minlength')) {
-                      <div>Bio must be at least 3 characters</div>
-                    }
-                    @if (hasError('bio', 'alphabetsOnly')) {
-                      <div>Bio should contain only alphabets</div>
-                    }
-                  }
-                </div>
-              </div>
-          
-              <div class="flex flex-col gap-2 mb-4">
-                <div class="flex items-center gap-4">
-                  <label for="gender" class="font-semibold w-24">Gender</label>
-                  <select
-                    id="gender"
-                    class="flex-auto p-2 border border-gray-500 rounded-md focus:outline-none bg-[#121212]"
-                    formControlName="gender"
-                  >
-                    <option value="" disabled>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
-                <div class="ml-24 text-red-500 text-sm">
-                  @if (userForm.get('gender')?.invalid && (userForm.get('gender')?.dirty || userForm.get('gender')?.touched)) {
-                    @if (hasError('gender', 'required')) {
-                      <div>Gender is required</div>
-                    }
-                    @if (hasError('gender', 'alphabetsOnly')) {
-                      <div>Gender should contain only alphabets</div>
-                    }
-                  }
-                </div>
-              </div>
-          
-              <div class="flex flex-col gap-2 mb-4">
-                <div class="flex items-center gap-4">
-                  <label for="dateofbirth" class="font-semibold w-24">Date Of Birth</label>
-                  <div class="flex-auto">
-                    <p-datePicker
-                        id="dateofbirth"
-                        formControlName="dateOfBirth"
-                        [showIcon]="true"
-                        dateFormat="dd/mm/yy"
-                        [maxDate]="maxDate"
-                        [showButtonBar]="true"
-                        placeholder="Select Date"
-                        inputId="dateofbirth"
-                        [style]="{'width':'100%'}"
-                        appendTo="body"
-                      ></p-datePicker>
-                  </div>
-                </div>
-                <div class="ml-24 text-red-500 text-sm">
-                  @if (userForm.get('dateOfBirth')?.invalid && (userForm.get('dateOfBirth')?.dirty || userForm.get('dateOfBirth')?.touched)) {
-                    @if (hasError('dateOfBirth', 'required')) {
-                      <div>Date of birth is required</div>
-                    }
-                  }
-                </div>
-              </div>
-          
-              <div class="flex justify-end gap-2">
-                <p-button label="Cancel" severity="secondary" (click)="cancelEdit()" />
-                <p-button label="Save" type="submit" [disabled]="isLoading || userForm.invalid" />
-              </div>
-            </form>
-          </p-dialog>
-      
         </div>
-
       </div>
     </div>
     }
 
+    <p-dialog header="Edit Profile" [(visible)]="editMode" [style]="{ width: '40rem' }" [modal]="true" styleClass="custom-dialog">
+      <div class="p-dialog-content bg-[#19191] text-white">
+        <span class="text-gray-300 block mb-6">Update your personal information to complete your profile</span>
+        <form [formGroup]="userForm" (ngSubmit)="updateProfile()">
+          <div class="flex flex-col gap-4 mb-4">
+            <div class="flex flex-col">
+              <label for="username" class="font-semibold mb-1 text-gray-300">Name</label>
+              <div class="relative">
+                <input pInputText id="username" class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]" formControlName="name" />
+              </div>
+              <div class="text-red-400 text-sm mt-1">
+                @if (userForm.get('name')?.invalid && (userForm.get('name')?.dirty || userForm.get('name')?.touched)) {
+                  @if (hasError('name', 'required')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name is required</div>
+                  }
+                  @if (hasError('name', 'minlength')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name must be at least 3 characters</div>
+                  }
+                  @if (hasError('name', 'alphabetsOnly')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name should contain only alphabets</div>
+                  }
+                  @if (hasError('name', 'noSpaces')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name should not contain spaces at beginning or end</div>
+                  }
+                  @if (hasError('name', 'repeatedCharacters')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name contains too many repeated characters</div>
+                  }
+                }
+              </div>
+            </div>
+        
+            <div class="flex flex-col">
+              <label for="phone" class="font-semibold mb-1 text-gray-300">Phone</label>
+              <div class="relative">
+                <input pInputText id="phone" class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]" formControlName="phone" />
+              </div>
+              <div class="text-red-400 text-sm mt-1">
+                @if (userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)) {
+                  @if (hasError('phone', 'required')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Phone number is required</div>
+                  }
+                  @if (hasError('phone', 'invalidMobile')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Please enter a valid mobile number</div>
+                  }
+                }
+              </div>
+            </div>
+            
+            <div class="flex flex-col">
+              <label for="location" class="font-semibold mb-1 text-gray-300">Location</label>
+              <div class="relative">
+                <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <p-autoComplete 
+                  id="location" 
+                  [suggestions]="indianCities"
+                  (completeMethod)="filterCities($event)"
+                  [dropdown]="true"
+                  formControlName="location"
+                  [minLength]="1"
+                  placeholder="Select your city"
+                  styleClass="w-full custom-autocomplete"
+                  [inputStyleClass]="'pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66] w-full'"
+                ></p-autoComplete>
+              </div>
+              <div class="text-red-400 text-sm mt-1">
+                @if (userForm.get('location')?.invalid && (userForm.get('location')?.dirty || userForm.get('location')?.touched)) {
+                  @if (hasError('location', 'required')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Location is required</div>
+                  }
+                  @if (hasError('location', 'minlength')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Location must be at least 2 characters</div>
+                  }
+                  @if (hasError('location', 'alphabetsOnly')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Location should contain only alphabets</div>
+                  }
+                }
+              </div>
+            </div>
+        
+            <div class="flex flex-col">
+              <label for="bio" class="font-semibold mb-1 text-gray-300">Bio</label>
+              <div class="relative">
+                <textarea pInputText id="bio" rows="3" class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]" formControlName="bio"></textarea>
+              </div>
+              <div class="text-red-400 text-sm mt-1">
+                @if (userForm.get('bio')?.invalid && (userForm.get('bio')?.dirty || userForm.get('bio')?.touched)) {
+                  @if (hasError('bio', 'minlength')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Bio must be at least 3 characters</div>
+                  }
+                  @if (hasError('bio', 'alphabetsOnly')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Bio should contain only alphabets</div>
+                  }
+                }
+              </div>
+            </div>
+        
+            <div class="flex flex-col">
+              <label for="gender" class="font-semibold mb-1 text-gray-300">Gender</label>
+              <div class="relative">
+                <i class="fas fa-venus-mars absolute left-3 top-1/2 transform -translate-y-1/2 text-green-300"></i>
+                <select
+                  id="gender"
+                  class="w-full pl-10 py-2 bg-black border  rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66] "
+                  formControlName="gender"
+                >
+                  <option value="" disabled>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div class="text-red-400 text-sm mt-1">
+                @if (userForm.get('gender')?.invalid && (userForm.get('gender')?.dirty || userForm.get('gender')?.touched)) {
+                  @if (hasError('gender', 'required')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Gender is required</div>
+                  }
+                  @if (hasError('gender', 'alphabetsOnly')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Gender should contain only alphabets</div>
+                  }
+                }
+              </div>
+            </div>
+        
+            <div class="flex flex-col">
+              <label for="dateofbirth" class="font-semibold mb-1 text-gray-300">Date Of Birth</label>
+              <div class="relative">
+                <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"></i>
+                <p-datePicker
+                    id="dateofbirth"
+                    formControlName="dateOfBirth"
+                    [showIcon]="false"
+                    dateFormat="dd/mm/yy"
+                    [maxDate]="maxDate"
+                    [showButtonBar]="true"
+                    placeholder="Select Date"
+                    inputId="dateofbirth"
+                    [style]="{'width':'100%'}"
+                    [inputStyle]="{'padding-left':'2.5rem', 'width':'100%', 'background-color':'black', 'border-color':'#4B5563'}"
+                    styleClass="custom-datepicker"
+                    appendTo="body"
+                  ></p-datePicker>
+              </div>
+              <div class="text-red-400 text-sm mt-1">
+                @if (userForm.get('dateOfBirth')?.invalid && (userForm.get('dateOfBirth')?.dirty || userForm.get('dateOfBirth')?.touched)) {
+                  @if (hasError('dateOfBirth', 'required')) {
+                    <div><i class="fas fa-exclamation-circle mr-1"></i> Date of birth is required</div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        
+          <div class="flex justify-end gap-3 mt-6">
+            <button type="button" (click)="cancelEdit()" 
+              class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
+              <i class="fas fa-times mr-2"></i>
+              Cancel
+            </button>
+            <button type="submit" [disabled]="isLoading || userForm.invalid"
+              class="px-4 py-2 bg-[#00ff66] hover:bg-[#00cc52] text-black font-semibold rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-opacity-50 disabled:bg-gray-500 disabled:text-gray-300">
+              <i class="fas fa-save mr-2"></i>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </p-dialog>
   </div>
 </div>
