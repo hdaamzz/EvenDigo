@@ -21,4 +21,6 @@ revenueDistributionRouter.post('/event/:eventId/distribute', (req, res) =>
   revenueDistributionController.distributeSpecificEvent(req, res)
 );
 
+
+
 export default revenueDistributionRouter;

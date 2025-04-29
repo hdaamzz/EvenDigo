@@ -7,6 +7,11 @@ export interface IRevenueDistributionService {
   distributeEventRevenue(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>>;
   getDistributionByEventId(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>>;
   getAllCompletedDistributions(): Promise<ServiceResponse<IRevenueDistribution[]>>;
+  getDistributedRevenue(page: number, limit: number): Promise<ServiceResponse<any>>;
+  getRecentDistributedRevenue(limit: number): Promise<ServiceResponse<IRevenueDistribution[]>>;
+  getRevenueByEventId(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>>;
+  getEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<ServiceResponse<any>>;
+  getRevenueStats(): Promise<ServiceResponse<any>>;
 }
 
 export interface IRevenueDistributionCronService {

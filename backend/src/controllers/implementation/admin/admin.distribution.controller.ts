@@ -106,4 +106,119 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       });
     }
   }
+  async getDistributedRevenue(req: Request, res: Response): Promise<void> {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const response = await this.revenueDistributionService.getDistributedRevenue(page, limit);
+
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch distributed revenue"
+      });
+    }
+  }
+
+  async getRecentDistributedRevenue(req: Request, res: Response): Promise<void> {
+    try {
+      const limit = parseInt(req.query.limit as string) || 5;
+
+      const response = await this.revenueDistributionService.getRecentDistributedRevenue(limit);
+
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch recent distributed revenue"
+      });
+    }
+  }
+
+  async getRevenueByEvent(req: Request, res: Response): Promise<void> {
+    try {
+      const eventId = req.params.eventId;
+
+      const response = await this.revenueDistributionService.getRevenueByEventId(eventId);
+
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue by event"
+      });
+    }
+  }
+
+  async getEventsByIds(req: Request, res: Response): Promise<void> {
+    try {
+      const ids = (req.query.ids as string || '').split(',').filter(id => id);
+      
+      if (!ids.length) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "No event IDs provided"
+        });
+        return;
+      }
+
+      const response = await this.revenueDistributionService.getEventsByIds(ids);
+
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch events by IDs"
+      });
+    }
+  }
+  async getRevenueStats(_req: Request, res: Response): Promise<void> {
+    try {
+      const response = await this.revenueDistributionService.getRevenueStats();
+  
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue statistics"
+      });
+    }
+  }
 }

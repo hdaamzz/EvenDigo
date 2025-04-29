@@ -105,4 +105,31 @@ export class FinanceService {
     
     return this.http.get(`${this.baseUrl}admin/finance/refunds/range`, { params, withCredentials: true });
   }
+  getRecentRevenue(limit: number = 5): Observable<any> {
+    const params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('sort', '-distributed_at');
+      
+    return this.http.get(`${this.baseUrl}admin/dist`, { params, withCredentials: true });
+  }
+  
+  getRevenueByEvent(eventId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}admin/dist/event/${eventId}`,{withCredentials: true});
+  }
+  getDistributedRevenue(page: number = 1, limit: number = 10): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString())
+      .set('is_distributed', 'true');
+      
+    return this.http.get(`${this.baseUrl}admin/dist/recent`, { params , withCredentials: true});
+  }
+  
+  getRevenueStats(): Observable<any> {
+    return this.http.get(`${this.baseUrl}admin/dist/stats`,{withCredentials:true});
+  }
+  getEventsByIds(eventIds: string[]): Observable<any[]> {
+    const params = new HttpParams().set('ids', eventIds.join(','));
+    return this.http.get<any[]>(`${this.baseUrl}admin/dist/batch`, { params , withCredentials: true});
+  }
 }

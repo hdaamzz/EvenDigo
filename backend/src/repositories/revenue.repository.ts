@@ -76,4 +76,159 @@ const eventIds = events.map((event: EventDocument) => event._id);
       { new: true }
     ).exec();
   }
+  async findDistributedRevenueWithPagination(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{
+    data: IRevenueDistribution[];
+    total: number;
+    page: number;
+    pages: number;
+  }> {
+    const skip = (page - 1) * limit;
+    const total = await this.revenueDistributionModel.countDocuments({ is_distributed: true });
+    
+    const data = await this.revenueDistributionModel.find({ is_distributed: true })
+      .sort({ distributed_at: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+    
+    return {
+      data,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    };
+  }
+  
+  async findRecentDistributedRevenue(limit: number = 5): Promise<IRevenueDistribution[]> {
+    return this.revenueDistributionModel.find({ is_distributed: true })
+      .sort({ distributed_at: -1 })
+      .limit(limit)
+      .exec();
+  }
+  
+  async findRevenueByEventId(eventId: Schema.Types.ObjectId | string): Promise<IRevenueDistribution | null> {
+    return this.revenueDistributionModel.findOne({ 
+      event: eventId, 
+      is_distributed: true 
+    })
+    .populate('event', 'eventTitle user_id')
+    .exec();
+  }
+  async findTotalRevenue(): Promise<number> {
+    const result = await this.revenueDistributionModel.aggregate([
+      { $match: { is_distributed: true } },
+      { $group: { _id: null, total: { $sum: "$total_revenue" } } }
+    ]);
+    return result.length > 0 ? Number(result[0].total) : 0;
+  }
+  
+  async findTotalRevenueForPreviousMonth(): Promise<number> {
+    const today = new Date();
+    const firstDayPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    
+    const result = await this.revenueDistributionModel.aggregate([
+      { 
+        $match: { 
+          is_distributed: true,
+          distributed_at: { 
+            $gte: firstDayPrevMonth, 
+            $lte: lastDayPrevMonth 
+          } 
+        } 
+      },
+      { $group: { _id: null, total: { $sum: "$total_revenue" } } }
+    ]);
+    
+    return result.length > 0 ? Number(result[0].total) : 0;
+  }
+  
+  async findTodayRevenue(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const result = await this.revenueDistributionModel.aggregate([
+      { 
+        $match: { 
+          is_distributed: true,
+          distributed_at: { 
+            $gte: today, 
+            $lt: tomorrow 
+          } 
+        } 
+      },
+      { $group: { _id: null, total: { $sum: "$total_revenue" } } }
+    ]);
+    
+    return result.length > 0 ? Number(result[0].total) : 0;
+  }
+  
+  async findYesterdayRevenue(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const result = await this.revenueDistributionModel.aggregate([
+      { 
+        $match: { 
+          is_distributed: true,
+          distributed_at: { 
+            $gte: yesterday, 
+            $lt: today 
+          } 
+        } 
+      },
+      { $group: { _id: null, total: { $sum: "$total_revenue" } } }
+    ]);
+    
+    return result.length > 0 ? Number(result[0].total) : 0;
+  }
+  
+  async findCurrentMonthRevenue(): Promise<number> {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    
+    const result = await this.revenueDistributionModel.aggregate([
+      { 
+        $match: { 
+          is_distributed: true,
+          distributed_at: { 
+            $gte: firstDayOfMonth, 
+            $lt: nextMonthFirstDay 
+          } 
+        } 
+      },
+      { $group: { _id: null, total: { $sum: "$total_revenue" } } }
+    ]);
+    
+    return result.length > 0 ? Number(result[0].total) : 0;
+  }
+  
+  async findPreviousMonthRevenue(): Promise<number> {
+    const today = new Date();
+    const firstDayPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const firstDayCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    const result = await this.revenueDistributionModel.aggregate([
+      { 
+        $match: { 
+          is_distributed: true,
+          distributed_at: { 
+            $gte: firstDayPrevMonth, 
+            $lt: firstDayCurrentMonth 
+          } 
+        } 
+      },
+      { $group: { _id: null, total: { $sum: "$total_revenue" } } }
+    ]);
+    
+    return result.length > 0 ? Number(result[0].total) : 0;
+  }
 }

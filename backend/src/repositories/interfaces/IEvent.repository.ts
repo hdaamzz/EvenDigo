@@ -10,4 +10,5 @@ export interface IDashboardRepository {
   deleteEvent(eventId: Schema.Types.ObjectId | string): Promise<boolean>;
   findAllEvents(): Promise<EventDocument[]>;
   findAllEventsWithPagination(page: number, limit: number): Promise<EventDocument[]> 
+  findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]>;
 }

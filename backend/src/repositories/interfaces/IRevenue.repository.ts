@@ -13,4 +13,21 @@ export interface IRevenueDistributionRepository {
   ): Promise<IRevenueDistribution | null>;
   findFinishedEventsForDistribution(): Promise<EventDocument[]>;
   markDistributionCompleted(eventId: Schema.Types.ObjectId | string): Promise<IRevenueDistribution | null>;
+  findDistributedRevenueWithPagination(
+      page: number,
+      limit: number 
+    ): Promise<{
+      data: IRevenueDistribution[];
+      total: number;
+      page: number;
+      pages: number;
+    }> ;
+    findRecentDistributedRevenue(limit: number): Promise<IRevenueDistribution[]> ;
+    findRevenueByEventId(eventId: Schema.Types.ObjectId | string): Promise<IRevenueDistribution | null>;
+    findTotalRevenue(): Promise<number>;
+    findTotalRevenueForPreviousMonth(): Promise<number>;
+    findTodayRevenue(): Promise<number>;
+    findYesterdayRevenue(): Promise<number>;
+    findCurrentMonthRevenue(): Promise<number>;
+    findPreviousMonthRevenue(): Promise<number>;
 }

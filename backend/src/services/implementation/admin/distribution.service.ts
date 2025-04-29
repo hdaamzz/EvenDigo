@@ -7,7 +7,7 @@ import { IRevenueDistributionRepository } from '../../../../src/repositories/int
 import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
 import { IRevenueDistributionService } from '../../../../src/services/interfaces/IDistribution.service';
 import { inject, injectable } from 'tsyringe';
-import { IDashboardRepository } from 'src/repositories/interfaces/IEvent.repository';
+import { IDashboardRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
 
 
 @injectable()
@@ -50,7 +50,6 @@ export class RevenueDistributionService implements IRevenueDistributionService {
 
   async distributeEventRevenue(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>> {
     try {
-      // Check if already distributed
       const existingDistribution = await this.revenueDistributionRepository.findDistributionByEventId(eventId);
       if (existingDistribution && existingDistribution.is_distributed) {
         return {
@@ -194,6 +193,118 @@ export class RevenueDistributionService implements IRevenueDistributionService {
       return {
         success: false,
         message: `Failed to fetch completed distributions: ${(error as Error).message}`
+      };
+    }
+  }
+
+  async getDistributedRevenue(page: number, limit: number): Promise<ServiceResponse<any>> {
+    try {
+      const result = await this.revenueDistributionRepository.findDistributedRevenueWithPagination(page, limit);
+      
+      return {
+        success: true,
+        message: "Revenue distribution data fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch revenue distribution data: ${(error as Error).message}`
+      };
+    }
+  }
+
+  async getRecentDistributedRevenue(limit: number): Promise<ServiceResponse<IRevenueDistribution[]>> {
+    try {
+      const result = await this.revenueDistributionRepository.findRecentDistributedRevenue(limit);
+      
+      return {
+        success: true,
+        message: "Recent revenue distribution data fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch recent revenue distribution data: ${(error as Error).message}`
+      };
+    }
+  }
+
+  async getRevenueByEventId(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>> {
+    try {
+      const result = await this.revenueDistributionRepository.findRevenueByEventId(eventId);
+      
+      return {
+        success: true,
+        message: "Revenue for event fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch revenue for event: ${(error as Error).message}`
+      };
+    }
+  }
+
+  async getEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<ServiceResponse<any>> {
+    try {
+      const events = await this.dashboardRepository.findEventsByIds(eventIds);
+      
+      return {
+        success: true,
+        message: "Events fetched successfully",
+        data: events
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch events: ${(error as Error).message}`
+      };
+    }
+  }
+  async getRevenueStats(): Promise<ServiceResponse<any>> {
+    try {
+      const totalRevenue = await this.revenueDistributionRepository.findTotalRevenue();
+      const previousMonthTotalRevenue = await this.revenueDistributionRepository.findTotalRevenueForPreviousMonth();
+  
+      const todayRevenue = await this.revenueDistributionRepository.findTodayRevenue();
+      const yesterdayRevenue = await this.revenueDistributionRepository.findYesterdayRevenue();
+  
+      const currentMonthRevenue = await this.revenueDistributionRepository.findCurrentMonthRevenue();
+      const previousMonthRevenue = await this.revenueDistributionRepository.findPreviousMonthRevenue();
+  
+      const totalRevenueChange = previousMonthTotalRevenue > 0
+        ? ((totalRevenue - previousMonthTotalRevenue) / previousMonthTotalRevenue) * 100
+        : 0;
+  
+      const todayRevenueChange = yesterdayRevenue > 0
+        ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100
+        : 0;
+  
+      const monthlyRevenueChange = previousMonthRevenue > 0
+        ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100
+        : 0;
+  
+      const stats = {
+        totalRevenue: totalRevenue.toFixed(2),
+        totalRevenueChange: Number(totalRevenueChange.toFixed(1)),
+        todayRevenue: todayRevenue.toFixed(2),
+        todayRevenueChange: Number(todayRevenueChange.toFixed(1)),
+        monthlyRevenue: currentMonthRevenue.toFixed(2),
+        monthlyRevenueChange: Number(monthlyRevenueChange.toFixed(1))
+      };
+  
+      return {
+        success: true,
+        message: "Revenue statistics fetched successfully",
+        data: stats
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch revenue statistics: ${(error as Error).message}`
       };
     }
   }
