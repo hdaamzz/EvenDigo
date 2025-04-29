@@ -6,18 +6,23 @@ import { inject, injectable } from 'tsyringe';
 import { IProfileService } from '../../../../src/services/interfaces/IProfile.service';
 import StatusCode from '../../../../src/types/statuscode';
 import { EventDocument } from 'src/models/interfaces/event.interface';
+import { IUserAchievementService } from '../../../../src/services/interfaces/IAchievement';
 
 
 @injectable()
 export class ProfileController {
   constructor(
     @inject("ProfileService")   private profileService: IProfileService,
+    @inject("UserAchievementService") private acheivementService : IUserAchievementService,
+    
   ) {}
 
   async fetchUserById(req: Request, res: Response): Promise<void> {
     const { userId } = req.body;
 
     const response: ServiceResponse<IUser> = await this.profileService.fetchUserById(userId);
+    await this.acheivementService.checkUserAchievements(userId);
+    
     if (response.success) {
       res.status(StatusCode.OK).json(response.data);
     } else {

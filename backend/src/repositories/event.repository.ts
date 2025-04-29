@@ -52,4 +52,8 @@ export class DashboardRepository implements IDashboardRepository {
   async findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]> {
     return await EventModel.find({ _id: { $in: eventIds } }).populate('user_id');
   }
+  async findDocumentCount(user_id: Schema.Types.ObjectId | string): Promise<any> {
+    return await EventModel.countDocuments({ user_id }).exec();;
+  }
+  
 }

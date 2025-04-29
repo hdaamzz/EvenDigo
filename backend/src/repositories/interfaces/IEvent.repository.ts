@@ -11,4 +11,5 @@ export interface IDashboardRepository {
   findAllEvents(): Promise<EventDocument[]>;
   findAllEventsWithPagination(page: number, limit: number): Promise<EventDocument[]> 
   findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]>;
+  findDocumentCount(user_id: Schema.Types.ObjectId | string): Promise<any> ;
 }

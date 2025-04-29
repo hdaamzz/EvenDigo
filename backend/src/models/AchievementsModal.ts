@@ -24,7 +24,13 @@ const achievementSchema = new Schema<IAchievement>({
         type: String,
         required: true,
         trim: true,
-        maxlength: 100
+        maxlength: 100,
+        enum: [
+            'events_created', 
+            'events_attended', 
+            'vip_events_taker', 
+            'gold_events_taker'      
+          ]
     },
     threshold: {
         type: Number,
@@ -46,8 +52,4 @@ const achievementSchema = new Schema<IAchievement>({
     toObject: { virtuals: true }
 });
 
-achievementSchema.index({ category: 1, isActive: 1 });
-
-export const AchievementModel = model<IAchievement>('Achievement', achievementSchema);
-
-export default AchievementModel;
+export default model<IAchievement>('Achievement', achievementSchema);

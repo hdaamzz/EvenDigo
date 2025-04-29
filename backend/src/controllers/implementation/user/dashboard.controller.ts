@@ -4,11 +4,13 @@ import { inject, injectable } from 'tsyringe';
 import { IDashboardController } from '../../../../src/controllers/interfaces/IDashboard.controller';
 import { IDashboardService } from '../../../../src/services/interfaces/IDashboard.service';
 import StatusCode from '../../../../src/types/statuscode';
+import { IUserAchievementService } from 'src/services/interfaces/IAchievement';
 
 @injectable()
 export class DashboardController implements IDashboardController{
   constructor(
     @inject("DashboardService") private dashboardService: IDashboardService,
+    @inject("UserAchievementService") private acheivementService : IUserAchievementService,
   ) {}
 
   createEvent = async (req: Request, res: Response): Promise<void> => {
@@ -46,6 +48,7 @@ export class DashboardController implements IDashboardController{
 
 
       const event = await this.dashboardService.createEvent(eventData);
+      await this.acheivementService.checkUserAchievements(userId)
       res.status(StatusCode.CREATED).json({ success: true, data: event });
     } catch (error) {
       console.error('Create event error:', error);

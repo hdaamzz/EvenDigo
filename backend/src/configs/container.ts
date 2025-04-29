@@ -37,6 +37,8 @@ import { RevenueDistributionCronService } from "../../src/services/implementatio
 import { RevenueDistributionController } from "../../src/controllers/implementation/admin/admin.distribution.controller";
 import { EventModel } from "../../src/models/EventModel";
 import { Logger } from "../../src/utils/logger";
+import { UserAchievementRepository } from "../../src/repositories/badge.repository";
+import { UserAchievementService } from "../../src/services/implementation/user/achievements/achivements.service";
 
 // Register repositories and services directly with their string token as the identifier
 container.register("UserRepository", { useClass: UserRepository });
@@ -49,6 +51,10 @@ container.register("WalletRepository", { useClass: WalletRepository });
 container.register("AchievementRepository",{useClass: AchievementRepository})
 container.register("FinanceRepository", { useClass: FinanceRepository });
 container.register("RevenueDistributionRepository", { useClass: RevenueDistributionRepository });
+container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
+
+
+
 
 //SERVICES
 //---user---
@@ -56,6 +62,7 @@ container.register("AuthService", { useClass: AuthService });
 container.register("DashboardService", { useClass: DashboardService });
 container.register("ExploreService", { useClass: ExploreService });
 container.register("ProfileService", { useClass: ProfileService });
+container.register("UserAchievementService", { useClass: UserAchievementService });
 
 
 //---admin---
