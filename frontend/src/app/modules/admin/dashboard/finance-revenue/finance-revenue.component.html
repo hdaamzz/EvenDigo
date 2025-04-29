@@ -6,10 +6,9 @@
                     Dashboard</span>
                 <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Revenue</span>
             </h3>
-
-
         </div>
 
+        <!-- Stats Cards -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
                 <h2 class="text-xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1">
@@ -17,7 +16,7 @@
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div *ngFor="let stat of statCards"
                     class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                     <div class="text-sm text-gray-500 mb-2">{{ stat.title }}</div>
@@ -31,28 +30,29 @@
             </div>
         </div>
 
+        <!-- Revenue Distribution Table -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+                <h2 class="text-xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1">
+                    Revenue Distribution
+                </h2>
+            </div>
 
+            <div *ngIf="isLoading" class="flex justify-center my-8">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500"></div>
+            </div>
 
-        <!-- <div *ngIf="loading" class="flex justify-center items-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-        </div> -->
-
-
-
-        <!-- <div *ngIf="!loading && transactions.length === 0" class="text-center py-8">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No transactions found</h3>
-          <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter parameters.</p>
-          <div class="mt-6">
-            <button (click)="resetFilters()"
-              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-              Reset Filters
-            </button>
-          </div>
-        </div> -->
+            <app-reusable-table 
+                *ngIf="!isLoading"
+                [columns]="tableColumns"
+                [data]="revenueData"
+                [currentPage]="currentPage"
+                [totalItems]="totalItems"
+                [pageSize]="itemsPerPage"
+                [showSearch]="true"
+                [searchPlaceholder]="'Search events...'"
+                (pageChange)="onPageChange($event)">
+            </app-reusable-table>
+        </div>
     </div>
 </div>

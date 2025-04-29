@@ -5,12 +5,8 @@ import { ReusableTableComponent, TableColumn } from '../../../../shared/reusable
 import { Subscription } from 'rxjs';
 import { FinanceService, RevenueStats, Transaction } from '../../../../core/services/admin/finance/finance.service';
 import { DatePickerModule } from 'primeng/datepicker';
-import { StatCard } from '../../../../core/models/admin/finance.interfaces';
+import { Filter, StatCard } from '../../../../core/models/admin/finance.interfaces';
 
-interface Filter {
-  startDate: string;
-  endDate: string;
-}
 
 @Component({
   selector: 'app-finance-booking',
@@ -62,7 +58,6 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     endDate: '',
   };
   
-  // Date range filter
   selectedDateRange: string = 'This Month';
   customStartDate: string = '';
   customEndDate: string = '';

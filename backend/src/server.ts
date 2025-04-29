@@ -13,6 +13,8 @@ import connectDB from './configs/db';
 import cookieParser from 'cookie-parser';
 import router from './routes/router';
 import stripeWebhookRouter from "./routes/user/webhook.routes";
+import { container } from "./configs/container";
+import { RevenueDistributionCronService } from "./services/implementation/cronjob/revenue.distribution";
 
 const PORT: string | undefined = process.env.PORT;
 
@@ -24,7 +26,8 @@ const corsOptions={
     credentials: true,  
 };
 // stripe listen --forward-to localhost:3000/webhooks/stripe
-
+const revenueDistributionCron = container.resolve(RevenueDistributionCronService);
+revenueDistributionCron.startCronJob();
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
 
 //Middlewares

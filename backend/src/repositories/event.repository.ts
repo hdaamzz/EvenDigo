@@ -49,4 +49,7 @@ export class DashboardRepository implements IDashboardRepository {
       .limit(limit)
       .populate('user_id');
   }
+  async findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]> {
+    return await EventModel.find({ _id: { $in: eventIds } }).populate('user_id');
+  }
 }

@@ -1,54 +1,129 @@
+Custom styles for PrimeNG components
 
-
-.shape {
-    animation: float 6s ease-in-out infinite;
+:host ::ng-deep .custom-dialog .p-dialog-header {
+  background-color: #1F2937;
+  border-color: #374151;
+  color: white;
+  padding: 1.5rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
-.header {
-    animation: slideDown 0.5s ease-out;
+:host ::ng-deep .custom-dialog .p-dialog-content {
+  background-color: #1F2937;
+  color: white;
+  padding: 1.5rem;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 
-.stat-card {
-    animation: slideUp 0.5s ease-out;
+:host ::ng-deep .p-button {
+  background: linear-gradient(to right, #00ff66, #00aa44);
+  border: none;
+  color: black;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.card {
-    animation: fadeIn 0.5s ease-out;
+:host ::ng-deep .p-button:hover {
+  background: linear-gradient(to right, #00aa44, #00ff66);
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
 }
 
-.progress {
-    animation: progressFill 1s ease-out;
+:host ::ng-deep .p-button.p-button-secondary {
+  background: #4B5563;
+  color: white;
 }
 
-.chart-bar {
-    animation: barRise 1s ease-out;
+:host ::ng-deep .p-button.p-button-secondary:hover {
+  background: #6B7280;
 }
 
-/* Add this to your global styles */
-.small-calendar-panel {
-    max-width: 280px !important;
-    font-size: 0.85rem !important;
-  }
-  
-  .small-calendar-panel .p-datepicker table {
-    font-size: 0.85rem !important;
-  }
-  
-  .small-calendar-panel .p-datepicker table td {
-    padding: 0.25rem !important;
-  }
-  
-  .small-calendar-panel .p-datepicker table th {
-    padding: 0.25rem !important;
-  }
-  
-  .small-calendar-panel .p-datepicker-buttonbar {
-    padding: 0.5rem !important;
-  }
-  
-  /* Make sure the calendar panel doesn't overflow the dialog */
-  .p-dialog-content {
-    overflow: visible !important;
-  }
-/* font-family: 'Poppins', sans-serif; */
+:host ::ng-deep .p-inputtext:enabled:focus {
+  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.2);
+  border-color: #00ff66;
+}
 
+:host ::ng-deep .p-autocomplete-panel {
+  background-color: #1F2937;
+  border: 1px solid #374151;
+  color: white;
+}
+
+:host ::ng-deep .p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item {
+  color: white;
+  padding: 0.75rem 1rem;
+}
+
+:host ::ng-deep .p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item:hover {
+  background-color: #374151;
+}
+
+:host ::ng-deep .p-datepicker {
+  background-color: #1F2937;
+  border: 1px solid #374151;
+  color: white;
+}
+
+:host ::ng-deep .p-datepicker .p-datepicker-header {
+  background-color: #111827;
+  border-color: #374151;
+  color: white;
+}
+
+:host ::ng-deep .p-datepicker .p-datepicker-calendar th {
+  color: #9CA3AF;
+}
+
+:host ::ng-deep .p-datepicker .p-datepicker-calendar td > span {
+  color: white;
+}
+
+:host ::ng-deep .p-datepicker .p-datepicker-calendar td.p-datepicker-today > span {
+  background-color: rgba(0, 255, 102, 0.2);
+  color: #00ff66;
+}
+
+:host ::ng-deep .p-datepicker .p-datepicker-calendar td > span.p-highlight {
+  background-color: #00ff66;
+  color: black;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1F2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00ff66;
+}
+
+/* Animation for badges */
+@keyframes badge-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.badge-pulse {
+  animation: badge-pulse 2s infinite;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(to right, #00ff66, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

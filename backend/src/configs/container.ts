@@ -30,6 +30,13 @@ import { AchievementController } from "../../src/controllers/implementation/admi
 import { FinanceService } from "../../src/services/implementation/admin/admin.revenue.service";
 import { FinanceRepository } from "../../src/repositories/finance.repository";
 import { WalletModel } from "../../src/models/WalletModel";
+import { RevenueDistributionModel } from "../../src/models/RevenueModal";
+import { RevenueDistributionRepository } from "../../src/repositories/revenue.repository";
+import { RevenueDistributionService } from "../../src/services/implementation/admin/distribution.service";
+import { RevenueDistributionCronService } from "../../src/services/implementation/cronjob/revenue.distribution";
+import { RevenueDistributionController } from "../../src/controllers/implementation/admin/admin.distribution.controller";
+import { EventModel } from "../../src/models/EventModel";
+import { Logger } from "../../src/utils/logger";
 
 // Register repositories and services directly with their string token as the identifier
 container.register("UserRepository", { useClass: UserRepository });
@@ -41,7 +48,7 @@ container.register("VerificationRepository", { useClass: VerificationRepository 
 container.register("WalletRepository", { useClass: WalletRepository });
 container.register("AchievementRepository",{useClass: AchievementRepository})
 container.register("FinanceRepository", { useClass: FinanceRepository });
-  
+container.register("RevenueDistributionRepository", { useClass: RevenueDistributionRepository });
 
 //SERVICES
 //---user---
@@ -58,7 +65,9 @@ container.register("AdminEventsService",{useClass:AdminEventsService})
 container.register("AdminUsersService",{useClass:AdminUsersService})
 container.register("AchievementService",{useClass:AchievementService })
 container.register("FinanceService", {useClass: FinanceService });
-  
+container.register("RevenueDistributionService",  { useClass: RevenueDistributionService } );
+container.register("RevenueDistributionCronService", { useClass: RevenueDistributionCronService });
+
 
 
 
@@ -77,11 +86,17 @@ container.register("CouponController", { useClass: CouponController });
 container.register("AdminEventsController", { useClass: AdminEventsController });
 container.register("AdminUsersController", { useClass: AdminUsersController });
 container.register("AchievementController",{useClass:AchievementController})
+container.register("RevenueDistributionController", { useClass: RevenueDistributionController });
 
 
 
 container.register("BookingModel", { useValue: BookingsModel });
 container.register("WalletModel", { useValue: WalletModel });
+container.register("RevenueDistributionModel", { useValue: RevenueDistributionModel });
+container.register("EventModel", { useValue: EventModel });
+
+
+container.register("Logger", { useClass: Logger });
 
 
 

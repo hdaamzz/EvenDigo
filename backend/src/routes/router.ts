@@ -10,6 +10,7 @@ import adminUsersRouter from './admin/users.routes';
 import adminAuthRouter from './admin/auth.routes';
 import achievementRouter from './admin/achievements.routes';
 import financeRouter from './admin/revenue.routes';
+import distributionRouter from './admin/distribution.revenue.routes';
 
 
 const router = express.Router();
@@ -32,6 +33,7 @@ router.use('/admin/events',adminEventsRouter);
 router.use('/admin/users',adminUsersRouter);
 router.use('/admin/achievements', achievementRouter);
 router.use('/admin/finance', financeRouter);
+router.use('/admin/dist',distributionRouter)
 
 
 

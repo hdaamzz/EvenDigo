@@ -9,4 +9,5 @@ export interface IBookingRepository {
   findByStripeSessionId(sessionId: string): Promise<IBooking | null>;
   updateTicketStatus(bookingId: string,ticketUniqueId: string,status: string): Promise<IBooking | null>;
   updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> ;
+  findBookingsByEventId(eventId: Schema.Types.ObjectId | string, filters: Record<string, any>): Promise<IBooking[]>
 }
