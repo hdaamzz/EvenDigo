@@ -1,0 +1,59 @@
+/* Custom styling for subscription component */
+:host {
+    display: block;
+    width: 100%;
+  }
+  
+  /* Status badge styling */
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+  }
+  
+  .badge-active {
+    color: #0f766e;
+    background-color: #ccfbf1;
+  }
+  
+  .badge-inactive {
+    color: #be123c;
+    background-color: #ffe4e6;
+  }
+  
+  /* Stats cards animations */
+  .stat-card {
+    transition: all 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  /* Custom button styles */
+  .btn-action {
+    min-width: 100px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .grid-stats {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
+  
+  /* Shadow effects */
+  .card-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Table row hover effect */
+  .hover-row:hover {
+    background-color: rgba(16, 185, 129, 0.05);
+  }

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export enum SubscriptionStatus {
+  INACTIVE='inactive',
   ACTIVE = 'active',
   CANCELLED = 'cancelled',
   EXPIRED = 'expired',

@@ -43,8 +43,11 @@ import { SubscriptionController } from "../../src/controllers/implementation/use
 import { SubscriptionRepository } from "../../src/repositories/user/subscription.repository";
 import { SubscriptionModel } from "../../src/models/user/SubscriptionModal";
 import { SubscriptionService } from "../../src/services/implementation/user/subscription/subscription.service";
+import { AdminSubscriptionService } from "../../src/services/implementation/admin/admin.subscription.service";
+import { AdminSubscriptionController } from "../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
 
-// Register repositories and services directly with their string token as the identifier
+
+
 container.register("UserRepository", { useClass: UserRepository });
 container.register("AuthRepository", { useClass: AuthRepository });
 container.register("BookingRepository", { useClass: BookingRepository });
@@ -80,6 +83,7 @@ container.register("AchievementService",{useClass:AchievementService })
 container.register("FinanceService", {useClass: FinanceService });
 container.register("RevenueDistributionService",  { useClass: RevenueDistributionService } );
 container.register("RevenueDistributionCronService", { useClass: RevenueDistributionCronService });
+container.register("AdminSubscriptionService",  { useClass: AdminSubscriptionService } );
 
 
 
@@ -94,6 +98,7 @@ container.register("SubscriptionController", { useClass: SubscriptionController 
 
 
 
+
 //----admin----
 container.register("AdminAuthController", { useClass: AdminAuthController });
 container.register("CouponController", { useClass: CouponController });
@@ -101,6 +106,8 @@ container.register("AdminEventsController", { useClass: AdminEventsController })
 container.register("AdminUsersController", { useClass: AdminUsersController });
 container.register("AchievementController",{useClass:AchievementController})
 container.register("RevenueDistributionController", { useClass: RevenueDistributionController });
+container.register("AdminSubscriptionController", { useClass: AdminSubscriptionController });
+
 
 
 

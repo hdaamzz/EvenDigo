@@ -1,0 +1,148 @@
+import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { Subscription } from '../../../../../core/models/admin/subscription.interface';
+import { SubscriptionService } from '../../../../../core/services/admin/subscription/subscription.service';
+
+
+@Component({
+  selector: 'app-subscription-details-dialog',
+  standalone: true,
+  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule],
+  templateUrl: './subscription-details-dialog.component.html',
+  styleUrls: ['./subscription-details-dialog.component.css']
+})
+export class SubscriptionDetailsDialogComponent {
+  subscription: Subscription;
+  isEditing: boolean = false;
+  isUpdating: boolean = false;
+  
+  // Format dates for display and editing
+  startDateFormatted: string = '';
+  endDateFormatted: string = '';
+  
+  constructor(
+    private dialogRef: MatDialogRef<SubscriptionDetailsDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) private data: { subscription: Subscription },
+    private subscriptionService: SubscriptionService
+  ) {
+    this.subscription = { ...data.subscription };
+    
+    // Format dates for the date input fields
+    if (this.subscription.startDate) {
+      const startDate = new Date(this.subscription.startDate);
+      this.startDateFormatted = startDate.toISOString().split('T')[0];
+    }
+    
+    if (this.subscription.endDate) {
+      const endDate = new Date(this.subscription.endDate);
+      this.endDateFormatted = endDate.toISOString().split('T')[0];
+    }
+  }
+  
+  close(): void {
+    this.dialogRef.close();
+  }
+  
+  toggleEditMode(): void {
+    this.isEditing = !this.isEditing;
+    
+    // Reset to original values if canceling edit
+    if (!this.isEditing) {
+      this.subscription = { ...this.data.subscription };
+      
+      // Reset formatted dates
+      if (this.subscription.startDate) {
+        const startDate = new Date(this.subscription.startDate);
+        this.startDateFormatted = startDate.toISOString().split('T')[0];
+      }
+      
+      if (this.subscription.endDate) {
+        const endDate = new Date(this.subscription.endDate);
+        this.endDateFormatted = endDate.toISOString().split('T')[0];
+      }
+    }
+  }
+  
+  updateStartDate(event: any): void {
+    const newDate = event.target.value;
+    this.startDateFormatted = newDate;
+    this.subscription.startDate = new Date(newDate).toISOString();
+  }
+  
+  updateEndDate(event: any): void {
+    const newDate = event.target.value;
+    this.endDateFormatted = newDate;
+    this.subscription.endDate = new Date(newDate).toISOString();
+  }
+  
+  toggleSubscriptionStatus(): void {
+    this.isUpdating = true;
+    const newStatus = !this.subscription.isActive;
+    
+    this.subscriptionService.updateSubscriptionStatus(this.subscription.id, newStatus).subscribe({
+      next: () => {
+        this.subscription.isActive = newStatus;
+        this.subscription.status = newStatus ? 'active' : 'inactive';
+        this.isUpdating = false;
+        
+        // Close dialog and pass back updated subscription
+        this.dialogRef.close({ updated: true, subscription: this.subscription });
+      },
+      error: (error) => {
+        console.error('Error updating subscription status:', error);
+        this.isUpdating = false;
+      }
+    });
+  }
+  
+  saveChanges(): void {
+    this.isUpdating = true;
+    
+    // In a real application, you would update the subscription via the service
+    // For now, we'll just simulate the update and close the dialog
+    
+    setTimeout(() => {
+      this.isUpdating = false;
+      this.isEditing = false;
+      
+      // Close the dialog and pass back the updated subscription
+      this.dialogRef.close({ updated: true, subscription: this.subscription });
+    }, 500);
+    
+    // Uncomment and adapt this code when you have a real update endpoint
+    /*
+    this.subscriptionService.updateSubscription(this.subscription).subscribe({
+      next: (updatedSubscription) => {
+        this.subscription = updatedSubscription;
+        this.isUpdating = false;
+        this.isEditing = false;
+        this.dialogRef.close({ updated: true, subscription: updatedSubscription });
+      },
+      error: (error) => {
+        console.error('Error updating subscription:', error);
+        this.isUpdating = false;
+      }
+    });
+    */
+  }
+  
+  formatCurrency(amount: number): string {
+    return (amount / 100).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    });
+  }
+  
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+}

@@ -12,6 +12,7 @@ import achievementRouter from './admin/achievements.routes';
 import financeRouter from './admin/revenue.routes';
 import distributionRouter from './admin/distribution.revenue.routes';
 import subscriptionRoutes from './user/subscription.routes';
+import adminSubscriptionRoutes from './admin/subscription.routes';
 
 
 const router = express.Router();
@@ -37,7 +38,8 @@ router.use('/admin/events',adminEventsRouter);
 router.use('/admin/users',adminUsersRouter);
 router.use('/admin/achievements', achievementRouter);
 router.use('/admin/finance', financeRouter);
-router.use('/admin/dist',distributionRouter)
+router.use('/admin/dist',distributionRouter);
+router.use('/admin/subscriptions', adminSubscriptionRoutes);
 
 
 
