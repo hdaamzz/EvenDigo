@@ -1,0 +1,141 @@
+<div class="subscription-container text-white min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">      
+      <!-- Loading state -->
+      <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400"></div>
+      </div>
+      
+      <!-- Error state -->
+      <div *ngIf="error" class="bg-red-900 text-white p-4 rounded-lg mb-6">
+        <p>{{ error }}</p>
+        <button (click)="loadSubscriptionDetails()" class="mt-2 bg-red-700 hover:bg-red-600 px-4 py-2 rounded">
+          Try Again
+        </button>
+      </div>
+      
+      <!-- No subscription state -->
+      <div *ngIf="!loading && !subscription && !error" class="bg-[#262626] rounded-lg p-6 mb-6">
+        <div class="flex items-center justify-center flex-col text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <h2 class="text-xl font-bold mb-2">Not a Premium Member</h2>
+          <p class="text-gray-400 mb-4">Upgrade to premium to unlock all features and benefits</p>
+          <button (click)="navigateToCheckout()" class="bg-green-500 hover:bg-green-400 text-black font-bold py-2 px-6 rounded-lg">
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+      
+      <!-- Active subscription state -->
+      <div *ngIf="subscription" class="space-y-6">
+        <!-- Subscription Status Card -->
+        <div class="bg-green-500 rounded-lg p-6 text-black">
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 class="text-xl font-bold">{{ getFormattedSubscriptionType() }}</h2>
+              <div class="flex items-center mt-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                      [ngClass]="{
+                        'bg-green-900 text-green-200': subscription.status === 'active',
+                        'bg-yellow-900 text-yellow-200': subscription.status === 'pending',
+                        'bg-red-900 text-red-200': subscription.status === 'cancelled' || subscription.status === 'expired'
+                      }">
+                  {{ subscription.status | titlecase }}
+                </span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-3xl font-bold">₹{{ subscription.amount }}</p>
+              <p class="text-sm opacity-75">{{ subscription.paymentMethod | titlecase }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Subscription Details -->
+        <div class="bg-[#262626] rounded-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-white">Subscription Details</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-4">
+              <div>
+                <p class="text-gray-400 text-sm">Subscription ID</p>
+                <p class="font-mono">{{ subscription.subscriptionId }}</p>
+              </div>
+              
+              <div>
+                <p class="text-gray-400 text-sm">Start Date</p>
+                <p>{{ formatDate(subscription.startDate) }}</p>
+              </div>
+              
+              <div>
+                <p class="text-gray-400 text-sm">End Date</p>
+                <p>{{ formatDate(subscription.endDate) }}</p>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <div *ngIf="subscription.stripeCustomerId">
+                <p class="text-gray-400 text-sm">Customer ID</p>
+                <p class="font-mono">{{ subscription.stripeCustomerId }}</p>
+              </div>
+              
+              <div *ngIf="subscription.stripeSubscriptionId">
+                <p class="text-gray-400 text-sm">Stripe Subscription ID</p>
+                <p class="font-mono">{{ subscription.stripeSubscriptionId }}</p>
+              </div>
+              
+              <div>
+                <p class="text-gray-400 text-sm">Auto Renewal</p>
+                <p>{{ subscription.isActive ? 'Enabled' : 'Disabled' }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Time remaining indicator -->
+          <div class="mt-6">
+            <div class="flex justify-between text-sm mb-1">
+              <span>Subscription Progress</span>
+              <span>{{ getRemainingDays() }} days remaining</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+              <div class="bg-green-500 h-2.5 rounded-full" [style.width]="getProgressPercentage() + '%'"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="bg-[#262626] rounded-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-white">Manage Subscription</h3>
+          
+          <div class="flex flex-wrap gap-4">
+            <button 
+              *ngIf="subscription.status === 'active'"
+              (click)="cancelSubscription()" 
+              class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg"
+              [disabled]="cancelingSubscription">
+              <span *ngIf="!cancelingSubscription">Cancel Subscription</span>
+              <span *ngIf="cancelingSubscription" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            </button>
+            
+            <a 
+              *ngIf="subscription.status !== 'active'"
+              routerLink="/upgrade" 
+              class="bg-green-500 hover:bg-green-400 text-black py-2 px-4 rounded-lg">
+              Renew Subscription
+            </a>
+            
+            <!-- <a routerLink="/billing-history" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg">
+              View Billing History
+            </a> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

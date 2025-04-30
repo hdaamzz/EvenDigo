@@ -17,7 +17,7 @@ export interface SubscriptionPlan {
   
   export interface SubscriptionRequest {
     planId: string;
-    paymentMethodId?: string; // For premium plans
+    paymentMethodId?: string; 
     couponCode?: string;
   }
   

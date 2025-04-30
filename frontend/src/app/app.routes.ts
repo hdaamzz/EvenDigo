@@ -18,32 +18,33 @@ import { ProfileWalletComponent } from './modules/user/profile/profile.wallet/pr
 import { ProfileBookingsComponent } from './modules/user/profile/profile.bookings/profile.bookings.component';
 import { EventEditComponent } from './modules/user/profile/profile.events/event-edit/event-edit.component';
 import { PremiumCheckoutComponent } from './modules/user/premium-checkout/premium-checkout.component';
+import { ProfileSubscriptionComponent } from './modules/user/profile/profile.subscription/profile.subscription.component';
 
 export const routes: Routes = [
     //user - side 
     {
-        path:'',
-        component:HomeComponent,
-        canActivate:[isAdmin]
+        path: '',
+        component: HomeComponent,
+        canActivate: [isAdmin]
     },
     {
-        path:'register',
-        component:RegisterComponent,
-        canActivate:[isLogout]
+        path: 'register',
+        component: RegisterComponent,
+        canActivate: [isLogout]
     },
     {
-        path:'login',
-        component:LoginComponent,
-        canActivate:[isLogout]
+        path: 'login',
+        component: LoginComponent,
+        canActivate: [isLogout]
     },
     {
-        path: 'reset-password', 
+        path: 'reset-password',
         component: ResetPasswordComponent,
-        canActivate:[isLogout]
+        canActivate: [isLogout]
     },
     {
-        path:'profile',
-        component:ProfileComponent,
+        path: 'profile',
+        component: ProfileComponent,
         children: [
             {
                 path: '',
@@ -65,54 +66,60 @@ export const routes: Routes = [
             {
                 path: 'edit-event/:id',
                 component: EventEditComponent
-              }
-              ,
+            }
+            ,
             {
-                path:'wallet',
-                component:ProfileWalletComponent
+                path: 'subscription',
+                component: ProfileSubscriptionComponent
+            }
+            ,
+            {
+                path: 'wallet',
+                component: ProfileWalletComponent
             }
         ],
-        canActivate:[isLogged]
+        canActivate: [isLogged]
     },
     {
-        path:'dashboard',
-        component:UserDashboardComponent,
-        canActivate:[isLogged]
+        path: 'dashboard',
+        component: UserDashboardComponent,
+        canActivate: [isLogged]
     },
     {
-        path:'explore',
-        component:UserExploreComponent,
-        canActivate:[isLogged]
+        path: 'explore',
+        component: UserExploreComponent,
+        canActivate: [isLogged]
     },
     {
-        path:'checkout',
-        component:UserCheckoutComponent,
-        canActivate:[isLogged]
+        path: 'checkout',
+        component: UserCheckoutComponent,
+        canActivate: [isLogged]
     },
-    { path: 'payment/success',
+    {
+        path: 'payment/success',
         component: PaymentSuccessComponent,
-        canActivate:[isLogged]
+        canActivate: [isLogged]
     },
     {
-        path:'premium/checkout',
-        component:PremiumCheckoutComponent,
-        canActivate:[isLogged]
+        path: 'premium/checkout',
+        component: PremiumCheckoutComponent,
+        canActivate: [isLogged]
     },
 
     //admin - side
     {
-        path:'admin/login',
-        component:AdminLoginComponent,
-        canActivate:[adminIsLogout]
+        path: 'admin/login',
+        component: AdminLoginComponent,
+        canActivate: [adminIsLogout]
     },
     {
-        path:'admin/dashboard',
-        component:DashboardComponent,
-        canActivate:[adminIsLogged]
+        path: 'admin/dashboard',
+        component: DashboardComponent,
+        canActivate: [adminIsLogged]
     },
     {
         path: '**',
         redirectTo: '/',
         pathMatch: 'full'
-      }
+    }
 ];
