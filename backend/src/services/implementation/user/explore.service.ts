@@ -36,7 +36,7 @@ export class ExploreService implements IExploreService{
 
   async getEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     if (!userId) throw new Error('ID is required');
-    return this.dashboardRepository.findAllEventWithoutCurrentUser(userId);
+    return this.dashboardRepository.findUpcomingEventsWithoutCurrentUser(userId);
   }
   
   async getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
