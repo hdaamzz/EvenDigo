@@ -3,16 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from '../../../../../core/models/admin/subscription.interface';
 import { SubscriptionService } from '../../../../../core/services/admin/subscription/subscription.service';
-
 
 @Component({
   selector: 'app-subscription-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule,MatIconModule],
   templateUrl: './subscription-details-dialog.component.html',
-  styleUrls: ['./subscription-details-dialog.component.css']
+  styleUrls: ['./subscription-details-dialog.component.scss']
 })
 export class SubscriptionDetailsDialogComponent {
   subscription: Subscription;
@@ -82,7 +82,10 @@ export class SubscriptionDetailsDialogComponent {
     this.isUpdating = true;
     const newStatus = !this.subscription.isActive;
     
-    this.subscriptionService.updateSubscriptionStatus(this.subscription.id, newStatus).subscribe({
+    this.subscriptionService.updateSubscriptionStatus({
+      id: this.subscription.id,
+      isActive: newStatus
+    }).subscribe({
       next: () => {
         this.subscription.isActive = newStatus;
         this.subscription.status = newStatus ? 'active' : 'inactive';
@@ -101,32 +104,33 @@ export class SubscriptionDetailsDialogComponent {
   saveChanges(): void {
     this.isUpdating = true;
     
-    // In a real application, you would update the subscription via the service
-    // For now, we'll just simulate the update and close the dialog
+    // Create an update payload with only the fields that changed
+    const updatePayload = {
+      id: this.subscription.id,
+      type: this.subscription.type,
+      amount: this.subscription.amount,
+      paymentMethod: this.subscription.paymentMethod,
+      status: this.subscription.status,
+      startDate: this.subscription.startDate,
+      endDate: this.subscription.endDate,
+      stripeCustomerId: this.subscription.stripeCustomerId,
+      stripeSubscriptionId: this.subscription.stripeSubscriptionId
+    };
     
-    setTimeout(() => {
-      this.isUpdating = false;
-      this.isEditing = false;
-      
-      // Close the dialog and pass back the updated subscription
-      this.dialogRef.close({ updated: true, subscription: this.subscription });
-    }, 500);
-    
-    // Uncomment and adapt this code when you have a real update endpoint
-    /*
-    this.subscriptionService.updateSubscription(this.subscription).subscribe({
-      next: (updatedSubscription) => {
-        this.subscription = updatedSubscription;
-        this.isUpdating = false;
-        this.isEditing = false;
-        this.dialogRef.close({ updated: true, subscription: updatedSubscription });
-      },
-      error: (error) => {
-        console.error('Error updating subscription:', error);
-        this.isUpdating = false;
-      }
-    });
-    */
+    // Uncomment this in a real application for the API call
+    // this.subscriptionService.updateSubscription(updatePayload).subscribe({
+    //   next: (response) => {
+    //     this.isUpdating = false;
+    //     this.isEditing = false;
+        
+    //     // Close the dialog and pass back the updated subscription
+    //     this.dialogRef.close({ updated: true, subscription: this.subscription });
+    //   },
+    //   error: (error) => {
+    //     console.error('Error updating subscription:', error);
+    //     this.isUpdating = false;
+    //   }
+    // });  
   }
   
   formatCurrency(amount: number): string {
