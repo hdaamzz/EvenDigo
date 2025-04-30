@@ -31,52 +31,51 @@ export class ProfileDetailsComponent implements OnInit {
   defaultImageUrl = 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318747/user.icon_slz5l0.png';
   maxDate: Date = new Date();
   
-  // Stats tracking
+  
   statsData = {
     eventsAttended: 12,
     achievements: 4,
-    rewardPoints: 2500,
     followedEvents: 8
   };
   
-  // Verification status tracking
+  
   verificationData = {
     user_id: '',
     status: '',
     note: ''
   };
   
-  // Achievement badges
-  badges = [
-    { 
-      name: 'Early Adopter', 
-      icon: 'star', 
-      bgClass: 'from-purple-500 to-indigo-600', 
-      level: 1, 
-      isUnlocked: true 
-    },
-    { 
-      name: 'Event Master', 
-      icon: 'medal', 
-      bgClass: 'from-green-500 to-emerald-600', 
-      level: 0, 
-      isUnlocked: false 
-    },
-    { 
-      name: 'Hot Streak', 
-      icon: 'fire', 
-      bgClass: 'from-rose-500 to-red-600', 
-      level: 0, 
-      isUnlocked: false 
-    },
-    { 
-      name: 'VIP Member', 
-      icon: 'crown', 
-      bgClass: 'from-amber-500 to-yellow-600', 
-      level: 0, 
-      isUnlocked: false 
-    }
-  ];
+  
+  // badges = [
+  //   { 
+  //     name: 'Early Adopter', 
+  //     icon: 'star', 
+  //     bgClass: 'from-purple-500 to-indigo-600', 
+  //     level: 1, 
+  //     isUnlocked: true 
+  //   },
+  //   { 
+  //     name: 'Event Master', 
+  //     icon: 'medal', 
+  //     bgClass: 'from-green-500 to-emerald-600', 
+  //     level: 0, 
+  //     isUnlocked: false 
+  //   },
+  //   { 
+  //     name: 'Hot Streak', 
+  //     icon: 'fire', 
+  //     bgClass: 'from-rose-500 to-red-600', 
+  //     level: 0, 
+  //     isUnlocked: false 
+  //   },
+  //   { 
+  //     name: 'VIP Member', 
+  //     icon: 'crown', 
+  //     bgClass: 'from-amber-500 to-yellow-600', 
+  //     level: 0, 
+  //     isUnlocked: false 
+  //   }
+  // ];
   
   allIndianCities: string[] = [
     'Mumbai', 'Delhi', 'Kochi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 
