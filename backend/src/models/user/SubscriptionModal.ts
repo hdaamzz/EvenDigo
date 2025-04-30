@@ -87,7 +87,5 @@ const SubscriptionSchema = new Schema<ISubscription>({
   timestamps: true
 });
 
-// SubscriptionSchema.index({ userId: 1});
-// SubscriptionSchema.index({ stripeSessionId: 1 });
 
 export const SubscriptionModel = mongoose.model<ISubscription>('Subscription', SubscriptionSchema);

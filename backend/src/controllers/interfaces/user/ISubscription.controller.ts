@@ -9,6 +9,4 @@ export interface ISubscriptionController {
   getCurrentSubscription(req: Request, res: Response): Promise<void>;
   
   cancelSubscription(req: Request, res: Response): Promise<void>;
-  
-  handleWebhook(req: Request, res: Response): Promise<void>;
 }

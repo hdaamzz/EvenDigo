@@ -149,37 +149,4 @@ export class SubscriptionController implements ISubscriptionController {
       });
     }
   };
-
-  handleWebhook = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const sig = req.headers['stripe-signature'] as string;
-      const endpointSecret = process.env.STRIPE_SUBSCRIPTION_WEBHOOK_SECRET;
-
-      if (!endpointSecret) {
-        console.error('Missing STRIPE_SUBSCRIPTION_WEBHOOK_SECRET environment variable');
-        throw new Error('STRIPE_SUBSCRIPTION_WEBHOOK_SECRET environment variable is not set');
-      }
-
-      if (!Buffer.isBuffer(req.body)) {
-        console.error('Request body is not a Buffer');
-        throw new Error('Webhook request body must be raw Buffer data');
-      }
-
-      const event = this.subscriptionService.constructWebhookEvent(
-        req.body, 
-        sig, 
-        endpointSecret
-      );
-
-      await this.subscriptionService.handleStripeWebhook(event);
-
-      res.status(StatusCode.OK).json({ received: true });
-    } catch (error) {
-      console.error('Webhook error:', error);
-      res.status(StatusCode.BAD_REQUEST).json({
-        success: false,
-        error: (error as Error).message
-      });
-    }
-  };
 }

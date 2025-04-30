@@ -10,8 +10,4 @@ subscriptionRoutes.post('/wallet-upgrade', (req, res) => subscriptionController.
 subscriptionRoutes.get('/current', (req, res) => subscriptionController.getCurrentSubscription(req, res));
 subscriptionRoutes.post('/cancel', (req, res) => subscriptionController.cancelSubscription(req, res));
 
-
-subscriptionRoutes.post('/webhook', (req, res) => subscriptionController.handleWebhook(req, res));
-
-
 export default subscriptionRoutes;

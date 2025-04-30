@@ -1,6 +1,5 @@
 import { inject, injectable } from 'tsyringe';
 import Stripe from 'stripe';
-// import { v4 as uuidv4 } from 'uuid';
 import { ISubscriptionService, SubscriptionPayload } from '../../../../../src/services/interfaces/ISubscription.service';
 import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/user/ISubscription.repository';
 import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
@@ -32,7 +31,6 @@ export class SubscriptionService implements ISubscriptionService {
 
   async createStripeSubscription(userId: string, payload: SubscriptionPayload): Promise<{ sessionId: string }> {
     try {
-      // First check if user already has an active subscription
       const existingSubscription = await this.subscriptionRepository.findActiveSubscriptionByUserId(userId);
       if (existingSubscription) {
         throw new Error('User already has an active subscription');
@@ -40,12 +38,10 @@ export class SubscriptionService implements ISubscriptionService {
 
       const subscriptionId = `SUB${Date.now()}${Math.floor(Math.random() * 10000)}`;
       
-      // Calculate subscription end date (1 month from now)
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
 
-      // Create Stripe checkout session
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -64,17 +60,16 @@ export class SubscriptionService implements ISubscriptionService {
             quantity: 1,
           },
         ],
-        mode: 'subscription',
-        success_url: `${payload.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: payload.cancelUrl,
-        metadata: { 
-          userId: userId.toString(),
-          subscriptionId,
-          planType: payload.planType,
-        },
+      mode: 'subscription',
+      success_url: `${process.env.CLIENT_SERVER}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_SERVER}/subscription/cancel`,
+      metadata: {
+        paymentType: 'subscription',
+        userId: userId.toString(),
+        subscriptionId: subscriptionId
+      },
       });
 
-      // Create pending subscription record
       await this.subscriptionRepository.createSubscription({
         userId,
         subscriptionId,
@@ -97,13 +92,11 @@ export class SubscriptionService implements ISubscriptionService {
 
   async processWalletSubscription(userId: string, payload: SubscriptionPayload): Promise<ISubscription> {
     try {
-      // First check if user already has an active subscription
       const existingSubscription = await this.subscriptionRepository.findActiveSubscriptionByUserId(userId);
       if (existingSubscription) {
         throw new Error('User already has an active subscription');
       }
 
-      // Check if user has sufficient balance
       const wallet = await this.walletRepository.findWalletById(userId);
       if (!wallet) {
         throw new Error('Wallet not found for this user');
@@ -115,12 +108,10 @@ export class SubscriptionService implements ISubscriptionService {
 
       const subscriptionId = `SUB${Date.now()}${Math.floor(Math.random() * 10000)}`;
       
-      // Calculate subscription end date (1 month from now)
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
 
-      // Create the subscription record
       const subscription = await this.subscriptionRepository.createSubscription({
         userId,
         subscriptionId,
@@ -133,7 +124,6 @@ export class SubscriptionService implements ISubscriptionService {
         paymentMethod: 'wallet'
       });
 
-      // Process the wallet payment
       await this.walletRepository.addTransaction(
         userId,
         {
@@ -179,12 +169,10 @@ export class SubscriptionService implements ISubscriptionService {
         return { success: true, message: 'Subscription is already cancelled' };
       }
       
-      // If it's a Stripe subscription, cancel it in Stripe as well
       if (subscription.stripeSubscriptionId) {
         await this.stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
       }
       
-      // Update the subscription in our database
       await this.subscriptionRepository.cancelSubscription(subscriptionId);
       
       return { success: true, message: 'Subscription cancelled successfully' };
@@ -194,20 +182,18 @@ export class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  async handleStripeWebhook(event: Stripe.Event): Promise<void> {
+  async handleSubscriptionWebhook(event: Stripe.Event): Promise<void> {
     try {
       switch (event.type) {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
           
-          // Find the subscription using the session ID
           const subscription = await this.subscriptionRepository.findSubscriptionByStripeSessionId(session.id);
           if (!subscription) {
             console.log(`No subscription found with session ID: ${session.id}`);
             return;
           }
           
-          // Update subscription status
           await this.subscriptionRepository.updateSubscription(subscription.subscriptionId, {
             status: SubscriptionStatus.ACTIVE,
             isActive: true,
@@ -220,7 +206,6 @@ export class SubscriptionService implements ISubscriptionService {
         case 'customer.subscription.deleted': {
           const stripeSubscription = event.data.object as Stripe.Subscription;
           
-          // Find all subscriptions with this Stripe subscription ID
           const subscriptions = await this.subscriptionRepository.findAllSubscriptionsByUserId(stripeSubscription.metadata.userId);
           const subscription = subscriptions.find(s => s.stripeSubscriptionId === stripeSubscription.id);
           
@@ -235,12 +220,10 @@ export class SubscriptionService implements ISubscriptionService {
           if (invoice.subscription) {
             const stripeSubscription = await this.stripe.subscriptions.retrieve(invoice.subscription as string);
             
-            // Find the subscription in our database
             const subscriptions = await this.subscriptionRepository.findAllSubscriptionsByUserId(stripeSubscription.metadata.userId);
             const subscription = subscriptions.find(s => s.stripeSubscriptionId === stripeSubscription.id);
             
             if (subscription) {
-              // Mark subscription as inactive due to payment failure
               await this.subscriptionRepository.updateSubscription(subscription.subscriptionId, {
                 status: SubscriptionStatus.EXPIRED,
                 isActive: false

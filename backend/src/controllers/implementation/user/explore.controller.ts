@@ -3,14 +3,17 @@ import { inject, injectable } from 'tsyringe';
 import { IExploreController } from '../../../../src/controllers/interfaces/IExplore.controller';
 import { IExploreService } from '../../../../src/services/interfaces/IExplore.service';
 import StatusCode from '../../../../src/types/statuscode';
+import Stripe from 'stripe';
+import { ISubscriptionService } from 'src/services/interfaces/ISubscription.service';
 
 @injectable()
 export class ExploreController implements IExploreController {
 
 
   constructor(
-    @inject("ExploreService") private exploreService: IExploreService
-  ) { }
+    @inject("ExploreService") private exploreService: IExploreService,
+    @inject("SubscriptionService") private subscriptionService:ISubscriptionService
+  ) { } 
 
   getAllEvents = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -60,7 +63,6 @@ export class ExploreController implements IExploreController {
   };
 
   handleStripeWebhook = async (req: Request, res: Response): Promise<void> => {
-
     try {
       const sig = req.headers['stripe-signature'] as string;
       const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -74,9 +76,10 @@ export class ExploreController implements IExploreController {
         console.error('Request body is not a Buffer');
         throw new Error('Webhook request body must be raw Buffer data');
       }
+      
       const event = this.exploreService.constructStripeEvent(req.body, sig, endpointSecret);
-
-      await this.exploreService.processStripeWebhook(event);
+      
+      await this.routeWebhookEvent(event);
 
       res.status(StatusCode.OK).json({ received: true });
     } catch (error) {
@@ -84,6 +87,31 @@ export class ExploreController implements IExploreController {
       res.status(StatusCode.BAD_REQUEST).json({ success: false, error: (error as Error).message });
     }
   };
+
+  private async routeWebhookEvent(event: Stripe.Event): Promise<void> {
+    try {
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as Stripe.Checkout.Session;
+        
+
+        if (session.metadata && session.metadata.paymentType === 'subscription') {
+          await this.subscriptionService.handleSubscriptionWebhook(event);
+        } else {
+          await this.exploreService.processStripeWebhook(event);
+        }
+      } else {
+        if (event.type.startsWith('customer.subscription') || 
+            event.type.startsWith('invoice')) {
+          await this.subscriptionService.handleSubscriptionWebhook(event);
+        } else {
+          await this.exploreService.processStripeWebhook(event);
+        }
+      }
+    } catch (error) {
+      console.error("Error in routeWebhookEvent:", error);
+      throw new Error(`Error routing webhook event: ${(error as Error).message}`);
+    }
+  }
 
   getBookingDetails = async (req: Request, res: Response): Promise<void> => {
     try {

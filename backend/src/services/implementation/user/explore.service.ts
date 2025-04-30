@@ -80,7 +80,7 @@ export class ExploreService implements IExploreService{
         mode: 'payment',
         success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: cancelUrl,
-        metadata: { userId: userId.toString(), eventId, couponCode: couponCode || '' },
+        metadata: { userId: userId.toString(), eventId,paymentType: 'event_booking', couponCode: couponCode || '' },
       });
 
       await this.bookingRepository.createBooking({

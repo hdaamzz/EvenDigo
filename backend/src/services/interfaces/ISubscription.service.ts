@@ -18,7 +18,7 @@ export interface ISubscriptionService {
   
   cancelSubscription(userId: string, subscriptionId: string): Promise<{ success: boolean; message: string }>;
   
-  handleStripeWebhook(event: Stripe.Event): Promise<void>;
+  handleSubscriptionWebhook(event: Stripe.Event): Promise<void> 
   
   verifyUserHasActiveSubscription(userId: string): Promise<boolean>;
   

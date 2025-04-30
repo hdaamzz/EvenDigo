@@ -34,7 +34,6 @@ export class DashboardController implements IDashboardController{
         }
       }
 
-      //form details
       const eventData = {
         ...req.body,
         user_id: userId,
@@ -90,7 +89,6 @@ export class DashboardController implements IDashboardController{
       const eventId = req.params.id;
       const userId = req.user.id;
       
-      // First check if event exists and belongs to user
       const existingEvent = await this.dashboardService.getEventById(eventId);
       
       if (!existingEvent) {
@@ -103,7 +101,6 @@ export class DashboardController implements IDashboardController{
         return;
       }
       
-      // Handle file uploads if present
       let updateData = { ...req.body };
       
       if (req.files) {
@@ -120,7 +117,6 @@ export class DashboardController implements IDashboardController{
         }
       }
       
-      // Process other form data
       if (updateData.ageRestriction) {
         updateData.ageRestriction = updateData.ageRestriction === 'Yes';
       }
@@ -150,7 +146,6 @@ export class DashboardController implements IDashboardController{
       const eventId = req.params.id;
       const userId = req.user.id;
       
-      // First check if event exists and belongs to user
       const existingEvent = await this.dashboardService.getEventById(eventId);
       
       if (!existingEvent) {

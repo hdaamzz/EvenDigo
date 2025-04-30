@@ -124,7 +124,6 @@ export class ProfileService implements IProfileService{
     }
   }
 
-  //profile image section
 
   async uploadImage(buffer: Buffer, folder = 'profiles'): Promise<CloudinaryUploadResult> {
     return new Promise((resolve, reject) => {
@@ -171,7 +170,6 @@ export class ProfileService implements IProfileService{
   }
 
 
-  //Booking section
   async getUserBookings(userId:  Schema.Types.ObjectId | string): Promise<IBooking[]> {
     try {
       const bookings = await this.bookingRepository.findBookingByUserId(userId);
@@ -304,7 +302,6 @@ export class ProfileService implements IProfileService{
       );
       
       if (!walletUpdate) {
-        // Log the error but don't fail the operation since the ticket is already cancelled
         console.error('Failed to add refund to wallet for user:', userId);
       }
       

@@ -61,7 +61,6 @@ const couponSchema = new Schema<ICoupon>({
     toObject: { virtuals: true }
 });
 
-// Compound index for performance
 couponSchema.index({ couponCode: 1, isActive: 1, expiryDate: 1 });
 
 export const CouponModel = model<ICoupon>('Coupon', couponSchema);
