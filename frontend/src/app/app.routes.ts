@@ -17,6 +17,7 @@ import { PaymentSuccessComponent } from './modules/user/user-checkout/payment-su
 import { ProfileWalletComponent } from './modules/user/profile/profile.wallet/profile.wallet.component';
 import { ProfileBookingsComponent } from './modules/user/profile/profile.bookings/profile.bookings.component';
 import { EventEditComponent } from './modules/user/profile/profile.events/event-edit/event-edit.component';
+import { PremiumCheckoutComponent } from './modules/user/premium-checkout/premium-checkout.component';
 
 export const routes: Routes = [
     //user - side 
@@ -89,7 +90,13 @@ export const routes: Routes = [
         canActivate:[isLogged]
     },
     { path: 'payment/success',
-        component: PaymentSuccessComponent
+        component: PaymentSuccessComponent,
+        canActivate:[isLogged]
+    },
+    {
+        path:'premium/checkout',
+        component:PremiumCheckoutComponent,
+        canActivate:[isLogged]
     },
 
     //admin - side

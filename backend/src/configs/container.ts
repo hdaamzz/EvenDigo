@@ -39,6 +39,10 @@ import { EventModel } from "../../src/models/EventModel";
 import { Logger } from "../../src/utils/logger";
 import { UserAchievementRepository } from "../../src/repositories/badge.repository";
 import { UserAchievementService } from "../../src/services/implementation/user/achievements/achivements.service";
+import { SubscriptionController } from "../../src/controllers/implementation/user/premium/subscription.controller";
+import { SubscriptionRepository } from "../../src/repositories/user/subscription.repository";
+import { SubscriptionModel } from "../../src/models/user/SubscriptionModal";
+import { SubscriptionService } from "../../src/services/implementation/user/subscription/subscription.service";
 
 // Register repositories and services directly with their string token as the identifier
 container.register("UserRepository", { useClass: UserRepository });
@@ -52,6 +56,7 @@ container.register("AchievementRepository",{useClass: AchievementRepository})
 container.register("FinanceRepository", { useClass: FinanceRepository });
 container.register("RevenueDistributionRepository", { useClass: RevenueDistributionRepository });
 container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
+container.register("SubscriptionRepository",  { useClass: SubscriptionRepository } );
 
 
 
@@ -63,6 +68,7 @@ container.register("DashboardService", { useClass: DashboardService });
 container.register("ExploreService", { useClass: ExploreService });
 container.register("ProfileService", { useClass: ProfileService });
 container.register("UserAchievementService", { useClass: UserAchievementService });
+container.register("SubscriptionService", { useClass: SubscriptionService });
 
 
 //---admin---
@@ -84,6 +90,7 @@ container.register("AuthController", { useClass: AuthController });
 container.register("DashboardController", { useClass: DashboardController });
 container.register("ExploreController", { useClass: ExploreController });
 container.register("ProfileController", { useClass: ProfileController });
+container.register("SubscriptionController", { useClass: SubscriptionController });
 
 
 
@@ -101,6 +108,7 @@ container.register("BookingModel", { useValue: BookingsModel });
 container.register("WalletModel", { useValue: WalletModel });
 container.register("RevenueDistributionModel", { useValue: RevenueDistributionModel });
 container.register("EventModel", { useValue: EventModel });
+container.register("SubscriptionModel", { useValue: SubscriptionModel });
 
 
 container.register("Logger", { useClass: Logger });

@@ -53,16 +53,66 @@
                 </div>
             </section>
     
-            <!-- Check-in Section -->
             <section class="mb-12 md:mb-20">
                 <h2 class="text-2xl mb-8">
                     Ready, Set, <span class="neon-bg px-4 py-1 rounded">Check-In!</span> With Just
                     <br><span class="neon-bg px-4 py-1 rounded">3 Clicks</span> You're Done!
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-                    <div class="glass-card rounded-xl h-40 md:h-56 pulse-animation"></div>
-                    <div class="glass-card rounded-xl h-40 md:h-56 pulse-animation"></div>
-                    <div class="glass-card rounded-xl h-40 md:h-56 pulse-animation"></div>
+                
+                <!-- Subscription header -->
+                <h3 class="text-xl font-bold mb-6 neon-green text-center">Choose Your Event Plan</h3>
+                
+                <!-- Horizontal subscription plans container -->
+                <div class="glass-card rounded-xl p-6 md:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                        <!-- Free Plan -->
+                        <div 
+                            class="bg-[#1a1a1a] bg-opacity-90 rounded-xl p-6 border border-gray-700 transition-transform duration-300 hover:-translate-y-2 hover:border-[#00ff66] h-full flex flex-col"
+                            [class.border-[#00ff66]]="selectedPlan?.id === 'free'"
+                            (click)="selectPlan(plans[0])">
+                            <div class="text-xl font-bold mb-2">{{plans[0].name}}</div>
+                            <div class="text-3xl font-bold mb-4">{{plans[0].price}}</div>
+                            <div class="text-gray-300 mb-4">{{plans[0].description}}</div>
+                            <ul class="space-y-3 mb-5 arrow-list flex-grow">
+                                <li *ngFor="let feature of plans[0].features">
+                                    {{feature}}
+                                </li>
+                            </ul>
+                            <button 
+                                (click)="subscribeToPlan(plans[0]); $event.stopPropagation();"
+                                class="neon-bg text-black font-bold py-2 px-6 rounded-md w-full hover:opacity-90 transition-all duration-300 mt-auto">
+                                Get Started Free
+                            </button>
+                        </div>
+                        
+                        <!-- Premium Plan -->
+                        <div 
+                            class="bg-[#1a1a1a] bg-opacity-90 rounded-xl p-6 border relative transition-transform duration-300 hover:-translate-y-2 hover:border-[#00ff66] h-full flex flex-col"
+                            [class.border-[#00ff66]]="selectedPlan?.id === 'premium'"
+                            (click)="selectPlan(plans[1])">
+                            <div class="absolute -top-3 right-5 bg-[#00ff66] text-black px-3 py-1 rounded-full text-sm font-bold">
+                                POPULAR
+                            </div>
+                            <div class="text-xl font-bold mb-2">{{plans[1].name}}</div>
+                            <div class="text-3xl font-bold mb-4">{{plans[1].price}}</div>
+                            <div class="text-gray-300 mb-4">{{plans[1].description}}</div>
+                            <ul class="space-y-3 mb-5 arrow-list flex-grow">
+                                <li *ngFor="let feature of plans[1].features">
+                                    {{feature}}
+                                </li>
+                            </ul>
+                            <button 
+                                (click)="subscribeToPlan(plans[1]); $event.stopPropagation();"
+                                class="neon-bg text-black font-bold py-2 px-6 rounded-md w-full hover:opacity-90 transition-all duration-300 mt-auto">
+                                Upgrade Now
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Optional comparison text -->
+                    <div class="text-center mt-6 text-gray-300">
+                        <p>All plans include event creation, basic analytics, and mobile check-in.</p>
+                    </div>
                 </div>
             </section>
         </main>

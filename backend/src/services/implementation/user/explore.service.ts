@@ -213,7 +213,6 @@ export class ExploreService implements IExploreService{
     }
   }
 
-  // Helper method to update booking payment status
   private async updateBookingPaymentStatus(sessionId: string): Promise<void> {
     try {
       const booking = await this.bookingRepository.findByStripeSessionId(sessionId);

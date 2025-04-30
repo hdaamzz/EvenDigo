@@ -11,6 +11,7 @@ import adminAuthRouter from './admin/auth.routes';
 import achievementRouter from './admin/achievements.routes';
 import financeRouter from './admin/revenue.routes';
 import distributionRouter from './admin/distribution.revenue.routes';
+import subscriptionRoutes from './user/subscription.routes';
 
 
 const router = express.Router();
@@ -26,6 +27,9 @@ router.use(authMiddleware);
 router.use('/user/profile',profileRouter);
 router.use('/user/dashboard',dashboardRouter);
 router.use('/user/explore',exploreRoutes);
+router.use('/user/subscription',subscriptionRoutes);
+
+
 
 //Admin - Routes
 router.use('/admin/coupon',couponRouter);
