@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AllEventResponse, IEvent } from '../../../models/event.interface';
+import { AllEventResponse } from '../../../models/event.interface';
 import { PayloadData } from '../../../models/booking.interface';
 
 @Injectable({

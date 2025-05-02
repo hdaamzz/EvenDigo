@@ -1,0 +1,153 @@
+<div class=" relative z-1">
+<div class="dialog-container ">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <h2 class="dialog-title">Subscription Details</h2>
+    <button mat-icon-button class="close-button" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <!-- Status Badge -->
+  <div class="status-badge-container">
+    <span class="status-badge" [ngClass]="{
+      'status-active': subscription.status === 'active', 
+      'status-inactive': subscription.status === 'inactive',
+      'status-pending': subscription.status === 'pending'
+    }">
+      {{ subscription.status | titlecase }}
+    </span>
+  </div>
+  
+  <!-- Loading Indicator -->
+  <div *ngIf="isUpdating" class="loading-overlay">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Updating subscription...</p>
+    </div>
+  </div>
+  
+  <!-- Subscription Details -->
+  <div *ngIf="!isEditing" class="content-section">
+    <div class="details-card">
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">Subscription ID</div>
+          <div class="detail-value">{{ subscription.subscriptionId }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">User ID</div>
+          <div class="detail-value truncate" [title]="subscription.userId">{{ subscription.userName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Plan Type</div>
+          <div class="detail-value capitalize">{{ subscription.type }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Amount</div>
+          <div class="detail-value">{{ subscription.amount }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Payment Method</div>
+          <div class="detail-value capitalize">{{ subscription.paymentMethod }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Active</div>
+          <div class="detail-value">{{ subscription.isActive ? 'Yes' : 'No' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Start Date</div>
+          <div class="detail-value">{{ formatDate(subscription.startDate) }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">End Date</div>
+          <div class="detail-value">{{ formatDate(subscription.endDate) }}</div>
+        </div>
+      </div>
+    </div>
+
+  
+    <!-- Timeline Section -->
+    
+  </div>
+  
+  <!-- Edit Form -->
+  <div *ngIf="isEditing" class="edit-form-container">
+    <div class="details-card">
+      <div class="edit-grid">
+        <div class="form-group">
+          <label class="form-label">Plan Type</label>
+          <select [(ngModel)]="subscription.type" class="form-control">
+            <option value="premium">Premium</option>
+            <option value="basic">Basic</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (in cents)</label>
+          <input type="number" [(ngModel)]="subscription.amount" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select [(ngModel)]="subscription.paymentMethod" class="form-control">
+            <option value="card">Card</option>
+            <option value="paypal">PayPal</option>
+            <option value="bank_transfer">Bank Transfer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select [(ngModel)]="subscription.status" class="form-control">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input type="date" [value]="startDateFormatted" (change)="updateStartDate($event)" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date</label>
+          <input type="date" [value]="endDateFormatted" (change)="updateEndDate($event)" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stripe Customer ID</label>
+          <input type="text" [(ngModel)]="subscription.stripeCustomerId" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stripe Subscription ID</label>
+          <input type="text" [(ngModel)]="subscription.stripeSubscriptionId" class="form-control">
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="dialog-actions">
+    <div class="action-left">
+      <button class="status-toggle-button" 
+              [ngClass]="{'activate': !subscription.isActive, 'deactivate': subscription.isActive}"
+              (click)="toggleSubscriptionStatus()" 
+              [disabled]="isUpdating">
+        {{ subscription.isActive ? 'Deactivate' : 'Activate' }}
+      </button>
+    </div>
+    
+    <div class="action-right">
+      <!-- <button *ngIf="!isEditing" class="edit-button" (click)="toggleEditMode()" [disabled]="isUpdating">
+        Edit
+      </button> -->
+      
+      <ng-container *ngIf="isEditing">
+        <button class="cancel-button" (click)="toggleEditMode()" [disabled]="isUpdating">
+          Cancel
+        </button>
+        
+        <button class="save-button" (click)="saveChanges()" [disabled]="isUpdating">
+          Save Changes
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</div>
+</div>

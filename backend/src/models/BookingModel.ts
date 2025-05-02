@@ -72,7 +72,6 @@ const bookingSchema = new Schema({
     paymentType: {
         type: String,
         required: true,
-        // enum: ['credit_card', 'debit_card', 'paypal', 'cash', 'other'] 
     },
     discount: {
         type: Number,

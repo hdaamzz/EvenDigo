@@ -52,45 +52,7 @@
       </div>
     </div>
 
-    <!-- Offers Section -->
     <div class="bg-[#1E1E1E] rounded-xl p-6">
-      <!-- <h3 class="text-lg font-semibold mb-4 text-white">Available Offers</h3>
-
-      <div *ngIf="couponLoading" class="text-center text-gray-400 py-4">
-        Loading coupons...
-      </div>
-
-      <div *ngIf="!couponLoading && couponsList.length === 0" class="text-center text-gray-400 py-4">
-        No offers available at this time.
-      </div> -->
-
-      <!-- Coupons List -->
-      <!-- <div *ngIf="!couponLoading && couponsList.length > 0" class="space-y-4 mb-5">
-        <div *ngFor="let coupon of couponsList; let i = index"
-          class="bg-[#121212] p-4 rounded-lg flex justify-between items-center">
-          <div>
-            <h3 class="text-green-500 font-semibold">{{ coupon.code }}</h3>
-            <p class="text-gray-300 text-sm">{{ coupon.description }}</p>
-            <div class="text-gray-400 text-xs mt-1">
-              <span>{{ coupon.discountType === 'percentage' ? coupon.discount + '%' : '₹' + coupon.discount }}
-                off</span>
-              <span *ngIf="coupon.minAmount > 0"> (Min. ₹{{ coupon.minAmount }})</span>
-              <span *ngIf="coupon.expiryDate"> | Expires: {{ coupon.expiryDate | date:'mediumDate' }}</span>
-              <span> | Uses: {{ coupon.usageCount }}/{{ coupon.maxUses }}</span>
-            </div>
-          </div>
-          <button *ngIf="!appliedCoupon || appliedCoupon._id !== coupon._id" (click)="applyCouponFromList(coupon)"
-            class="border-2 border-green-500 text-green-500 px-4 py-2 rounded-md hover:bg-green-500 hover:text-white transition-colors"
-            [disabled]="coupon.usageCount >= coupon.maxUses && coupon.maxUses !== 'Unlimited'">
-            Apply
-          </button>
-          <span *ngIf="appliedCoupon && appliedCoupon._id === coupon._id" class="text-green-500 font-semibold">
-            Applied
-          </span>
-        </div>
-      </div> -->
-
-      <!-- Coupon Input -->
       <div class="flex gap-2">
         <input type="text" [(ngModel)]="couponCode" placeholder="Enter coupon code"
           class="flex-1 p-3 bg-[#a4a4a441] rounded-md text-white border-none focus:outline-none"

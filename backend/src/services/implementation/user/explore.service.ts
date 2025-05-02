@@ -36,7 +36,7 @@ export class ExploreService implements IExploreService{
 
   async getEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     if (!userId) throw new Error('ID is required');
-    return this.dashboardRepository.findAllEventWithoutCurrentUser(userId);
+    return this.dashboardRepository.findUpcomingEventsWithoutCurrentUser(userId);
   }
   
   async getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
@@ -80,7 +80,7 @@ export class ExploreService implements IExploreService{
         mode: 'payment',
         success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: cancelUrl,
-        metadata: { userId: userId.toString(), eventId, couponCode: couponCode || '' },
+        metadata: { userId: userId.toString(), eventId,paymentType: 'event_booking', couponCode: couponCode || '' },
       });
 
       await this.bookingRepository.createBooking({
@@ -213,7 +213,6 @@ export class ExploreService implements IExploreService{
     }
   }
 
-  // Helper method to update booking payment status
   private async updateBookingPaymentStatus(sessionId: string): Promise<void> {
     try {
       const booking = await this.bookingRepository.findByStripeSessionId(sessionId);

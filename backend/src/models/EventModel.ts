@@ -7,7 +7,6 @@ const eventSchema = new Schema({
       ref: "User",
       required: true,
     },
-    // Basic Information
     eventTitle: {
       type: String,
       required: true
@@ -20,7 +19,6 @@ const eventSchema = new Schema({
       type: String,
       required: true
     },
-    // Schedule
     startDate: {
       type: Date,
       required: true
@@ -42,7 +40,6 @@ const eventSchema = new Schema({
       enum: ['Public', 'Private'],
       required: true
     },
-    // Venue Details
     venueName: {
       type: String,
       required: true
@@ -73,7 +70,6 @@ const eventSchema = new Schema({
       type: Boolean,
       required: true
     },
-    // Event Branding
     mainBanner: {
       type: String,
       required: true

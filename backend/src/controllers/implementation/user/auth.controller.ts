@@ -26,9 +26,7 @@ export class AuthController implements IAuthController {
         name,
         email,
         password,
-      });
-      // console.log("sendOTP,result",result);
-      
+      });      
       res.status(StatusCode.OK).json(result);
     } catch (error) {
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
@@ -171,7 +169,6 @@ export class AuthController implements IAuthController {
     try {
       const { idToken, name, profileImg } = req.body;
 
-      // Input validation
       if (!idToken || !name) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -191,11 +188,9 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      // Find or create user
       let user = await this.authService.findUserByEmail(decodedToken.email);
 
       if (!user) {
-        // Create new user
         const newUser: IUser = {
           name: name || decodedToken.name || 'Unknown',
           email: decodedToken.email,
@@ -213,21 +208,18 @@ export class AuthController implements IAuthController {
         if (!user._id) {
           throw new Error('User ID is undefined');
         }
-        // Update existing user
         user = await this.authService.updateUser(user._id, {
           firebaseUid: decodedToken.uid,
           lastLogin: new Date()
         });
       }
 
-      // Create session token
       const sessionToken = jwt.sign(
         { userId: user._id, email: user.email, name: user.name },
         process.env.JWT_SECRET!,
         { expiresIn: '8h' }
       );
 
-      // Set session cookie
       res.cookie('session', sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -236,7 +228,6 @@ export class AuthController implements IAuthController {
         domain: process.env.NODE_ENV === 'production' ? '' : undefined
       });
 
-      // Exclude sensitive data from response
       const { firebaseUid, createdAt, updatedAt, ...safeUser } = user;
 
       res.status(StatusCode.OK).json({

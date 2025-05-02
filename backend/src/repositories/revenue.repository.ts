@@ -2,7 +2,6 @@ import { Schema } from 'mongoose';
 import { injectable, inject } from 'tsyringe';
 import { Model } from 'mongoose';
 
-// import { IBooking } from '../models/interfaces/booking.interface';
 import { IRevenueDistributionRepository } from './interfaces/IRevenue.repository';
 import { IRevenueDistribution } from '../../src/models/interfaces/distribution.interface';
 import { EventDocument } from '../../src/models/interfaces/event.interface';
@@ -12,7 +11,6 @@ export class RevenueDistributionRepository implements IRevenueDistributionReposi
   constructor(
     @inject("RevenueDistributionModel") private revenueDistributionModel: Model<IRevenueDistribution>,
     @inject("EventModel") private eventModel: Model<EventDocument>,
-    // @inject("BookingModel") private bookingModel: Model<IBooking>
   ) { }
 
   async findCompletedDistributions(): Promise<IRevenueDistribution[]> {

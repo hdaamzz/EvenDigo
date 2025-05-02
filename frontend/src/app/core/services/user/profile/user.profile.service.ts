@@ -119,4 +119,9 @@ export class UserProfileService {
       withCredentials: true
     });
   }
+  getBadgeById(userId: string) :Observable<any>{
+    return this.http.get(`${this.baseUrl}user/profile/badge/${userId}`,{
+      withCredentials: true
+    });
+  }
 }

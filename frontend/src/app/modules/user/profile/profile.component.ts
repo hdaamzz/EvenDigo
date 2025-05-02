@@ -29,6 +29,7 @@ export class ProfileComponent implements OnInit, OnDestroy{
     { icon: 'fa-user', label: 'Profile', path: '/profile/details', exact: true },
     { icon: 'fa-code-branch', label: 'My Events', path: '/profile/events' },
     { icon: 'fa-ticket-alt', label: 'My Bookings', path: '/profile/bookings' },
+    { icon: 'fa-credit-card', label: 'Subscription', path: '/profile/subscription' },
     { icon: 'fa-wallet', label: 'Wallet', path: '/profile/wallet' }
   ];
 

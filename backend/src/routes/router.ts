@@ -11,6 +11,8 @@ import adminAuthRouter from './admin/auth.routes';
 import achievementRouter from './admin/achievements.routes';
 import financeRouter from './admin/revenue.routes';
 import distributionRouter from './admin/distribution.revenue.routes';
+import subscriptionRoutes from './user/subscription.routes';
+import adminSubscriptionRoutes from './admin/subscription.routes';
 
 
 const router = express.Router();
@@ -26,6 +28,9 @@ router.use(authMiddleware);
 router.use('/user/profile',profileRouter);
 router.use('/user/dashboard',dashboardRouter);
 router.use('/user/explore',exploreRoutes);
+router.use('/user/subscription',subscriptionRoutes);
+
+
 
 //Admin - Routes
 router.use('/admin/coupon',couponRouter);
@@ -33,7 +38,8 @@ router.use('/admin/events',adminEventsRouter);
 router.use('/admin/users',adminUsersRouter);
 router.use('/admin/achievements', achievementRouter);
 router.use('/admin/finance', financeRouter);
-router.use('/admin/dist',distributionRouter)
+router.use('/admin/dist',distributionRouter);
+router.use('/admin/subscriptions', adminSubscriptionRoutes);
 
 
 

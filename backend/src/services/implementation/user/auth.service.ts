@@ -203,18 +203,8 @@ export class AuthService implements IAuthService {
     }
   }
 
-  // async validateSession(token: string): Promise<IUser | null> {
-  //   try {
-  //     const payload = jwt.verify(token, process.env.JWT_SECRET!) as { sub: string };
-  //     return await this.userRepository.findUserById(payload.sub);
-  //   } catch {
-  //     return null;
-  //   }
-  // }
-
   async sendForgotPasswordEmail(email: string): Promise<ServiceResponse<null>> {
     try {
-      // Check if user exists
       const user = await this.userRepository.findUserByEmail(email);
       if (!user) {
         return {
@@ -223,13 +213,10 @@ export class AuthService implements IAuthService {
         };
       }
   
-      // Generate a reset token
-      const resetToken = generateOTP(); // Or use a specific function for reset tokens
+      const resetToken = generateOTP(); 
       
-      // Store the token in Redis
       await this.authRepository.storeResetToken(email, resetToken);
       
-      // Send email with reset instructions
       await sendEmail({
         to: email,
         subject: 'Password Reset Request',
@@ -251,7 +238,6 @@ export class AuthService implements IAuthService {
 
   async resetPassword(email: string, token: string, newPassword: string): Promise<ServiceResponse<null>> {
     try {
-      // Verify token
       const storedToken = await this.authRepository.getResetToken(email);
       if (!storedToken || storedToken !== token) {
         return {
@@ -260,7 +246,6 @@ export class AuthService implements IAuthService {
         };
       }
       
-      // Get user
       const user = await this.userRepository.findUserByEmail(email);
       if (!user || !user._id) {
         return {
@@ -269,13 +254,12 @@ export class AuthService implements IAuthService {
         };
       }
       
-      // Hash the new password
       const hashedPassword = await hashPassword(newPassword);
       
-      // Update user password
+     
       await this.userRepository.updateUser(user._id.toString(), { password: hashedPassword });
       
-      // Delete the reset token
+   
       await this.authRepository.deleteResetToken(email);
       
       return {

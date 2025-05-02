@@ -55,7 +55,6 @@ export class ProfileWalletComponent implements OnInit {
   transactionTypes = ['all', 'credit', 'debit', 'refund', 'withdrawal'];
   selectedType = 'all';
 
-  // Pagination variables
   currentPage = 1;
   pageSize = 5;
   totalPages = 1;
@@ -96,7 +95,6 @@ export class ProfileWalletComponent implements OnInit {
     const filteredCount = this.getFilteredTransactions().length;
     this.totalPages = Math.max(1, Math.ceil(filteredCount / this.pageSize));
     
-    // Reset to page 1 if current page is out of bounds
     if (this.currentPage > this.totalPages) {
       this.currentPage = 1;
     }
@@ -139,25 +137,21 @@ export class ProfileWalletComponent implements OnInit {
     });
   }
 
-  // Returns all transactions that match the current filter
   private getFilteredTransactions(): Transaction[] {
     if (this.selectedType === 'all') return this.transactions;
     return this.transactions.filter(t => t.type === this.selectedType);
   }
 
-  // Returns only the transactions for the current page
   get filteredTransactions(): Transaction[] {
     const filtered = this.getFilteredTransactions();
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
-  // Recalculate pages when filter changes
   onFilterChange(): void {
     this.calculateTotalPages();
   }
 
-  // Pagination methods
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
@@ -178,16 +172,13 @@ export class ProfileWalletComponent implements OnInit {
 
   getPageNumbers(): number[] {
     const pages: number[] = [];
-    // Show maximum 5 page numbers
     const maxPages = 5;
     
     if (this.totalPages <= maxPages) {
-      // Show all pages if total pages is less than or equal to maxPages
       for (let i = 1; i <= this.totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Calculate start and end page numbers to display
       let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
       let endPage = startPage + maxPages - 1;
       

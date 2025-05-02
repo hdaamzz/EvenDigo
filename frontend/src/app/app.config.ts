@@ -47,7 +47,6 @@ Notiflix.Notify.init({
   fontFamily: 'Quicksand',
   fontSize: '12px',
 
-  // Success notification settings
   success: {
     background: '#00ff66',
     textColor: '#ffffff',
@@ -56,7 +55,6 @@ Notiflix.Notify.init({
     fontAwesomeClassName: 'fas fa-check-circle',
   },
 
-  // Failure notification settings
   failure: {
     background: '#ff5549',
     textColor: '#fff',
@@ -65,7 +63,6 @@ Notiflix.Notify.init({
     fontAwesomeClassName: 'fas fa-times-circle',
   },
 
-  // Warning notification settings
   warning: {
     background: '#eebf31',
     textColor: '#fff',
@@ -74,7 +71,6 @@ Notiflix.Notify.init({
     fontAwesomeClassName: 'fas fa-exclamation-circle',
   },
 
-  // Info notification settings
   info: {
     background: '#26c0d3',
     textColor: '#fff',

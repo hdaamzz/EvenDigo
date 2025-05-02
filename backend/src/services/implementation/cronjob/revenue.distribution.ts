@@ -11,8 +11,7 @@ export class RevenueDistributionCronService implements IRevenueDistributionCronS
   ) {}
 
   startCronJob(): void {
-    // Run every minute for testing purposes
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('0 0 * * *', async () => {
       this.logger.info('Starting daily revenue distribution job');
       
       try {
@@ -28,6 +27,6 @@ export class RevenueDistributionCronService implements IRevenueDistributionCronS
       }
     });
 
-    this.logger.info('Revenue distribution cron job scheduled for testing (running every minute)');
+    this.logger.info('Revenue distribution cron job scheduled to run daily at midnight (12 AM)');
   }
 }
