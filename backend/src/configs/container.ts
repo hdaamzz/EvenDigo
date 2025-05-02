@@ -10,7 +10,7 @@ import { CouponRepository } from "../../src/repositories/implementation/coupon.r
 import { VerificationRepository } from "../../src/repositories/implementation/verification.repository";
 import { WalletRepository } from "../../src/repositories/implementation/wallet.repository";
 import { ProfileService } from "../../src/services/implementation/user/profile.service";
-import { ExploreService } from "../../src/services/implementation/user/explore.service";
+import { ExploreService } from "../services/implementation/user/explore/explore.service";
 import { BookingsModel } from "../../src/models/BookingModel";
 import { AdminAuthService } from "../../src/services/implementation/admin/admin.auth.service";
 import { CouponService } from "../../src/services/implementation/admin/admin.coupon.service";
@@ -47,6 +47,8 @@ import { EventMapper } from "../../src/services/implementation/user/dashboard/ev
 import { FileService } from "../../src/services/implementation/user/dashboard/file.service";
 import { EventRepository } from "../../src/repositories/implementation/event.repository";
 import { DashboardController } from "../../src/controllers/implementation/user/dashboard/dashboard.controller";
+import { PaymentService } from "../../src/services/implementation/user/explore/payment.service";
+import { BookingService } from "../../src/services/implementation/user/explore/booking.service";
 
 
 
@@ -76,6 +78,10 @@ container.register("SubscriptionService", { useClass: SubscriptionService });
 container.register("EventService", { useClass: EventService });
 container.register("FileService", { useClass: FileService });
 container.register("EventMapper", { useClass: EventMapper });
+container.register("PaymentService", { useClass: PaymentService });
+container.register("BookingService", { useClass: BookingService });
+
+
 
 
 

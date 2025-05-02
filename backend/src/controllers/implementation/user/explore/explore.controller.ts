@@ -1,28 +1,30 @@
 import { Request, Response } from 'express'
 import { inject, injectable } from 'tsyringe';
-import { IExploreService } from '../../../../services/interfaces/IExplore.service';
+import { ISubscriptionService } from '../../../../services/interfaces/ISubscription.service';
+import { IExploreController } from '../../../../controllers/interfaces/User/Explore/IExplore.controller';
+import { ResponseHandler } from '../../../../utils/response-handler';
 import StatusCode from '../../../../types/statuscode';
-import Stripe from 'stripe';
-import { ISubscriptionService } from '../../../../../src/services/interfaces/ISubscription.service';
-import { IExploreController } from '../../../../../src/controllers/interfaces/User/Explore/IExplore.controller';
+import { IExploreService } from '../../../../../src/services/interfaces/user/explore/IExplore.service';
+import { IPaymentService } from '../../../../../src/services/interfaces/user/explore/IPaymentService';
+import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
+import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
 
 @injectable()
 export class ExploreController implements IExploreController {
-
-
   constructor(
     @inject("ExploreService") private exploreService: IExploreService,
-    @inject("SubscriptionService") private subscriptionService:ISubscriptionService
-  ) { } 
+    @inject("PaymentService") private paymentService: IPaymentService,
+    @inject("BookingService") private bookingService: IBookingService,
+    @inject("SubscriptionService") private subscriptionService: ISubscriptionService
+  ) {}
 
   getAllEvents = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId: string = req.user._id
+      const userId: string = req.user._id;
       const events = await this.exploreService.getEvents(userId);
-      res.status(StatusCode.OK).json({ success: true, data: events });
+      ResponseHandler.success(res, events);
     } catch (error) {
-      console.error('Get user events error:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: 'Failed to fetch events' });
+      ResponseHandler.error(res, error, 'Failed to fetch events');
     }
   };
 
@@ -32,33 +34,23 @@ export class ExploreController implements IExploreController {
   
     try {
       if (paymentMethod === 'wallet') {
-        const bookingResult = await this.exploreService.walletBooking(
+        const booking = await this.paymentService.processWalletPayment(
           eventId, tickets, amount, userId, couponCode, discount
         );
         
-        if (bookingResult) {
-          const booking = await this.exploreService.processWalletPayment(bookingResult);
-          res.status(StatusCode.OK).json({ 
-            success: true, 
-            data: booking,
-            message: 'Booking successful! Payment completed from wallet.'
-          });
-        } else {
-          res.status(StatusCode.BAD_REQUEST).json({ 
-            success: false, 
-            error: 'Failed to create booking'
-          });
-        }
+        ResponseHandler.success(res, booking, 'Booking successful! Payment completed from wallet.');
       } else {
-        const session = await this.exploreService.booking(eventId, tickets, amount, successUrl, cancelUrl, userId, couponCode, discount);
-        res.status(StatusCode.OK).json({ success: true, data: { sessionId: session.id } });
+        const session = await this.paymentService.createStripeCheckoutSession(
+          eventId, tickets, amount, successUrl, cancelUrl, userId, couponCode, discount
+        );
+        
+        ResponseHandler.success(res, { sessionId: session.id });
       }
     } catch (error) {
-      console.error('Error in checkout:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
-        success: false, 
-        error: (error as Error).message || 'Failed to process checkout' 
-      });
+      const statusCode = error instanceof BadRequestException ? 
+        StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR;
+        
+      ResponseHandler.error(res, error, 'Failed to process checkout', statusCode);
     }
   };
 
@@ -68,43 +60,39 @@ export class ExploreController implements IExploreController {
       const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
       if (!endpointSecret) {
-        console.error('Missing STRIPE_WEBHOOK_SECRET environment variable');
         throw new Error('STRIPE_WEBHOOK_SECRET environment variable is not set');
       }
 
       if (!Buffer.isBuffer(req.body)) {
-        console.error('Request body is not a Buffer');
         throw new Error('Webhook request body must be raw Buffer data');
       }
       
-      const event = this.exploreService.constructStripeEvent(req.body, sig, endpointSecret);
+      const event = this.paymentService.constructStripeEvent(req.body, sig, endpointSecret);
       
       await this.routeWebhookEvent(event);
 
-      res.status(StatusCode.OK).json({ received: true });
+      ResponseHandler.success(res, { received: true });
     } catch (error) {
-      console.error('Webhook error:', error);
-      res.status(StatusCode.BAD_REQUEST).json({ success: false, error: (error as Error).message });
+      ResponseHandler.error(res, error, 'Webhook error', StatusCode.BAD_REQUEST);
     }
   };
 
-  private async routeWebhookEvent(event: Stripe.Event): Promise<void> {
+  private async routeWebhookEvent(event: any): Promise<void> {
     try {
       if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         
-
         if (session.metadata && session.metadata.paymentType === 'subscription') {
           await this.subscriptionService.handleSubscriptionWebhook(event);
         } else {
-          await this.exploreService.processStripeWebhook(event);
+          await this.paymentService.processStripeWebhook(event);
         }
       } else {
         if (event.type.startsWith('customer.subscription') || 
             event.type.startsWith('invoice')) {
           await this.subscriptionService.handleSubscriptionWebhook(event);
         } else {
-          await this.exploreService.processStripeWebhook(event);
+          await this.paymentService.processStripeWebhook(event);
         }
       }
     } catch (error) {
@@ -116,50 +104,50 @@ export class ExploreController implements IExploreController {
   getBookingDetails = async (req: Request, res: Response): Promise<void> => {
     try {
       const sessionId: string = req.query.id as string;
-      console.log(sessionId);
 
       if (!sessionId) {
-        res.status(StatusCode.BAD_REQUEST).json({ success: false, error: 'SESSION_ID is required' });
-        return;
+        throw new BadRequestException('SESSION_ID is required');
       }
 
-      const bookingDetails = await this.exploreService.getBookingDetails(sessionId);
-      res.status(StatusCode.OK).json({ success: true, data: bookingDetails });
+      const bookingDetails = await this.bookingService.getBookingDetails(sessionId);
+      
+      if (!bookingDetails) {
+        throw new NotFoundException('Booking not found');
+      }
+      
+      ResponseHandler.success(res, bookingDetails);
     } catch (error) {
-      console.error('Get user events error:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: 'Failed to fetch events' });
+      const statusCode = error instanceof BadRequestException ? 
+        StatusCode.BAD_REQUEST : 
+        error instanceof NotFoundException ? 
+          StatusCode.NOT_FOUND : StatusCode.INTERNAL_SERVER_ERROR;
+          
+      ResponseHandler.error(res, error, 'Failed to fetch booking details', statusCode);
     }
   };
-
-
 
   downloadTickets = async (req: Request, res: Response): Promise<void> => {
     try {
       const bookingId = req.params.bookingId;
       const userId = req.user._id;
 
-
-      const pdfDoc = await this.exploreService.generateTicketsPdf(bookingId, userId);
+      const pdfDoc = await this.bookingService.generateTicketsPdf(bookingId, userId);
 
       if (!pdfDoc) {
-        res.status(StatusCode.NOT_FOUND).json({ success: false, message: 'Booking not found' });
-        return;
+        throw new NotFoundException('Booking not found');
       }
-
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename=Event_Tickets_${bookingId}.pdf`);
-
 
       pdfDoc.pipe(res);
       pdfDoc.end();
 
     } catch (error) {
-      console.error('Error generating tickets:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: (error as Error).message || 'Server error'
-      });
+      const statusCode = error instanceof NotFoundException ? 
+        StatusCode.NOT_FOUND : StatusCode.INTERNAL_SERVER_ERROR;
+        
+      ResponseHandler.error(res, error, 'Error generating tickets', statusCode);
     }
   };
 
@@ -168,14 +156,11 @@ export class ExploreController implements IExploreController {
       const bookingId = req.params.bookingId;
       const userId = req.user._id;
 
-
-      const pdfDoc = await this.exploreService.generateInvoicePdf(bookingId, userId);
+      const pdfDoc = await this.bookingService.generateInvoicePdf(bookingId, userId);
 
       if (!pdfDoc) {
-        res.status(StatusCode.NOT_FOUND).json({ success: false, message: 'Booking not found' });
-        return;
+        throw new NotFoundException('Booking not found');
       }
-
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename=Invoice_${bookingId}.pdf`);
@@ -184,13 +169,10 @@ export class ExploreController implements IExploreController {
       pdfDoc.end();
 
     } catch (error) {
-      console.error('Error generating invoice:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: (error as Error).message || 'Server error'
-      });
+      const statusCode = error instanceof NotFoundException ? 
+        StatusCode.NOT_FOUND : StatusCode.INTERNAL_SERVER_ERROR;
+        
+      ResponseHandler.error(res, error, 'Error generating invoice', statusCode);
     }
   };
-
-
 }
