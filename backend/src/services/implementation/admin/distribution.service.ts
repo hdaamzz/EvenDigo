@@ -7,7 +7,7 @@ import { IRevenueDistributionRepository } from '../../../../src/repositories/int
 import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
 import { IRevenueDistributionService } from '../../../../src/services/interfaces/IDistribution.service';
 import { inject, injectable } from 'tsyringe';
-import { IDashboardRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
+import { IEventRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
 
 
 @injectable()
@@ -19,7 +19,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
     @inject("RevenueDistributionRepository") private revenueDistributionRepository: IRevenueDistributionRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
-    @inject("DashboardRepository") private dashboardRepository: IDashboardRepository
+    @inject("EventRepository") private eventRepository: IEventRepository
 
   ) { }
 
@@ -82,7 +82,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
       const organizerAmount = totalRevenue - adminAmount;
 
       // Get event details for organizer ID
-      const eventWithOrganizer = await this.dashboardRepository.findEventById(eventId);
+      const eventWithOrganizer = await this.eventRepository.findEventById(eventId);
       if (!eventWithOrganizer) {
         throw new Error("Event not found");
       }
@@ -250,7 +250,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
 
   async getEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<ServiceResponse<any>> {
     try {
-      const events = await this.dashboardRepository.findEventsByIds(eventIds);
+      const events = await this.eventRepository.findEventsByIds(eventIds);
       
       return {
         success: true,

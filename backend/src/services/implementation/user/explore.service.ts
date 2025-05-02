@@ -5,7 +5,7 @@ import { generateAndUploadQrCode, generateUniqueId } from "../../../utils/helper
 import { Schema } from "mongoose";
 import { inject, injectable } from "tsyringe";
 import { IExploreService } from "../../../../src/services/interfaces/IExplore.service";
-import { IDashboardRepository } from "../../../../src/repositories/interfaces/IEvent.repository";
+import { IEventRepository } from "../../../../src/repositories/interfaces/IEvent.repository";
 import PDFDocument from 'pdfkit';
 type PDFDocument = PDFKit.PDFDocument;
 import QRCode from 'qrcode';
@@ -22,7 +22,7 @@ export class ExploreService implements IExploreService{
   private stripe: Stripe;
 
   constructor(
-    @inject("DashboardRepository") private dashboardRepository :IDashboardRepository,
+    @inject("EventRepository") private eventRepository :IEventRepository,
     @inject("BookingRepository") private bookingRepository:IBookingRepository,
     @inject("UserRepository") private userRepository:IUserRepository,
     @inject("WalletRepository") private walletRepository:IWalletRepository
@@ -36,12 +36,12 @@ export class ExploreService implements IExploreService{
 
   async getEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     if (!userId) throw new Error('ID is required');
-    return this.dashboardRepository.findUpcomingEventsWithoutCurrentUser(userId);
+    return this.eventRepository.findUpcomingEventsWithoutCurrentUser(userId);
   }
   
   async getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
     if (!eventId) throw new Error('ID is required');
-    return this.dashboardRepository.findEventById(eventId);
+    return this.eventRepository.findEventById(eventId);
   }
 
   async booking(
@@ -129,7 +129,7 @@ export class ExploreService implements IExploreService{
       
       const ticketDetails = await this.prepareTicketDetails(eventId, tickets, generatedBookingId);
       
-      const event = await this.dashboardRepository.findEventById(eventId);
+      const event = await this.eventRepository.findEventById(eventId);
       if (!event) {
         throw new Error('Event not found');
       }
@@ -288,7 +288,7 @@ export class ExploreService implements IExploreService{
         return null;
       }
       
-      const event = await this.dashboardRepository.findEventById(booking.eventId);
+      const event = await this.eventRepository.findEventById(booking.eventId);
       
       if (!event) {
         throw new Error('Event not found');
@@ -341,7 +341,7 @@ export class ExploreService implements IExploreService{
         return null;
       }
       
-      const event = await this.dashboardRepository.findEventById(booking.eventId);
+      const event = await this.eventRepository.findEventById(booking.eventId);
       
       if (!event) {
         throw new Error('Event not found');

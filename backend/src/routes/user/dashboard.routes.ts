@@ -1,16 +1,21 @@
-import {Router} from 'express';
-import { DashboardController } from '../../controllers/implementation/user/dashboard/dashboard.controller';
-import {authMiddleware } from '../../../src/middlewares/auth.middleware';
+import { Router } from 'express';
+import { authMiddleware } from '../../../src/middlewares/auth.middleware';
 import { upload } from '../../../src/utils/helpers';
 import { container } from 'tsyringe';
+import { DashboardController } from '../../../src/controllers/implementation/user/dashboard/dashboard.controller';
 
 const dashboardController = container.resolve(DashboardController);
-const dashboardRouter=Router();
+const dashboardRouter = Router();
 
 
-dashboardRouter.post('/events', authMiddleware, upload.fields([ { name: 'mainBanner', maxCount: 1 },{ name: 'promotionalImage', maxCount: 1 }]), 
-    (req, res) => dashboardController.createEvent(req, res)
-  );
-dashboardRouter.get('/events',authMiddleware,(req,res)=>dashboardController.getUserEvents(req,res))
-dashboardRouter.get('/events/:eventId',authMiddleware,(req,res)=>dashboardController.getEventById(req,res))
+dashboardRouter.post('/events', authMiddleware, upload.fields([{ name: 'mainBanner', maxCount: 1 },{ name: 'promotionalImage', maxCount: 1 }]), (req, res) => dashboardController.createEvent(req, res));
+
+dashboardRouter.get('/events',authMiddleware,(req, res) => dashboardController.getUserEvents(req, res));
+
+dashboardRouter.get('/events/:eventId', authMiddleware,(req, res) => dashboardController.getEventById(req, res));
+
+dashboardRouter.put('/events/:id',authMiddleware,upload.fields([ { name: 'mainBanner', maxCount: 1 },{ name: 'promotionalImage', maxCount: 1 }]),(req, res) => dashboardController.updateEvent(req, res));
+
+dashboardRouter.delete('/events/:id',authMiddleware,(req, res) => dashboardController.deleteEvent(req, res));
+
 export default dashboardRouter;

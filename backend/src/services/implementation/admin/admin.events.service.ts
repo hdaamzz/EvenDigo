@@ -1,13 +1,13 @@
 import { ServiceResponse } from "../../../models/interfaces/auth.interface";
 import { EventDocument } from "../../../models/interfaces/event.interface";
 import { inject, injectable } from "tsyringe";
-import { IDashboardRepository } from "../../../../src/repositories/interfaces/IEvent.repository";
+import { IEventRepository } from "../../../../src/repositories/interfaces/IEvent.repository";
 import { IEventsAdminService } from "../../../../src/services/interfaces/IEvents.admin.service";
 
 @injectable()
 export class AdminEventsService implements IEventsAdminService{
     constructor(
-        @inject("DashboardRepository") private eventRepository: IDashboardRepository
+        @inject("EventRepository") private eventRepository: IEventRepository
 
     ) {}
 

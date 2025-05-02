@@ -10,7 +10,7 @@ import { IProfileService } from '../../../../src/services/interfaces/IProfile.se
 import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
 import { IVerificationRepository } from '../../../../src/repositories/interfaces/IVerification.repository';
 import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
-import { IDashboardRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
+import { IEventRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
 import { IBooking } from '../../../../src/models/interfaces/booking.interface';
 import { EventDocument } from '../../../../src/models/interfaces/event.interface';
 import { IBookingRepository } from '../../../../src/repositories/interfaces/IBooking.repository';
@@ -24,7 +24,7 @@ export class ProfileService implements IProfileService{
     @inject("BookingRepository") private bookingRepository:IBookingRepository,
     @inject("WalletRepository") private walletRepository:IWalletRepository,
     @inject("VerificationRepository") private verificationRepository:IVerificationRepository,
-    @inject("DashboardRepository") private dashboardRespository :IDashboardRepository,
+    @inject("EventRepository") private dashboardRespository :IEventRepository,
   ) {}
   async fetchUserById(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IUser>> {
     try {

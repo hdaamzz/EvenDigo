@@ -4,16 +4,13 @@ import { UserRepository } from "../../src/repositories/implementation/user.repos
 import { AuthRepository } from "../../src/repositories/implementation/auth.repository";
 import { AuthService } from "../../src/services/implementation/user/auth.service";
 import { AuthController } from "../controllers/implementation/user/auth/auth.controller";
-import { DashboardController } from "../controllers/implementation/user/dashboard/dashboard.controller";
 import { ExploreController } from "../controllers/implementation/user/explore/explore.controller";
 import { BookingRepository } from "../../src/repositories/implementation/booking.repository";
 import { CouponRepository } from "../../src/repositories/implementation/coupon.repository";
-import { DashboardRepository } from "../../src/repositories/implementation/event.repository";
 import { VerificationRepository } from "../../src/repositories/implementation/verification.repository";
 import { WalletRepository } from "../../src/repositories/implementation/wallet.repository";
 import { ProfileService } from "../../src/services/implementation/user/profile.service";
 import { ExploreService } from "../../src/services/implementation/user/explore.service";
-import { DashboardService } from "../../src/services/implementation/user/dashboard.service";
 import { BookingsModel } from "../../src/models/BookingModel";
 import { AdminAuthService } from "../../src/services/implementation/admin/admin.auth.service";
 import { CouponService } from "../../src/services/implementation/admin/admin.coupon.service";
@@ -45,6 +42,11 @@ import { AdminEventsController } from "../../src/controllers/implementation/admi
 import { AdminUsersController } from "../../src/controllers/implementation/admin/user/admin.users.controller";
 import { AchievementController } from "../../src/controllers/implementation/admin/achievement/admin.achievements.controller";
 import { RevenueDistributionController } from "../../src/controllers/implementation/admin/finance/admin.distribution.controller";
+import { EventService } from "../../src/services/implementation/user/dashboard/event.service";
+import { EventMapper } from "../../src/services/implementation/user/dashboard/eventMapper.service";
+import { FileService } from "../../src/services/implementation/user/dashboard/file.service";
+import { EventRepository } from "../../src/repositories/implementation/event.repository";
+import { DashboardController } from "../../src/controllers/implementation/user/dashboard/dashboard.controller";
 
 
 
@@ -52,7 +54,7 @@ container.register("UserRepository", { useClass: UserRepository });
 container.register("AuthRepository", { useClass: AuthRepository });
 container.register("BookingRepository", { useClass: BookingRepository });
 container.register("CouponRepository", { useClass: CouponRepository });
-container.register("DashboardRepository", { useClass: DashboardRepository });
+container.register("EventRepository", { useClass: EventRepository });
 container.register("VerificationRepository", { useClass: VerificationRepository });
 container.register("WalletRepository", { useClass: WalletRepository });
 container.register("AchievementRepository",{useClass: AchievementRepository})
@@ -67,11 +69,15 @@ container.register("SubscriptionRepository",  { useClass: SubscriptionRepository
 //SERVICES
 //---user---
 container.register("AuthService", { useClass: AuthService });
-container.register("DashboardService", { useClass: DashboardService });
 container.register("ExploreService", { useClass: ExploreService });
 container.register("ProfileService", { useClass: ProfileService });
 container.register("UserAchievementService", { useClass: UserAchievementService });
 container.register("SubscriptionService", { useClass: SubscriptionService });
+container.register("EventService", { useClass: EventService });
+container.register("FileService", { useClass: FileService });
+container.register("EventMapper", { useClass: EventMapper });
+
+
 
 
 //---admin---
