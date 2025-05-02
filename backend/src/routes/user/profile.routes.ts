@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { ProfileController } from '../../controllers/implementation/user/profile.controller';
 import { FileRequest } from '../../models/interfaces/profile.interface';
 import {upload} from '../../utils/helpers'
 import { authMiddleware } from '../../../src/middlewares/auth.middleware';
 import { container } from 'tsyringe';
+import { ProfileController } from '../../../src/controllers/implementation/user/profile/profile.controller';
 
 
 

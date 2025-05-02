@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ExploreController } from '../../controllers/implementation/user/explore.controller';
+import { ExploreController } from '../../controllers/implementation/user/explore/explore.controller';
 import { authMiddleware } from '../../../src/middlewares/auth.middleware';
 import { container } from 'tsyringe';
 

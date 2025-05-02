@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import { ServiceResponse } from '../../../../src/models/interfaces/auth.interface';
 import { IRevenueDistribution } from '../../../../src/models/interfaces/distribution.interface';
 import { TransactionType } from '../../../../src/models/interfaces/wallet.interface';
-import { IBookingRepository } from '../../../../src/repositories/booking.repository';
+import { IBookingRepository } from '../../../../src/repositories/implementation/booking.repository';
 import { IRevenueDistributionRepository } from '../../../../src/repositories/interfaces/IRevenue.repository';
 import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
 import { IRevenueDistributionService } from '../../../../src/services/interfaces/IDistribution.service';

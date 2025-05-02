@@ -1,10 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 import Stripe from 'stripe';
 import { ISubscriptionService, SubscriptionPayload } from '../../../../../src/services/interfaces/ISubscription.service';
-import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/user/ISubscription.repository';
 import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
 import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../../../src/models/user/SubscriptionModal';
 import { TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
+import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/ISubscription.repository';
 
 
 @injectable()

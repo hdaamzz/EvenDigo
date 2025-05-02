@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { AuthController } from '../../controllers/implementation/user/auth.controller';
+import { AuthController } from '../../controllers/implementation/user/auth/auth.controller';
 import { validateFirebaseSignInRequest,authMiddleware } from '../../middlewares/auth.middleware';
 import { container } from 'tsyringe';
 

@@ -1,6 +1,6 @@
 // coupon.router.ts
 import { Router } from 'express';
-import { CouponController } from '../../controllers/implementation/admin/admin.coupon.controller';
+import { CouponController } from '../../../src/controllers/implementation/admin/coupon/admin.coupon.controller';
 import { container } from 'tsyringe';
 
 const couponController = container.resolve(CouponController);

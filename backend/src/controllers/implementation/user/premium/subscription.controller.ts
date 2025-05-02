@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ISubscriptionController } from '../../../../../src/controllers/interfaces/user/ISubscription.controller';
+import { ISubscriptionController } from '../../../interfaces/User/Premium/ISubscription.controller';
 import { inject, injectable } from 'tsyringe';
 import { ISubscriptionService } from '../../../../../src/services/interfaces/ISubscription.service';
 import StatusCode from '../../../../../src/types/statuscode';

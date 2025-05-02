@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 
 import StatusCode from '../../../../../src/types/statuscode';
-import { IAdminSubscriptionController } from '../../../../../src/controllers/interfaces/admin/IAdminSubscription.controller';
+import { IAdminSubscriptionController } from '../../../interfaces/Admin/Subscription/IAdminSubscription.controller';
 import { IAdminSubscriptionService } from '../../../../../src/services/interfaces/IAdminSubscription.service';
 
 @injectable()

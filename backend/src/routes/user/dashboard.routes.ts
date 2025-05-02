@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { DashboardController } from '../../controllers/implementation/user/dashboard.controller';
+import { DashboardController } from '../../controllers/implementation/user/dashboard/dashboard.controller';
 import {authMiddleware } from '../../../src/middlewares/auth.middleware';
 import { upload } from '../../../src/utils/helpers';
 import { container } from 'tsyringe';

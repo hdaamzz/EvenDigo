@@ -1,6 +1,5 @@
 import { EventDocument } from "../../../models/interfaces/event.interface";
 import Stripe from 'stripe';
-import { IBookingRepository } from "../../../repositories/booking.repository";
 import { IBooking, ITicket } from "../../../models/interfaces/booking.interface";
 import { generateAndUploadQrCode, generateUniqueId } from "../../../utils/helpers";
 import { Schema } from "mongoose";
@@ -10,11 +9,12 @@ import { IDashboardRepository } from "../../../../src/repositories/interfaces/IE
 import PDFDocument from 'pdfkit';
 type PDFDocument = PDFKit.PDFDocument;
 import QRCode from 'qrcode';
-import { IUserRepository } from "src/repositories/interfaces/IUser.repository";
-import { IUser } from "src/models/interfaces/auth.interface";
+import { IUserRepository } from "../../../../src/repositories/interfaces/IUser.repository";
+import { IUser } from "../../../../src/models/interfaces/auth.interface";
 import { IWalletRepository } from "src/repositories/interfaces/IWallet.repository";
 import { IWallet, TransactionType } from "../../../../src/models/interfaces/wallet.interface";
 import { error } from "console";
+import { IBookingRepository } from "../../../../src/repositories/interfaces/IBooking.repository";
 
 
 @injectable()

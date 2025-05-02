@@ -3,7 +3,6 @@ import { IUser, ServiceResponse } from '../../../models/interfaces/auth.interfac
 import cloudinary from '../../../configs/cloudinary';
 import { Readable } from 'stream';
 import { CloudinaryUploadResult, ProfileServiceResponse } from '../../../models/interfaces/profile.interface';
-import {  IBookingRepository } from '../../../repositories/booking.repository';
 import { IWallet, TransactionType } from '../../../models/interfaces/wallet.interface';
 import { Schema } from 'mongoose';
 import { inject, injectable } from 'tsyringe';
@@ -11,9 +10,10 @@ import { IProfileService } from '../../../../src/services/interfaces/IProfile.se
 import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
 import { IVerificationRepository } from '../../../../src/repositories/interfaces/IVerification.repository';
 import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
-import { IDashboardRepository } from 'src/repositories/interfaces/IEvent.repository';
-import { IBooking } from 'src/models/interfaces/booking.interface';
-import { EventDocument } from 'src/models/interfaces/event.interface';
+import { IDashboardRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
+import { IBooking } from '../../../../src/models/interfaces/booking.interface';
+import { EventDocument } from '../../../../src/models/interfaces/event.interface';
+import { IBookingRepository } from '../../../../src/repositories/interfaces/IBooking.repository';
 
 
 
