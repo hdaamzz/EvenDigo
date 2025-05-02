@@ -98,20 +98,16 @@ export class SubscriptionRepository implements ISubscriptionRepository {
     }
   }
 
-  // New methods required for admin functionality
 
   async findSubscriptionByObjectId(id: string): Promise<ISubscription | null> {
     try {
-      // Check if the ID looks like a valid ObjectId
       if (!mongoose.Types.ObjectId.isValid(id) && !id.includes('ObjectId')) {
         return null;
       }
       
       let objectId: mongoose.Types.ObjectId;
       
-      // Handle both raw ObjectId and string representation
       if (id.includes('ObjectId')) {
-        // Extract the actual ID from the string format
         const match = id.match(/ObjectId\(['"]?([0-9a-fA-F]{24})['"]?\)/);
         if (!match || !match[1]) {
           return null;

@@ -26,6 +26,7 @@ profileRouter.put('/events', authMiddleware, upload.fields([
     { name: 'promotionalImage', maxCount: 1 }
   ]), (req, res) => profileController.updateEvent(req, res));
 profileRouter.delete('/events/:eventId', authMiddleware, (req, res) => profileController.deleteEvent(req, res));
+// profileRouter.get('/badge/:userId', authMiddleware, (req, res) => profileController.getUserWallet(req, res));
 
 
 export default profileRouter;

@@ -16,7 +16,6 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       
-      // Extract filter parameters from query
       const filters: any = {};
       
       if (req.query.status && req.query.status !== 'all') {
