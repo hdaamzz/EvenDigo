@@ -9,5 +9,5 @@ export interface IAuthController {
   resetPassword(req: Request, res: Response): Promise<void>;
   isAuthenticated(req: AuthenticatedRequest, res: Response): Promise<void>;
   firebaseSignIn(req: Request, res: Response): Promise<void>;
-  isLogout(req: Request, res: Response): void;
+  logout(req: Request, res: Response): void;
 }

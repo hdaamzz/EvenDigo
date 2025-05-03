@@ -2,14 +2,12 @@ import "reflect-metadata";
 import { container } from "tsyringe";
 import { UserRepository } from "../../src/repositories/implementation/user.repository";
 import { AuthRepository } from "../../src/repositories/implementation/auth.repository";
-import { AuthService } from "../../src/services/implementation/user/auth.service";
 import { AuthController } from "../controllers/implementation/user/auth/auth.controller";
 import { ExploreController } from "../controllers/implementation/user/explore/explore.controller";
 import { BookingRepository } from "../../src/repositories/implementation/booking.repository";
 import { CouponRepository } from "../../src/repositories/implementation/coupon.repository";
 import { VerificationRepository } from "../../src/repositories/implementation/verification.repository";
 import { WalletRepository } from "../../src/repositories/implementation/wallet.repository";
-import { ProfileService } from "../../src/services/implementation/user/profile.service";
 import { ExploreService } from "../services/implementation/user/explore/explore.service";
 import { BookingsModel } from "../../src/models/BookingModel";
 import { AdminAuthService } from "../../src/services/implementation/admin/admin.auth.service";
@@ -59,6 +57,13 @@ import { ProfileUserService } from "../../src/services/implementation/user/profi
 import { ProfileBookingService } from "../../src/services/implementation/user/profile/ProfileBooking.service";
 import { ProfileWalletService } from "../../src/services/implementation/user/profile/ProfileWallet.service";
 import { ProfileEventService } from "../../src/services/implementation/user/profile/ProfileEvent.service";
+import { UserAuthService } from "../../src/services/implementation/user/auth/UserAuthService";
+import { OTPService } from "../../src/services/implementation/user/auth/OTPService";
+import { PasswordService } from "../../src/services/implementation/user/auth/PasswordService";
+import { EmailService } from "../../src/services/implementation/user/auth/EmailService";
+import { FirebaseAuthService } from "../../src/services/implementation/user/auth/FirebaseAuthService";
+import { AuthService } from "../../src/services/implementation/user/auth/Auth.service";
+import { TokenService } from "../../src/services/implementation/user/auth/TokenService";
 
 
 
@@ -82,7 +87,6 @@ container.register("SubscriptionRepository", { useClass: SubscriptionRepository 
 //---user---
 container.register("AuthService", { useClass: AuthService });
 container.register("ExploreService", { useClass: ExploreService });
-container.register("ProfileService", { useClass: ProfileService });
 container.register("UserAchievementService", { useClass: UserAchievementService });
 container.register("SubscriptionQueryService", { useClass: SubscriptionQueryService });
 container.register("WalletSubscriptionService", { useClass: WalletSubscriptionService });
@@ -97,6 +101,15 @@ container.register("ProfileUserService", { useClass: ProfileUserService });
 container.register("ProfileBookingService", { useClass: ProfileBookingService });
 container.register("ProfileWalletService", { useClass: ProfileWalletService });
 container.register("ProfileEventService", { useClass: ProfileEventService });
+container.register("UserAuthService", { useClass: UserAuthService });
+container.register("OTPService", { useClass: OTPService });
+container.register("PasswordService", { useClass: PasswordService });
+container.register("EmailService", { useClass: EmailService });
+container.register("FirebaseAuthService", { useClass: FirebaseAuthService });
+container.register("TokenService", { useClass: TokenService });
+
+
+
 
 
 
