@@ -1,14 +1,19 @@
 import { Request, Response } from 'express';
-import { ISubscriptionController } from '../../../interfaces/User/Premium/ISubscription.controller';
 import { inject, injectable } from 'tsyringe';
-import { ISubscriptionService } from '../../../../../src/services/interfaces/ISubscription.service';
-import StatusCode from '../../../../../src/types/statuscode';
+import { ISubscriptionController } from '../../../interfaces/User/Premium/ISubscription.controller';
+import { ICheckoutService } from '../../../../../src/services/interfaces/user/subscription/ICheckout.service';
+import { IWalletSubscriptionService } from '../../../../../src/services/interfaces/user/subscription/IWalletSubscription.service';
+import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { BadRequestException } from '../../../../../src/error/error-handlers';
+import { ResponseHandler } from '../../../../../src/utils/response-handler';
 
 
 @injectable()
 export class SubscriptionController implements ISubscriptionController {
   constructor(
-    @inject("SubscriptionService") private subscriptionService: ISubscriptionService
+    @inject("CheckoutService") private checkoutService: ICheckoutService,
+    @inject("WalletSubscriptionService") private walletSubscriptionService: IWalletSubscriptionService,
+    @inject("SubscriptionQueryService") private subscriptionQueryService: ISubscriptionQueryService
   ) {}
 
   createCheckout = async (req: Request, res: Response): Promise<void> => {
@@ -17,30 +22,23 @@ export class SubscriptionController implements ISubscriptionController {
       const userId = req.user._id;
 
       if (!planType || !amount || !successUrl || !cancelUrl) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          error: 'Missing required fields'
-        });
-        return;
+        throw new BadRequestException('Missing required fields');
       }
 
-      const result = await this.subscriptionService.createStripeSubscription(userId, {
+      const result = await this.checkoutService.createCheckoutSession(userId, {
         planType,
         amount,
         successUrl,
         cancelUrl
       });
 
-      res.status(StatusCode.OK).json({
-        success: true,
-        data: { sessionId: result.sessionId }
-      });
+      ResponseHandler.success(res, { sessionId: result.sessionId }, 'Checkout session created successfully');
     } catch (error) {
-      console.error('Error creating subscription checkout:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: (error as Error).message || 'Failed to create subscription'
-      });
+      if (error instanceof BadRequestException) {
+        ResponseHandler.error(res, error, error.message, 400);
+      } else {
+        ResponseHandler.error(res, error, 'Failed to create subscription');
+      }
     }
   };
 
@@ -50,75 +48,60 @@ export class SubscriptionController implements ISubscriptionController {
       const userId = req.user._id;
 
       if (!planType || !amount) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          error: 'Missing required fields'
-        });
-        return;
+        throw new BadRequestException('Missing required fields');
       }
 
-      const subscription = await this.subscriptionService.processWalletSubscription(userId, {
+      const subscription = await this.walletSubscriptionService.processSubscription(userId, {
         planType,
         amount,
         successUrl: successUrl || '',
         cancelUrl: cancelUrl || ''
       });
 
-      res.status(StatusCode.OK).json({
-        success: true,
-        data: {
+      ResponseHandler.success(
+        res, 
+        {
           subscriptionId: subscription.subscriptionId,
           startDate: subscription.startDate,
           endDate: subscription.endDate,
           isActive: subscription.isActive,
           paymentMethod: subscription.paymentMethod,
           userId: subscription.userId
-        },
-        message: 'Subscription activated successfully'
-      });
+        }, 
+        'Subscription activated successfully'
+      );
     } catch (error) {
-      console.error('Error processing wallet subscription:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: (error as Error).message || 'Failed to process subscription'
-      });
+      if (error instanceof BadRequestException) {
+        ResponseHandler.error(res, error, error.message, 400);
+      } else {
+        ResponseHandler.error(res, error, 'Failed to process subscription');
+      }
     }
   };
 
   getCurrentSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user._id;
-      const subscription = await this.subscriptionService.getCurrentSubscription(userId);
+      const subscription = await this.subscriptionQueryService.getCurrentActiveSubscription(userId);
 
       if (!subscription) {
-        res.status(StatusCode.OK).json({
-          success: true,
-          data: null,
-          message: 'No active subscription found'
-        });
+        ResponseHandler.success(res, null, 'No active subscription found');
         return;
       }
 
-      res.status(StatusCode.OK).json({
-        success: true,
-        data: {
-          subscriptionId: subscription.subscriptionId,
-          type: subscription.type,
-          status: subscription.status,
-          startDate: subscription.startDate,
-          endDate: subscription.endDate,
-          isActive: subscription.isActive,
-          paymentMethod: subscription.paymentMethod,
-          amount: subscription.amount,
-          userId: subscription.userId
-        }
+      ResponseHandler.success(res, {
+        subscriptionId: subscription.subscriptionId,
+        type: subscription.type,
+        status: subscription.status,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+        isActive: subscription.isActive,
+        paymentMethod: subscription.paymentMethod,
+        amount: subscription.amount,
+        userId: subscription.userId
       });
     } catch (error) {
-      console.error('Error fetching current subscription:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: (error as Error).message || 'Failed to fetch subscription'
-      });
+      ResponseHandler.error(res, error, 'Failed to fetch subscription');
     }
   };
 
@@ -128,25 +111,42 @@ export class SubscriptionController implements ISubscriptionController {
       const userId = req.user._id;
 
       if (!subscriptionId) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          error: 'Subscription ID is required'
-        });
-        return;
+        throw new BadRequestException('Subscription ID is required');
       }
 
-      const result = await this.subscriptionService.cancelSubscription(userId, subscriptionId);
-
-      res.status(StatusCode.OK).json({
-        success: result.success,
-        message: result.message
-      });
+      const result = await this.subscriptionQueryService.cancelUserSubscription(userId, subscriptionId);
+      
+      ResponseHandler.success(res, null, result.message);
     } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: (error as Error).message || 'Failed to cancel subscription'
-      });
+      if (error instanceof BadRequestException) {
+        ResponseHandler.error(res, error, error.message, 400);
+      } else {
+        ResponseHandler.error(res, error, 'Failed to cancel subscription');
+      }
+    }
+  };
+
+  handleStripeWebhook = async (req: Request, res: Response): Promise<void> => {
+    const signature = req.headers['stripe-signature'] as string;
+    
+    if (!signature) {
+      ResponseHandler.error(res, new Error('Stripe signature is missing'), 'Invalid webhook', 400);
+      return;
+    }
+
+    try {
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (!endpointSecret) {
+        throw new Error('STRIPE_WEBHOOK_SECRET is not set');
+      }
+
+      const event = this.subscriptionQueryService.constructWebhookEvent(req.body, signature, endpointSecret);
+      
+      await this.subscriptionQueryService.handleSubscriptionWebhook(event);
+      
+      ResponseHandler.success(res, null, 'Webhook received');
+    } catch (error) {
+      ResponseHandler.error(res, error, 'Webhook failed', 400);
     }
   };
 }

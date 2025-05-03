@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
 import { inject, injectable } from 'tsyringe';
-import { ISubscriptionService } from '../../../../services/interfaces/ISubscription.service';
 import { IExploreController } from '../../../../controllers/interfaces/User/Explore/IExplore.controller';
 import { ResponseHandler } from '../../../../utils/response-handler';
 import StatusCode from '../../../../types/statuscode';
@@ -8,6 +7,7 @@ import { IExploreService } from '../../../../../src/services/interfaces/user/exp
 import { IPaymentService } from '../../../../../src/services/interfaces/user/explore/IPaymentService';
 import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
 import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
+import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
 
 @injectable()
 export class ExploreController implements IExploreController {
@@ -15,7 +15,7 @@ export class ExploreController implements IExploreController {
     @inject("ExploreService") private exploreService: IExploreService,
     @inject("PaymentService") private paymentService: IPaymentService,
     @inject("BookingService") private bookingService: IBookingService,
-    @inject("SubscriptionService") private subscriptionService: ISubscriptionService
+    @inject("SubscriptionQueryService") private subscriptionService: ISubscriptionQueryService
   ) {}
 
   getAllEvents = async (req: Request, res: Response): Promise<void> => {

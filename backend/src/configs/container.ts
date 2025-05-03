@@ -32,7 +32,6 @@ import { UserAchievementService } from "../../src/services/implementation/user/a
 import { SubscriptionController } from "../../src/controllers/implementation/user/premium/subscription.controller";
 import { SubscriptionRepository } from "../repositories/implementation/subscription.repository";
 import { SubscriptionModel } from "../../src/models/user/SubscriptionModal";
-import { SubscriptionService } from "../../src/services/implementation/user/subscription/subscription.service";
 import { AdminSubscriptionService } from "../../src/services/implementation/admin/admin.subscription.service";
 import { AdminSubscriptionController } from "../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
 import { ProfileController } from "../../src/controllers/implementation/user/profile/profile.controller";
@@ -49,6 +48,10 @@ import { EventRepository } from "../../src/repositories/implementation/event.rep
 import { DashboardController } from "../../src/controllers/implementation/user/dashboard/dashboard.controller";
 import { PaymentService } from "../../src/services/implementation/user/explore/payment.service";
 import { BookingService } from "../../src/services/implementation/user/explore/booking.service";
+import { SubscriptionQueryService } from "../../src/services/implementation/user/subscription/SubscriptionQueryService";
+import { WalletSubscriptionService } from "../../src/services/implementation/user/subscription/WalletSubscriptionService";
+import { CheckoutService } from "../../src/services/implementation/user/subscription/CheckoutService";
+import { StripeProvider } from "../../src/utils/stripeProvider";
 
 
 
@@ -59,11 +62,11 @@ container.register("CouponRepository", { useClass: CouponRepository });
 container.register("EventRepository", { useClass: EventRepository });
 container.register("VerificationRepository", { useClass: VerificationRepository });
 container.register("WalletRepository", { useClass: WalletRepository });
-container.register("AchievementRepository",{useClass: AchievementRepository})
+container.register("AchievementRepository", { useClass: AchievementRepository })
 container.register("FinanceRepository", { useClass: FinanceRepository });
 container.register("RevenueDistributionRepository", { useClass: RevenueDistributionRepository });
 container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
-container.register("SubscriptionRepository",  { useClass: SubscriptionRepository } );
+container.register("SubscriptionRepository", { useClass: SubscriptionRepository });
 
 
 
@@ -74,12 +77,16 @@ container.register("AuthService", { useClass: AuthService });
 container.register("ExploreService", { useClass: ExploreService });
 container.register("ProfileService", { useClass: ProfileService });
 container.register("UserAchievementService", { useClass: UserAchievementService });
-container.register("SubscriptionService", { useClass: SubscriptionService });
+container.register("SubscriptionQueryService", { useClass: SubscriptionQueryService });
+container.register("WalletSubscriptionService", { useClass: WalletSubscriptionService });
+container.register("CheckoutService", { useClass: CheckoutService });
 container.register("EventService", { useClass: EventService });
 container.register("FileService", { useClass: FileService });
 container.register("EventMapper", { useClass: EventMapper });
 container.register("PaymentService", { useClass: PaymentService });
 container.register("BookingService", { useClass: BookingService });
+container.register("StripeProvider", { useClass: StripeProvider });
+
 
 
 
@@ -87,15 +94,15 @@ container.register("BookingService", { useClass: BookingService });
 
 
 //---admin---
-container.register("AdminAuthService",{useClass:AdminAuthService})
-container.register("CouponService",{useClass:CouponService})
-container.register("AdminEventsService",{useClass:AdminEventsService})
-container.register("AdminUsersService",{useClass:AdminUsersService})
-container.register("AchievementService",{useClass:AchievementService })
-container.register("FinanceService", {useClass: FinanceService });
-container.register("RevenueDistributionService",  { useClass: RevenueDistributionService } );
+container.register("AdminAuthService", { useClass: AdminAuthService })
+container.register("CouponService", { useClass: CouponService })
+container.register("AdminEventsService", { useClass: AdminEventsService })
+container.register("AdminUsersService", { useClass: AdminUsersService })
+container.register("AchievementService", { useClass: AchievementService })
+container.register("FinanceService", { useClass: FinanceService });
+container.register("RevenueDistributionService", { useClass: RevenueDistributionService });
 container.register("RevenueDistributionCronService", { useClass: RevenueDistributionCronService });
-container.register("AdminSubscriptionService",  { useClass: AdminSubscriptionService } );
+container.register("AdminSubscriptionService", { useClass: AdminSubscriptionService });
 
 
 
@@ -116,7 +123,7 @@ container.register("AdminAuthController", { useClass: AdminAuthController });
 container.register("CouponController", { useClass: CouponController });
 container.register("AdminEventsController", { useClass: AdminEventsController });
 container.register("AdminUsersController", { useClass: AdminUsersController });
-container.register("AchievementController",{useClass:AchievementController})
+container.register("AchievementController", { useClass: AchievementController })
 container.register("RevenueDistributionController", { useClass: RevenueDistributionController });
 container.register("AdminSubscriptionController", { useClass: AdminSubscriptionController });
 

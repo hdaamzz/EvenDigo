@@ -21,6 +21,8 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findSubscriptionById(subscriptionId: string): Promise<ISubscription | null> {
     try {
+      console.log(subscriptionId);
+      
       return await this.subscriptionModel.findOne({ subscriptionId }).exec();
     } catch (error) {
       throw new Error(`Failed to find subscription: ${(error as Error).message}`);
