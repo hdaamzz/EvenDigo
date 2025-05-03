@@ -1,57 +1,52 @@
 import { Request, Response } from 'express';
-import { IProfileService } from '../../../../../src/services/interfaces/IProfile.service';
-import StatusCode from '../../../../../src/types/statuscode';
-
 import { inject, injectable } from 'tsyringe';
-import { IProfileBookingController } from '../../../../../src/controllers/interfaces/User/Profile/IProfileBooking.controller';
-
-
+import { IProfileBookingController } from '../../../../controllers/interfaces/User/Profile/IProfileBooking.controller';
+import { ResponseHandler } from '../../../../utils/response-handler';
+import { IProfileBookingService } from '../../../../../src/services/interfaces/user/profile/IProfileBooking.service';
 
 @injectable()
-export class ProfileBookingController implements IProfileBookingController{
+export class ProfileBookingController implements IProfileBookingController {
   constructor(
-    @inject("ProfileService")   private profileService: IProfileService,
-    
+    @inject("ProfileBookingService") private profileBookingService: IProfileBookingService,
   ) {}
 
   async getUserBookings(req: Request, res: Response): Promise<void> {
-    const userId = req.user._id.toString();
     try {
-      const bookings = await this.profileService.getUserBookings(userId);
-      res.status(StatusCode.OK).json({ success: true, data: bookings });
+      if (!req.user?._id) {
+        return ResponseHandler.error(res, null, "User not authenticated", 401);
+      }
+      
+      const userId = req.user._id.toString();
+      const bookings = await this.profileBookingService.getUserBookings(userId);
+      
+      ResponseHandler.success(res, bookings, "User bookings retrieved successfully");
     } catch (error) {
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: (error as Error).message });
+      ResponseHandler.error(res, error, "Failed to fetch user bookings");
     }
   }
 
   async cancelTicket(req: Request, res: Response): Promise<void> {
     try {
+      if (!req.user?._id) {
+        return ResponseHandler.error(res, null, "User not authenticated", 401);
+      }
+      
       const userId = req.user._id.toString();
       const { bookingId, ticketUniqueId } = req.body;
-  
+      
       if (!bookingId || !ticketUniqueId) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          message: 'Booking ID and ticket ID are required'
-        });
-        return;
+        return ResponseHandler.error(res, null, "Booking ID and ticket ID are required", 400);
       }
-  
-      const result = await this.profileService.cancelTicket(userId, bookingId, ticketUniqueId);
+      
+      const result = await this.profileBookingService.cancelTicket(userId, bookingId, ticketUniqueId);
       
       if (result.success) {
-        res.status(StatusCode.OK).json(result);
+        ResponseHandler.success(res, result.data, result.message);
       } else {
-        res.status(StatusCode.BAD_REQUEST).json(result);
+        ResponseHandler.error(res, null, result.message, 400);
       }
     } catch (error) {
-      console.error('Ticket cancellation error:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: 'Failed to cancel ticket',
-        error: (error as Error).message
-      });
+      ResponseHandler.error(res, error, "Failed to cancel ticket");
     }
   }
-
 }

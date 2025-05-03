@@ -1,74 +1,77 @@
 import { Request, Response } from 'express';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
-import { IProfileService } from '../../../../../src/services/interfaces/IProfile.service';
-import StatusCode from '../../../../../src/types/statuscode';
-import { uploadToCloudinary } from '../../../../../src/utils/helpers';
-
 import { inject, injectable } from 'tsyringe';
-import { IProfileEventsController } from '../../../../../src/controllers/interfaces/User/Profile/IProfileEvents.controller';
-
-
+import { IProfileEventsController } from '../../../../controllers/interfaces/User/Profile/IProfileEvents.controller';
+import { ResponseHandler } from '../../../../utils/response-handler';
+import { uploadToCloudinary } from '../../../../utils/helpers';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
+import { IProfileEventService } from '../../../../../src/services/interfaces/user/profile/IProfileEvent.service';
 
 @injectable()
-export class ProfileEventsController implements IProfileEventsController{
+export class ProfileEventsController implements IProfileEventsController {
   constructor(
-    @inject("ProfileService")   private profileService: IProfileService,
-    
+    @inject("ProfileEventService") private profileEventService: IProfileEventService,
   ) {}
 
   async getUserEvents(req: Request, res: Response): Promise<void> {
-    const userId = req.user._id.toString();
     try {
-      const bookings = await this.profileService.getUserEvents(userId);
-      res.status(StatusCode.OK).json({ success: true, data: bookings });
+      if (!req.user?._id) {
+        return ResponseHandler.error(res, null, "User not authenticated", 401);
+      }
+      
+      const userId = req.user._id.toString();
+      const events = await this.profileEventService.getUserEvents(userId);
+      
+      ResponseHandler.success(res, events, "User events retrieved successfully");
     } catch (error) {
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: (error as Error).message });
+      ResponseHandler.error(res, error, "Failed to fetch user events");
     }
   }
 
-
   async getEvent(req: Request, res: Response): Promise<void> {
-    const eventId = req.params.eventId.toString();
     try {
-      const event= await this.profileService.getEvent(eventId)
-      res.status(StatusCode.OK).json({ success: true, data: event });
+      const eventId = req.params.eventId;
+      
+      if (!eventId) {
+        return ResponseHandler.error(res, null, "Event ID is required", 400);
+      }
+      
+      const event = await this.profileEventService.getEvent(eventId);
+      
+      if (!event) {
+        return ResponseHandler.error(res, null, "Event not found", 404);
+      }
+      
+      ResponseHandler.success(res, event, "Event retrieved successfully");
     } catch (error) {
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: (error as Error).message });
+      ResponseHandler.error(res, error, "Failed to fetch event");
     }
-}
-  
+  }
 
   async updateEvent(req: Request, res: Response): Promise<void> {
     try {
       const eventId = req.body.eventId;
       
       if (!eventId) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          message: 'Event ID is required'
-        });
-        return;
+        return ResponseHandler.error(res, null, "Event ID is required", 400);
       }
-  
-      const event = await this.profileService.getEvent(eventId);
+      
+      // Check if event exists
+      const event = await this.profileEventService.getEvent(eventId);
       
       if (!event) {
-        res.status(StatusCode.NOT_FOUND).json({
-          success: false,
-          message: 'Event not found'
-        });
-        return;
+        return ResponseHandler.error(res, null, "Event not found", 404);
       }
       
-      const updateData:Partial<EventDocument> = {};
+      const updateData: Partial<EventDocument> = {};
       
+      // Extract relevant fields from request body
       for (const key in req.body) {
         if (key !== 'eventId') {
           updateData[key as keyof EventDocument] = req.body[key];
         }
       }
-      console.log(updateData)
       
+      // Process uploaded files if any
       if (req.files) {
         const files = req.files as Record<string, Express.Multer.File[]>;
         
@@ -82,78 +85,49 @@ export class ProfileEventsController implements IProfileEventsController{
           updateData.promotionalImage = promoResult.secure_url;
         }
       }
-  
+      
+      // Parse tickets if they exist as a string
       if (updateData.tickets && typeof updateData.tickets === 'string') {
         updateData.tickets = JSON.parse(updateData.tickets);
       }
-  
-      const result = await this.profileService.updateEvent(eventId, updateData);
+      
+      // Update the event
+      const result = await this.profileEventService.updateEvent(eventId, updateData);
       
       if (result) {
-        res.status(StatusCode.OK).json({
-          success: true,
-          message: 'Event updated successfully',
-          data: result
-        });
+        ResponseHandler.success(res, result, "Event updated successfully");
       } else {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          message: 'Failed to update event'
-        });
+        ResponseHandler.error(res, null, "Failed to update event", 400);
       }
     } catch (error) {
-      console.error('Event update error:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: 'Failed to update event',
-        error: (error as Error).message
-      });
+      ResponseHandler.error(res, error, "Failed to update event");
     }
   }
 
   async deleteEvent(req: Request, res: Response): Promise<void> {
     try {
       const eventId = req.params.eventId;
-  
+      
       if (!eventId) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          message: 'Event ID is required'
-        });
-        return;
+        return ResponseHandler.error(res, null, "Event ID is required", 400);
       }
-  
-      const event = await this.profileService.getEvent(eventId);
+      
+      // Check if event exists
+      const event = await this.profileEventService.getEvent(eventId);
       
       if (!event) {
-        res.status(StatusCode.NOT_FOUND).json({
-          success: false,
-          message: 'Event not found'
-        });
-        return;
+        return ResponseHandler.error(res, null, "Event not found", 404);
       }
-
-      const result = await this.profileService.deleteEvent(eventId);
+      
+      const result = await this.profileEventService.deleteEvent(eventId);
       
       if (result) {
-        res.status(StatusCode.OK).json({
-          success: true,
-          message: 'Event deleted successfully'
-        });
+        ResponseHandler.success(res, null, "Event deleted successfully");
       } else {
-        res.status(StatusCode.BAD_REQUEST).json({
-          success: false,
-          message: 'Failed to delete event'
-        });
+        ResponseHandler.error(res, null, "Failed to delete event", 400);
       }
     } catch (error) {
-      console.error('Event deletion error:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: 'Failed to delete event',
-        error: (error as Error).message
-      });
+      ResponseHandler.error(res, error, "Failed to delete event");
     }
   }
-
 }

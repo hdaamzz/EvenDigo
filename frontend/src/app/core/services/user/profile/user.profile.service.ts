@@ -40,8 +40,8 @@ export class UserProfileService {
   }
 
   
-  userDetails(userId: string): Observable<User> {
-      return this.http.post<User>(`${this.baseUrl}user/profile/user-details`, { userId: userId }, {
+  userDetails(userId: string): Observable<UpdateProfileResponse> {
+      return this.http.post<UpdateProfileResponse>(`${this.baseUrl}user/profile/user-details`, { userId: userId }, {
         withCredentials: true,
       }).pipe(
         catchError(error => {

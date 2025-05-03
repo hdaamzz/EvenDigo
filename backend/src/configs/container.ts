@@ -55,6 +55,10 @@ import { ProfileBookingController } from "../../src/controllers/implementation/u
 import { ProfileEventsController } from "../../src/controllers/implementation/user/profile/profileEvents.controller";
 import { ProfileWalletController } from "../../src/controllers/implementation/user/profile/profileWallet.controller";
 import { ProfileUserController } from "../../src/controllers/implementation/user/profile/profileUser.controller";
+import { ProfileUserService } from "../../src/services/implementation/user/profile/ProfileUser.service";
+import { ProfileBookingService } from "../../src/services/implementation/user/profile/ProfileBooking.service";
+import { ProfileWalletService } from "../../src/services/implementation/user/profile/ProfileWallet.service";
+import { ProfileEventService } from "../../src/services/implementation/user/profile/ProfileEvent.service";
 
 
 
@@ -89,6 +93,11 @@ container.register("EventMapper", { useClass: EventMapper });
 container.register("PaymentService", { useClass: PaymentService });
 container.register("BookingService", { useClass: BookingService });
 container.register("StripeProvider", { useClass: StripeProvider });
+container.register("ProfileUserService", { useClass: ProfileUserService });
+container.register("ProfileBookingService", { useClass: ProfileBookingService });
+container.register("ProfileWalletService", { useClass: ProfileWalletService });
+container.register("ProfileEventService", { useClass: ProfileEventService });
+
 
 
 

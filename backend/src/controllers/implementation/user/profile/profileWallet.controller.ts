@@ -1,36 +1,31 @@
 import { Request, Response } from 'express';
-import { IProfileService } from '../../../../../src/services/interfaces/IProfile.service';
-import StatusCode from '../../../../../src/types/statuscode';
 import { inject, injectable } from 'tsyringe';
-import { IProfileWalletController } from '../../../../../src/controllers/interfaces/User/Profile/IProfileWallet.controller';
-
-
+import { IProfileWalletController } from '../../../../controllers/interfaces/User/Profile/IProfileWallet.controller';
+import { ResponseHandler } from '../../../../utils/response-handler';
+import { IProfileWalletService } from '../../../../../src/services/interfaces/user/profile/IProfileWallet.service';
 
 @injectable()
-export class ProfileWalletController implements IProfileWalletController{
+export class ProfileWalletController implements IProfileWalletController {
   constructor(
-    @inject("ProfileService")   private profileService: IProfileService,
-    
+    @inject("ProfileWalletService") private profileWalletService: IProfileWalletService,
   ) {}
 
   async getUserWallet(req: Request, res: Response): Promise<void> {
     try {
+      if (!req.user?._id) {
+        return ResponseHandler.error(res, null, "User not authenticated", 401);
+      }
+      
       const userId = req.user._id.toString();
-      const response = await this.profileService.getWalletDetails(userId);
-      console.log(response);
+      const response = await this.profileWalletService.getWalletDetails(userId);
       
       if (response.success) {
-        res.status(StatusCode.OK).json(response);
+        ResponseHandler.success(res, response.data, response.message);
       } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
+        ResponseHandler.error(res, null, response.message, 400);
       }
     } catch (error) {
-      console.error('Wallet fetch error:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: 'Internal server error',
-        error: (error as Error).message
-      });
+      ResponseHandler.error(res, error, "Failed to fetch wallet details");
     }
   }
 }

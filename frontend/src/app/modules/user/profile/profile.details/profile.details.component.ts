@@ -135,7 +135,7 @@ export class ProfileDetailsComponent implements OnInit {
 
     this.userProfileService.userDetails(this.userId).subscribe({
       next: (userData) => {
-        this.user = userData;
+        this.user = userData.data;
         if (this.user.dateOfBirth) {
           this.user.dateOfBirth = new Date(this.user.dateOfBirth);
         }
