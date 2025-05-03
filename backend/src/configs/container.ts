@@ -34,7 +34,6 @@ import { SubscriptionRepository } from "../repositories/implementation/subscript
 import { SubscriptionModel } from "../../src/models/user/SubscriptionModal";
 import { AdminSubscriptionService } from "../../src/services/implementation/admin/admin.subscription.service";
 import { AdminSubscriptionController } from "../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
-import { ProfileController } from "../../src/controllers/implementation/user/profile/profile.controller";
 import { AdminAuthController } from "../../src/controllers/implementation/admin/auth/admin.auth.controller";
 import { CouponController } from "../../src/controllers/implementation/admin/coupon/admin.coupon.controller";
 import { AdminEventsController } from "../../src/controllers/implementation/admin/event/admin.events.controller";
@@ -52,6 +51,10 @@ import { SubscriptionQueryService } from "../../src/services/implementation/user
 import { WalletSubscriptionService } from "../../src/services/implementation/user/subscription/WalletSubscriptionService";
 import { CheckoutService } from "../../src/services/implementation/user/subscription/CheckoutService";
 import { StripeProvider } from "../../src/utils/stripeProvider";
+import { ProfileBookingController } from "../../src/controllers/implementation/user/profile/profileBooking.controller";
+import { ProfileEventsController } from "../../src/controllers/implementation/user/profile/profileEvents.controller";
+import { ProfileWalletController } from "../../src/controllers/implementation/user/profile/profileWallet.controller";
+import { ProfileUserController } from "../../src/controllers/implementation/user/profile/profileUser.controller";
 
 
 
@@ -112,8 +115,12 @@ container.register("AdminSubscriptionService", { useClass: AdminSubscriptionServ
 container.register("AuthController", { useClass: AuthController });
 container.register("DashboardController", { useClass: DashboardController });
 container.register("ExploreController", { useClass: ExploreController });
-container.register("ProfileController", { useClass: ProfileController });
 container.register("SubscriptionController", { useClass: SubscriptionController });
+container.register("ProfileBookingController", { useClass: ProfileBookingController });
+container.register("ProfileEventsController", { useClass: ProfileEventsController });
+container.register("ProfileWalletController", { useClass: ProfileWalletController });
+container.register("ProfileUserController", { useClass: ProfileUserController });
+
 
 
 
