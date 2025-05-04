@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
-import { ISubscription } from '../../../../models/user/SubscriptionModal';
+import { ISubscription } from '../../../../models/SubscriptionModal';
 import Stripe from 'stripe';
-import { SubscriptionStatus } from '../../../../../src/models/user/SubscriptionModal';
+import { SubscriptionStatus } from '../../../../models/SubscriptionModal';
 import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
 import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/ISubscription.repository';
 import { StripeProvider } from '../../../../../src/utils/stripeProvider';

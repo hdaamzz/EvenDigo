@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { ISubscription } from "../../../src/models/user/SubscriptionModal";
+import { ISubscription } from "../../models/SubscriptionModal";
 
 export interface SubscriptionFilter {
   status?: string;

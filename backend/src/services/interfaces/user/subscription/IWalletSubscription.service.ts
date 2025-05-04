@@ -1,4 +1,4 @@
-import { ISubscription } from "../../../../../src/models/user/SubscriptionModal";
+import { ISubscription } from "../../../../models/SubscriptionModal";
 import { SubscriptionPayload } from "./ISubscriptionQuery.service";
 
 

@@ -1,7 +1,7 @@
 import { Model, Schema } from 'mongoose';
 import { inject, injectable } from 'tsyringe';
 import { ISubscriptionRepository } from '../interfaces/ISubscription.repository';
-import { ISubscription, SubscriptionStatus } from '../../models/user/SubscriptionModal';
+import { ISubscription, SubscriptionStatus } from '../../models/SubscriptionModal';
 import mongoose from 'mongoose';
 
 @injectable()

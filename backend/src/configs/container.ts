@@ -29,7 +29,7 @@ import { UserAchievementRepository } from "../../src/repositories/implementation
 import { UserAchievementService } from "../../src/services/implementation/user/achievements/achivements.service";
 import { SubscriptionController } from "../../src/controllers/implementation/user/premium/subscription.controller";
 import { SubscriptionRepository } from "../repositories/implementation/subscription.repository";
-import { SubscriptionModel } from "../../src/models/user/SubscriptionModal";
+import { SubscriptionModel } from "../models/SubscriptionModal";
 import { AdminSubscriptionService } from "../../src/services/implementation/admin/admin.subscription.service";
 import { AdminSubscriptionController } from "../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
 import { AdminAuthController } from "../../src/controllers/implementation/admin/auth/admin.auth.controller";

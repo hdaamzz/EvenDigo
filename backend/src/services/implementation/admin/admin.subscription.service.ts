@@ -2,7 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
 import { IAdminSubscriptionService, PaginatedSubscriptions, SubscriptionFilter, SubscriptionFilterOptions, SubscriptionStats } from '../../../../src/services/interfaces/IAdminSubscription.service';
 import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
-import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../../src/models/user/SubscriptionModal';
+import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../models/SubscriptionModal';
 import { ISubscriptionRepository } from '../../../../src/repositories/interfaces/ISubscription.repository';
 
 

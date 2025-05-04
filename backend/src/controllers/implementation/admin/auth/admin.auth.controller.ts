@@ -5,8 +5,6 @@ import { IAuthAdminController } from '../../../../../src/controllers/interfaces/
 import { IAuthAdminService } from '../../../../../src/services/interfaces/IAuth.admin.service';
 import StatusCode from '../../../../../src/types/statuscode';
 
-// import * as jwt from 'jsonwebtoken';
-
 @injectable()
 export class AdminAuthController implements IAuthAdminController{
     constructor(
