@@ -3,8 +3,7 @@ import { IFinanceController } from '../../../../../src/controllers/interfaces/Ad
 import { IFinanceService } from '../../../../../src/services/interfaces/IRevenue.service';
 import StatusCode from '../../../../../src/types/statuscode';
 import { inject, injectable } from 'tsyringe';
-import { ResponseHandler } from '../../../../../src/utils/response-handler';
-import { BadRequestException, InternalServerErrorException } from '../../../../../src/error/error-handlers';
+
 
 @injectable()
 export class FinanceController implements IFinanceController {
@@ -21,26 +20,39 @@ export class FinanceController implements IFinanceController {
       const response = await this.financeService.getRevenueTransactions(page, limit, search);
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch revenue transactions');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch revenue transactions');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue transactions"
+      });
     }
   }
 
   async getRevenueStats(_req: Request, res: Response): Promise<void> {
     try {
       const response = await this.financeService.getRevenueStats();
+      console.log(response);
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch revenue statistics');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch revenue statistics');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue statistics"
+      });
     }
   }
 
@@ -50,7 +62,11 @@ export class FinanceController implements IFinanceController {
       const endDate = new Date(req.query.endDate as string);
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        throw new BadRequestException('Invalid date format. Use YYYY-MM-DD format.');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "Invalid date format. Use YYYY-MM-DD format."
+        });
+        return;
       }
 
       endDate.setHours(23, 59, 59, 999);
@@ -68,19 +84,21 @@ export class FinanceController implements IFinanceController {
       );
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch revenue by date range');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to fetch revenue by date range', 
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue by date range"
+      });
     }
   }
+
 
   async getRefundTransactions(req: Request, res: Response): Promise<void> {
     try {
@@ -89,16 +107,23 @@ export class FinanceController implements IFinanceController {
       const search = req.query.search as string || '';
 
       const response = await this.financeService.getRefundTransactions(page, limit, search);
-      
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch refund transactions');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch refund transactions');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch refund transactions"
+      });
     }
   }
+
+  
   
   async getRefundsByDateRange(req: Request, res: Response): Promise<void> {
     try {
@@ -106,7 +131,11 @@ export class FinanceController implements IFinanceController {
       const endDate = new Date(req.query.endDate as string);
   
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        throw new BadRequestException('Invalid date format. Use YYYY-MM-DD format.');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "Invalid date format. Use YYYY-MM-DD format."
+        });
+        return;
       }
   
       endDate.setHours(23, 59, 59, 999);
@@ -124,17 +153,18 @@ export class FinanceController implements IFinanceController {
       );
   
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch refunds by date range');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to fetch refunds by date range', 
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch refunds by date range"
+      });
     }
   }
 }

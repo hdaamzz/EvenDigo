@@ -4,8 +4,6 @@ import { inject, injectable } from 'tsyringe';
 import StatusCode from '../../../../../src/types/statuscode';
 import { IAdminSubscriptionController } from '../../../interfaces/Admin/Subscription/IAdminSubscription.controller';
 import { IAdminSubscriptionService } from '../../../../../src/services/interfaces/IAdminSubscription.service';
-import { ResponseHandler } from '../../../../../src/utils/response-handler';
-import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
 
 @injectable()
 export class AdminSubscriptionController implements IAdminSubscriptionController {
@@ -41,18 +39,34 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       }
 
       const result = await this.adminSubscriptionService.getAllSubscriptions(page, limit, filters);
-      ResponseHandler.success(res, result);
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: result
+      });
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch subscriptions');
+      console.error('Error fetching subscriptions:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch subscriptions'
+      });
     }
   };
 
   getSubscriptionStats = async (_req: Request, res: Response): Promise<void> => {
     try {
       const stats = await this.adminSubscriptionService.getSubscriptionStats();
-      ResponseHandler.success(res, stats);
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: stats
+      });
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch subscription statistics');
+      console.error('Error fetching subscription stats:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch subscription statistics'
+      });
     }
   };
 
@@ -61,25 +75,33 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       const { id } = req.params;
       
       if (!id) {
-        throw new BadRequestException('Subscription ID is required');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          error: 'Subscription ID is required'
+        });
+        return;
       }
 
       const subscription = await this.adminSubscriptionService.getSubscriptionById(id);
       
       if (!subscription) {
-        throw new NotFoundException('Subscription not found');
+        res.status(StatusCode.NOT_FOUND).json({
+          success: false,
+          error: 'Subscription not found'
+        });
+        return;
       }
 
-      ResponseHandler.success(res, subscription);
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: subscription
+      });
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to fetch subscription details',
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : 
-        error instanceof NotFoundException ? StatusCode.NOT_FOUND : 
-        StatusCode.INTERNAL_SERVER_ERROR
-      );
+      console.error('Error fetching subscription details:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch subscription details'
+      });
     }
   };
 
@@ -88,18 +110,25 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       const { userId } = req.params;
       
       if (!userId) {
-        throw new BadRequestException('User ID is required');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          error: 'User ID is required'
+        });
+        return;
       }
 
       const subscriptions = await this.adminSubscriptionService.getUserSubscriptions(userId);
-      ResponseHandler.success(res, subscriptions);
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: subscriptions
+      });
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to fetch user subscriptions',
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      console.error('Error fetching user subscriptions:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch user subscriptions'
+      });
     }
   };
 
@@ -108,33 +137,42 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       const { id, isActive } = req.body;
       
       if (!id) {
-        throw new BadRequestException('Subscription ID is required');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          error: 'Subscription ID is required'
+        });
+        return;
       }
 
       if (isActive === undefined) {
-        throw new BadRequestException('Status value is required');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          error: 'Status value is required'
+        });
+        return;
       }
 
       const updatedSubscription = await this.adminSubscriptionService.updateSubscriptionStatus(id, isActive);
       
       if (!updatedSubscription) {
-        throw new NotFoundException('Subscription not found');
+        res.status(StatusCode.NOT_FOUND).json({
+          success: false,
+          error: 'Subscription not found'
+        });
+        return;
       }
 
-      ResponseHandler.success(
-        res, 
-        updatedSubscription, 
-        `Subscription ${isActive ? 'activated' : 'deactivated'} successfully`
-      );
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: updatedSubscription,
+        message: `Subscription ${isActive ? 'activated' : 'deactivated'} successfully`
+      });
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to update subscription status',
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : 
-        error instanceof NotFoundException ? StatusCode.NOT_FOUND : 
-        StatusCode.INTERNAL_SERVER_ERROR
-      );
+      console.error('Error updating subscription status:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to update subscription status'
+      });
     }
   };
 
@@ -143,34 +181,50 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       const { id } = req.params;
       
       if (!id) {
-        throw new BadRequestException('Subscription ID is required');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          error: 'Subscription ID is required'
+        });
+        return;
       }
 
       const result = await this.adminSubscriptionService.deleteSubscription(id);
       
       if (!result) {
-        throw new NotFoundException('Subscription not found');
+        res.status(StatusCode.NOT_FOUND).json({
+          success: false,
+          error: 'Subscription not found'
+        });
+        return;
       }
 
-      ResponseHandler.success(res, null, 'Subscription deleted successfully');
+      res.status(StatusCode.OK).json({
+        success: true,
+        message: 'Subscription deleted successfully'
+      });
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to delete subscription',
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : 
-        error instanceof NotFoundException ? StatusCode.NOT_FOUND : 
-        StatusCode.INTERNAL_SERVER_ERROR
-      );
+      console.error('Error deleting subscription:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to delete subscription'
+      });
     }
   };
 
   getFilterOptions = async (_req: Request, res: Response): Promise<void> => {
     try {
       const filterOptions = await this.adminSubscriptionService.getFilterOptions();
-      ResponseHandler.success(res, filterOptions);
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: filterOptions
+      });
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch filter options');
+      console.error('Error fetching filter options:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch filter options'
+      });
     }
   };
 }

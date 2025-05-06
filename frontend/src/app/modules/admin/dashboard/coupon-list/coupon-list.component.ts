@@ -44,7 +44,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   
   private destroy$ = new Subject<void>();
   
-  // For scroll detection
   @ViewChild('couponsContainer') couponsContainer: ElementRef | undefined;  
   couponForm: FormGroup;
   discountTypes = [
@@ -56,7 +55,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     private fb: FormBuilder,
     private couponService: AdminCouponService
   ) {
-    // Initialize coupon form with validations
     this.couponForm = this.fb.group({
       couponCode: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20), alphabetsValidator()]],
       discountType: ['', Validators.required],
@@ -71,7 +69,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.loadCoupons(true);
     
-    // Handle window resize for mobile detection
     fromEvent(window, 'resize')
       .pipe(
         takeUntil(this.destroy$),
@@ -109,7 +106,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     return (scrollPosition + windowHeight) > (documentHeight * 0.8);
   }
 
-  // Load coupons with pagination
   loadCoupons(reset: boolean = false) {
     if (reset) {
       this.currentPage = 1;
@@ -201,7 +197,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     if (this.selectedCoupon._id) {
-      // Update existing coupon
       this.couponService.updateCoupon(this.selectedCoupon._id, couponData).subscribe({
         next: () => {
           this.loadCoupons(true); 
@@ -215,7 +210,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
     } else {
-      // Create new coupon
       this.couponService.createCoupon(couponData).subscribe({
         next: () => {
           this.loadCoupons(true);
@@ -244,7 +238,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.createDialogVisible = true;
   }
 
-  // Activate coupon
   activateCoupon(couponId: string) {
     this.couponService.activateCoupon(couponId).subscribe({
       next: () => {
@@ -261,7 +254,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // Deactivate coupon
   deactivateCoupon(couponId: string) {
     this.couponService.deactivateCoupon(couponId).subscribe({
       next: () => {
@@ -278,7 +270,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // Delete coupon
   deleteCoupon(couponId: string) {
     Notiflix.Confirm.show(
       'Confirm Deletion', 
@@ -310,7 +301,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  //custom validation method 
   customValidators(): ValidatorFn {
     return (formGroup: AbstractControl): ValidationErrors | null => {
       const discountType = formGroup.get('discountType')?.value;
@@ -332,7 +322,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  // Helper methods for the reusable card component
   getCouponStatusBadge(coupon: any): { text: string, classes: string } {
     return coupon.status === 'active' 
       ? { text: 'Active', classes: 'bg-green-100 text-green-600' }

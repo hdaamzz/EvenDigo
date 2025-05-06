@@ -3,8 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import { IRevenueDistributionService } from '../../../../../src/services/interfaces/IDistribution.service';
 import { IRevenueDistributionController } from 'src/controllers/interfaces/Admin/Finance/IDistribution.controller';
 import StatusCode from '../../../../../src/types/statuscode';
-import { ResponseHandler } from '../../../../../src/utils/response-handler';
-import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../../../../src/error/error-handlers';
+
 
 @injectable()
 export class RevenueDistributionController implements IRevenueDistributionController {
@@ -17,21 +16,22 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.processFinishedEvents();
 
       if (result.success) {
-        ResponseHandler.success(
-          res, 
-          result.data, 
-          `Processed ${result.data?.processed} events for revenue distribution`
-        );
+        res.status(StatusCode.OK).json({
+          success: true,
+          message: `Processed ${result.data?.processed} events for revenue distribution`,
+          data: result.data
+        });
       } else {
-        throw new InternalServerErrorException(result.message || 'Failed to trigger distribution');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: result.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        `Failed to trigger distribution`, 
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: `Failed to trigger distribution: ${(error as Error).message}`
+      });
     }
   }
 
@@ -41,17 +41,21 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.getDistributionByEventId(eventId);
 
       if (result.success) {
-        ResponseHandler.success(res, result.data);
+        res.status(StatusCode.OK).json({
+          success: true,
+          data: result.data
+        });
       } else {
-        throw new NotFoundException(result.message || 'Distribution not found');
+        res.status(StatusCode.NOT_FOUND).json({
+          success: false,
+          message: result.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to fetch distribution', 
-        error instanceof NotFoundException ? StatusCode.NOT_FOUND : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: `Failed to fetch distribution: ${(error as Error).message}`
+      });
     }
   }
 
@@ -60,12 +64,21 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.getAllCompletedDistributions();
 
       if (result.success) {
-        ResponseHandler.success(res, result.data);
+        res.status(StatusCode.OK).json({
+          success: true,
+          data: result.data
+        });
       } else {
-        throw new InternalServerErrorException(result.message || 'Failed to fetch distributions');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: result.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch distributions');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: `Failed to fetch distributions: ${(error as Error).message}`
+      });
     }
   }
 
@@ -75,20 +88,24 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.distributeEventRevenue(eventId);
 
       if (result.success) {
-        ResponseHandler.success(res, result.data, "Event revenue distributed successfully");
+        res.status(StatusCode.OK).json({
+          success: true,
+          message: "Event revenue distributed successfully",
+          data: result.data
+        });
       } else {
-        throw new BadRequestException(result.message || 'Failed to distribute event revenue');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: result.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to distribute event revenue', 
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: `Failed to distribute event revenue: ${(error as Error).message}`
+      });
     }
   }
-
   async getDistributedRevenue(req: Request, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -97,12 +114,18 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getDistributedRevenue(page, limit);
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch distributed revenue');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch distributed revenue');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch distributed revenue"
+      });
     }
   }
 
@@ -113,12 +136,18 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getRecentDistributedRevenue(limit);
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch recent distributed revenue');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch recent distributed revenue');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch recent distributed revenue"
+      });
     }
   }
 
@@ -129,12 +158,18 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getRevenueByEventId(eventId);
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch revenue by event');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch revenue by event');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue by event"
+      });
     }
   }
 
@@ -143,37 +178,47 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const ids = (req.query.ids as string || '').split(',').filter(id => id);
       
       if (!ids.length) {
-        throw new BadRequestException('No event IDs provided');
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "No event IDs provided"
+        });
+        return;
       }
 
       const response = await this.revenueDistributionService.getEventsByIds(ids);
 
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch events by IDs');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(
-        res, 
-        error, 
-        'Failed to fetch events by IDs', 
-        error instanceof BadRequestException ? StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR
-      );
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch events by IDs"
+      });
     }
   }
-
   async getRevenueStats(_req: Request, res: Response): Promise<void> {
     try {
       const response = await this.revenueDistributionService.getRevenueStats();
   
       if (response.success) {
-        ResponseHandler.success(res, response.data);
+        res.status(StatusCode.OK).json(response.data);
       } else {
-        throw new InternalServerErrorException(response.message || 'Failed to fetch revenue statistics');
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
       }
     } catch (error) {
-      ResponseHandler.error(res, error, 'Failed to fetch revenue statistics');
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue statistics"
+      });
     }
   }
 }

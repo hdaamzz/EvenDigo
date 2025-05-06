@@ -96,26 +96,26 @@
         } @else if (usersList.length === 0) {
           <div class="col-span-full text-center py-4">No users found</div>
         } @else {
-          @for (user of usersList; track user._id) {
+          @for (user of verificationList; track user._id) {
             <app-admin-card
-              [statusBadge]="getUserStatusBadge(user)" 
-              [menuItems]="getUserMenuItems(user)"
-              (cardClick)="showDialog(user._id, isMobile ? 'bottom' : 'right')">
+              [statusBadge]="getUserStatusBadge(user.user_id)" 
+              [menuItems]="getMenuItems(user._id)"
+              (cardClick)="showDialog(user.user_id._id, isMobile ? 'bottom' : 'right')">
               
               <!-- Card Header Content -->
               <div card-header class="flex items-center">
-                @if (user.profileImg && user.profileImg[8]=='r') {
+                @if (user.user_id.profileImg && user.user_id.profileImg[8]=='r') {
                   <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" 
-                      [src]="user.profileImg" alt="">
+                      [src]="user.user_id.profileImg" alt="">
                 } @else {
-                  <div [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.name) + ' flex items-center justify-center text-white mr-3'">
-                    {{ user.name.charAt(0).toUpperCase() }}
+                  <div [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.user_id.name) + ' flex items-center justify-center text-white mr-3'">
+                    {{ user.user_id.name.charAt(0).toUpperCase() }}
                   </div>
                 }
       
                 <div>
-                  <h3 class="font-medium text-gray-800">{{ user.name }}</h3>
-                  <p class="text-sm text-gray-500">{{ user.email }}</p>
+                  <h3 class="font-medium text-gray-800">{{ user.user_id.name }}</h3>
+                  <p class="text-sm text-gray-500">{{ user.user_id.email }}</p>
                 </div>
               </div>
               
@@ -123,18 +123,18 @@
               <div card-body class="grid grid-cols-2 gap-2">
                 <div class="text-sm">
                   <span class="text-gray-500">Phone:</span>
-                  <span class="ml-1 text-gray-700">{{ user.phone || 'N/A' }}</span>
+                  <span class="ml-1 text-gray-700">{{ user.user_id.phone || 'N/A' }}</span>
                 </div>
                 <div class="text-sm">
                   <span class="text-gray-500">Gender:</span>
-                  <span class="ml-1 text-gray-700">{{ user.gender || 'N/A' }}</span>
+                  <span class="ml-1 text-gray-700">{{ user.user_id.gender || 'N/A' }}</span>
                 </div>
               </div>
               
               <!-- Card Actions -->
               <div card-actions>
                 <p-button class="action-btn text-white rounded transition-all"
-                  (click)="showDialog(user._id, isMobile ? 'bottom' : 'right')" 
+                  (click)="showDialog(user.user_id._id, isMobile ? 'bottom' : 'right')" 
                   label="Details" severity="success" styleClass="p-button-sm">
                 </p-button>
               </div>

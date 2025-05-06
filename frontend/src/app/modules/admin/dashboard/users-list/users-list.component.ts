@@ -42,10 +42,20 @@ export class UsersListComponent implements OnInit {
   checkScreenSize() {
     this.isMobile = window.innerWidth < 768;
   }
+
+  ngOnInit(): void {
+    this.checkScreenSize();
+    this.fetchUserData();
+    this.fetchVerificationUserData();
+  }
+
+
   fetchUserData() {
     this.loading = true;
     this.userService.usersList().pipe(
       tap((response) => {
+        
+        
         if (response.success) {
           this.usersList = response.data;
         } else {
@@ -66,6 +76,8 @@ export class UsersListComponent implements OnInit {
     this.userService.verificationUsersList().pipe(
       tap((response) => {
         if (response.success) {
+          console.log(response.data);
+          
           this.verificationList = response.data;
         } else {
           console.error('Failed to fetch users:', response.message);
@@ -79,14 +91,6 @@ export class UsersListComponent implements OnInit {
       }),
       finalize(() => this.verificationLoading = false)
     ).subscribe();
-  }
-  
-
-
-  ngOnInit(): void {
-    this.checkScreenSize();
-    this.fetchUserData();
-    this.fetchVerificationUserData();
   }
 
 
@@ -124,6 +128,8 @@ export class UsersListComponent implements OnInit {
         this.fetchUserData();
         Notiflix.Notify.success('Successfully Blocked');
         this.hideDialog();
+        this.ngOnInit()
+
       },
       error: (err) => {
         console.error('Error blocking user:', err);
@@ -137,6 +143,8 @@ export class UsersListComponent implements OnInit {
         this.fetchUserData();
         Notiflix.Notify.success('Successfully Unblocked');
         this.hideDialog();
+        this.ngOnInit()
+
       },
       error: (err) => {
         console.error('Error unblocking user:', err);
@@ -152,6 +160,8 @@ export class UsersListComponent implements OnInit {
         this.fetchVerificationUserData();
         Notiflix.Notify.success('Successfully Approved');
         this.hideDialog();
+        this.ngOnInit()
+
       },
       error: (err) => {
         console.error('Error approved user:', err);
@@ -166,6 +176,7 @@ export class UsersListComponent implements OnInit {
         this.fetchVerificationUserData();
         Notiflix.Notify.success('Successfully Rejected');
         this.hideDialog();
+        this.ngOnInit()
       },
       error: (err) => {
         console.error('Error reject user:', err);
