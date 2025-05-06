@@ -4,34 +4,33 @@ import { inject, injectable } from 'tsyringe';
 import { IAuthAdminController } from '../../../../../src/controllers/interfaces/Admin/Auth/IAuth.admin.controller';
 import { IAuthAdminService } from '../../../../../src/services/interfaces/IAuth.admin.service';
 import StatusCode from '../../../../../src/types/statuscode';
+import { ResponseHandler } from '../../../../../src/utils/response-handler';
+import { BadRequestException, InternalServerErrorException,  ForbiddenException } from '../../../../../src/error/error-handlers';
 
 @injectable()
-export class AdminAuthController implements IAuthAdminController{
+export class AdminAuthController implements IAuthAdminController {
     constructor(
-      @inject("AdminAuthService")  private adminAuthService: IAuthAdminService,
-    ){}
-
+      @inject("AdminAuthService") private adminAuthService: IAuthAdminService,
+    ) {}
 
     async verifyAdmin(req: Request, res: Response): Promise<void> {
         try {
           const loginData: ILogin = req.body;
+          
           if (!loginData.email || !loginData.password) {
-            res.status(StatusCode.BAD_REQUEST).json({
-              success: false,
-              message: 'Email and password are required'
-            });
-            return;
+            throw new BadRequestException('Email and password are required');
           }
     
           const result = await this.adminAuthService.login(loginData);
+          
           if (!result.success) {
-            res.status(StatusCode.UNAUTHORIZED).json(result);
+            ResponseHandler.error(res,new ForbiddenException('Invalid credentials'),'Authentication failed',StatusCode.UNAUTHORIZED );
             return;
           }
     
-    
           const token = result.token;
     
+          // Set cookie
           res.cookie('session', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -40,13 +39,20 @@ export class AdminAuthController implements IAuthAdminController{
             domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined 
           });
     
-          res.status(StatusCode.OK).json(result);
+          ResponseHandler.success(res, 
+            { 
+              user: result.user,
+              token: result.token
+            },
+            'Authentication successful',StatusCode.OK );
+          
         } catch (error) {
-          console.error('Login error:', error);
-          res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: 'Internal server error'
-          });
+          if (error instanceof BadRequestException) {
+            ResponseHandler.error(res,error,'Invalid request data',StatusCode.BAD_REQUEST);
+          } else {
+            console.error('Login error:', error);
+            ResponseHandler.error(res,new InternalServerErrorException('Authentication process failed'), 'Internal server error', StatusCode.INTERNAL_SERVER_ERROR );
+          }
         }
-      }
+    };
 }
