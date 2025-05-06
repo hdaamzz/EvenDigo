@@ -8,6 +8,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { MenuModule } from 'primeng/menu';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { IAchievement } from '../../../../core/models/admin/achievements.interface';
 import { debounceTime, filter, fromEvent, Subject, takeUntil } from 'rxjs';
 import { AdminAchievementService } from '../../../../core/services/admin/achievements/admin-achievement.service';
@@ -18,12 +19,14 @@ import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.com
 @Component({
   selector: 'app-achievements',
   imports: [DialogModule, ButtonModule, MenuModule, CommonModule,
-    InputTextModule, FormsModule, ReactiveFormsModule, SelectModule, CheckboxModule, AdminCardComponent],
+    InputTextModule, FormsModule, ReactiveFormsModule, SelectModule, CheckboxModule, 
+    AdminCardComponent, MultiSelectModule],
   templateUrl: './achievements.component.html',
   styleUrl: './achievements.component.css'
 })
 export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
   achievementsList: any[] = [];
+  filteredAchievementsList: any[] = [];
   loading = false;
   achievementDialogVisible = false;
   selectedAchievement: any = {};
@@ -39,8 +42,10 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
   
   @ViewChild('achievementsContainer') achievementsContainer: ElementRef | undefined;  
   achievementForm: FormGroup;
+  filterForm: FormGroup;
   
   categoryOptions = [
+    { label: 'All Categories', value: null },
     { label: 'Event', value: 'event' },
     { label: 'User', value: 'user' },
     { label: 'Engagement', value: 'engagement' },
@@ -59,13 +64,18 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   criteriaOptions = [
+    { label: 'All Criteria', value: null },
     { label: 'Events Attended', value: 'events_attended' },
     { label: 'Events Created', value: 'events_created' },
     { label: 'VIP Events Taker', value: 'vip_events_taker' },
     { label: 'Gold Events Taker', value: 'gold_events_taker' }
   ];
 
-
+  statusOptions = [
+    { label: 'All Status', value: null },
+    { label: 'Active', value: true },
+    { label: 'Inactive', value: false }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -84,6 +94,12 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       icon: ['', Validators.required],
       isActive: [true]
     });
+
+    this.filterForm = this.fb.group({
+      category: [null],
+      criteria: [null],
+      status: [null]
+    });
   }
   
   ngOnInit() {
@@ -96,6 +112,16 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       )
       .subscribe(() => {
         this.isMobile = window.innerWidth < 768;
+      });
+
+    // Subscribe to filter form changes
+    this.filterForm.valueChanges
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(300)
+      )
+      .subscribe(() => {
+        this.applyFilters();
       });
   }
   
@@ -130,6 +156,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     if (reset) {
       this.currentPage = 1;
       this.achievementsList = [];
+      this.filteredAchievementsList = [];
       this.hasMoreAchievements = true;
       this.allLoaded = false;
     }
@@ -153,6 +180,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         }));
         
         this.achievementsList = reset ? newAchievements : [...this.achievementsList, ...newAchievements];
+        this.applyFilters(); // Apply filters to the updated list
         
         this.hasMoreAchievements = response.pagination?.hasMore || false;
         if (!this.hasMoreAchievements) {
@@ -167,6 +195,32 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         Notiflix.Notify.failure('Failed to load achievements');
       }
     });
+  }
+
+  applyFilters() {
+    const filters = this.filterForm.value;
+    
+    this.filteredAchievementsList = this.achievementsList.filter(achievement => {
+      // Category filter
+      const categoryMatch = filters.category === null || achievement.category === filters.category;
+      
+      // Criteria filter
+      const criteriaMatch = filters.criteria === null || achievement.criteria === filters.criteria;
+      
+      // Status filter
+      const statusMatch = filters.status === null || achievement.isActive === filters.status;
+      
+      return categoryMatch && criteriaMatch && statusMatch;
+    });
+  }
+
+  resetFilters() {
+    this.filterForm.reset({
+      category: null,
+      criteria: null,
+      status: null
+    });
+    this.applyFilters();
   }
 
   getCriteriaLabel(value: string): string {
@@ -270,6 +324,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         if (achievement) {
           achievement.isActive = true;
         }
+        this.applyFilters();
         Notiflix.Notify.success('Achievement activated successfully');
       },
       error: (err) => {
@@ -286,6 +341,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         if (achievement) {
           achievement.isActive = false;
         }
+        this.applyFilters();
         Notiflix.Notify.success('Achievement deactivated successfully');
       },
       error: (err) => {
@@ -305,6 +361,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.achievementService.deleteAchievement(achievementId).subscribe({
           next: () => {
             this.achievementsList = this.achievementsList.filter(achievement => achievement._id !== achievementId);
+            this.applyFilters(); // Re-apply filters after deletion
             Notiflix.Notify.success('Achievement deleted successfully');
           },
           error: (err) => {
@@ -367,5 +424,4 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     ];
   }
-
 }
