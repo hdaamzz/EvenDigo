@@ -10,4 +10,10 @@ export interface IAuthService{
     updateUser(userId: Schema.Types.ObjectId | string, updateData: Partial<IUser>): Promise<IUser>;
     sendForgotPasswordEmail(email: string): Promise<ServiceResponse<null>>;
     resetPassword(email: string, token: string, newPassword: string): Promise<ServiceResponse<null>>;
+    verifyFirebaseToken(idToken: string, name: string, profileImg?: string): Promise<{
+        success: boolean;
+        message: string;
+        user?: IUser;
+        token?: string;
+      }>
 }

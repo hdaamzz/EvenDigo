@@ -55,9 +55,10 @@ export interface ServiceResponseWithError {
 }
 
 export interface OTPVerificationData {
-  userId: Schema.Types.ObjectId | string | undefined;
+  userId: string | undefined;
   email: string;
-  name?: string
+  name: string;
+  userData: IUser;
 }
 
 export interface ILogin {

@@ -1,50 +1,69 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import { UserRepository } from "../../src/repositories/user.repository";
-import { AuthRepository } from "../../src/repositories/auth.repository";
-import { AuthService } from "../../src/services/implementation/user/auth.service";
-import { AuthController } from "../../src/controllers/implementation/user/auth.controller";
-import { DashboardController } from "../../src/controllers/implementation/user/dashboard.controller";
-import { ExploreController } from "../../src/controllers/implementation/user/explore.controller";
-import { ProfileController } from "../../src/controllers/implementation/user/profile.controller";
-import { BookingRepository } from "../../src/repositories/booking.repository";
-import { CouponRepository } from "../../src/repositories/coupon.repository";
-import { DashboardRepository } from "../../src/repositories/event.repository";
-import { VerificationRepository } from "../../src/repositories/verification.repository";
-import { WalletRepository } from "../../src/repositories/wallet.repository";
-import { ProfileService } from "../../src/services/implementation/user/profile.service";
-import { ExploreService } from "../../src/services/implementation/user/explore.service";
-import { DashboardService } from "../../src/services/implementation/user/dashboard.service";
+import { UserRepository } from "../../src/repositories/implementation/user.repository";
+import { AuthRepository } from "../../src/repositories/implementation/auth.repository";
+import { AuthController } from "../controllers/implementation/user/auth/auth.controller";
+import { ExploreController } from "../controllers/implementation/user/explore/explore.controller";
+import { BookingRepository } from "../../src/repositories/implementation/booking.repository";
+import { CouponRepository } from "../../src/repositories/implementation/coupon.repository";
+import { VerificationRepository } from "../../src/repositories/implementation/verification.repository";
+import { WalletRepository } from "../../src/repositories/implementation/wallet.repository";
+import { ExploreService } from "../services/implementation/user/explore/explore.service";
 import { BookingsModel } from "../../src/models/BookingModel";
 import { AdminAuthService } from "../../src/services/implementation/admin/admin.auth.service";
 import { CouponService } from "../../src/services/implementation/admin/admin.coupon.service";
 import { AdminEventsService } from "../../src/services/implementation/admin/admin.events.service";
 import { AdminUsersService } from "../../src/services/implementation/admin/admin.users.service";
-import { AdminAuthController } from "../../src/controllers/implementation/admin/admin.auth.controller";
-import { CouponController } from "../../src/controllers/implementation/admin/admin.coupon.controller";
-import { AdminEventsController } from "../../src/controllers/implementation/admin/admin.events.controller";
-import { AdminUsersController } from "../../src/controllers/implementation/admin/admin.users.controller";
-import { AchievementRepository } from "../../src/repositories/achievements.repository";
+import { AchievementRepository } from "../../src/repositories/implementation/achievements.repository";
 import { AchievementService } from "../../src/services/implementation/admin/admin.achievements";
-import { AchievementController } from "../../src/controllers/implementation/admin/admin.achievements.controller";
 import { FinanceService } from "../../src/services/implementation/admin/admin.revenue.service";
-import { FinanceRepository } from "../../src/repositories/finance.repository";
+import { FinanceRepository } from "../../src/repositories/implementation/finance.repository";
 import { WalletModel } from "../../src/models/WalletModel";
 import { RevenueDistributionModel } from "../../src/models/RevenueModal";
-import { RevenueDistributionRepository } from "../../src/repositories/revenue.repository";
+import { RevenueDistributionRepository } from "../../src/repositories/implementation/revenue.repository";
 import { RevenueDistributionService } from "../../src/services/implementation/admin/distribution.service";
 import { RevenueDistributionCronService } from "../../src/services/implementation/cronjob/revenue.distribution";
-import { RevenueDistributionController } from "../../src/controllers/implementation/admin/admin.distribution.controller";
 import { EventModel } from "../../src/models/EventModel";
 import { Logger } from "../../src/utils/logger";
-import { UserAchievementRepository } from "../../src/repositories/badge.repository";
+import { UserAchievementRepository } from "../../src/repositories/implementation/badge.repository";
 import { UserAchievementService } from "../../src/services/implementation/user/achievements/achivements.service";
 import { SubscriptionController } from "../../src/controllers/implementation/user/premium/subscription.controller";
-import { SubscriptionRepository } from "../../src/repositories/user/subscription.repository";
-import { SubscriptionModel } from "../../src/models/user/SubscriptionModal";
-import { SubscriptionService } from "../../src/services/implementation/user/subscription/subscription.service";
+import { SubscriptionRepository } from "../repositories/implementation/subscription.repository";
+import { SubscriptionModel } from "../models/SubscriptionModal";
 import { AdminSubscriptionService } from "../../src/services/implementation/admin/admin.subscription.service";
 import { AdminSubscriptionController } from "../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
+import { AdminAuthController } from "../../src/controllers/implementation/admin/auth/admin.auth.controller";
+import { CouponController } from "../../src/controllers/implementation/admin/coupon/admin.coupon.controller";
+import { AdminEventsController } from "../../src/controllers/implementation/admin/event/admin.events.controller";
+import { AdminUsersController } from "../../src/controllers/implementation/admin/user/admin.users.controller";
+import { AchievementController } from "../../src/controllers/implementation/admin/achievement/admin.achievements.controller";
+import { RevenueDistributionController } from "../../src/controllers/implementation/admin/finance/admin.distribution.controller";
+import { EventService } from "../../src/services/implementation/user/dashboard/event.service";
+import { EventMapper } from "../../src/services/implementation/user/dashboard/eventMapper.service";
+import { FileService } from "../../src/services/implementation/user/dashboard/file.service";
+import { EventRepository } from "../../src/repositories/implementation/event.repository";
+import { DashboardController } from "../../src/controllers/implementation/user/dashboard/dashboard.controller";
+import { PaymentService } from "../../src/services/implementation/user/explore/payment.service";
+import { BookingService } from "../../src/services/implementation/user/explore/booking.service";
+import { SubscriptionQueryService } from "../../src/services/implementation/user/subscription/SubscriptionQueryService";
+import { WalletSubscriptionService } from "../../src/services/implementation/user/subscription/WalletSubscriptionService";
+import { CheckoutService } from "../../src/services/implementation/user/subscription/CheckoutService";
+import { StripeProvider } from "../../src/utils/stripeProvider";
+import { ProfileBookingController } from "../../src/controllers/implementation/user/profile/profileBooking.controller";
+import { ProfileEventsController } from "../../src/controllers/implementation/user/profile/profileEvents.controller";
+import { ProfileWalletController } from "../../src/controllers/implementation/user/profile/profileWallet.controller";
+import { ProfileUserController } from "../../src/controllers/implementation/user/profile/profileUser.controller";
+import { ProfileUserService } from "../../src/services/implementation/user/profile/ProfileUser.service";
+import { ProfileBookingService } from "../../src/services/implementation/user/profile/ProfileBooking.service";
+import { ProfileWalletService } from "../../src/services/implementation/user/profile/ProfileWallet.service";
+import { ProfileEventService } from "../../src/services/implementation/user/profile/ProfileEvent.service";
+import { UserAuthService } from "../../src/services/implementation/user/auth/UserAuthService";
+import { OTPService } from "../../src/services/implementation/user/auth/OTPService";
+import { PasswordService } from "../../src/services/implementation/user/auth/PasswordService";
+import { EmailService } from "../../src/services/implementation/user/auth/EmailService";
+import { FirebaseAuthService } from "../../src/services/implementation/user/auth/FirebaseAuthService";
+import { AuthService } from "../../src/services/implementation/user/auth/Auth.service";
+import { TokenService } from "../../src/services/implementation/user/auth/TokenService";
 
 
 
@@ -52,14 +71,14 @@ container.register("UserRepository", { useClass: UserRepository });
 container.register("AuthRepository", { useClass: AuthRepository });
 container.register("BookingRepository", { useClass: BookingRepository });
 container.register("CouponRepository", { useClass: CouponRepository });
-container.register("DashboardRepository", { useClass: DashboardRepository });
+container.register("EventRepository", { useClass: EventRepository });
 container.register("VerificationRepository", { useClass: VerificationRepository });
 container.register("WalletRepository", { useClass: WalletRepository });
-container.register("AchievementRepository",{useClass: AchievementRepository})
+container.register("AchievementRepository", { useClass: AchievementRepository })
 container.register("FinanceRepository", { useClass: FinanceRepository });
 container.register("RevenueDistributionRepository", { useClass: RevenueDistributionRepository });
 container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
-container.register("SubscriptionRepository",  { useClass: SubscriptionRepository } );
+container.register("SubscriptionRepository", { useClass: SubscriptionRepository });
 
 
 
@@ -67,23 +86,48 @@ container.register("SubscriptionRepository",  { useClass: SubscriptionRepository
 //SERVICES
 //---user---
 container.register("AuthService", { useClass: AuthService });
-container.register("DashboardService", { useClass: DashboardService });
 container.register("ExploreService", { useClass: ExploreService });
-container.register("ProfileService", { useClass: ProfileService });
 container.register("UserAchievementService", { useClass: UserAchievementService });
-container.register("SubscriptionService", { useClass: SubscriptionService });
+container.register("SubscriptionQueryService", { useClass: SubscriptionQueryService });
+container.register("WalletSubscriptionService", { useClass: WalletSubscriptionService });
+container.register("CheckoutService", { useClass: CheckoutService });
+container.register("EventService", { useClass: EventService });
+container.register("FileService", { useClass: FileService });
+container.register("EventMapper", { useClass: EventMapper });
+container.register("PaymentService", { useClass: PaymentService });
+container.register("BookingService", { useClass: BookingService });
+container.register("StripeProvider", { useClass: StripeProvider });
+container.register("ProfileUserService", { useClass: ProfileUserService });
+container.register("ProfileBookingService", { useClass: ProfileBookingService });
+container.register("ProfileWalletService", { useClass: ProfileWalletService });
+container.register("ProfileEventService", { useClass: ProfileEventService });
+container.register("UserAuthService", { useClass: UserAuthService });
+container.register("OTPService", { useClass: OTPService });
+container.register("PasswordService", { useClass: PasswordService });
+container.register("EmailService", { useClass: EmailService });
+container.register("FirebaseAuthService", { useClass: FirebaseAuthService });
+container.register("TokenService", { useClass: TokenService });
+
+
+
+
+
+
+
+
+
 
 
 //---admin---
-container.register("AdminAuthService",{useClass:AdminAuthService})
-container.register("CouponService",{useClass:CouponService})
-container.register("AdminEventsService",{useClass:AdminEventsService})
-container.register("AdminUsersService",{useClass:AdminUsersService})
-container.register("AchievementService",{useClass:AchievementService })
-container.register("FinanceService", {useClass: FinanceService });
-container.register("RevenueDistributionService",  { useClass: RevenueDistributionService } );
+container.register("AdminAuthService", { useClass: AdminAuthService })
+container.register("CouponService", { useClass: CouponService })
+container.register("AdminEventsService", { useClass: AdminEventsService })
+container.register("AdminUsersService", { useClass: AdminUsersService })
+container.register("AchievementService", { useClass: AchievementService })
+container.register("FinanceService", { useClass: FinanceService });
+container.register("RevenueDistributionService", { useClass: RevenueDistributionService });
 container.register("RevenueDistributionCronService", { useClass: RevenueDistributionCronService });
-container.register("AdminSubscriptionService",  { useClass: AdminSubscriptionService } );
+container.register("AdminSubscriptionService", { useClass: AdminSubscriptionService });
 
 
 
@@ -93,8 +137,12 @@ container.register("AdminSubscriptionService",  { useClass: AdminSubscriptionSer
 container.register("AuthController", { useClass: AuthController });
 container.register("DashboardController", { useClass: DashboardController });
 container.register("ExploreController", { useClass: ExploreController });
-container.register("ProfileController", { useClass: ProfileController });
 container.register("SubscriptionController", { useClass: SubscriptionController });
+container.register("ProfileBookingController", { useClass: ProfileBookingController });
+container.register("ProfileEventsController", { useClass: ProfileEventsController });
+container.register("ProfileWalletController", { useClass: ProfileWalletController });
+container.register("ProfileUserController", { useClass: ProfileUserController });
+
 
 
 
@@ -104,7 +152,7 @@ container.register("AdminAuthController", { useClass: AdminAuthController });
 container.register("CouponController", { useClass: CouponController });
 container.register("AdminEventsController", { useClass: AdminEventsController });
 container.register("AdminUsersController", { useClass: AdminUsersController });
-container.register("AchievementController",{useClass:AchievementController})
+container.register("AchievementController", { useClass: AchievementController })
 container.register("RevenueDistributionController", { useClass: RevenueDistributionController });
 container.register("AdminSubscriptionController", { useClass: AdminSubscriptionController });
 

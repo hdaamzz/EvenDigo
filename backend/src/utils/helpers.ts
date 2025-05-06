@@ -146,31 +146,3 @@ export async function generateQrCode(data: string): Promise<string> {
     throw new Error(`Failed to generate QR code: ${(error as Error).message}`);
   }
 }
-
-
-// private async sendBookingConfirmationEmail(userId: string, bookingId: string): Promise<void> {
-//   // Get user details with email
-//   const user = await this.userRepository.findById(userId); // You'll need to inject userRepository
-  
-//   if (!user || !user.email) {
-//     console.error(`Cannot send confirmation email: User ${userId} not found or missing email`);
-//     return;
-//   }
-  
-//   // Get booking details
-//   const booking = await this.bookingRepository.findByBookingId(bookingId);
-  
-//   if (!booking) {
-//     console.error(`Cannot send confirmation email: Booking ${bookingId} not found`);
-//     return;
-//   }
-  
-  // Send email with a email service - you'll need to implement or use a library
-  // await this.emailService.sendTemplate('booking-confirmation', user.email, {
-  //   userName: user.name,
-  //   bookingId: booking.bookingId,
-  //   eventName: booking.eventName, // You might need to fetch event details
-  //   ticketDetails: booking.tickets,
-  //   totalAmount: booking.totalAmount
-  // });
-// }

@@ -103,7 +103,7 @@ export class ProfileDetailsComponent implements OnInit {
       if (userId) {
         this.loadUserProfile();
         this.verificationRequestDetails();
-        this.loadUserStats(); // Load user statistics
+        this.loadUserStats(); 
       }
     });
   }
@@ -112,7 +112,6 @@ export class ProfileDetailsComponent implements OnInit {
     this.initializeForm();
   }
   
-  // Initialize the form with user data or empty values
   initializeForm(): void {
     this.userForm = this.fb.group({
       name: [this.user.name || '', [Validators.required, Validators.minLength(3), spacesValidator(), repeateCharacterValidator()]],
@@ -124,7 +123,6 @@ export class ProfileDetailsComponent implements OnInit {
     });
   }
   
-  // Load user profile information
   loadUserProfile(): void {
     this.isLoading = true;
     if (!this.userId) {
@@ -135,7 +133,7 @@ export class ProfileDetailsComponent implements OnInit {
 
     this.userProfileService.userDetails(this.userId).subscribe({
       next: (userData) => {
-        this.user = userData;
+        this.user = userData.data;
         if (this.user.dateOfBirth) {
           this.user.dateOfBirth = new Date(this.user.dateOfBirth);
         }

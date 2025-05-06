@@ -1,6 +1,6 @@
 import { IAchievement } from "../../../../../src/models/interfaces/achievements.interface";
 import { IUserAchievementRepository } from "../../../../../src/repositories/interfaces/IBadge.repository";
-import { IDashboardRepository } from "../../../../../src/repositories/interfaces/IEvent.repository";
+import { IEventRepository } from "../../../../../src/repositories/interfaces/IEvent.repository";
 import { IUserRepository } from "../../../../../src/repositories/interfaces/IUser.repository";
 import { IUserAchievementService } from "../../../../../src/services/interfaces/IAchievement";
 import { inject, injectable } from "tsyringe";
@@ -11,7 +11,7 @@ export class UserAchievementService implements IUserAchievementService {
   constructor(
     @inject('UserAchievementRepository') private userAchievementRepository: IUserAchievementRepository,
     @inject("UserRepository") private userRepository: IUserRepository,
-    @inject("DashboardRepository") private eventRepository: IDashboardRepository,
+    @inject("EventRepository") private eventRepository: IEventRepository,
     @inject("BookingRepository") private bookingRepository: IBookingRepository
   ) {}
 
