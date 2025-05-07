@@ -11,6 +11,7 @@ distributionRouter.get('/recent', (req, res) => distributionController.getRecent
 distributionRouter.get('/event/:eventId', (req, res) => distributionController.getRevenueByEvent(req, res));
 distributionRouter.get('/batch', (req, res) => distributionController.getEventsByIds(req, res));
 distributionRouter.get('/stats', (req, res) => distributionController.getRevenueStats(req, res)); 
+distributionRouter.get('/date-range', (req, res) => distributionController.getRevenueByDateRange(req, res));
 
 
 export default distributionRouter;

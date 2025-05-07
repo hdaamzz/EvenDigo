@@ -57,34 +57,39 @@ export class FinanceService {
   
   constructor(private http: HttpClient) { }
 
-  fetchRevenue(page: number = 1, limit: number = 10): Observable<any> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+  // event distribution history
 
-    return this.http.get(`${this.baseUrl}admin/finance/revenue`, { params, withCredentials: true });
+  getDistributedRevenue(page: number = 1, limit: number = 10): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString())
+      .set('is_distributed', 'true');
+      
+    return this.http.get(`${this.baseUrl}admin/dist/recent`, { params , withCredentials: true});
   }
   
-  fetchRevenueStats(): Observable<RevenueStats> {
-    return this.http.get<RevenueStats>(`${this.baseUrl}admin/finance/stats`, { withCredentials: true });
+  getRevenueStats(): Observable<any> {
+    return this.http.get(`${this.baseUrl}admin/dist/stats`,{withCredentials:true});
   }
-  
-  getTransactionByDateRange(startDate: string, endDate: string): Observable<any> {    
+  getEventsByIds(eventIds: string[]): Observable<any[]> {
+    const params = new HttpParams().set('ids', eventIds.join(','));
+    return this.http.get<any[]>(`${this.baseUrl}admin/dist/batch`, { params , withCredentials: true});
+  }
+  getRevenueByDateRange(startDate: string, endDate: string, page: number = 1, limit: number = 10): Observable<any> {
     let params = new HttpParams()
       .set('startDate', startDate)
-      .set('endDate', endDate);
-    
-    return this.http.get(`${this.baseUrl}admin/finance/revenue/range`, { params, withCredentials: true });
+      .set('endDate', endDate)
+      .set('page', page.toString())
+      .set('limit', limit.toString())
+      .set('is_distributed', 'true');
+      
+    return this.http.get(`${this.baseUrl}admin/dist/date-range`, { params, withCredentials: true });
   }
-  
-  getBookingDetails(bookingId: string): Observable<BookingDetail> {
-    return this.http.get<BookingDetail>(`${this.baseUrl}admin/finance/booking/${bookingId}`, { withCredentials: true });
-  }
-  
-  getRevenueAnalytics(period: 'daily' | 'weekly' | 'monthly' = 'monthly'): Observable<any> {
-    const params = new HttpParams().set('period', period);
-    return this.http.get(`${this.baseUrl}admin/finance/analytics`, { params, withCredentials: true });
-  }
+
+
+
+
+  //refund history
 
   getRefundTransactions(page: number = 1, limit: number = 5): Observable<any> {
     let params = new HttpParams()
@@ -105,31 +110,47 @@ export class FinanceService {
     
     return this.http.get(`${this.baseUrl}admin/finance/refunds/range`, { params, withCredentials: true });
   }
-  getRecentRevenue(limit: number = 5): Observable<any> {
-    const params = new HttpParams()
-      .set('limit', limit.toString())
-      .set('sort', '-distributed_at');
-      
-    return this.http.get(`${this.baseUrl}admin/dist`, { params, withCredentials: true });
-  }
-  
-  getRevenueByEvent(eventId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}admin/dist/event/${eventId}`,{withCredentials: true});
-  }
-  getDistributedRevenue(page: number = 1, limit: number = 10): Observable<any> {
-    const params = new HttpParams()
+
+
+// booking history
+
+  fetchRevenue(page: number = 1, limit: number = 10): Observable<any> {
+    let params = new HttpParams()
       .set('page', page.toString())
-      .set('limit', limit.toString())
-      .set('is_distributed', 'true');
-      
-    return this.http.get(`${this.baseUrl}admin/dist/recent`, { params , withCredentials: true});
+      .set('limit', limit.toString());
+
+    return this.http.get(`${this.baseUrl}admin/finance/revenue`, { params, withCredentials: true });
   }
   
-  getRevenueStats(): Observable<any> {
-    return this.http.get(`${this.baseUrl}admin/dist/stats`,{withCredentials:true});
+  fetchRevenueStats(): Observable<RevenueStats> {
+    return this.http.get<RevenueStats>(`${this.baseUrl}admin/finance/stats`, { withCredentials: true });
   }
-  getEventsByIds(eventIds: string[]): Observable<any[]> {
-    const params = new HttpParams().set('ids', eventIds.join(','));
-    return this.http.get<any[]>(`${this.baseUrl}admin/dist/batch`, { params , withCredentials: true});
+  
+  getTransactionByDateRange(startDate: string, endDate: string): Observable<any> {    
+    let params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+    
+    return this.http.get(`${this.baseUrl}admin/finance/revenue/range`, { params, withCredentials: true });
   }
+
+ 
+
+
+
+
+  // getRecentRevenue(limit: number = 5): Observable<any> {
+  //   const params = new HttpParams()
+  //     .set('limit', limit.toString())
+  //     .set('sort', '-distributed_at');
+      
+  //   return this.http.get(`${this.baseUrl}admin/dist`, { params, withCredentials: true });
+  // }
+  
+  // getRevenueByEvent(eventId: string): Observable<any> {
+  //   return this.http.get(`${this.baseUrl}admin/dist/event/${eventId}`,{withCredentials: true});
+  // }
+
+  
+  
 }

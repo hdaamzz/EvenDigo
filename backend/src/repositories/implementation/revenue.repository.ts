@@ -229,4 +229,47 @@ const eventIds = events.map((event: EventDocument) => event._id);
     
     return result.length > 0 ? Number(result[0].total) : 0;
   }
+  async findRevenueByDateRange(
+    startDate: string,
+    endDate: string,
+    page: number = 1,
+    limit: number = 10,
+    isDistributed: boolean = true
+  ): Promise<{
+    data: IRevenueDistribution[];
+    total: number;
+    page: number;
+    pages: number;
+  }> {
+    const startDateTime = new Date(startDate);
+    startDateTime.setHours(0, 0, 0, 0);
+    
+    const endDateTime = new Date(endDate);
+    endDateTime.setHours(23, 59, 59, 999);
+    
+    const skip = (page - 1) * limit;
+    
+    const query = { 
+      is_distributed: isDistributed,
+      distributed_at: { 
+        $gte: startDateTime, 
+        $lte: endDateTime 
+      } 
+    };
+    
+    const total = await this.revenueDistributionModel.countDocuments(query);
+    
+    const data = await this.revenueDistributionModel.find(query)
+      .sort({ distributed_at: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+    
+    return {
+      data,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    };
+  }
 }

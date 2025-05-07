@@ -308,4 +308,33 @@ export class RevenueDistributionService implements IRevenueDistributionService {
       };
     }
   }
+
+  async getRevenueByDateRange(
+    startDate: string, 
+    endDate: string, 
+    page: number = 1, 
+    limit: number = 10,
+    isDistributed: boolean = true
+  ): Promise<ServiceResponse<any>> {
+    try {
+      const result = await this.revenueDistributionRepository.findRevenueByDateRange(
+        startDate, 
+        endDate, 
+        page, 
+        limit,
+        isDistributed
+      );
+      
+      return {
+        success: true,
+        message: "Revenue distribution data fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch revenue distribution data: ${(error as Error).message}`
+      };
+    }
+  }
 }

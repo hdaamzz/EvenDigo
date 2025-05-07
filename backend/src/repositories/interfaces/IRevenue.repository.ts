@@ -30,4 +30,16 @@ export interface IRevenueDistributionRepository {
     findYesterdayRevenue(): Promise<number>;
     findCurrentMonthRevenue(): Promise<number>;
     findPreviousMonthRevenue(): Promise<number>;
+    findRevenueByDateRange(
+        startDate: string,
+        endDate: string,
+        page: number,
+        limit: number,
+        isDistributed: boolean
+      ): Promise<{
+        data: IRevenueDistribution[];
+        total: number;
+        page: number;
+        pages: number;
+      }>
 }

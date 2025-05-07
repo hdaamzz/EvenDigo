@@ -221,4 +221,44 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       });
     }
   }
+
+  async getRevenueByDateRange(req: Request, res: Response): Promise<void> {
+    try {
+      const startDate = req.query.startDate as string;
+      const endDate = req.query.endDate as string;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const isDistributed = req.query.is_distributed === 'true';
+      
+      if (!startDate || !endDate) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "Start date and end date are required"
+        });
+        return;
+      }
+  
+      const response = await this.revenueDistributionService.getRevenueByDateRange(
+        startDate, 
+        endDate, 
+        page, 
+        limit,
+        isDistributed
+      );
+  
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch revenue by date range"
+      });
+    }
+  }
 }

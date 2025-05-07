@@ -12,6 +12,13 @@ export interface IRevenueDistributionService {
   getRevenueByEventId(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>>;
   getEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<ServiceResponse<any>>;
   getRevenueStats(): Promise<ServiceResponse<any>>;
+  getRevenueByDateRange(
+      startDate: string, 
+      endDate: string, 
+      page: number, 
+      limit: number,
+      isDistributed: boolean
+    ): Promise<ServiceResponse<any>> 
 }
 
 export interface IRevenueDistributionCronService {

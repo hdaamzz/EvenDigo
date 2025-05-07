@@ -6,11 +6,8 @@ const revenueDistributionController = container.resolve(RevenueDistributionContr
 const revenueDistributionRouter = Router();
 
 revenueDistributionRouter.post('/distribute', (req, res) => revenueDistributionController.triggerDistributionManually(req, res));
-
 revenueDistributionRouter.get('/distributions', (req, res) => revenueDistributionController.getAllCompletedDistributions(req, res));
-
 revenueDistributionRouter.get('/event/:eventId', (req, res) => revenueDistributionController.getEventDistribution(req, res));
-
 revenueDistributionRouter.post('/event/:eventId/distribute', (req, res) => revenueDistributionController.distributeSpecificEvent(req, res));
 
 

@@ -10,4 +10,5 @@ export interface IRevenueDistributionController {
   getRevenueByEvent(req: Request, res: Response): Promise<void>;
   getEventsByIds(req: Request, res: Response): Promise<void>;
   getRevenueStats(req: Request, res: Response): Promise<void>;
+  getRevenueByDateRange(req: Request, res: Response): Promise<void> 
 }
