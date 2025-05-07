@@ -11,7 +11,7 @@ import Notiflix from 'notiflix';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
-import { AdminCouponService } from '../../../core/services/admin/admin-coupon.service';
+import { AdminCouponService } from '../../../core/services/admin/coupon/admin-coupon.service';
 import { PayloadData } from '../../../core/models/booking.interface';
 import { WalletService } from '../../../core/services/user/wallet/wallet.service';
 import { IWallet } from '../../../core/models/wallet.interface';

@@ -8,7 +8,7 @@ import { AuthActions } from "./auth.actions";
 import { routerNavigatedAction, routerNavigationAction } from '@ngrx/router-store';
 import Notiflix from "notiflix";
 import { GoogleAuthService } from "../../services/user/googleAuth/google-auth.service";
-import { AdminAuthService } from "../../services/admin/admin.auth.service";
+import { AdminAuthService } from "../../services/admin/auth/admin.auth.service";
 import { AuthService } from "../../services/user/auth/auth.service";
 
 

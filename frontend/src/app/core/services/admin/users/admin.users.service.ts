@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, map, throwError } from 'rxjs';
-import { User } from '../../models/userModel';
-import { ApiResponse } from '../../models/admin/admin.interface';
+import { User } from '../../../models/userModel';
+import { ApiResponse } from '../../../models/admin/admin.interface';
 
 @Injectable({
   providedIn: 'root'

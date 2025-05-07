@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AllCouponResponse, CouponResponse, ICoupon } from '../../models/admin/coupon.interfacce';
+import { AllCouponResponse, CouponResponse, ICoupon } from '../../../models/admin/coupon.interfacce';
 
 @Injectable({
   providedIn: 'root'

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
-import { EventsApiResponse } from '../../models/admin/admin.interface';
-import { IEvent } from '../../models/event.interface';
+import { EventsApiResponse } from '../../../models/admin/admin.interface';
+import { IEvent } from '../../../models/event.interface';
 
 @Injectable({
   providedIn: 'root'

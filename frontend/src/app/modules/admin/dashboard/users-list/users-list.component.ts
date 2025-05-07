@@ -1,7 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { User } from '../../../../core/models/userModel';
 import Notiflix from 'notiflix';
-import { AdminUsersService } from '../../../../core/services/admin/admin.users.service';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -10,6 +9,7 @@ import { of } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { AdminCardComponent } from '../../../../shared/admin-card/admin-card.component';
+import { AdminUsersService } from '../../../../core/services/admin/users/admin.users.service';
 
 @Component({
   selector: 'app-users-list',

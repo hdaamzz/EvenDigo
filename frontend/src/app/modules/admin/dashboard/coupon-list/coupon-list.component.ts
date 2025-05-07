@@ -7,7 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
-import { AdminCouponService } from '../../../../core/services/admin/admin-coupon.service';
+import { AdminCouponService } from '../../../../core/services/admin/coupon/admin-coupon.service';
 import { alphabetsValidator, onlyNumbersValidator, futureDateValidator } from '../../../../validators/formValidators';
 import Notiflix from 'notiflix';
 import { ICoupon } from '../../../../core/models/admin/coupon.interfacce';

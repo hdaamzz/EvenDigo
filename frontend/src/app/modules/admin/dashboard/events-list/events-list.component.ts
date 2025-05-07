@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { IEvent } from '../../../../core/models/event.interface';
-import { AdminEventsService } from '../../../../core/services/admin/admin.events.service';
 import { catchError, finalize, of, Subject, takeUntil, tap } from 'rxjs';
 import Notiflix from 'notiflix';
 import { MenuItem } from 'primeng/api';
@@ -10,6 +9,7 @@ import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.component";
+import { AdminEventsService } from '../../../../core/services/admin/events/admin.events.service';
 
 @Component({
   selector: 'app-events-list',

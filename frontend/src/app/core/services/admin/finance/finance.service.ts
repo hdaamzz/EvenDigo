@@ -133,24 +133,5 @@ export class FinanceService {
     
     return this.http.get(`${this.baseUrl}admin/finance/revenue/range`, { params, withCredentials: true });
   }
-
- 
-
-
-
-
-  // getRecentRevenue(limit: number = 5): Observable<any> {
-  //   const params = new HttpParams()
-  //     .set('limit', limit.toString())
-  //     .set('sort', '-distributed_at');
-      
-  //   return this.http.get(`${this.baseUrl}admin/dist`, { params, withCredentials: true });
-  // }
-  
-  // getRevenueByEvent(eventId: string): Observable<any> {
-  //   return this.http.get(`${this.baseUrl}admin/dist/event/${eventId}`,{withCredentials: true});
-  // }
-
-  
   
 }
