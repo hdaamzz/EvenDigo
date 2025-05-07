@@ -2,36 +2,39 @@
   <div class="max-w-5xl mx-auto">
 
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <!-- <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div
+        class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
         <div class="flex items-center justify-between">
           <span class="text-gray-400 text-sm">Events Attended</span>
           <div class="bg-indigo-900 p-2 rounded-lg">
             <i class="fas fa-calendar text-indigo-300"></i>
           </div>
         </div>
-        <h3 class="text-3xl font-bold mt-2">12</h3>
-      </div> -->
-      
-      <!-- <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+        <h3 class="text-3xl font-bold mt-2">{{eventParticipated}}</h3>
+      </div>
+
+      <div
+        class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
         <div class="flex items-center justify-between">
           <span class="text-gray-400 text-sm">Achievements</span>
           <div class="bg-yellow-900 p-2 rounded-lg">
             <i class="fas fa-trophy text-yellow-300"></i>
           </div>
         </div>
-        <h3 class="text-3xl font-bold mt-2">4</h3>
-      </div> -->
-      
-      <!-- <div class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
+        <h3 class="text-3xl font-bold mt-2">{{achievements.length}}</h3>
+      </div>
+
+      <div
+        class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
         <div class="flex items-center justify-between">
-          <span class="text-gray-400 text-sm">Followed Events</span>
+          <span class="text-gray-400 text-sm">Events Organized</span>
           <div class="bg-pink-900 p-2 rounded-lg">
             <i class="fas fa-heart text-pink-300"></i>
           </div>
         </div>
-        <h3 class="text-3xl font-bold mt-2">8</h3>
-      </div> -->
+        <h3 class="text-3xl font-bold mt-2">{{eventOrganized}}</h3>
+      </div>
     </div>
 
     @if (user) {
@@ -43,12 +46,13 @@
         <!-- Profile image section -->
         <div class="flex flex-col items-center mb-6 md:mb-0 md:mr-8">
           <div class="relative group">
-            <div class="absolute -inset-0.5 rounded-full opacity-75 group-hover:opacity-100 blur group-hover:blur-md transition duration-500"></div>
+            <div
+              class="absolute -inset-0.5 rounded-full opacity-75 group-hover:opacity-100 blur group-hover:blur-md transition duration-500">
+            </div>
             <div class="relative">
-              <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" 
-                alt="Profile picture"
+              <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" alt="Profile picture"
                 class="h-36 w-36 rounded-full object-cover border-2 border-[#00ff66]" />
-              
+
               <button (click)="openFileSelector()"
                 class="absolute bottom-1 right-1 bg-[#00ff66] text-black h-8 w-8 rounded-full flex items-center justify-center hover:bg-white transition-colors duration-300">
                 <i class="fas fa-camera"></i>
@@ -56,69 +60,61 @@
               <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
             </div>
           </div>
-          
+
           <div class="mt-4 text-center">
             <h3 class="font-bold text-xl mb-1">{{user.name}}</h3>
             <div class="flex items-center justify-center space-x-2">
               <!-- Verification badge -->
               @if (verificationData.status=='Verified') {
-                <div class="flex items-center bg-gradient-to-r from-green-600 to-[#00ff66] rounded-full px-3 py-1">
-                  <i class="fas fa-check-circle mr-1"></i>
-                  <span class="text-xs font-bold">Verified</span>
-                </div>
+              <div class="flex items-center bg-gradient-to-r from-green-600 to-[#00ff66] rounded-full px-3 py-1">
+                <i class="fas fa-check-circle mr-1"></i>
+                <span class="text-xs font-bold">Verified</span>
+              </div>
               } @else if (verificationData.status=='Pending') {
-                <div class="flex items-center bg-gradient-to-r from-yellow-600 to-yellow-400 text-black rounded-full px-3 py-1">
-                  <i class="fas fa-clock mr-1"></i>
-                  <span class="text-xs font-bold">Pending</span>
-                </div>
+              <div
+                class="flex items-center bg-gradient-to-r from-yellow-600 to-yellow-400 text-black rounded-full px-3 py-1">
+                <i class="fas fa-clock mr-1"></i>
+                <span class="text-xs font-bold">Pending</span>
+              </div>
               } @else if (verificationData.status=='Rejected') {
-                <div class="flex items-center bg-gradient-to-r from-red-700 to-red-500 rounded-full px-3 py-1">
-                  <i class="fas fa-times-circle mr-1"></i>
-                  <span class="text-xs font-bold">Rejected</span>
-                </div>
+              <div class="flex items-center bg-gradient-to-r from-red-700 to-red-500 rounded-full px-3 py-1">
+                <i class="fas fa-times-circle mr-1"></i>
+                <span class="text-xs font-bold">Rejected</span>
+              </div>
               } @else {
-                @if (user.name && user.email && user.phone && user.bio && user.location && user.dateOfBirth) {
-                  <button (click)="sendVerificationRequest()" 
-                    class="bg-gradient-to-r from-blue-500 to-[#00ff66] hover:from-[#00ff66] hover:to-blue-500 text-black rounded-full px-3 py-1 font-semibold text-xs transition-all duration-300 transform hover:scale-105">
-                    <i class="fas fa-shield-alt mr-1"></i>
-                    Verify Account
-                  </button>
-                }
+              @if (user.name && user.email && user.phone && user.bio && user.location && user.dateOfBirth) {
+              <button (click)="sendVerificationRequest()"
+                class="bg-gradient-to-r from-blue-500 to-[#00ff66] hover:from-[#00ff66] hover:to-blue-500 text-black rounded-full px-3 py-1 font-semibold text-xs transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-shield-alt mr-1"></i>
+                Verify Account
+              </button>
+              }
               }
             </div>
           </div>
 
-         
-          <!-- <div class="mt-6 w-full">
+
+          <div class="mt-6 w-full">
             <h4 class="text-sm font-semibold text-gray-400 mb-2 text-center">Achievement Badges</h4>
-            <div class="flex flex-wrap justify-center gap-2">
+            <div class="flex flex-wrap justify-center gap-3">
+              @for (badge of achievements; track $index) {
+              @if(badge.isActive){
               <div class="group relative">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                  <i class="fas fa-star text-white"></i>
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br {{getBadgeColorClass(badge, $index)}} flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-{{getBadgeGlowColor(badge, $index)}}">
+                  <i [class]="badge.icon+' '+getBadgeIconColor(badge, $index)"></i>
                 </div>
-                <div class="absolute -bottom-1 right-0 w-4 h-4 bg-yellow-500 rounded-full border-2 border-gray-800 flex items-center justify-center text-[10px] font-bold">1</div>
-                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">Early Adopter</span>
-              </div>
-              <div class="group relative">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center opacity-50">
-                  <i class="fas fa-medal text-white"></i>
+
+                <div
+                  class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black border border-{{getBadgeBorderColor(badge, $index)}} px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all duration-300 mb-3 z-10 min-w-max text-center">
+                  <span class="block font-bold mb-0.5">{{badge.title}}</span>
+                  <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black rotate-45"></div>
                 </div>
-                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">Event Master</span>
               </div>
-              <div class="group relative">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center opacity-50">
-                  <i class="fas fa-fire text-white"></i>
-                </div>
-                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">Hot Streak</span>
-              </div>
-              <div class="group relative">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center opacity-50">
-                  <i class="fas fa-crown text-white"></i>
-                </div>
-                <span class="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap transition-opacity duration-300 mb-2">VIP Member</span>
-              </div>
+              }
+              }
             </div>
-          </div> -->
+          </div>
         </div>
 
         <div class="flex-1">
@@ -168,21 +164,30 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Edit button -->
           @if (!editMode) {
-            <button (click)="editMode=true" 
-              class="w-full bg-gradient-to-r from-[#00ff66] to-[#00aa44] hover:from-[#00aa44] hover:to-[#00ff66] text-black font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-opacity-50 shadow-lg">
-              <i class="fas fa-edit mr-2"></i>
-              Update Your Information
-            </button>
+          <button (click)="editMode=true"
+            class="w-full bg-gradient-to-r from-[#00ff66] to-[#00aa44] hover:from-[#00aa44] hover:to-[#00ff66] text-black font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-opacity-50 shadow-lg">
+            <i class="fas fa-edit mr-2"></i>
+            Update Your Information
+          </button>
           }
+        </div>
+      </div>
+      <div class="bg-black rounded-2xl p-4 md:p-6 mb-6">
+        <div class="mt-6 flex space-x-3 justify-end">
+          <button (click)="openChangePasswordDialog()"
+            class="px-4 py-2 border border-[#00ff66] text-[#00ff66] rounded-lg font-medium hover:bg-[#00ff66] hover:text-[#151A2D] transition-colors duration-200">
+            <i class="fa fa-lock mr-2"></i>Change Password
+          </button>
         </div>
       </div>
     </div>
     }
 
-    <p-dialog header="Edit Profile" [(visible)]="editMode" [style]="{ width: '40rem' }" [modal]="true" styleClass="custom-dialog">
+    <p-dialog header="Edit Profile" [(visible)]="editMode" [style]="{ width: '40rem' }" [modal]="true"
+      styleClass="custom-dialog">
       <div class="p-dialog-content bg-[#19191] text-white">
         <span class="text-gray-300 block mb-6">Update your personal information to complete your profile</span>
         <form [formGroup]="userForm" (ngSubmit)="updateProfile()">
@@ -190,151 +195,144 @@
             <div class="flex flex-col">
               <label for="username" class="font-semibold mb-1 text-gray-300">Name</label>
               <div class="relative">
-                <input pInputText id="username" class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]" formControlName="name" />
+                <input pInputText id="username"
+                  class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]"
+                  formControlName="name" />
               </div>
               <div class="text-red-400 text-sm mt-1">
                 @if (userForm.get('name')?.invalid && (userForm.get('name')?.dirty || userForm.get('name')?.touched)) {
-                  @if (hasError('name', 'required')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name is required</div>
-                  }
-                  @if (hasError('name', 'minlength')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name must be at least 3 characters</div>
-                  }
-                  @if (hasError('name', 'alphabetsOnly')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name should contain only alphabets</div>
-                  }
-                  @if (hasError('name', 'noSpaces')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name should not contain spaces at beginning or end</div>
-                  }
-                  @if (hasError('name', 'repeatedCharacters')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Name contains too many repeated characters</div>
-                  }
+                @if (hasError('name', 'required')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Name is required</div>
+                }
+                @if (hasError('name', 'minlength')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Name must be at least 3 characters</div>
+                }
+                @if (hasError('name', 'alphabetsOnly')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Name should contain only alphabets</div>
+                }
+                @if (hasError('name', 'noSpaces')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Name should not contain spaces at beginning or end
+                </div>
+                }
+                @if (hasError('name', 'repeatedCharacters')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Name contains too many repeated characters</div>
+                }
                 }
               </div>
             </div>
-        
+
             <div class="flex flex-col">
               <label for="phone" class="font-semibold mb-1 text-gray-300">Phone</label>
               <div class="relative">
-                <input pInputText id="phone" class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]" formControlName="phone" />
+                <input pInputText id="phone"
+                  class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]"
+                  formControlName="phone" />
               </div>
               <div class="text-red-400 text-sm mt-1">
-                @if (userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)) {
-                  @if (hasError('phone', 'required')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Phone number is required</div>
-                  }
-                  @if (hasError('phone', 'invalidMobile')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Please enter a valid mobile number</div>
-                  }
+                @if (userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched))
+                {
+                @if (hasError('phone', 'required')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Phone number is required</div>
+                }
+                @if (hasError('phone', 'invalidMobile')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Please enter a valid mobile number</div>
+                }
                 }
               </div>
             </div>
-            
+
             <div class="flex flex-col">
               <label for="location" class="font-semibold mb-1 text-gray-300">Location</label>
               <div class="relative">
                 <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <p-autoComplete 
-                  id="location" 
-                  [suggestions]="indianCities"
-                  (completeMethod)="filterCities($event)"
-                  [dropdown]="true"
-                  formControlName="location"
-                  [minLength]="1"
-                  placeholder="Select your city"
+                <p-autoComplete id="location" [suggestions]="indianCities" (completeMethod)="filterCities($event)"
+                  [dropdown]="true" formControlName="location" [minLength]="1" placeholder="Select your city"
                   styleClass="w-full custom-autocomplete"
-                  [inputStyleClass]="'pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66] w-full'"
-                ></p-autoComplete>
+                  [inputStyleClass]="'pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66] w-full'"></p-autoComplete>
               </div>
               <div class="text-red-400 text-sm mt-1">
-                @if (userForm.get('location')?.invalid && (userForm.get('location')?.dirty || userForm.get('location')?.touched)) {
-                  @if (hasError('location', 'required')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Location is required</div>
-                  }
-                  @if (hasError('location', 'minlength')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Location must be at least 2 characters</div>
-                  }
-                  @if (hasError('location', 'alphabetsOnly')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Location should contain only alphabets</div>
-                  }
+                @if (userForm.get('location')?.invalid && (userForm.get('location')?.dirty ||
+                userForm.get('location')?.touched)) {
+                @if (hasError('location', 'required')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Location is required</div>
+                }
+                @if (hasError('location', 'minlength')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Location must be at least 2 characters</div>
+                }
+                @if (hasError('location', 'alphabetsOnly')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Location should contain only alphabets</div>
+                }
                 }
               </div>
             </div>
-        
+
             <div class="flex flex-col">
               <label for="bio" class="font-semibold mb-1 text-gray-300">Bio</label>
               <div class="relative">
-                <textarea pInputText id="bio" rows="3" class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]" formControlName="bio"></textarea>
+                <textarea pInputText id="bio" rows="3"
+                  class="w-full pl-10 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]"
+                  formControlName="bio"></textarea>
               </div>
               <div class="text-red-400 text-sm mt-1">
                 @if (userForm.get('bio')?.invalid && (userForm.get('bio')?.dirty || userForm.get('bio')?.touched)) {
-                  @if (hasError('bio', 'minlength')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Bio must be at least 3 characters</div>
-                  }
-                  @if (hasError('bio', 'alphabetsOnly')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Bio should contain only alphabets</div>
-                  }
+                @if (hasError('bio', 'minlength')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Bio must be at least 3 characters</div>
+                }
+                @if (hasError('bio', 'alphabetsOnly')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Bio should contain only alphabets</div>
+                }
                 }
               </div>
             </div>
-        
+
             <div class="flex flex-col">
               <label for="gender" class="font-semibold mb-1 text-gray-300">Gender</label>
               <div class="relative">
                 <i class="fas fa-venus-mars absolute left-3 top-1/2 transform -translate-y-1/2 text-green-300"></i>
-                <select
-                  id="gender"
+                <select id="gender"
                   class="w-full pl-10 py-2 bg-black border  rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66] "
-                  formControlName="gender"
-                >
+                  formControlName="gender">
                   <option value="" disabled>Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
               </div>
               <div class="text-red-400 text-sm mt-1">
-                @if (userForm.get('gender')?.invalid && (userForm.get('gender')?.dirty || userForm.get('gender')?.touched)) {
-                  @if (hasError('gender', 'required')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Gender is required</div>
-                  }
-                  @if (hasError('gender', 'alphabetsOnly')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Gender should contain only alphabets</div>
-                  }
+                @if (userForm.get('gender')?.invalid && (userForm.get('gender')?.dirty ||
+                userForm.get('gender')?.touched)) {
+                @if (hasError('gender', 'required')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Gender is required</div>
+                }
+                @if (hasError('gender', 'alphabetsOnly')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Gender should contain only alphabets</div>
+                }
                 }
               </div>
             </div>
-        
+
             <div class="flex flex-col">
               <label for="dateofbirth" class="font-semibold mb-1 text-gray-300">Date Of Birth</label>
               <div class="relative">
                 <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"></i>
-                <p-datePicker
-                    id="dateofbirth"
-                    formControlName="dateOfBirth"
-                    [showIcon]="false"
-                    dateFormat="dd/mm/yy"
-                    [maxDate]="maxDate"
-                    [showButtonBar]="true"
-                    placeholder="Select Date"
-                    inputId="dateofbirth"
-                    [style]="{'width':'100%'}"
-                    [inputStyle]="{'padding-left':'2.5rem', 'width':'100%', 'background-color':'black', 'border-color':'#4B5563'}"
-                    styleClass="custom-datepicker"
-                    appendTo="body"
-                  ></p-datePicker>
+                <p-datePicker id="dateofbirth" formControlName="dateOfBirth" [showIcon]="false" dateFormat="dd/mm/yy"
+                  [maxDate]="maxDate" [showButtonBar]="true" placeholder="Select Date" inputId="dateofbirth"
+                  [style]="{'width':'100%'}"
+                  [inputStyle]="{'padding-left':'2.5rem', 'width':'100%', 'background-color':'black', 'border-color':'#4B5563'}"
+                  styleClass="custom-datepicker" appendTo="body"></p-datePicker>
               </div>
               <div class="text-red-400 text-sm mt-1">
-                @if (userForm.get('dateOfBirth')?.invalid && (userForm.get('dateOfBirth')?.dirty || userForm.get('dateOfBirth')?.touched)) {
-                  @if (hasError('dateOfBirth', 'required')) {
-                    <div><i class="fas fa-exclamation-circle mr-1"></i> Date of birth is required</div>
-                  }
+                @if (userForm.get('dateOfBirth')?.invalid && (userForm.get('dateOfBirth')?.dirty ||
+                userForm.get('dateOfBirth')?.touched)) {
+                @if (hasError('dateOfBirth', 'required')) {
+                <div><i class="fas fa-exclamation-circle mr-1"></i> Date of birth is required</div>
+                }
                 }
               </div>
             </div>
           </div>
-        
+
           <div class="flex justify-end gap-3 mt-6">
-            <button type="button" (click)="cancelEdit()" 
+            <button type="button" (click)="cancelEdit()"
               class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
               <i class="fas fa-times mr-2"></i>
               Cancel
@@ -350,3 +348,120 @@
     </p-dialog>
   </div>
 </div>
+
+<!-- Add this dialog to your component's HTML -->
+<p-dialog header="Change Password" [(visible)]="showChangePasswordDialog" 
+  [style]="{ width: '40rem' }" [modal]="true" styleClass="custom-dialog">
+  <div class="p-dialog-content bg-[#191919] text-white">
+    <span class="text-gray-300 block mb-6">Update your password to secure your account</span>
+    
+    <form [formGroup]="changePasswordForm" (ngSubmit)="submitPasswordChange()">
+      <div class="flex flex-col gap-4 mb-4">
+        <!-- Current Password Field -->
+        <div class="flex flex-col">
+          <label for="currentPassword" class="font-semibold mb-1 text-gray-300">Current Password</label>
+          <div class="relative">
+            <input pInputText id="currentPassword" [type]="showCurrentPassword ? 'text' : 'password'"
+              class="w-full pl-12 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]"
+              formControlName="currentPassword" />
+            <button type="button" 
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none"
+                    (click)="showCurrentPassword = !showCurrentPassword">
+              <i class="fas" [ngClass]="showCurrentPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </button>
+          </div>
+          <div class="text-red-400 text-sm mt-1">
+            <div *ngIf="changePasswordForm.get('currentPassword')?.invalid && 
+                      (changePasswordForm.get('currentPassword')?.dirty || 
+                      changePasswordForm.get('currentPassword')?.touched)">
+              <div *ngIf="hasPasswordError('currentPassword', 'required')">
+                <i class="fas fa-exclamation-circle mr-1"></i> Current password is required
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- New Password Field -->
+        <div class="flex flex-col">
+          <label for="newPassword" class="font-semibold mb-1 text-gray-300">New Password</label>
+          <div class="relative">
+            <input pInputText id="newPassword" [type]="showNewPassword ? 'text' : 'password'"
+              class="w-full pl-12 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]"
+              formControlName="newPassword" />
+            <button type="button" 
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none"
+                    (click)="showNewPassword = !showNewPassword">
+              <i class="fas" [ngClass]="showNewPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </button>
+          </div>
+          <div class="text-red-400 text-sm mt-1">
+            <div *ngIf="changePasswordForm.get('newPassword')?.invalid && 
+                      (changePasswordForm.get('newPassword')?.dirty || 
+                      changePasswordForm.get('newPassword')?.touched)">
+              <div *ngIf="hasPasswordError('newPassword', 'required')">
+                <i class="fas fa-exclamation-circle mr-1"></i> New password is required
+              </div>
+              <div *ngIf="hasPasswordError('newPassword', 'strongPassword')">
+                <i class="fas fa-exclamation-circle mr-1"></i> Password must be at least 8 characters and include uppercase, lowercase, number, and special character
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Confirm Password Field -->
+        <div class="flex flex-col">
+          <label for="confirmPassword" class="font-semibold mb-1 text-gray-300">Confirm Password</label>
+          <div class="relative">
+            <input pInputText id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
+              class="w-full pl-12 bg-gray-700 border border-gray-600 rounded-lg focus:ring-[#00ff66] focus:border-[#00ff66]"
+              formControlName="confirmPassword" />
+            <button type="button" 
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none"
+                    (click)="showConfirmPassword = !showConfirmPassword">
+              <i class="fas" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </button>
+          </div>
+          <div class="text-red-400 text-sm mt-1">
+            <div *ngIf="changePasswordForm.get('confirmPassword')?.invalid && 
+                      (changePasswordForm.get('confirmPassword')?.dirty || 
+                      changePasswordForm.get('confirmPassword')?.touched)">
+              <div *ngIf="hasPasswordError('confirmPassword', 'required')">
+                <i class="fas fa-exclamation-circle mr-1"></i> Confirm password is required
+              </div>
+            </div>
+            <div *ngIf="changePasswordForm.hasError('passwordMismatch') && 
+                      changePasswordForm.get('confirmPassword')?.touched">
+              <i class="fas fa-exclamation-circle mr-1"></i> Passwords do not match
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="mb-4 mt-2" *ngIf="changePasswordForm.get('newPassword')?.value">
+        <div class="text-sm text-gray-300 mb-1">Password Strength:</div>
+        <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden">
+          <div class="h-full transition-all duration-300"
+            [ngClass]="{'w-1/4 bg-red-500': changePasswordForm.get('newPassword')?.value.length < 8,
+                      'w-2/4 bg-yellow-500': changePasswordForm.get('newPassword')?.value.length >= 8 && changePasswordForm.get('newPassword')?.hasError('strongPassword'),
+                      'w-full bg-green-500': !changePasswordForm.get('newPassword')?.hasError('strongPassword') && changePasswordForm.get('newPassword')?.value.length >= 8}"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" (click)="closeChangePasswordDialog()"
+          class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
+          <i class="fas fa-times mr-2"></i>
+          Cancel
+        </button>
+        <button type="submit" [disabled]="isLoading || changePasswordForm.invalid"
+          class="px-4 py-2 bg-[#00ff66] hover:bg-[#00cc52] text-black font-semibold rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:ring-opacity-50 disabled:bg-gray-500 disabled:text-gray-300">
+          <i class="fas fa-save mr-2"></i>
+          Change Password
+        </button>
+      </div>
+    </form>
+  </div>
+</p-dialog>

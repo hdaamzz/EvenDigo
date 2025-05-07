@@ -8,6 +8,8 @@ import { IUser, ServiceResponse } from '../../../../../src/models/interfaces/aut
 import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
 import { CloudinaryUploadResult } from '../../../../../src/models/interfaces/profile.interface';
 import cloudinary from '../../../../../src/configs/cloudinary';
+import { IUserAchievementRepository } from '../../../../../src/repositories/interfaces/IBadge.repository';
+import { hashPassword, reHash } from '../../../../../src/utils/helpers';
 
 
 @injectable()
@@ -15,6 +17,7 @@ export class ProfileUserService implements IProfileUserService {
   constructor(
     @inject("UserRepository") private userRepository: IUserRepository,
     @inject("VerificationRepository") private verificationRepository: IVerificationRepository,
+    @inject("UserAchievementRepository") private badgeRepository : IUserAchievementRepository,
   ) {}
 
   async fetchUserById(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IUser>> {
@@ -139,5 +142,81 @@ export class ProfileUserService implements IProfileUserService {
 
   async deleteImage(publicId: string): Promise<any> {
     return cloudinary.uploader.destroy(publicId);
+  }
+  
+  async getUserBadges(userId: Schema.Types.ObjectId | string): Promise<any> {
+    try {
+      const badges = await this.badgeRepository.getUserAchievements(userId);
+
+      if (!badges) {
+        throw new NotFoundException("Badges not found");
+      }
+
+      return {
+        success: true,
+        message: "Badges fetched successfully",
+        data: badges,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return {
+          success: false,
+          message: error.message,
+        };
+      }
+      return {
+        success: false,
+        message: "Failed to fetch user",
+      };
+    }
+  }
+
+  async changePassword(
+    userId: Schema.Types.ObjectId | string, 
+    currentPassword: string, 
+    newPassword: string
+  ): Promise<ServiceResponse<null>> {
+    try {
+      const user = await this.userRepository.findUserById(userId);
+      
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      
+      
+      if (!user.password) {
+        throw new BadRequestException("User password is not set");
+      }
+
+      const isPasswordValid = await reHash(currentPassword, user.password);
+      
+      if (!isPasswordValid) {
+        throw new BadRequestException("Current password is incorrect");
+      }
+      
+      const hashedPassword = await hashPassword(newPassword);
+      
+      await this.userRepository.updateUser(userId, { password: hashedPassword });
+      
+      return {
+        success: true,
+        message: "Password changed successfully",
+        data: null,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        return {
+          success: false,
+          message: error.message,
+          data: null,
+        };
+      }
+      
+      return {
+        success: false,
+        message: "Failed to change password",
+        data: null,
+      };
+    }
   }
 }

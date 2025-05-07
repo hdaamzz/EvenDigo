@@ -27,21 +27,12 @@ interface WalletDetails {
 })
 export class UserProfileService {
 
-
-
-  private userIdSource = new BehaviorSubject<string | undefined>(undefined);
-  currentUserId = this.userIdSource.asObservable();
-
   baseUrl=environment.baseUrl
   constructor(private http: HttpClient) { }
 
-  updateUserId(userId: string | undefined) {
-    this.userIdSource.next(userId);
-  }
-
   
-  userDetails(userId: string): Observable<UpdateProfileResponse> {
-      return this.http.post<UpdateProfileResponse>(`${this.baseUrl}user/profile/user-details`, { userId: userId }, {
+  userDetails(): Observable<UpdateProfileResponse> {
+      return this.http.get<UpdateProfileResponse>(`${this.baseUrl}user/profile/user-details`, {
         withCredentials: true,
       }).pipe(
         catchError(error => {
@@ -50,13 +41,9 @@ export class UserProfileService {
         })
       );
   }
-  updateUserProfile(userId: string | undefined, userData: Partial<User>): Observable<UpdateProfileResponse> {
-    if (!userId) {
-      return throwError(() => new Error('User ID is missing'));
-    }
+  updateUserProfile( userData: Partial<User>): Observable<UpdateProfileResponse> {
     
     return this.http.post<UpdateProfileResponse>(`${this.baseUrl}user/profile/update`, {
-      userId: userId,
       ...userData
     }, {
       withCredentials: true
@@ -68,8 +55,8 @@ export class UserProfileService {
     );
   }
 
-  verificationRequest(userId:string):Observable<VerificationRequestResponse>{
-    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{userId},{
+  verificationRequest():Observable<VerificationRequestResponse>{
+    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{
       withCredentials: true,
     }).pipe(
       catchError(error => {
@@ -79,8 +66,8 @@ export class UserProfileService {
     )
   }
 
-  verificationRequestDetails(userId:string):Observable<any>{
-    return this.http.get(`${this.baseUrl}user/profile/verification-request/${userId}`,{withCredentials: true}).pipe(
+  verificationRequestDetails():Observable<any>{
+    return this.http.get(`${this.baseUrl}user/profile/verification-request`,{withCredentials: true}).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
         return throwError(() => new Error('Failed to fetch user details'));
@@ -119,9 +106,19 @@ export class UserProfileService {
       withCredentials: true
     });
   }
-  getBadgeById(userId: string) :Observable<any>{
-    return this.http.get(`${this.baseUrl}user/profile/badge/${userId}`,{
+  getBadgeById() :Observable<any>{
+    return this.http.get(`${this.baseUrl}user/profile/badge`,{
       withCredentials: true
     });
+  }
+  changePassword(data: {currentPassword: string, newPassword: string, confirmPassword: string}): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}user/profile/change-password`, data, {
+      withCredentials: true
+    }).pipe(
+      catchError(error => {
+        console.error('Error changing password:', error);
+        return throwError(() => new Error(error.error?.message || 'Failed to change password'));
+      })
+    );
   }
 }

@@ -9,4 +9,6 @@ export interface IProfileUserService {
   verificationRequestDetails(userId: Schema.Types.ObjectId | string): Promise<any>;
   uploadImage(buffer: Buffer, folder?: string): Promise<CloudinaryUploadResult>;
   deleteImage(publicId: string): Promise<any>;
+  getUserBadges(userId: Schema.Types.ObjectId | string): Promise<any>;
+  changePassword(userId: Schema.Types.ObjectId | string, currentPassword: string, newPassword: string): Promise<ServiceResponse<null>>;
 }

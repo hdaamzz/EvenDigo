@@ -176,7 +176,6 @@ export class AuthController implements IAuthController {
       }
 
       const currentUser = await this.authService.findUserByEmail(req.user.email);
-      console.log(currentUser);
       
       if (!currentUser) {
         res.status(StatusCode.UNAUTHORIZED).json({

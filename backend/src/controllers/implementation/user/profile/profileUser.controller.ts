@@ -16,8 +16,8 @@ export class ProfileUserController implements IProfileUserController {
 
   async fetchUserById(req: Request, res: Response): Promise<void> {
     try {
-      const { userId } = req.body;
-
+      const userId  = req.user._id;
+      
       if (!userId) {
         return ResponseHandler.error(res, null, "User ID is required", 400);
       }
@@ -37,8 +37,8 @@ export class ProfileUserController implements IProfileUserController {
 
   async updateUserDetails(req: Request, res: Response): Promise<void> {
     try {
-      const { userId, name, phone, dateOfBirth, location, bio, gender } = req.body;
-      
+      const { name, phone, dateOfBirth, location, bio, gender } = req.body;
+      const userId=req.user._id;
       if (!userId) {
         return ResponseHandler.error(res, null, "User ID is required", 400);
       }
@@ -58,13 +58,13 @@ export class ProfileUserController implements IProfileUserController {
 
   async sendVerificationRequest(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.body;
       
-      if (!id) {
+      const userId=req.user._id;
+      if (!userId) {
         return ResponseHandler.error(res, null, "User ID is required", 400);
       }
       
-      const response = await this.profileUserService.verificationRequest(id);
+      const response = await this.profileUserService.verificationRequest(userId);
       
       if (response.success) {
         ResponseHandler.success(res, response.data, response.message);
@@ -78,7 +78,7 @@ export class ProfileUserController implements IProfileUserController {
   
   async verificationRequestDetails(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.params.userId;
+      const userId = req.user._id;
       
       if (!userId) {
         return ResponseHandler.error(res, null, "User ID is required", 400);
@@ -119,6 +119,55 @@ export class ProfileUserController implements IProfileUserController {
       }, "Image uploaded successfully");
     } catch (error) {
       ResponseHandler.error(res, error, "Failed to upload profile image");
+    }
+  }
+
+  async fetchUserBadges(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user._id;
+      
+      if (!userId) {
+        return ResponseHandler.error(res, null, "User ID is required", 400);
+      }
+      
+      const response = await this.profileUserService.getUserBadges(userId);
+      
+      if (response.success) {
+        ResponseHandler.success(res, response.data, response.message);
+      } else {
+        ResponseHandler.error(res, null, response.message, 404);
+      }
+    } catch (error) {
+      ResponseHandler.error(res, error, "Failed to get verification request details");
+    }
+  }
+
+  async changePassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { currentPassword, newPassword, confirmPassword } = req.body;
+      const userId = req.user._id;
+      
+      if (!userId) {
+        return ResponseHandler.error(res, null, "User ID is required", 400);
+      }
+      
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        return ResponseHandler.error(res, null, "All password fields are required", 400);
+      }
+      
+      if (newPassword !== confirmPassword) {
+        return ResponseHandler.error(res, null, "New password and confirm password do not match", 400);
+      }
+      
+      const response = await this.profileUserService.changePassword(userId, currentPassword, newPassword);
+      
+      if (response.success) {
+        ResponseHandler.success(res, null, response.message);
+      } else {
+        ResponseHandler.error(res, null, response.message, 400);
+      }
+    } catch (error) {
+      ResponseHandler.error(res, error, "Failed to change password");
     }
   }
 }

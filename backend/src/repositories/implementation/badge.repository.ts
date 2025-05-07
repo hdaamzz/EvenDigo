@@ -1,5 +1,5 @@
 import { injectable } from 'tsyringe';
-import { IAchievement } from '../../models/interfaces/achievements.interface';
+// import { IAchievement } from '../../models/interfaces/achievements.interface';
 import { IUserAchievementRepository } from '../interfaces/IBadge.repository';
 import AchievementModel from '../../models/AchievementsModal';
 import BadgeModal from '../../models/BadgeModal';
@@ -35,9 +35,9 @@ export class UserAchievementRepository implements IUserAchievementRepository {
     }
   }
 
-  async getUserAchievements(userId: string): Promise<IAchievement[]> {
+  async getUserAchievements(userId: Schema.Types.ObjectId | string): Promise<any> {
     const userAchievements = await BadgeModal.aggregate([
-      { $match: { userId: new Schema.Types.ObjectId(userId) } },
+      { $match: { userId: userId } },
       {
         $lookup: {
           from: 'achievements',

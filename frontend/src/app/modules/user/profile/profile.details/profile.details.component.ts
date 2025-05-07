@@ -7,9 +7,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import Notiflix from 'notiflix';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { DatePickerModule } from 'primeng/datepicker';
-import { alphabetsValidator, mobileNumberValidator, repeateCharacterValidator, spacesValidator } from '../../../../validators/formValidators';
+import { alphabetsValidator, changePasswordMatchValidator, mobileNumberValidator, repeateCharacterValidator, spacesValidator } from '../../../../validators/formValidators';
 import { CloudinaryService } from '../../../../core/services/utility/cloudinary.service';
 import { UserProfileService } from '../../../../core/services/user/profile/user.profile.service';
+import { catchError, of, tap } from 'rxjs';
+import { passwordValidator } from '../../../../validators/formValidators';
+
+
 
 @Component({
   selector: 'app-profile-details',
@@ -21,8 +25,6 @@ import { UserProfileService } from '../../../../core/services/user/profile/user.
 })
 export class ProfileDetailsComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
-
-  userId: string | undefined;
   user: any = {};
   userForm!: FormGroup;
   editMode = false;
@@ -30,53 +32,48 @@ export class ProfileDetailsComponent implements OnInit {
   imageError = false;
   defaultImageUrl = 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318747/user.icon_slz5l0.png';
   maxDate: Date = new Date();
-  
-  
+  achievements: any[]=[]
+  eventOrganized:Number=0;
+  eventParticipated:Number=0
   statsData = {
     eventsAttended: 12,
     achievements: 4,
     followedEvents: 8
   };
-  
-  
+
   verificationData = {
     user_id: '',
     status: '',
     note: ''
   };
-  
-  
-  // badges = [
-  //   { 
-  //     name: 'Early Adopter', 
-  //     icon: 'star', 
-  //     bgClass: 'from-purple-500 to-indigo-600', 
-  //     level: 1, 
-  //     isUnlocked: true 
-  //   },
-  //   { 
-  //     name: 'Event Master', 
-  //     icon: 'medal', 
-  //     bgClass: 'from-green-500 to-emerald-600', 
-  //     level: 0, 
-  //     isUnlocked: false 
-  //   },
-  //   { 
-  //     name: 'Hot Streak', 
-  //     icon: 'fire', 
-  //     bgClass: 'from-rose-500 to-red-600', 
-  //     level: 0, 
-  //     isUnlocked: false 
-  //   },
-  //   { 
-  //     name: 'VIP Member', 
-  //     icon: 'crown', 
-  //     bgClass: 'from-amber-500 to-yellow-600', 
-  //     level: 0, 
-  //     isUnlocked: false 
-  //   }
-  // ];
-  
+
+  changePasswordForm!: FormGroup;
+  showChangePasswordDialog = false;
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+
+
+
+  badgeCategoryColors: Record<string, { gradient: string; icon: string; glow: string; border: string }> = {
+    'event': { gradient: 'from-blue-600 to-cyan-400', icon: 'text-cyan-100', glow: 'cyan-400/30', border: 'cyan-400' },
+    'achievement': { gradient: 'from-yellow-500 to-amber-400', icon: 'text-amber-100', glow: 'amber-400/30', border: 'amber-400' },
+    'special': { gradient: 'from-fuchsia-600 to-pink-400', icon: 'text-pink-100', glow: 'pink-400/30', border: 'pink-400' },
+    'community': { gradient: 'from-green-600 to-emerald-400', icon: 'text-emerald-100', glow: 'emerald-400/30', border: 'emerald-400' },
+    'milestone': { gradient: 'from-red-600 to-orange-400', icon: 'text-orange-100', glow: 'orange-400/30', border: 'orange-400' },
+  };
+
+  badgeColorSets = [
+    { gradient: 'from-purple-600 to-indigo-500', icon: 'text-indigo-100', glow: 'indigo-400/30', border: 'indigo-400' },
+    { gradient: 'from-blue-600 to-cyan-400', icon: 'text-cyan-100', glow: 'cyan-400/30', border: 'cyan-400' },
+    { gradient: 'from-green-600 to-emerald-400', icon: 'text-emerald-100', glow: 'emerald-400/30', border: 'emerald-400' },
+    { gradient: 'from-yellow-500 to-amber-400', icon: 'text-amber-100', glow: 'amber-400/30', border: 'amber-400' },
+    { gradient: 'from-red-600 to-orange-400', icon: 'text-orange-100', glow: 'orange-400/30', border: 'orange-400' },
+    { gradient: 'from-fuchsia-600 to-pink-400', icon: 'text-pink-100', glow: 'pink-400/30', border: 'pink-400' },
+    { gradient: 'from-indigo-600 to-blue-400', icon: 'text-blue-100', glow: 'blue-400/30', border: 'blue-400' },
+    { gradient: 'from-emerald-600 to-teal-400', icon: 'text-teal-100', glow: 'teal-400/30', border: 'teal-400' }
+  ];
+
   allIndianCities: string[] = [
     'Mumbai', 'Delhi', 'Kochi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 
     'Chennai', 'Kolkata', 'Surat', 'Pune', 'Jaipur', 
@@ -91,27 +88,48 @@ export class ProfileDetailsComponent implements OnInit {
     'Moradabad', 'Mysore', 'Gurgaon', 'Aligarh', 'Jalandhar', 'Calicut'
   ];
   indianCities: string[] = [];
-  
+
   constructor(
     private fb: FormBuilder,
     private userProfileService: UserProfileService,
     private cloudinaryService: CloudinaryService,
   ) {
-    this.userProfileService.currentUserId.subscribe(userId => {
-      this.userId = userId;
-      
-      if (userId) {
-        this.loadUserProfile();
-        this.verificationRequestDetails();
-        this.loadUserStats(); 
-      }
-    });
   }
 
   ngOnInit(): void {
     this.initializeForm();
+    this.initializePasswordForm();
+    this.loadUserProfile();
+    this.verificationRequestDetails();
+    this.loadUserBadges();
+    this.fetchEventCount();
+    this.fetchUserBookingCount()
   }
-  
+
+  getBadgeStyles(badge: any, index: number): any {
+    if (badge.category && this.badgeCategoryColors[badge.category]) {
+      return this.badgeCategoryColors[badge.category];
+    }
+    
+    return this.badgeColorSets[index % this.badgeColorSets.length];
+  }
+
+  getBadgeColorClass(badge: any, index: number): string {
+    return this.getBadgeStyles(badge, index).gradient;
+  }
+
+  getBadgeIconColor(badge: any, index: number): string {
+    return this.getBadgeStyles(badge, index).icon;
+  }
+
+  getBadgeGlowColor(badge: any, index: number): string {
+    return this.getBadgeStyles(badge, index).glow;
+  }
+
+  getBadgeBorderColor(badge: any, index: number): string {
+    return this.getBadgeStyles(badge, index).border;
+  }
+
   initializeForm(): void {
     this.userForm = this.fb.group({
       name: [this.user.name || '', [Validators.required, Validators.minLength(3), spacesValidator(), repeateCharacterValidator()]],
@@ -122,22 +140,32 @@ export class ProfileDetailsComponent implements OnInit {
       gender: [this.user.gender || '', [Validators.required, alphabetsValidator()]]
     });
   }
-  
-  loadUserProfile(): void {
-    this.isLoading = true;
-    if (!this.userId) {
-      Notiflix.Notify.failure('User ID is missing');
-      this.isLoading = false;
-      return;
-    }
+  initializePasswordForm(): void {
+    this.changePasswordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, passwordValidator()]],
+      confirmPassword: ['', [Validators.required]]
+    }, {
+      validators: changePasswordMatchValidator
+    });
+  }
+  openChangePasswordDialog(): void {
+    this.showChangePasswordDialog = true;
+    this.initializePasswordForm();
+  }
+  closeChangePasswordDialog(): void {
+    this.showChangePasswordDialog = false;
+    this.changePasswordForm.reset();
+  }
 
-    this.userProfileService.userDetails(this.userId).subscribe({
+  loadUserProfile(): void {
+    this.userProfileService.userDetails().subscribe({
       next: (userData) => {
         this.user = userData.data;
         if (this.user.dateOfBirth) {
           this.user.dateOfBirth = new Date(this.user.dateOfBirth);
         }
-        this.initializeForm(); 
+        this.initializeForm();
         this.isLoading = false;
       },
       error: (error) => {
@@ -147,33 +175,56 @@ export class ProfileDetailsComponent implements OnInit {
       }
     });
   }
-  
-  // Load user statistics (placeholder for future implementation)
-  loadUserStats(): void {
-    // This would typically be an API call but for now we're using static data
-    // In the future, you can replace this with a service call
-    // this.userProfileService.getUserStats(this.userId).subscribe(stats => {
-    //   this.statsData = stats;
-    // });
-    
-    // Also load badges when you implement that feature
-    // this.userProfileService.getUserBadges(this.userId).subscribe(badges => {
-    //   this.badges = badges;
-    // });
+  fetchEventCount() {
+      this.userProfileService.getUserEvents().pipe(
+        tap((response) => {
+          if(response.data){
+            this.eventOrganized = response.data.length;
+          }
+        }),
+        catchError((error) => {
+          console.error('Error fetching events:', error);
+          Notiflix.Notify.failure('Error fetching events');
+          return of(null);
+        })
+      ).subscribe();
   }
-  
-  // Update user profile
+
+  loadUserBadges(): void {
+    this.userProfileService.getBadgeById().subscribe({
+      next: (response) => {
+        this.achievements = response.data;
+      }
+    });
+  }
+
+  fetchUserBookingCount() {
+      this.userProfileService.getUserBookings().subscribe({
+        next: (response) => {
+          if (response) {
+            this.eventParticipated = response.data.length;
+          } else {
+            Notiflix.Notify.failure('Failed to load your events.');
+          }
+        },
+        error: (error) => {
+          console.error('Error loading events:', error);
+          Notiflix.Notify.failure('Error loading your events.');
+        },
+      });
+  }
+
   updateProfile(): void {
     if (!this.userForm.valid) {
       this.userForm.markAllAsTouched();
       return;
     }
-    
+
     if (this.userForm.valid) {
       this.isLoading = true;
       const updatedData = this.userForm.value;
       
-      this.userProfileService.updateUserProfile(this.userId, updatedData).subscribe({
+      this.userProfileService.updateUserProfile(updatedData).subscribe({
         next: (response) => {
           this.user = { ...this.user, ...updatedData };
           Notiflix.Notify.success('Profile updated successfully');
@@ -188,28 +239,47 @@ export class ProfileDetailsComponent implements OnInit {
       });
     }
   }
+  submitPasswordChange(): void {
+    if (this.changePasswordForm.invalid) {
+      this.changePasswordForm.markAllAsTouched();
+      return;
+    }
   
-  // Cancel edit mode
+    this.isLoading = true;
+    const passwordData = {
+      currentPassword: this.changePasswordForm.value.currentPassword,
+      newPassword: this.changePasswordForm.value.newPassword,
+      confirmPassword: this.changePasswordForm.value.confirmPassword
+    };
+  
+    this.userProfileService.changePassword(passwordData).subscribe({
+      next: (response) => {
+        Notiflix.Notify.success('Password changed successfully');
+        this.closeChangePasswordDialog();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Password change error:', error);
+        Notiflix.Notify.failure(error.message || 'Failed to change password');
+        this.isLoading = false;
+      }
+    });
+  }
+
   cancelEdit(): void {
     this.editMode = false;
-    this.initializeForm(); 
+    this.initializeForm();
   }
-  
-  // Filter cities for autocomplete
+
   filterCities(event: { query: string }): void {
     const query = event.query.toLowerCase();
-    this.indianCities = this.allIndianCities.filter(city => 
+    this.indianCities = this.allIndianCities.filter(city =>
       city.toLowerCase().includes(query)
     );
   }
-  
-  // Send verification request
+
   sendVerificationRequest(): void {
-    if (!this.userId) {
-      Notiflix.Notify.failure('User ID is missing');
-      return;
-    }
-    this.userProfileService.verificationRequest(this.userId).subscribe({
+    this.userProfileService.verificationRequest().subscribe({
       next: (response) => {
         this.verificationRequestDetails();
         Notiflix.Notify.success(response.message);
@@ -220,50 +290,41 @@ export class ProfileDetailsComponent implements OnInit {
       }
     });
   }
-  
-  // Get verification request details
+
   verificationRequestDetails(): void {
-    if (!this.userId) {
-      Notiflix.Notify.failure('User ID is missing');
-      return;
-    }
-    this.userProfileService.verificationRequestDetails(this.userId).subscribe({
-      next: (response) => {        
+    this.userProfileService.verificationRequestDetails().subscribe({
+      next: (response) => {
         this.verificationData = response.data;
       },
       error: (error) => {
         console.error('Error getting verification profile:', error);
-        // Don't show failure notification for this one as it might be a common scenario
       }
     });
   }
-  
-  // Form validation helper
-  hasError(controlName: string, errorName: string): boolean {
-    return this.userForm.controls[controlName].hasError(errorName);
-  }
 
-  // Profile image handling
+
+
   openFileSelector(): void {
     this.fileInput.nativeElement.click();
   }
-  
+
   onFileSelected(event: Event): void {
     const element = event.target as HTMLInputElement;
     const file: File | null = element.files?.[0] || null;
-    
+
     if (file) {
       this.isLoading = true;
       
       this.cloudinaryService.uploadProfileImage(file).subscribe({
         next: (response) => {
-          if (response.success && response.imageUrl) {
+          if (response.success) {
             this.user.profileImg = response.imageUrl;
             Notiflix.Notify.success('Profile picture updated successfully');
           } else {
             Notiflix.Notify.failure(response.message || 'Unknown error occurred');
             this.imageError = true;
           }
+          this.ngOnInit();
           this.isLoading = false;
         },
         error: (error) => {
@@ -275,8 +336,7 @@ export class ProfileDetailsComponent implements OnInit {
       });
     }
   }
-  
-  // Helper method to get badge color class based on verification status
+
   getVerificationStatusClass(): string {
     switch (this.verificationData.status) {
       case 'Verified':
@@ -289,8 +349,7 @@ export class ProfileDetailsComponent implements OnInit {
         return 'from-blue-500 to-[#00ff66]';
     }
   }
-  
-  // Helper method to get verification icon
+
   getVerificationIcon(): string {
     switch (this.verificationData.status) {
       case 'Verified':
@@ -303,10 +362,15 @@ export class ProfileDetailsComponent implements OnInit {
         return 'shield-alt';
     }
   }
-  
-  // Check if user has completed profile
+
   hasCompletedProfile(): boolean {
-    return !!(this.user.name && this.user.email && this.user.phone && 
-              this.user.bio && this.user.location && this.user.dateOfBirth);
+    return !!(this.user.name && this.user.email && this.user.phone &&
+      this.user.bio && this.user.location && this.user.dateOfBirth);
+  }
+  hasError(controlName: string, errorName: string): boolean {
+    return this.userForm.controls[controlName].hasError(errorName);
+  }
+  hasPasswordError(controlName: string, errorName: string): boolean {
+    return this.changePasswordForm.controls[controlName].hasError(errorName);
   }
 }

@@ -9,4 +9,5 @@ export interface IProfileUserController {
   sendVerificationRequest(req: Request, res: Response): Promise<void>;
   verificationRequestDetails(req: Request, res: Response): Promise<void>;
   uploadProfileImage(req: FileRequest & AuthenticatedRequest, res: Response): Promise<void>;
+  changePassword(req: Request, res: Response): Promise<void> 
 }

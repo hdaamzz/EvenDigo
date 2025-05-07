@@ -18,7 +18,6 @@ interface AppState {
 
 export class ProfileComponent implements OnInit, OnDestroy{
   @ViewChild('sidebarRef') sidebarRef!: ElementRef;
-  user$: Observable<any | null>;
   private destroy$ = new Subject<void>();
   userId:string | undefined;
   isCollapsed = false;
@@ -38,28 +37,10 @@ export class ProfileComponent implements OnInit, OnDestroy{
     { icon: 'fa-sign-out-alt', label: 'Logout', path: '/logout' }
   ];
 
-  constructor(
-    private router: Router,
-    private store: Store<AppState>,
-    private userProfileService: UserProfileService
-  ) {
-      this.user$ = this.store.select(selectUser);
-     
-      
-  }
+  constructor() {}
 
   ngOnInit(): void {
     this.checkScreenSize();
-    this.user$
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (user) =>{              
-              this.userId=user?._id ;
-              
-              this.userProfileService.updateUserId(this.userId);           
-            },
-            error: (error) => console.error('Error in user$ subscription:', error)
-          });
   }
 
   ngOnDestroy(): void {

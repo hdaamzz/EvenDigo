@@ -56,7 +56,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     { label: 'Trophy', value: 'fas fa-trophy' },
     { label: 'Medal', value: 'fas fa-medal' },
     { label: 'Star', value: 'fas fa-star' },
-    { label: 'Certificate', value: 'fas fa-certificate' },
     { label: 'Award', value: 'fas fa-award' },
     { label: 'Crown', value: 'fas fa-crown' },
     { label: 'Badge', value: 'fas fa-badge' },
@@ -114,7 +113,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isMobile = window.innerWidth < 768;
       });
 
-    // Subscribe to filter form changes
+    
     this.filterForm.valueChanges
       .pipe(
         takeUntil(this.destroy$),
@@ -180,7 +179,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         }));
         
         this.achievementsList = reset ? newAchievements : [...this.achievementsList, ...newAchievements];
-        this.applyFilters(); // Apply filters to the updated list
+        this.applyFilters();
         
         this.hasMoreAchievements = response.pagination?.hasMore || false;
         if (!this.hasMoreAchievements) {
@@ -201,13 +200,13 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     const filters = this.filterForm.value;
     
     this.filteredAchievementsList = this.achievementsList.filter(achievement => {
-      // Category filter
+      
       const categoryMatch = filters.category === null || achievement.category === filters.category;
       
-      // Criteria filter
+      
       const criteriaMatch = filters.criteria === null || achievement.criteria === filters.criteria;
       
-      // Status filter
+      
       const statusMatch = filters.status === null || achievement.isActive === filters.status;
       
       return categoryMatch && criteriaMatch && statusMatch;
@@ -361,7 +360,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.achievementService.deleteAchievement(achievementId).subscribe({
           next: () => {
             this.achievementsList = this.achievementsList.filter(achievement => achievement._id !== achievementId);
-            this.applyFilters(); // Re-apply filters after deletion
+            this.applyFilters(); 
             Notiflix.Notify.success('Achievement deleted successfully');
           },
           error: (err) => {

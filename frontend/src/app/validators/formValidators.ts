@@ -51,6 +51,11 @@ export function passwordMatchValidator (group:AbstractControl):ValidationErrors 
     return password === confirmPassword ? null : { passwordMismatch: true };
 }
 
+export function changePasswordMatchValidator (group:AbstractControl):ValidationErrors | null {
+  const password = group.get('newPassword')?.value;
+  const confirmPassword = group.get('confirmPassword')?.value;
+  return password === confirmPassword ? null : { passwordMismatch: true };
+}
 
 export function repeateCharacterValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
