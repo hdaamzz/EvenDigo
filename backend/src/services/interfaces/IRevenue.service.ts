@@ -31,4 +31,5 @@ export interface IFinanceService {
   getTransactionsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
   getRefundTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
   getRefundsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<ServiceResponse<any>>;
+  getTransactionsByUser(userId: string, page: number, limit: number): Promise<ServiceResponse<RevenueTransactions>>;
 }

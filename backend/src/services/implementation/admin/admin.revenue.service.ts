@@ -146,4 +146,28 @@ export class FinanceService implements IFinanceService {
     }
   }
 
+  async getTransactionsByUser(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<ServiceResponse<RevenueTransactions>> {
+    try {
+      const result = await this.financeRepository.findTransactionsByUser(
+        userId,
+        page,
+        limit
+      );
+  
+      return {
+        success: true,
+        message: "User transactions fetched successfully",
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch user transactions: ${(error as Error).message}`
+      };
+    }
+  }
 }

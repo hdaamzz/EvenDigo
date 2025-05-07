@@ -2,15 +2,18 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReusableTableComponent, TableColumn } from '../../../../shared/reusable-table/reusable-table.component';
-import { Subscription } from 'rxjs';
+import { catchError, of, Subscription, tap } from 'rxjs';
 import { FinanceService, RevenueStats, Transaction } from '../../../../core/services/admin/finance/finance.service';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DropdownModule } from 'primeng/dropdown'; // Import PrimeNG Dropdown
 import { Filter, StatCard } from '../../../../core/models/admin/finance.interfaces';
-
+import { AdminUsersService } from '../../../../core/services/admin/users/admin.users.service';
+import { User } from '../../../../core/models/userModel';
+import Notiflix from 'notiflix';
 
 @Component({
   selector: 'app-finance-booking',
-  imports: [CommonModule, FormsModule, ReusableTableComponent,DatePickerModule],
+  imports: [CommonModule, FormsModule, ReusableTableComponent, DatePickerModule, DropdownModule],
   templateUrl: './finance-booking.component.html',
   styleUrl: './finance-booking.component.css'
 })
@@ -56,6 +59,7 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   filters: Filter = {
     startDate: '',
     endDate: '',
+    userId: ''
   };
   
   selectedDateRange: string = 'This Month';
@@ -65,9 +69,16 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   endDateValue: Date | null = null;
   showCustomDateRange: boolean = false;
   
+  filterOptions: string[] = ['Date Range', 'User'];
+  selectedFilterOption: string = 'Date Range';
+  users: User[] = []; 
+  selectedUser: any = null;
+  
   private subscriptions: Subscription = new Subscription();
   
-  constructor(private financeService: FinanceService) {}
+  constructor(private financeService: FinanceService,
+    private userService:AdminUsersService
+  ) {}
 
   ngOnInit(): void {
     if (this.customStartDate) {
@@ -79,7 +90,7 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.initDateFilters();
     this.fetchRevenueStats();
     this.fetchRevenue();
-
+    this.fetchUsers(); 
   }
   
   ngOnDestroy(): void {
@@ -160,6 +171,23 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.subscriptions.add(sub);
   }
   
+  fetchUsers(): void {
+    this.userService.usersList().pipe(
+          tap((response) => {
+            if (response.success) {
+              this.users = response.data;
+            } else {
+              console.error('Failed to fetch users:', response.message);
+              Notiflix.Notify.failure(response.message);
+            }
+          }),
+          catchError((error) => {
+            console.error('Error fetching users:', error);
+            Notiflix.Notify.failure('Error fetching users');
+            return of(null);
+          })
+        ).subscribe();
+  }
 
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex + 1;
@@ -202,12 +230,24 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     
     this.applyFilters();
   }
+  
   onStartDateSelect(event: any): void {
     this.customStartDate = event.toISOString().split('T')[0];
   }
   
   onEndDateSelect(event: any): void {
     this.customEndDate = event.toISOString().split('T')[0];
+  }
+  
+  onFilterOptionChange(option: string): void {
+    this.selectedFilterOption = option;
+    this.resetFilters();
+  }
+  
+  onUserSelect(user: any): void {
+    this.selectedUser = user;
+    this.filters.userId = user ? user._id : '';
+    this.applyFilters();
   }
   
   applyCustomDateRange(): void {
@@ -220,7 +260,12 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   
   applyFilters(): void {
     this.currentPage = 1;
-    this.fetchFilteredRevenue();
+    
+    if (this.selectedFilterOption === 'User' && this.selectedUser) {
+      this.fetchTransactionsByUser();
+    } else {
+      this.fetchFilteredRevenue();
+    }
   }
   
   fetchFilteredRevenue(): void {
@@ -231,7 +276,7 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     
     const sub = this.financeService.getTransactionByDateRange(startDate, endDate).subscribe({
       next: (response) => {
-        console.log("date",response.data);
+        console.log("date", response.data);
         this.transactions = response.data.map((item: any) => {
           const ticketDetails = item.tickets.map((ticket: any) => 
             `${ticket.type} (${ticket.quantity}x)`
@@ -258,16 +303,58 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
     this.subscriptions.add(sub);
   }
   
+  fetchTransactionsByUser(): void {
+    this.loading = true;
+    console.log(this.filters.userId);
+    
+    if (!this.filters.userId) {
+      return;
+    }
+
+    const sub = this.financeService.getTransactionsByUser(this.filters.userId, this.currentPage, this.itemsPerPage).subscribe({
+      next: (response) => {
+        this.transactions = response.data.map((item: any) => {
+          const ticketDetails = item.tickets.map((ticket: any) => 
+            `${ticket.type} (${ticket.quantity}x)`
+          ).join(', ');          
+          return {
+            bookingId: item.bookingId,
+            date: new Date(item.createdAt).toLocaleDateString(),
+            ticketDetails: ticketDetails,
+            paymentType: item.paymentType,
+            amount: `${item.totalAmount.toFixed(2)}`,
+            rawData: item
+          };
+        });
+        
+        this.totalItems = response.totalItems || response.data.length;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching user transactions:', error);
+        this.loading = false;
+      }
+    });
+    
+    this.subscriptions.add(sub);
+  }
+  
   resetFilters(): void {
     this.filters = {
       startDate: '',
       endDate: '',
+      userId: ''
     };
     
     this.selectedDateRange = 'This Month';
     this.showCustomDateRange = false;
     this.searchTerm = '';
-    this.initDateFilters();
+    this.selectedUser = null;
+    
+    if (this.selectedFilterOption === 'Date Range') {
+      this.initDateFilters();
+    }
+    
     this.fetchRevenue();
   }
   

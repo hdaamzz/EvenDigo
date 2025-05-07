@@ -10,4 +10,5 @@ export interface IFinanceRepository {
     findRefundTransactions(page: number, limit: number, search?: string): Promise<any>;
     findRefundByTransactionId(transactionId: string): Promise<any>;
     findRefundsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<any>;
+    findTransactionsByUser(userId: string, page: number, limit: number): Promise<any>;
   }

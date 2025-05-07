@@ -86,9 +86,6 @@ export class FinanceService {
     return this.http.get(`${this.baseUrl}admin/dist/date-range`, { params, withCredentials: true });
   }
 
-
-
-
   //refund history
 
   getRefundTransactions(page: number = 1, limit: number = 5): Observable<any> {
@@ -111,8 +108,7 @@ export class FinanceService {
     return this.http.get(`${this.baseUrl}admin/finance/refunds/range`, { params, withCredentials: true });
   }
 
-
-// booking history
+  // booking history
 
   fetchRevenue(page: number = 1, limit: number = 10): Observable<any> {
     let params = new HttpParams()
@@ -134,4 +130,12 @@ export class FinanceService {
     return this.http.get(`${this.baseUrl}admin/finance/revenue/range`, { params, withCredentials: true });
   }
   
+  getTransactionsByUser(userId: string, page: number = 1, limit: number = 10): Observable<any> {
+    let params = new HttpParams()
+      .set('userId', userId)
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    
+    return this.http.get(`${this.baseUrl}admin/finance/revenue/user`, { params, withCredentials: true });
+  }
 }

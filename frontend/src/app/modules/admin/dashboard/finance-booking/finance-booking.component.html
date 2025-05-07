@@ -5,8 +5,6 @@
         <span class="bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Finance Dashboard</span>
         <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Bookings History</span>
       </h3>
-
-
     </div>
 
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -16,7 +14,7 @@
         </h2>
       </div>
 
-      <div class="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div *ngFor="let stat of statCards"
           class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="text-sm text-gray-500 mb-2">{{ stat.title }}</div>
@@ -33,83 +31,160 @@
       <div class="mb-6">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Transaction History</h2>
 
-        <div class="bg-gray-50 p-4 rounded-lg mb-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-              <select [(ngModel)]="selectedDateRange" (change)="onDateRangeChange(selectedDateRange)"
-                class="w-full px-3 py-2 border text-gray-800 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                <option *ngFor="let range of dateRangeOptions" [value]="range">{{ range }}</option>
-              </select>
+        <!-- Filter Type Selection -->
+        <!-- Enhanced Filter Section with improved design -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 mb-6">
+          <!-- Filter Header with Icon -->
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+            <div class="flex items-center space-x-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20"
+                fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                  clip-rule="evenodd" />
+              </svg>
+              <h3 class="text-lg font-semibold text-gray-800">Filter Transactions</h3>
             </div>
+            <span class="text-xs font-medium text-gray-500 bg-gray-50 rounded-full px-3 py-1 border border-gray-200">
+              Customize your view
+            </span>
+          </div>
 
-            <div *ngIf="showCustomDateRange" class="lg:col-span-2 grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                <p-datePicker [(ngModel)]="startDateValue" 
-                             [showIcon]="true"
-                             dateFormat="yy-mm-dd"
-                             [readonlyInput]="true"
-                             placeholder="Select Start Date"
-                             styleClass="w-full"
-                             (onSelect)="onStartDateSelect($event)"
-                             [inputStyleClass]="'w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500'">
-                </p-datePicker>
+          <!-- Filter Type Selection with improved buttons -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Filter By</label>
+            <div class="flex flex-wrap gap-2">
+              <button *ngFor="let option of filterOptions" (click)="onFilterOptionChange(option)" [ngClass]="selectedFilterOption === option ? 
+          'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md' : 
+          'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
+                class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center">
+                <span *ngIf="selectedFilterOption === option" class="mr-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </span>
+                {{ option }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Enhanced Date Range Filters -->
+          <div *ngIf="selectedFilterOption === 'Date Range'"
+            class="bg-gray-50 rounded-lg p-4 border border-gray-100 transition-all duration-300">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="md:col-span-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Date Range</label>
+                <div class="relative">
+                  <select [(ngModel)]="selectedDateRange" (change)="onDateRangeChange(selectedDateRange)"
+                    class="w-full px-3 py-2 appearance-none bg-white border text-gray-800 border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option *ngFor="let range of dateRangeOptions" [value]="range">{{ range }}</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                <p-datePicker [(ngModel)]="endDateValue" 
-                             [showIcon]="true"
-                             [minDate]="startDateValue"
-                             dateFormat="yy-mm-dd"
-                             [readonlyInput]="true"
-                             placeholder="Select End Date"
-                             styleClass="w-full"
-                             (onSelect)="onEndDateSelect($event)"
-                             [inputStyleClass]="'w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500'">
-                </p-datePicker>
+
+              <div *ngIf="showCustomDateRange" class="md:col-span-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Start Date</label>
+                    <div class="relative">
+                      <p-datePicker [(ngModel)]="startDateValue" [showIcon]="true" dateFormat="yy-mm-dd"
+                        [readonlyInput]="true" placeholder="Select Start Date" styleClass="w-full"
+                        (onSelect)="onStartDateSelect($event)"
+                        [inputStyleClass]="'w-full pl-3 pr-10 py-2 border text-gray-700 border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500'">
+                      </p-datePicker>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">End Date</label>
+                    <div class="relative">
+                      <p-datePicker [(ngModel)]="endDateValue" [showIcon]="true" [minDate]="startDateValue"
+                        dateFormat="yy-mm-dd" [readonlyInput]="true" placeholder="Select End Date" styleClass="w-full"
+                        (onSelect)="onEndDateSelect($event)"
+                        [inputStyleClass]="'w-full pl-3 pr-10 py-2 border text-gray-700 border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500'">
+                      </p-datePicker>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="flex justify-start mt-4 gap-2">
+          <!-- Enhanced User Filter -->
+          <div *ngIf="selectedFilterOption === 'User'"
+            class="bg-gray-50 rounded-lg p-4 border border-gray-100 transition-all duration-300">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Select User</label>
+                <div class="relative">
+                  <select [(ngModel)]="selectedUser" (change)="onUserSelect(selectedUser)"
+                    class="w-full px-3 py-2 appearance-none bg-white border text-gray-800 border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option [ngValue]="null">-- Select User --</option>
+                    <option *ngFor="let user of users" [ngValue]="user">{{ user.name }}</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Action Buttons -->
+          <div class="flex flex-wrap justify-start mt-5 gap-3">
             <button *ngIf="showCustomDateRange" (click)="applyCustomDateRange()"
-              class="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors">
-              Apply Date Range
+              class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-md text-sm font-medium hover:shadow-md transition-all duration-200 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+              Apply Filters
             </button>
             <button (click)="resetFilters()"
-              class="px-4 py-2 bg-red-500 border border-gray-300 rounded-md text-sm hover:bg-red-600 transition-colors">
+              class="px-4 py-2 bg-white text-red-500 border border-red-200 rounded-md text-sm font-medium hover:bg-red-50 transition-all duration-200 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
+              Reset Filters
+            </button>
+          </div>
+        </div>
+        <div *ngIf="loading" class="flex justify-center items-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+
+        <app-reusable-table *ngIf="!loading" [columns]="tableColumns" [data]="transactions" [pageSize]="itemsPerPage"
+          [totalItems]="totalItems" [currentPage]="currentPage" [showSearch]="true" searchPlaceholder="Search..."
+          (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
+          (rowClick)="viewBookingDetails($event)">
+        </app-reusable-table>
+
+        <div *ngIf="!loading && transactions.length === 0" class="text-center py-8">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No transactions found</h3>
+          <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter parameters.</p>
+          <div class="mt-6">
+            <button (click)="resetFilters()"
+              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
               Reset Filters
             </button>
           </div>
         </div>
       </div>
-
-      <div *ngIf="loading" class="flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-      </div>
-
-      <app-reusable-table *ngIf="!loading" [columns]="tableColumns" [data]="transactions" [pageSize]="itemsPerPage"
-        [totalItems]="totalItems" [currentPage]="currentPage" [showSearch]="true" searchPlaceholder="Search..."
-        (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
-        (rowClick)="viewBookingDetails($event)">
-      </app-reusable-table>
-
-      <div *ngIf="!loading && transactions.length === 0" class="text-center py-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No transactions found</h3>
-        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter parameters.</p>
-        <div class="mt-6">
-          <button (click)="resetFilters()"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-            Reset Filters
-          </button>
-        </div>
-      </div>
     </div>
   </div>
-</div>

@@ -8,6 +8,7 @@ export interface StatCard {
  export interface Filter {
     startDate: string;
     endDate: string;
+    userId?:string;
   }
 
   export interface StatCard {

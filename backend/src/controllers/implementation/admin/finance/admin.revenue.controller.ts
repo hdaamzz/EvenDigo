@@ -167,4 +167,41 @@ export class FinanceController implements IFinanceController {
       });
     }
   }
+
+  async getTransactionsByUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.query.userId as string;
+      
+      if (!userId) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "User ID is required"
+        });
+        return;
+      }
+      
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const response = await this.financeService.getTransactionsByUser(
+        userId,
+        page,
+        limit
+      );
+  
+      if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+      } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: response.message
+        });
+      }
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to fetch user transactions"
+      });
+    }
+  }
 }

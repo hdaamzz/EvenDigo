@@ -12,5 +12,7 @@ financeRouter.get('/revenue/range', (req, res) => financeController.getTransacti
 financeRouter.get('/refunds', (req, res) => financeController.getRefundTransactions(req, res));
 financeRouter.get('/refunds/range', (req, res) => financeController.getRefundsByDateRange(req, res));
 financeRouter.use('/distribution', revenueDistributionRouter);
+financeRouter.get('/revenue/user', (req, res) => financeController.getTransactionsByUser(req, res));
+
 
 export default financeRouter;

@@ -378,4 +378,40 @@ export class FinanceRepository implements IFinanceRepository {
       throw new Error(`Error finding refunds by date range: ${(error as Error).message}`);
     }
   }
+  async findTransactionsByUser(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<any> {
+    try {
+      const searchQuery = {
+        userId: userId,
+        paymentStatus: "Completed"
+      };
+  
+      const skip = (page - 1) * limit;
+  
+      const totalItems = await this.bookingModel.countDocuments(searchQuery);
+  
+      const bookings = await this.bookingModel.find(searchQuery)
+        .populate('eventId', 'eventTitle user_id')
+        .populate('eventId.user_id', 'name')
+        .populate('userId', 'name')
+        .populate('tickets')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+  
+      const totalPages = Math.ceil(totalItems / limit);
+  
+      return {
+        data: bookings,
+        totalItems,
+        currentPage: page,
+        totalPages
+      };
+    } catch (error) {
+      throw new Error(`Error finding user transactions: ${(error as Error).message}`);
+    }
+  }
 }
