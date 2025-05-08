@@ -1,0 +1,58 @@
+
+<app-user-nav></app-user-nav>
+<div class="bg-[#1E1E1E] text-white p-8 pt-20">
+    <div class="max-w-7xl mx-auto mb-8 bg-green-500 p-5 rounded-xl text-center">
+      <h1 class="text-2xl mb-2 font-semibold">Subscription Confirmed!</h1>
+      <p>Your {{ subscription?.type | titlecase }} subscription has been confirmed. Subscription ID: #{{ subscription?.subscriptionId }}</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="md:col-span-3">
+        <div class="bg-[#121212] rounded-xl p-6 mb-5">
+          <h2 class="text-xl mb-5 text-green-500 flex items-center gap-2">
+            <i class="fas fa-info-circle"></i>
+            Subscription Information
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-5">
+            <div class="bg-[#1E1E1E] p-4 rounded-lg">
+              <h3 class="text-gray-300 text-sm mb-1">Subscription Type</h3>
+              <p class="text-base">{{ subscription?.type | titlecase }}</p>
+            </div>
+            <div class="bg-[#1E1E1E] p-4 rounded-lg">
+              <h3 class="text-gray-300 text-sm mb-1">Start Date</h3>
+              <p class="text-base">{{ subscription?.startDate | date:'MMMM d, yyyy' }}</p>
+            </div>
+            <div class="bg-[#1E1E1E] p-4 rounded-lg">
+              <h3 class="text-gray-300 text-sm mb-1">End Date</h3>
+              <p class="text-base">{{ subscription?.endDate | date:'MMMM d, yyyy' }}</p>
+            </div>
+            <div class="bg-[#1E1E1E] p-4 rounded-lg">
+              <h3 class="text-gray-300 text-sm mb-1">Amount</h3>
+              <p class="text-base">₹{{ subscription?.amount }}</p>
+            </div>
+            <div class="bg-[#1E1E1E] p-4 rounded-lg">
+              <h3 class="text-gray-300 text-sm mb-1">Payment Method</h3>
+              <p class="text-base">{{ subscription?.paymentMethod | titlecase }}</p>
+            </div>
+            <div class="bg-[#1E1E1E] p-4 rounded-lg">
+              <h3 class="text-gray-300 text-sm mb-1">Status</h3>
+              <p [ngClass]="subscription?.status === 'active' ? 'text-green-500' : subscription?.status === 'cancelled' ? 'text-red-500' : 'text-yellow-500'" class="text-base font-medium">
+                {{ subscription?.status | titlecase }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center text-gray-300 mt-5">
+          <p>Need help with your subscription?</p>
+          <div class="flex justify-center gap-5 mt-4">
+            <a href="#" class="text-green-500 hover:underline">Contact Support</a>
+            <a href="#" class="text-green-500 hover:underline">FAQs</a>
+            <a href="#" class="text-green-500 hover:underline">Subscription Policy</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-user-footer></app-user-footer>

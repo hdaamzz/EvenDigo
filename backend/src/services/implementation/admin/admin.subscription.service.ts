@@ -118,7 +118,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
         return null;
       }
       
-      // Enhance with user info
       const enhancedSubscriptions = await this.enhanceSubscriptionsWithUserInfo([subscription]);
       return enhancedSubscriptions[0];
     } catch (error) {
@@ -126,6 +125,30 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
       throw new Error(`Failed to get subscription: ${(error as Error).message}`);
     }
   }
+
+
+  async getSubscriptionBySessionId(sessionId: string): Promise<ISubscription | null> {
+    try {
+      let subscription: ISubscription | null;
+      
+      if (sessionId.includes('ObjectId')) {
+        subscription = await this.subscriptionRepository.findSubscriptionByStripeSessionId(sessionId);
+      } else {
+        subscription = await this.subscriptionRepository.findSubscriptionByStripeSessionId(sessionId);
+      }
+      
+      if (!subscription) {
+        return null;
+      }
+
+      return subscription
+    } catch (error) {
+      console.error('Error getting subscription by ID:', error);
+      throw new Error(`Failed to get subscription: ${(error as Error).message}`);
+    }
+  }
+
+
 
   async getUserSubscriptions(userId: Schema.Types.ObjectId | string): Promise<ISubscription[]> {
     try {

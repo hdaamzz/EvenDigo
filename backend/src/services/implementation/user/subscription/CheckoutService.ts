@@ -52,7 +52,7 @@ export class CheckoutService implements ICheckoutService {
           },
         ],
         mode: 'subscription',
-        success_url: `${process.env.CLIENT_SERVER}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.CLIENT_SERVER}/premium/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.CLIENT_SERVER}/subscription/cancel`,
         metadata: {
           paymentType: 'subscription',

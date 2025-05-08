@@ -6,6 +6,8 @@ import { IWalletSubscriptionService } from '../../../../../src/services/interfac
 import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
 import { BadRequestException } from '../../../../../src/error/error-handlers';
 import { ResponseHandler } from '../../../../../src/utils/response-handler';
+import StatusCode from '../../../../../src/types/statuscode';
+import { IAdminSubscriptionService } from '../../../../../src/services/interfaces/IAdminSubscription.service';
 
 
 @injectable()
@@ -13,7 +15,8 @@ export class SubscriptionController implements ISubscriptionController {
   constructor(
     @inject("CheckoutService") private checkoutService: ICheckoutService,
     @inject("WalletSubscriptionService") private walletSubscriptionService: IWalletSubscriptionService,
-    @inject("SubscriptionQueryService") private subscriptionQueryService: ISubscriptionQueryService
+    @inject("SubscriptionQueryService") private subscriptionQueryService: ISubscriptionQueryService,
+    @inject("AdminSubscriptionService") private adminSubscriptionService: IAdminSubscriptionService
   ) {}
 
   createCheckout = async (req: Request, res: Response): Promise<void> => {
@@ -125,6 +128,43 @@ export class SubscriptionController implements ISubscriptionController {
       }
     }
   };
+  
+  getSubscriptionDetails = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { sessionId } = req.params;
+      
+      if (!sessionId) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          error: 'Subscription ID is required'
+        });
+        return;
+      }
+      console.log(sessionId);
+      
+      const subscription = await this.adminSubscriptionService.getSubscriptionBySessionId(sessionId);
+      
+      if (!subscription) {
+        res.status(StatusCode.NOT_FOUND).json({
+          success: false,
+          error: 'Subscription not found'
+        });
+        return;
+      }
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: subscription
+      });
+    } catch (error) {
+      console.error('Error fetching subscription details:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch subscription details'
+      });
+    }
+  };
+
 
   handleStripeWebhook = async (req: Request, res: Response): Promise<void> => {
     const signature = req.headers['stripe-signature'] as string;

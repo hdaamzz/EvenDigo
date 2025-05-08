@@ -19,6 +19,7 @@ import { ProfileBookingsComponent } from './modules/user/profile/profile.booking
 import { EventEditComponent } from './modules/user/profile/profile.events/event-edit/event-edit.component';
 import { PremiumCheckoutComponent } from './modules/user/premium-checkout/premium-checkout.component';
 import { ProfileSubscriptionComponent } from './modules/user/profile/profile.subscription/profile.subscription.component';
+import { SubscriptionConfirmationComponent } from './modules/user/premium-checkout/subscription-confirmation/subscription-confirmation.component';
 
 export const routes: Routes = [
     //user - side 
@@ -103,6 +104,11 @@ export const routes: Routes = [
     {
         path: 'premium/checkout',
         component: PremiumCheckoutComponent,
+        canActivate: [isLogged]
+    },
+    {
+        path: 'premium/success',
+        component: SubscriptionConfirmationComponent,
         canActivate: [isLogged]
     },
 

@@ -42,4 +42,5 @@ export interface IAdminSubscriptionService {
   updateSubscriptionStatus(id: string, isActive: boolean): Promise<ISubscription | null>;
   deleteSubscription(id: string): Promise<boolean>;
   getFilterOptions(): Promise<SubscriptionFilterOptions>;
+  getSubscriptionBySessionId(sessionId: string): Promise<ISubscription | null>
 }
