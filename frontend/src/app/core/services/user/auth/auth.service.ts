@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of } from 'rxjs';
+import { catchError, delay, Observable, of } from 'rxjs';
 import { ILogin, IRegister, User } from '../../../models/userModel';
 import { environment } from '../../../../environments/environment';
 import { CommonResponse } from '../../../models/user.auth.interface';
+import { SubscriptionPlan } from '../../admin/subscription-plan/subscription-plan.service';
+import { ApiResponse } from '../subscription/premium.service';
 
 @Injectable({
   providedIn: 'root'
@@ -80,6 +82,16 @@ export class AuthService {
       })
     );
   }
+  getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
+      
+      return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.baseUrl}user/auth/plans`).pipe(
+        delay(700),
+        catchError(error => {
+          console.error('Logout error:', error);
+        return of({ success: false, message: 'fetch subscription plans' });
+        })
+      );
+    }
 
 
 }

@@ -13,6 +13,7 @@ import financeRouter from './admin/revenue.routes';
 import distributionRouter from './admin/distribution.revenue.routes';
 import subscriptionRoutes from './user/subscription.routes';
 import adminSubscriptionRoutes from './admin/subscription.routes';
+import subscriptionPlanRouter from './admin/subscriptionPlan.route';
 
 
 const router = express.Router();
@@ -40,6 +41,8 @@ router.use('/admin/achievements', achievementRouter);
 router.use('/admin/finance', financeRouter);
 router.use('/admin/dist',distributionRouter);
 router.use('/admin/subscriptions', adminSubscriptionRoutes);
+router.use('/admin/subscription-plans', subscriptionPlanRouter);
+
 
 
 

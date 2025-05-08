@@ -63,6 +63,8 @@
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fas fa-trophy w-5 text-center"></i> Achievements
         </div>
+
+        <!-- Finance Dropdown -->
         <div class="relative">
             <div [ngClass]="{'bg-green-500 text-white': finance}" (click)="toggleFinanceDropdown()"
                 class="nav-item flex items-center justify-between p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all cursor-pointer">
@@ -95,11 +97,35 @@
             </div>
         </div>
 
-        <div [ngClass]="{'bg-green-500 text-white': subscription}"
-            (click)="showSubscriptionList(); closeSidebarOnMobile()"
-            class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
-            <i class="fas fa-credit-card w-5 text-center"></i> Subscriptions
+        <!-- Subscription Dropdown -->
+        <div class="relative">
+            <div [ngClass]="{'bg-green-500 text-white': subscription}" (click)="toggleSubscriptionDropdown()"
+                class="nav-item flex items-center justify-between p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all cursor-pointer">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-credit-card w-5 text-center"></i> Subscriptions
+                </div>
+                <i class="fas fa-chevron-down transition-transform duration-300"
+                    [ngClass]="{'transform rotate-180': subscriptionDropdownOpen}"></i>
+            </div>
+
+            <div class="overflow-hidden transition-all duration-300 max-h-0"
+                [ngClass]="{'max-h-48': subscriptionDropdownOpen}">
+                <div class="pl-8 space-y-1 mt-1">
+                    
+                    <div [ngClass]="{'bg-green-100 text-green-600': subscription && subscriptionSection === 'plans'}"
+                        (click)="navigateToSubscriptionSection('plans'); closeSidebarOnMobile()"
+                        class="flex items-center gap-2 p-2 rounded-lg text-gray-600 hover:bg-green-100 hover:text-green-600 transition-all">
+                        <i class="fas fa-file-alt w-5 text-center"></i> Plans
+                    </div>
+                    <div [ngClass]="{'bg-green-100 text-green-600': subscription && subscriptionSection === 'management'}"
+                        (click)="navigateToSubscriptionSection('management'); closeSidebarOnMobile()"
+                        class="flex items-center gap-2 p-2 rounded-lg text-gray-600 hover:bg-green-100 hover:text-green-600 transition-all">
+                        <i class="fas fa-cogs w-5 text-center"></i> Management
+                    </div>
+                </div>
+            </div>
         </div>
+
         <div (click)="logout()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fa-solid fa-cog w-5 text-center"></i> Logout
@@ -129,9 +155,10 @@
         <app-finance-refund></app-finance-refund>
         }@else if(finance && financeSection=='bookings'){
         <app-finance-booking></app-finance-booking>
-        }@else if(subscription){
+        }@else if(subscription && subscriptionSection=='management'){
         <app-subscription></app-subscription>
+        }@else if(subscription && subscriptionSection=='plans'){
+            <app-subscription-plans></app-subscription-plans>
         }
-
     </div>
 </div>

@@ -1,0 +1,116 @@
+<div class="p-2 md:p-5 relative z-1">
+    <div class="subscription-plans-container bg-white  rounded-2xl">
+        <div class="header-section">
+            <div class="mb-6">
+                <h2
+                    class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
+                    <span
+                        class="gradient-text bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Subscription</span>
+                    <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Plans</span>
+                </h2>
+            </div>
+        </div>
+
+        <div class="loading-indicator" *ngIf="loading">
+            <p-progressSpinner [style]="{width: '50px', height: '50px'}"></p-progressSpinner>
+            <span>Loading...</span>
+        </div>
+
+        <div class="plans-grid" *ngIf="!loading">
+            <div class="plan-card" *ngFor="let plan of plans">
+                <p-card [styleClass]="plan.isPopular ? 'popular-plan' : ''">
+                    <ng-template pTemplate="header">
+                        <div class="plan-header" [ngClass]="{'premium-plan': plan.type === 'premium'}">
+                            <div class="plan-title">
+                                <h2>{{ plan.type === 'basic' ? 'Basic' : 'Premium' }}</h2>
+                                <p-tag *ngIf="plan.isPopular" severity="success" value="POPULAR"></p-tag>
+                            </div>
+                            <div class="plan-price">
+                                <span class="price-value">₹{{ plan.price }}</span>
+                                <span class="price-period">/mo</span>
+                            </div>
+                            <p class="plan-description">{{ plan.description }}</p>
+                        </div>
+                    </ng-template>
+
+                    <div class="plan-features">
+                        <ul>
+                            <li *ngFor="let feature of plan.features">
+                                <i class="pi pi-check-circle" style="color: #22c55e"></i>
+                                <span>{{ feature }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <ng-template pTemplate="footer">
+                        <div class="plan-actions">
+                            <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-info"
+                                (click)="openDialog(plan)" pTooltip="Edit plan"></p-button>
+                        </div>
+                    </ng-template>
+                </p-card>
+            </div>
+        </div>
+
+        <!-- Empty state when no plans exist -->
+        <div class="empty-state" *ngIf="!loading && plans?.length === 0">
+            <i class="pi pi-file-excel" style="font-size: 3rem"></i>
+            <h3 class="text-green-600">No subscription plans found</h3>
+        </div>
+
+        <p-dialog [(visible)]="showDialog" [header]="dialogTitle" [modal]="true"
+            [style]="{width: '90%', maxWidth: '650px'}" [draggable]="false" [resizable]="false">
+
+            <form [formGroup]="planForm" (ngSubmit)="savePlan()">
+                <div class="form-section">
+                    <label class="form-label" for="price">Price (₹)</label>
+                    <p-inputNumber id="price" formControlName="price" [showButtons]="true" buttonLayout="horizontal"
+                        spinnerMode="horizontal" [min]="0" [step]="50" decrementButtonClass="p-button-danger"
+                        incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
+                        decrementButtonIcon="pi pi-minus" [style]="{width: '100%'}">
+                    </p-inputNumber>
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label" for="description">Description</label>
+                    <input pInputText type="text" formControlName="description" id="description"
+                        [style]="{width: '100%'}" placeholder="Describe your plan">
+                </div>
+                <div class="form-section">
+                    <div class="p-field-checkbox">
+                        <p-checkbox formControlName="isPopular" [binary]="true" inputId="isPopular"></p-checkbox>
+                        <label for="isPopular">Mark as Popular</label>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Features</label>
+                    <div class="features-grid">
+                        <div class="p-field-checkbox" *ngFor="let feature of availableFeatures">
+                            <p-checkbox [binary]="true" [(ngModel)]="feature.selected"
+                                [ngModelOptions]="{standalone: true}" [inputId]="feature.id">
+                            </p-checkbox>
+                            <label [for]="feature.id">{{ feature.name }}</label>
+                        </div>
+                    </div>
+
+                    <div class="custom-feature-section">
+                        <div class="p-inputgroup">
+                            <input pInputText type="text" [(ngModel)]="newFeatureName"
+                                [ngModelOptions]="{standalone: true}" placeholder="Add custom feature">
+                            <button pButton type="button" icon="pi pi-plus" class="p-button-success"
+                                (click)="addCustomFeature()">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <ng-template pTemplate="footer">
+                <p-button label="Cancel" icon="pi pi-times" styleClass="p-button-text"
+                    (click)="closeDialog()"></p-button>
+                <p-button label="Save" icon="pi pi-check" [disabled]="planForm.invalid" (click)="savePlan()"></p-button>
+            </ng-template>
+        </p-dialog>
+
+    </div>
+</div>

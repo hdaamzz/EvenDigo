@@ -24,7 +24,7 @@ import { RevenueDistributionRepository } from "../../src/repositories/implementa
 import { RevenueDistributionService } from "../../src/services/implementation/admin/distribution.service";
 import { RevenueDistributionCronService } from "../../src/services/implementation/cronjob/revenue.distribution";
 import { EventModel } from "../../src/models/EventModel";
-import { Logger } from "../../src/utils/logger";
+// import { Logger } from "../../src/utils/logger";
 import { UserAchievementRepository } from "../../src/repositories/implementation/badge.repository";
 import { UserAchievementService } from "../../src/services/implementation/user/achievements/achivements.service";
 import { SubscriptionController } from "../../src/controllers/implementation/user/premium/subscription.controller";
@@ -64,6 +64,9 @@ import { EmailService } from "../../src/services/implementation/user/auth/EmailS
 import { FirebaseAuthService } from "../../src/services/implementation/user/auth/FirebaseAuthService";
 import { AuthService } from "../../src/services/implementation/user/auth/Auth.service";
 import { TokenService } from "../../src/services/implementation/user/auth/TokenService";
+import { SubscriptionPlanRepository } from "../../src/repositories/implementation/subscriptionPlan.repository";
+import { SubscriptionPlanService } from "../../src/services/implementation/admin/SubscriptionPlan.service";
+import { SubscriptionPlanController } from "../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
 
 
 
@@ -79,7 +82,7 @@ container.register("FinanceRepository", { useClass: FinanceRepository });
 container.register("RevenueDistributionRepository", { useClass: RevenueDistributionRepository });
 container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
 container.register("SubscriptionRepository", { useClass: SubscriptionRepository });
-
+container.register('SubscriptionPlanRepository',{useClass:SubscriptionPlanRepository});
 
 
 
@@ -128,6 +131,8 @@ container.register("FinanceService", { useClass: FinanceService });
 container.register("RevenueDistributionService", { useClass: RevenueDistributionService });
 container.register("RevenueDistributionCronService", { useClass: RevenueDistributionCronService });
 container.register("AdminSubscriptionService", { useClass: AdminSubscriptionService });
+container.register("SubscriptionPlanService", { useClass: SubscriptionPlanService });
+
 
 
 
@@ -142,6 +147,8 @@ container.register("ProfileBookingController", { useClass: ProfileBookingControl
 container.register("ProfileEventsController", { useClass: ProfileEventsController });
 container.register("ProfileWalletController", { useClass: ProfileWalletController });
 container.register("ProfileUserController", { useClass: ProfileUserController });
+container.register("SubscriptionPlanController", { useClass: SubscriptionPlanController });
+
 
 
 
@@ -166,7 +173,7 @@ container.register("EventModel", { useValue: EventModel });
 container.register("SubscriptionModel", { useValue: SubscriptionModel });
 
 
-container.register("Logger", { useClass: Logger });
+// container.register("Logger", { useClass: Logger });
 
 
 

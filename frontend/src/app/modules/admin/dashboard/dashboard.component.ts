@@ -12,16 +12,32 @@ import { FinanceRevenueComponent } from './finance-revenue/finance-revenue.compo
 import { SubscriptionComponent } from './subscription/subscription.component';
 import { FinanceRefundComponent } from "./finance-refund/finance-refund.component";
 import { FinanceBookingComponent } from "./finance-booking/finance-booking.component";
+import { SubscriptionPlansComponent } from "./subscription-plans/subscription-plans.component";
+
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DashboardHomeComponent, UsersListComponent, CommonModule, EventsListComponent, CouponListComponent, AchievementsComponent, FinanceRevenueComponent, SubscriptionComponent, FinanceRefundComponent, FinanceBookingComponent],
+  imports: [
+    DashboardHomeComponent,
+    UsersListComponent,
+    CommonModule,
+    EventsListComponent,
+    CouponListComponent,
+    AchievementsComponent,
+    FinanceRevenueComponent,
+    SubscriptionComponent,
+    FinanceRefundComponent,
+    FinanceBookingComponent,
+    SubscriptionPlansComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
   financeDropdownOpen: boolean = false;
-  financeSection: 'revenue' | 'refunds' | 'bookings' | null = null;
+  subscriptionDropdownOpen: boolean = false;
+  financeSection: 'revenue' | 'refunds' | 'bookings' |  null = null;
+  subscriptionSection: 'management' | 'plans' | null = null;
   activeView: 'dashboard' | 'users' | 'events' | 'coupons' | 'achievements' | 'finance' | 'subscription'= 'dashboard';
   sidebarOpen: boolean = false;
   
@@ -78,6 +94,7 @@ export class DashboardComponent implements OnInit {
   showAchievements(): void {
     this.navigateTo('achievements');
   }
+
   toggleFinanceDropdown(): void {
     this.financeDropdownOpen = !this.financeDropdownOpen;
   }
@@ -87,10 +104,21 @@ export class DashboardComponent implements OnInit {
     this.financeSection = section;
   }
 
-  showSubscriptionList(): void {
-    this.navigateTo('subscription');
+  toggleSubscriptionDropdown(): void {
+    this.subscriptionDropdownOpen = !this.subscriptionDropdownOpen;
   }
 
+  navigateToSubscriptionSection(section:'management' | 'plans'): void {
+    this.navigateTo('subscription');
+    this.subscriptionSection = section;
+  }
+
+  showSubscriptionList(): void {
+    this.navigateTo('subscription');
+    if (!this.subscriptionSection) {
+      this.subscriptionSection = 'management';
+    }
+  }
   logout(): void {
     this.store.dispatch(AuthActions.logout());
     Notiflix.Notify.success('Admin Logout Successfully');
