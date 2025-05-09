@@ -19,7 +19,7 @@ export class WalletSubscriptionService implements IWalletSubscriptionService {
     try {
       const existingSubscription = await this.subscriptionRepository.findActiveSubscriptionByUserId(userId);
       if (existingSubscription) {
-        throw new ConflictException('User already has an active subscription');
+        throw new ConflictException('You already has an active subscription');
       }
 
       const wallet = await this.walletRepository.findWalletById(userId);

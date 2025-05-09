@@ -24,7 +24,7 @@ export class CheckoutService implements ICheckoutService {
       const existingSubscription = await this.subscriptionRepository.findActiveSubscriptionByUserId(userId);
       
       if (existingSubscription) {
-        throw new ConflictException('User already has an active subscription');
+        throw new ConflictException('You already has an active subscription');
       }
 
       const subscriptionId = this.generateSubscriptionId();

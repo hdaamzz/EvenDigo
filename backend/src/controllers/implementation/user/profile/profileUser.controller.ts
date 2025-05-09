@@ -60,6 +60,7 @@ export class ProfileUserController implements IProfileUserController {
     try {
       
       const userId=req.user._id;
+      
       if (!userId) {
         return ResponseHandler.error(res, null, "User ID is required", 400);
       }

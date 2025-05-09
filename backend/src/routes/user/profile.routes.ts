@@ -22,7 +22,7 @@ const profileRouter = Router();
 //user details
 profileRouter.get('/user-details', (req, res) => profileUserController.fetchUserById(req, res));
 profileRouter.post('/update',(req,res)=>profileUserController.updateUserDetails(req,res));
-profileRouter.post('/verification-request',(req,res)=>profileUserController.sendVerificationRequest(req,res));
+profileRouter.post('/verification-request',authMiddleware,(req,res)=>profileUserController.sendVerificationRequest(req,res));
 profileRouter.get('/verification-request',(req,res)=>profileUserController.verificationRequestDetails(req,res));
 profileRouter.post('/image',authMiddleware,upload.single('profileImage'),(req, res) => profileUserController.uploadProfileImage(req as FileRequest, res));
 profileRouter.get('/badge',(req,res)=>profileUserController.fetchUserBadges(req,res))

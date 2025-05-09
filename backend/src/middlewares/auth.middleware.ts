@@ -95,7 +95,6 @@ declare global {
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
   try {
-    // Get token from header
     const token = req.cookies.session;
     
     if (!token) {

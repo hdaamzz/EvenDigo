@@ -56,9 +56,9 @@ export class UserProfileService {
   }
 
   verificationRequest():Observable<VerificationRequestResponse>{
-    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{
-      withCredentials: true,
-    }).pipe(
+    console.log("helll");
+    
+    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{},{withCredentials:true}).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
         return throwError(() => new Error('Failed to fetch user details'));
