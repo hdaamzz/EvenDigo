@@ -69,7 +69,8 @@ export class SubscriptionController implements ISubscriptionController {
           endDate: subscription.endDate,
           isActive: subscription.isActive,
           paymentMethod: subscription.paymentMethod,
-          userId: subscription.userId
+          userId: subscription.userId,
+          stripeSessionId:subscription.stripeSessionId
         }, 
         'Subscription activated successfully'
       );

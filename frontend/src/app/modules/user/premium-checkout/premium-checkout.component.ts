@@ -130,12 +130,12 @@ export class PremiumCheckoutComponent implements OnInit {
     };
     
     const response = await firstValueFrom(this.premiumService.processWalletUpgrade(payload));
+    console.log(response);
     
     if (response.success) {
-      this.router.navigate(['/payment/success'], { 
+      this.router.navigate(['/premium/success'], { 
         queryParams: { 
-          subscription_id: response.data?.subscriptionId,
-          plan: 'premium'
+          session_id: response.data?.stripeSessionId
         }
       });
       Notiflix.Notify.success('Premium plan activated successfully!');

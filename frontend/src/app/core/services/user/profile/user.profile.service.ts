@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { catchError, delay, Observable, of, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-
-import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { User, VerificationRequestResponse } from '../../../models/userModel';
 import { UpdateProfileResponse } from '../../../models/profile.interfaces';
@@ -56,8 +54,6 @@ export class UserProfileService {
   }
 
   verificationRequest():Observable<VerificationRequestResponse>{
-    console.log("helll");
-    
     return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{},{withCredentials:true}).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);

@@ -146,3 +146,13 @@ export async function generateQrCode(data: string): Promise<string> {
     throw new Error(`Failed to generate QR code: ${(error as Error).message}`);
   }
 }
+
+export function generateRandomId(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 30; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    result += chars[randomIndex];
+  }
+  return result;
+}

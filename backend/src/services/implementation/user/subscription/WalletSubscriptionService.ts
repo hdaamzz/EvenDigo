@@ -6,6 +6,7 @@ import { ISubscriptionRepository } from '../../../../../src/repositories/interfa
 import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
 import { IWalletSubscriptionService } from '../../../../../src/services/interfaces/user/subscription/IWalletSubscription.service';
 import { inject, injectable } from 'tsyringe';
+import { generateRandomId } from '../../../../../src/utils/helpers';
 
 
 @injectable()
@@ -32,6 +33,7 @@ export class WalletSubscriptionService implements IWalletSubscriptionService {
       }
 
       const subscriptionId = this.generateSubscriptionId();
+      const sessionId=generateRandomId()
       
       const startDate = new Date();
       const endDate = new Date();
@@ -46,7 +48,8 @@ export class WalletSubscriptionService implements IWalletSubscriptionService {
         startDate,
         endDate,
         isActive: true,
-        paymentMethod: 'wallet'
+        paymentMethod: 'wallet',
+        stripeSessionId:sessionId
       });
 
       await this.recordWalletTransaction(userId, payload.amount, subscriptionId, payload.planType);

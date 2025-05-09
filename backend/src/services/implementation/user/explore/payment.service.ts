@@ -8,6 +8,7 @@ import { IBookingService } from '../../../../../src/services/interfaces/user/exp
 import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
 import { BadRequestException } from '../../../../../src/error/error-handlers';
 import { IWallet, TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
+import { generateRandomId } from '../../../../../src/utils/helpers';
 
 
 @injectable()
@@ -105,6 +106,7 @@ export class PaymentService implements IPaymentService {
       
       const generatedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
       const ticketDetails = await this.bookingService.prepareTicketDetails(eventId, tickets, generatedBookingId);
+      const sessionId = generateRandomId()
       
       const booking = await this.bookingRepository.createBooking({
         bookingId: generatedBookingId,
@@ -115,7 +117,8 @@ export class PaymentService implements IPaymentService {
         paymentType: 'wallet',
         discount,
         coupon: couponCode,
-        paymentStatus: 'Completed'
+        paymentStatus: 'Completed',
+        stripeSessionId:sessionId
       });
 
       await this.walletRepository.addTransaction(

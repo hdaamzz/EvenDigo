@@ -227,7 +227,7 @@ export class UserCheckoutComponent implements OnInit {
               // Navigate to success page with booking data
               this.router.navigate(['/payment/success'], { 
                 queryParams: { 
-                  booking_id: response.data.bookingId 
+                  session_id: response.data.stripeSessionId 
                 }
               });
               Notiflix.Notify.success('Payment successful! Your booking is confirmed.');
