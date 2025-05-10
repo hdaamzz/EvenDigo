@@ -232,8 +232,7 @@
                     @for (achievement of filteredAchievementsList; track achievement._id) {
                         <app-admin-card [statusBadge]="getAchievementStatusBadge(achievement)"
                             [menuItems]="getAchievementMenuItems(achievement)"
-                            (cardClick)="showAchievementDetails(achievement._id)">
-
+                            (cardClick)="showAchievementDetails(achievement._id ?? '')">
                             <div card-header class="flex items-center justify-between mb-1">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-full mr-3">
@@ -248,7 +247,7 @@
 
                             <div card-body>
                                 <p class="text-sm text-gray-700 mb-3">{{ achievement.description | slice:0:80 }}{{
-                                    achievement.description?.length > 80 ? '...' : '' }}</p>
+                                    achievement.description && achievement.description.length > 80 ? '...' : '' }}</p>
 
                                 <div class="grid grid-cols-2 gap-2">
                                     <div class="text-sm">
@@ -263,7 +262,7 @@
                             </div>
 
                             <div card-actions>
-                                <p-button (click)="editAchievement(achievement._id)" icon="fas fa-edit"
+                                <p-button (click)="editAchievement(achievement._id ?? '')" icon="fas fa-edit"
                                     styleClass="p-button-sm p-button-outlined p-button-info" pTooltip="Edit Achievement">
                                 </p-button>
                             </div>
@@ -337,7 +336,7 @@
                     </div>
 
                     <div class="flex justify-end space-x-2 pt-4 border-t border-gray-100">
-                        <p-button (click)="editAchievement(selectedAchievement._id)" label="Edit" icon="fas fa-edit"
+                        <p-button (click)="editAchievement(selectedAchievement._id ?? '')" label="Edit" icon="fas fa-edit"
                             styleClass="p-button-outlined p-button-info"></p-button>
 
                         <p-button (click)="hideAchievementDialog()" label="Close" severity="secondary"></p-button>

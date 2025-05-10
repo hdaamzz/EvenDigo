@@ -4,40 +4,104 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AchievementResponse, IAchievement } from '../../../models/admin/achievements.interface';
 
+/**
+ * Service for managing achievement data through admin API endpoints
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class AdminAchievementService {
+  private readonly _baseUrl = `${environment.baseUrl}/admin/achievements`;
 
-  private baseUrl=`${environment.baseUrl}/admin/achievements`;
+  constructor(private readonly _http: HttpClient) { }
 
-  constructor(private http: HttpClient) { }
-
+  /**
+   * Gets paginated list of achievements
+   * @param page Current page number
+   * @param limit Number of items per page
+   * @returns Observable with achievement response data
+   */
   getAchievementsWithPagination(page: number, limit: number): Observable<AchievementResponse> {
-    return this.http.get<AchievementResponse>(`${this.baseUrl}?page=${page}&limit=${limit}`,{withCredentials:true});
+    return this._http.get<AchievementResponse>(
+      `${this._baseUrl}?page=${page}&limit=${limit}`,
+      { withCredentials: true }
+    );
   }
 
+  /**
+   * Gets a single achievement by ID
+   * @param achievementId ID of the achievement to retrieve
+   * @returns Observable with achievement data
+   */
   getAchievementById(achievementId: string): Observable<{ success: boolean; data: IAchievement }> {
-    return this.http.get<{ success: boolean; data: IAchievement }>(`${this.baseUrl}/${achievementId}`,{withCredentials:true});
+    return this._http.get<{ success: boolean; data: IAchievement }>(
+      `${this._baseUrl}/${achievementId}`,
+      { withCredentials: true }
+    );
   }
 
+  /**
+   * Creates a new achievement
+   * @param achievement Achievement data to create
+   * @returns Observable with created achievement data
+   */
   createAchievement(achievement: IAchievement): Observable<{ success: boolean; data: IAchievement }> {
-    return this.http.post<{ success: boolean; data: IAchievement }>(this.baseUrl, achievement,{withCredentials:true});
+    return this._http.post<{ success: boolean; data: IAchievement }>(
+      this._baseUrl, 
+      achievement,
+      { withCredentials: true }
+    );
   }
 
+  /**
+   * Updates an existing achievement
+   * @param achievementId ID of the achievement to update
+   * @param achievement Updated achievement data
+   * @returns Observable with updated achievement data
+   */
   updateAchievement(achievementId: string, achievement: IAchievement): Observable<{ success: boolean; data: IAchievement }> {
-    return this.http.put<{ success: boolean; data: IAchievement }>(`${this.baseUrl}/${achievementId}`, achievement,{withCredentials:true});
+    return this._http.put<{ success: boolean; data: IAchievement }>(
+      `${this._baseUrl}/${achievementId}`, 
+      achievement,
+      { withCredentials: true }
+    );
   }
 
+  /**
+   * Deletes an achievement
+   * @param achievementId ID of the achievement to delete
+   * @returns Observable with success message
+   */
   deleteAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${achievementId}`,{withCredentials:true});
+    return this._http.delete<{ success: boolean; message: string }>(
+      `${this._baseUrl}/${achievementId}`,
+      { withCredentials: true }
+    );
   }
 
+  /**
+   * Activates an achievement
+   * @param achievementId ID of the achievement to activate
+   * @returns Observable with success message
+   */
   activateAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
-    return this.http.patch<{ success: boolean; message: string }>(`${this.baseUrl}/${achievementId}/activate`,{},{withCredentials:true});
+    return this._http.patch<{ success: boolean; message: string }>(
+      `${this._baseUrl}/${achievementId}/activate`,
+      {},
+      { withCredentials: true }
+    );
   }
 
+  /**
+   * Deactivates an achievement
+   * @param achievementId ID of the achievement to deactivate
+   * @returns Observable with success message
+   */
   deactivateAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
-    return this.http.patch<{ success: boolean; message: string }>(`${this.baseUrl}/${achievementId}/deactivate`,{},{withCredentials:true});
+    return this._http.patch<{ success: boolean; message: string }>(
+      `${this._baseUrl}/${achievementId}/deactivate`,
+      {},
+      { withCredentials: true }
+    );
   }
 }

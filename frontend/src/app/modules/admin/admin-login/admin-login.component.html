@@ -20,16 +20,16 @@
         </div>
 
         
-        <form [formGroup]="adminLoginFrom" (ngSubmit)="signIn()">
+        <form [formGroup]="adminLoginForm" (ngSubmit)="signIn()">
             <div class="mb-6">
                 <label for="email" class="block text-sm text-gray-700 mb-2">Email Address</label>
                 <input type="email" id="email"  formControlName="email"  placeholder="Enter your email" class="w-full px-4 py-3 border-2 text-gray-950 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition-all" autocomplete="username">
             
-            @if(hasError('email','required') && (adminLoginFrom.get('email')?.dirty || adminLoginFrom.get('email')?.touched)) {
+            @if(hasError('email','required') && (adminLoginForm.get('email')?.dirty || adminLoginForm.get('email')?.touched)) {
                 <p class="mt-2 text-center text-sm font-light text-red-500">Email is required</p>
-            } @else if (hasError('email', 'fullSpaces') && (adminLoginFrom.get('email')?.dirty || adminLoginFrom.get('email')?.touched)) {
+            } @else if (hasError('email', 'fullSpaces') && (adminLoginForm.get('email')?.dirty || adminLoginForm.get('email')?.touched)) {
                 <p class="mt-2 text-center text-sm font-light text-red-500">Email cannot contain spaces</p>
-            } @else if (hasError('email','email') && (adminLoginFrom.get('email')?.dirty || adminLoginFrom.get('email')?.touched)) {
+            } @else if (hasError('email','email') && (adminLoginForm.get('email')?.dirty || adminLoginForm.get('email')?.touched)) {
                 <p class="mt-2 text-center text-sm font-light text-red-500">Please enter a valid email address</p>
             }
             </div>
@@ -76,9 +76,9 @@
                     </svg>
                 </button>
                 </div>
-                @if(hasError('password','required') && (adminLoginFrom.get('password')?.dirty || adminLoginFrom.get('password')?.touched)) {
+                @if(hasError('password','required') && (adminLoginForm.get('password')?.dirty || adminLoginForm.get('password')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Password field is required</p>
-                } @else if (hasError('password', 'strongPassword') && (adminLoginFrom.get('password')?.dirty || adminLoginFrom.get('password')?.touched)) {
+                } @else if (hasError('password', 'strongPassword') && (adminLoginForm.get('password')?.dirty || adminLoginForm.get('password')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Password must be at least 8 characters long and include: an uppercase letter, a lowercase letter, a number, and a special character.</p>
                 }
             </div>

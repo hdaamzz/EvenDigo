@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -14,21 +14,24 @@ import { selectLoading } from '../../../core/store/auth/auth.selectors';
   templateUrl: './admin-login.component.html',
   styleUrl: './admin-login.component.css'
 })
-export class AdminLoginComponent {
-  adminLoginFrom!: FormGroup;
+export class AdminLoginComponent implements OnInit {
+  adminLoginForm!: FormGroup;
   showPassword = false;
   loading$: Observable<boolean>;
+
   constructor(
-    private fb: FormBuilder,
-    private store: Store
+    private _fb: FormBuilder,
+    private _store: Store
   ) {
-    this.initializeForms();
-    this.loading$ = this.store.select(selectLoading);
+    this.loading$ = this._store.select(selectLoading);
   }
 
+  ngOnInit(): void {
+    this._initializeForm();
+  }
 
-  private initializeForms() {
-    this.adminLoginFrom = this.fb.group({
+  private _initializeForm(): void {
+    this.adminLoginForm = this._fb.group({
       email: [
         '',
         [
@@ -44,27 +47,27 @@ export class AdminLoginComponent {
           passwordValidator()
         ]
       ]
-    })
+    });
   }
 
-  signIn() {
-    if (!this.adminLoginFrom.valid) {
-      this.adminLoginFrom.markAllAsTouched();
+  signIn(): void {
+    if (!this.adminLoginForm.valid) {
+      this.adminLoginForm.markAllAsTouched();
       return;
     }
-    const formData = this.adminLoginFrom.value;
-    this.store.dispatch(AuthActions.adminLogin(formData));
-  };
-
-
-
-  hasError(controlName: string, errorName: string) {
-    return this.adminLoginFrom.controls[controlName].hasError(errorName);
+    const formData = this.adminLoginForm.value;
+    this._store.dispatch(AuthActions.adminLogin(formData));
   }
-  hasFormError(errorName: string) {
-    return this.adminLoginFrom.hasError(errorName);
+
+  hasError(controlName: string, errorName: string): boolean {
+    return this.adminLoginForm.controls[controlName].hasError(errorName);
   }
-  togglePasswordVisibility() {
+
+  hasFormError(errorName: string): boolean {
+    return this.adminLoginForm.hasError(errorName);
+  }
+
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 }
