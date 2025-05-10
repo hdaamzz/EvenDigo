@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PremiumService, SubscriptionResponse, SubscriptionType } from '../../../../core/services/user/subscription/premium.service';
-import { catchError, of } from 'rxjs';
+import { catchError, delay, of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -44,12 +44,11 @@ export class ProfileSubscriptionComponent  implements OnInit {
   }
 
   cancelSubscription(): void {
-    if (!this.subscription) return;
-    
     this.cancelingSubscription = true;
-    
-    this.premiumService.cancelSubscription(this.subscription.subscriptionId)
-      .pipe(
+    setTimeout(()=>{
+      if (!this.subscription) return;
+      this.premiumService.cancelSubscription(this.subscription.subscriptionId)
+      .pipe(delay(500),
         catchError(err => {
           this.error = err.message || 'Failed to cancel subscription';
           this.cancelingSubscription = false;
@@ -62,6 +61,8 @@ export class ProfileSubscriptionComponent  implements OnInit {
           this.loadSubscriptionDetails();
         }
       });
+    },2000);
+    this.ngOnInit()
   }
 
   getFormattedSubscriptionType(): string {

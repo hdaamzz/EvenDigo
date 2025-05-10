@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
 import { UserFooterComponent } from "../../../shared/user-footer/user-footer.component";
-import { catchError, finalize, of, tap } from 'rxjs';
+import { catchError, delay, finalize, of, tap } from 'rxjs';
 import Notiflix from 'notiflix';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
@@ -104,7 +104,9 @@ export class PremiumCheckoutComponent implements OnInit {
     
     try {
       if (this.selectedPaymentMethod === 'wallet') {
-        await this.processWalletPayment();
+        setTimeout(async ()=>{
+          await this.processWalletPayment();
+        },2000)
       } else {
         await this.processCardPayment();
       }

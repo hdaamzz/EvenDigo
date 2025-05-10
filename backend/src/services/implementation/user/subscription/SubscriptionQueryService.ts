@@ -6,6 +6,8 @@ import { ISubscriptionQueryService } from '../../../../../src/services/interface
 import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/ISubscription.repository';
 import { StripeProvider } from '../../../../../src/utils/stripeProvider';
 import { ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
+import { TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
+import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
 
 @injectable()
 export class SubscriptionQueryService implements ISubscriptionQueryService {
@@ -13,7 +15,9 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
 
   constructor(
     @inject("SubscriptionRepository") private subscriptionRepository: ISubscriptionRepository,
-    @inject("StripeProvider") private stripeProvider: StripeProvider
+    @inject("StripeProvider") private stripeProvider: StripeProvider,
+    @inject("WalletRepository") private walletRepository: IWalletRepository
+
   ) {
     this.stripe = this.stripeProvider.getInstance();
   }
@@ -31,7 +35,6 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
 
   async cancelUserSubscription(userId: string, subscriptionId: string): Promise<{ success: boolean; message: string }> {
     try {
-
       const subscription = await this.subscriptionRepository.findSubscriptionById(subscriptionId);
       
       if (!subscription) {
@@ -45,16 +48,21 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
       if (subscription.status === 'cancelled') {
         return { success: true, message: 'Subscription is already cancelled' };
       }
+  
+      const refundAmount = this.calculateRefundAmount(subscription);
       
-      // // If it's a Stripe subscription, cancel it through Stripe
-      // if (subscription.stripeSubscriptionId) {
-      //   await this.cancelStripeSubscription(subscription.stripeSubscriptionId);
-      // }
-      
-      // Update the subscription in our database
+      if (refundAmount > 0) {
+        await this.addRefundToWallet(userId, refundAmount, subscription);
+      }
+  
       await this.subscriptionRepository.cancelSubscription(subscriptionId);
       
-      return { success: true, message: 'Subscription cancelled successfully' };
+      return { 
+        success: true, 
+        message: refundAmount > 0 
+          ? `Subscription cancelled successfully. ${refundAmount} added to your wallet.` 
+          : 'Subscription cancelled successfully' 
+      };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
@@ -73,10 +81,6 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
       return false;
     }
   }
-
-  // private async cancelStripeSubscription(stripeSubscriptionId: string): Promise<void> {
-  //   await this.stripe.subscriptions.cancel(stripeSubscriptionId);
-  // }
 
   async handleSubscriptionWebhook(event: Stripe.Event): Promise<void> {
     try {
@@ -143,5 +147,46 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
         isActive: false
       });
     }
+  }
+
+  calculateRefundAmount(subscription: ISubscription): number {
+    if (subscription.paymentMethod !== 'wallet' && subscription.paymentMethod !== 'card') {
+      return 0;
+    }
+  
+    const now = new Date();
+    const endDate = new Date(subscription.endDate);
+    
+    if (now >= endDate) {
+      return 0;
+    }
+  
+    const totalDays = (endDate.getTime() - new Date(subscription.startDate).getTime()) / (1000 * 60 * 60 * 24);
+    const remainingDays = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+    
+
+    const refundAmount = Math.round((remainingDays / totalDays) * subscription.amount);
+    
+    return refundAmount;
+  }
+  
+  async addRefundToWallet(
+    userId: string, 
+    amount: number, 
+    subscription: ISubscription
+  ): Promise<void> {
+    
+    await this.walletRepository.addTransaction(
+      userId,
+      {
+        amount: amount,
+        type: TransactionType.REFUND,
+        description: `Refund for cancelled subscription #${subscription.subscriptionId}`,
+        metadata: {
+          subscriptionId: subscription.subscriptionId,
+          refundReason: 'subscription_cancellation'
+        }
+      }
+    );
   }
 }
