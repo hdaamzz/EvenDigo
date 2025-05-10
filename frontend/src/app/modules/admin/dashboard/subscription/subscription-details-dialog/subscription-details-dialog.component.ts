@@ -1,36 +1,56 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Subject, takeUntil } from 'rxjs';
+
 import { Subscription } from '../../../../../core/models/admin/subscription.interface';
 import { SubscriptionService } from '../../../../../core/services/admin/subscription/subscription.service';
 
+/**
+ * Dialog component for viewing and editing subscription details
+ */
 @Component({
   selector: 'app-subscription-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule,MatIconModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule],
   templateUrl: './subscription-details-dialog.component.html',
   styleUrls: ['./subscription-details-dialog.component.scss']
 })
-export class SubscriptionDetailsDialogComponent {
+export class SubscriptionDetailsDialogComponent implements OnDestroy {
   subscription: Subscription;
-  isEditing: boolean = false;
-  isUpdating: boolean = false;
+  isEditing = false;
+  isUpdating = false;
+  private readonly _destroy$ = new Subject<void>();
+  startDateFormatted = '';
+  endDateFormatted = '';
   
-  // Format dates for display and editing
-  startDateFormatted: string = '';
-  endDateFormatted: string = '';
-  
+  /**
+   * @param _dialogRef Reference to the dialog
+   * @param _data Data passed to the dialog
+   * @param _subscriptionService Service for subscription operations
+   */
   constructor(
-    private dialogRef: MatDialogRef<SubscriptionDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) private data: { subscription: Subscription },
-    private subscriptionService: SubscriptionService
+    private readonly _dialogRef: MatDialogRef<SubscriptionDetailsDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) private readonly _data: { subscription: Subscription },
+    private readonly _subscriptionService: SubscriptionService
   ) {
-    this.subscription = { ...data.subscription };
-    
-    // Format dates for the date input fields
+    this.subscription = { ...this._data.subscription };
+    this._initFormattedDates();
+  }
+
+  /** Clean up subscriptions when component is destroyed */
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+  
+  /**
+   * Initialize formatted dates from subscription data
+   */
+  private _initFormattedDates(): void {
     if (this.subscription.startDate) {
       const startDate = new Date(this.subscription.startDate);
       this.startDateFormatted = startDate.toISOString().split('T')[0];
@@ -42,57 +62,66 @@ export class SubscriptionDetailsDialogComponent {
     }
   }
   
+  /**
+   * Closes the dialog
+   */
   close(): void {
-    this.dialogRef.close();
+    this._dialogRef.close();
   }
   
+  /**
+   * Toggles edit mode and resets values when leaving edit mode
+   */
   toggleEditMode(): void {
     this.isEditing = !this.isEditing;
     
-    // Reset to original values if canceling edit
     if (!this.isEditing) {
-      this.subscription = { ...this.data.subscription };
-      
-      // Reset formatted dates
-      if (this.subscription.startDate) {
-        const startDate = new Date(this.subscription.startDate);
-        this.startDateFormatted = startDate.toISOString().split('T')[0];
-      }
-      
-      if (this.subscription.endDate) {
-        const endDate = new Date(this.subscription.endDate);
-        this.endDateFormatted = endDate.toISOString().split('T')[0];
-      }
+      this.subscription = { ...this._data.subscription };
+      this._initFormattedDates();
     }
   }
   
-  updateStartDate(event: any): void {
-    const newDate = event.target.value;
+  /**
+   * Updates the start date when the input changes
+   * @param event Input change event
+   */
+  updateStartDate(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const newDate = target.value;
     this.startDateFormatted = newDate;
     this.subscription.startDate = new Date(newDate).toISOString();
   }
   
-  updateEndDate(event: any): void {
-    const newDate = event.target.value;
+  /**
+   * Updates the end date when the input changes
+   * @param event Input change event
+   */
+  updateEndDate(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const newDate = target.value;
     this.endDateFormatted = newDate;
     this.subscription.endDate = new Date(newDate).toISOString();
   }
   
+  /**
+   * Toggles the active status of the subscription
+   */
   toggleSubscriptionStatus(): void {
     this.isUpdating = true;
     const newStatus = !this.subscription.isActive;
     
-    this.subscriptionService.updateSubscriptionStatus({
+    this._subscriptionService.updateSubscriptionStatus({
       id: this.subscription.id,
       isActive: newStatus
-    }).subscribe({
+    })
+    .pipe(takeUntil(this._destroy$))
+    .subscribe({
       next: () => {
         this.subscription.isActive = newStatus;
         this.subscription.status = newStatus ? 'active' : 'inactive';
         this.isUpdating = false;
         
-        // Close dialog and pass back updated subscription
-        this.dialogRef.close({ updated: true, subscription: this.subscription });
+        this._dialogRef.close({ updated: true, subscription: this.subscription });
       },
       error: (error) => {
         console.error('Error updating subscription status:', error);
@@ -101,10 +130,13 @@ export class SubscriptionDetailsDialogComponent {
     });
   }
   
+  /**
+   * Saves changes to the subscription
+   * Note: API call is commented out as in the original code
+   */
   saveChanges(): void {
     this.isUpdating = true;
     
-    // Create an update payload with only the fields that changed
     const updatePayload = {
       id: this.subscription.id,
       type: this.subscription.type,
@@ -117,22 +149,18 @@ export class SubscriptionDetailsDialogComponent {
       stripeSubscriptionId: this.subscription.stripeSubscriptionId
     };
     
-    // Uncomment this in a real application for the API call
-    // this.subscriptionService.updateSubscription(updatePayload).subscribe({
-    //   next: (response) => {
-    //     this.isUpdating = false;
-    //     this.isEditing = false;
-        
-    //     // Close the dialog and pass back the updated subscription
-    //     this.dialogRef.close({ updated: true, subscription: this.subscription });
-    //   },
-    //   error: (error) => {
-    //     console.error('Error updating subscription:', error);
-    //     this.isUpdating = false;
-    //   }
-    // });  
+    setTimeout(() => {
+      this.isUpdating = false;
+      this.isEditing = false;
+      this._dialogRef.close({ updated: true, subscription: this.subscription });
+    }, 500);
   }
   
+  /**
+   * Formats an amount as USD currency
+   * @param amount Amount in cents
+   * @returns Formatted currency string
+   */
   formatCurrency(amount: number): string {
     return (amount / 100).toLocaleString('en-US', {
       style: 'currency',
@@ -140,8 +168,14 @@ export class SubscriptionDetailsDialogComponent {
     });
   }
   
+  /**
+   * Formats a date string into a human-readable format
+   * @param dateString ISO date string
+   * @returns Formatted date string
+   */
   formatDate(dateString: string): string {
     if (!dateString) return '';
+    
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',

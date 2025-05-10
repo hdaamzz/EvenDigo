@@ -1,12 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { Subject, takeUntil } from 'rxjs';
 import { ReusableTableComponent, TableColumn } from '../../../../shared/reusable-table/reusable-table.component';
 import { SubscriptionService } from '../../../../core/services/admin/subscription/subscription.service';
 import { Subscription } from '../../../../core/models/admin/subscription.interface';
 import { SubscriptionDetailsDialogComponent } from './subscription-details-dialog/subscription-details-dialog.component';
 
+/**
+ * Component for managing user subscriptions
+ * Displays subscription data in a table with filtering and pagination
+ */
 @Component({
   selector: 'app-subscription',
   standalone: true,
@@ -14,11 +19,11 @@ import { SubscriptionDetailsDialogComponent } from './subscription-details-dialo
   templateUrl: './subscription.component.html',
   styleUrl: './subscription.component.css'
 })
-export class SubscriptionComponent implements OnInit {
+export class SubscriptionComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   filteredSubscriptions: Subscription[] = [];
-  loading: boolean = true;
-  
+  loading = true;
+  private readonly _destroy$ = new Subject<void>();
   stats = {
     totalSubscriptions: 0,
     activeSubscriptions: 0,
@@ -43,77 +48,109 @@ export class SubscriptionComponent implements OnInit {
     { key: 'paymentMethod', header: 'Payment Method' }
   ];
   
-  currentPage: number = 1;
-  itemsPerPage: number = 5;
-  totalItems: number = 0;
+  currentPage = 1;
+  itemsPerPage = 5;
+  totalItems = 0;
+  statusFilter = 'all';
+  planTypeFilter = 'all';
   
-  statusFilter: string = 'all';
-  planTypeFilter: string = 'all';
-  
+  /**
+   * @param _subscriptionService Service for subscription-related API calls
+   * @param _dialog Material dialog service for displaying subscription details
+   */
   constructor(
-    private subscriptionService: SubscriptionService,
-    private dialog: MatDialog
-  ) { }
+    private readonly _subscriptionService: SubscriptionService,
+    private readonly _dialog: MatDialog
+  ) {}
 
+  /** Initialize component and load subscription data */
   ngOnInit(): void {
     this.loadSubscriptions();
   }
 
-  loadSubscriptions(): void {
-    this.loading = true;
-    this.subscriptionService.getSubscriptions().subscribe({
-      next: (data) => {
-        this.subscriptions = data.data?.subscriptions ?? [];
-        
-        // Format dates to show only YYYY-MM-DD format
-        this.subscriptions = this.subscriptions.map(sub => {
-          return {
-            ...sub,
-            startDate: this.formatDate(sub.startDate),
-            endDate: this.formatDate(sub.endDate)
-          };
-        });
-        
-        this.filteredSubscriptions = [...this.subscriptions];
-        this.totalItems = this.subscriptions.length;
-        this.calculateStats();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error fetching subscriptions:', error);
-        this.loading = false;
-      }
-    });
+  /** Clean up subscriptions when component is destroyed */
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
-  // Helper method to format dates as YYYY-MM-DD
-  formatDate(dateString: string): string {
+  /**
+   * Loads subscription data from the API
+   */
+  loadSubscriptions(): void {
+    this.loading = true;
+    
+    this._subscriptionService.getSubscriptions()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (data) => {
+          this.subscriptions = data.data?.subscriptions ?? [];
+          
+          this.subscriptions = this.subscriptions.map(sub => ({
+            ...sub,
+            startDate: this._formatDate(sub.startDate),
+            endDate: this._formatDate(sub.endDate)
+          }));
+          
+          this.filteredSubscriptions = [...this.subscriptions];
+          this.totalItems = this.subscriptions.length;
+          this._calculateStats();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching subscriptions:', error);
+          this.loading = false;
+        }
+      });
+  }
+
+  /**
+   * Formats date string to YYYY-MM-DD format
+   * @param dateString Date string to format
+   * @returns Formatted date string
+   */
+  private _formatDate(dateString: string): string {
     if (!dateString) return '';
     
     try {
       const date = new Date(dateString);
-      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+      return date.toISOString().split('T')[0]; 
     } catch (error) {
       console.error('Error formatting date:', error);
-      return dateString; // Return original string if error occurs
+      return dateString; 
     }
   }
 
-  calculateStats(): void {
+  /**
+   * Calculates subscription statistics
+   */
+  private _calculateStats(): void {
     this.stats.totalSubscriptions = this.subscriptions.length;
     this.stats.activeSubscriptions = this.subscriptions.filter(s => s.isActive === true).length;
     this.stats.inactiveSubscriptions = this.subscriptions.filter(s => s.isActive === false).length;
     this.stats.premiumSubscriptions = this.subscriptions.filter(s => s.type === 'premium').length;
   }
 
-  onPageChange(event: any): void {
+  /**
+   * Handles page change events from the table component
+   * @param event Page change event containing page number
+   */
+  onPageChange(event: { page?: number }): void {
     this.currentPage = event.page || 1;
   }
 
+  /**
+   * Handles search term changes
+   * @param term Search term
+   */
   onSearchChange(term: string): void {
     this.applyFilters(term);
   }
 
+  /**
+   * Applies filters to the subscription data
+   * @param searchTerm Optional search term
+   */
   applyFilters(searchTerm: string = ''): void {
     let filtered = [...this.subscriptions];
     
@@ -140,6 +177,9 @@ export class SubscriptionComponent implements OnInit {
     this.currentPage = 1;
   }
 
+  /**
+   * Resets all applied filters
+   */
   resetFilters(): void {
     this.statusFilter = 'all';
     this.planTypeFilter = 'all';
@@ -148,16 +188,23 @@ export class SubscriptionComponent implements OnInit {
     this.currentPage = 1;
   }
 
-  toggleSubscriptionStatus(subscription: any): void {
+  /**
+   * Toggles the active status of a subscription
+   * @param subscription Subscription to update
+   */
+  toggleSubscriptionStatus(subscription: Subscription): void {
     const newStatus = !subscription.isActive;
-    this.subscriptionService.updateSubscriptionStatus({
+    
+    this._subscriptionService.updateSubscriptionStatus({
       id: subscription.id,
       isActive: newStatus
-    }).subscribe({
+    })
+    .pipe(takeUntil(this._destroy$))
+    .subscribe({
       next: () => {
         subscription.isActive = newStatus;
         subscription.status = newStatus ? 'active' : 'inactive';
-        this.calculateStats();
+        this._calculateStats();
       },
       error: (error) => {
         console.error('Error updating subscription status:', error);
@@ -165,32 +212,35 @@ export class SubscriptionComponent implements OnInit {
     });
   }
 
-  viewSubscriptionDetails(subscription: any): void {
-    const dialogRef = this.dialog.open(SubscriptionDetailsDialogComponent, {
+  /**
+   * Opens a dialog to view detailed subscription information
+   * @param subscription Subscription to view
+   */
+  viewSubscriptionDetails(subscription: Subscription): void {
+    const dialogRef = this._dialog.open(SubscriptionDetailsDialogComponent, {
       width: '700px',
       data: { subscription }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result.updated) {
-        // Find the subscription in our arrays and update it
-        const index = this.subscriptions.findIndex(s => s.id === result.subscription.id);
-        if (index !== -1) {
-          // Format the dates if they've been changed
-          result.subscription.startDate = this.formatDate(result.subscription.startDate);
-          result.subscription.endDate = this.formatDate(result.subscription.endDate);
-          
-          this.subscriptions[index] = result.subscription;
-        }
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(result => {
+        if (result?.updated) {
+          const index = this.subscriptions.findIndex(s => s.id === result.subscription.id);
+          if (index !== -1) {
+            result.subscription.startDate = this._formatDate(result.subscription.startDate);
+            result.subscription.endDate = this._formatDate(result.subscription.endDate);
+            
+            this.subscriptions[index] = result.subscription;
+          }
 
-        const filteredIndex = this.filteredSubscriptions.findIndex(s => s.id === result.subscription.id);
-        if (filteredIndex !== -1) {
-          this.filteredSubscriptions[filteredIndex] = result.subscription;
-        }
+          const filteredIndex = this.filteredSubscriptions.findIndex(s => s.id === result.subscription.id);
+          if (filteredIndex !== -1) {
+            this.filteredSubscriptions[filteredIndex] = result.subscription;
+          }
 
-        // Recalculate stats
-        this.calculateStats();
-      }
-    });
+          this._calculateStats();
+        }
+      });
   }
 }

@@ -102,14 +102,18 @@ import { Filter } from '../../../../core/models/admin/finance.interfaces';
                 quantity: item.metadata?.quantity || 0,
                 originalPrice: `₹${item.metadata?.originalPrice?.toFixed(2) || '0.00'}`,
                 refundAmount: `₹${item.amount.toFixed(2)}`,
-                rawData: item
+                rawData: item,
+                eventName: item.metadata?.eventName || 'N/A',
+                organizer: item.metadata?.organizer || 'N/A',
+                amount: item.amount,
+                status: item.status || 'pending'
               };
             });
           } else {
             this.refundTransactions = [];
           }
           
-          this.totalItems = response.totalItems;
+          this.totalItems = response.totalItems ?? 0;
           this.loading = false;
         },
         error: (error) => {
@@ -207,7 +211,11 @@ import { Filter } from '../../../../core/models/admin/finance.interfaces';
               quantity: item.metadata?.quantity || 0,
               originalPrice: `₹${item.metadata?.originalPrice?.toFixed(2) || '0.00'}`,
               refundAmount: `₹${item.amount.toFixed(2)}`,
-              rawData: item
+              rawData: item,
+              eventName: item.metadata?.eventName || 'N/A',
+              organizer: item.metadata?.organizer || 'N/A',
+              amount: item.amount,
+              status: item.status || 'pending'
             };
           });
           

@@ -1,26 +1,30 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { DashboardHomeComponent } from './dashboard-home/dashboard-home.component';
-import { UsersListComponent } from "./users-list/users-list.component";
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { AuthActions } from '../../../core/store/auth/auth.actions';
 import Notiflix from 'notiflix';
-import { EventsListComponent } from "./events-list/events-list.component";
+import { AuthActions } from '../../../core/store/auth/auth.actions';
+import { DashboardHomeComponent } from './dashboard-home/dashboard-home.component';
+import { UsersListComponent } from './users-list/users-list.component';
+import { EventsListComponent } from './events-list/events-list.component';
 import { CouponListComponent } from './coupon-list/coupon-list.component';
-import { AchievementsComponent } from "./achievements/achievements.component";
+import { AchievementsComponent } from './achievements/achievements.component';
 import { FinanceRevenueComponent } from './finance-revenue/finance-revenue.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
-import { FinanceRefundComponent } from "./finance-refund/finance-refund.component";
-import { FinanceBookingComponent } from "./finance-booking/finance-booking.component";
-import { SubscriptionPlansComponent } from "./subscription-plans/subscription-plans.component";
+import { FinanceRefundComponent } from './finance-refund/finance-refund.component';
+import { FinanceBookingComponent } from './finance-booking/finance-booking.component';
+import { SubscriptionPlansComponent } from './subscription-plans/subscription-plans.component';
 
+type ViewType = 'dashboard' | 'users' | 'events' | 'coupons' | 'achievements' | 'finance' | 'subscription';
+type FinanceSectionType = 'revenue' | 'refunds' | 'bookings' | null;
+type SubscriptionSectionType = 'management' | 'plans' | null;
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [
+    CommonModule,
     DashboardHomeComponent,
     UsersListComponent,
-    CommonModule,
     EventsListComponent,
     CouponListComponent,
     AchievementsComponent,
@@ -29,17 +33,17 @@ import { SubscriptionPlansComponent } from "./subscription-plans/subscription-pl
     FinanceRefundComponent,
     FinanceBookingComponent,
     SubscriptionPlansComponent
-],
+  ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  financeDropdownOpen: boolean = false;
-  subscriptionDropdownOpen: boolean = false;
-  financeSection: 'revenue' | 'refunds' | 'bookings' |  null = null;
-  subscriptionSection: 'management' | 'plans' | null = null;
-  activeView: 'dashboard' | 'users' | 'events' | 'coupons' | 'achievements' | 'finance' | 'subscription'= 'dashboard';
-  sidebarOpen: boolean = false;
+  financeDropdownOpen = false;
+  subscriptionDropdownOpen = false;
+  financeSection: FinanceSectionType = null;
+  subscriptionSection: SubscriptionSectionType = null;
+  activeView: ViewType = 'dashboard';
+  sidebarOpen = false;
   
   get dashBoard(): boolean { return this.activeView === 'dashboard'; }
   get userList(): boolean { return this.activeView === 'users'; }
@@ -49,30 +53,23 @@ export class DashboardComponent implements OnInit {
   get finance(): boolean { return this.activeView === 'finance'; }
   get subscription(): boolean { return this.activeView === 'subscription'; }
 
-  constructor(private store: Store) { }
+  constructor(private _store: Store) {}
 
   ngOnInit(): void {
     this.navigateTo('dashboard');
-    this.sidebarOpen = window.innerWidth >= 1024;
-  }
-
-  toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
-
-  closeSidebarOnMobile(): void {
-    if (window.innerWidth < 1024) {
-      this.sidebarOpen = false;
-    }
+    this._setSidebarStateBasedOnScreenSize();
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event: any): void {
-    this.sidebarOpen = event.target.innerWidth >= 1024;
+  onResize(event: UIEvent): void {
+    if (event.target instanceof Window) {
+      this.sidebarOpen = event.target.innerWidth >= 1024;
+    }
   }
 
-  navigateTo(view: 'dashboard' | 'users' | 'events' | 'coupons' | 'achievements' | 'finance' | 'subscription'): void {
+  navigateTo(view: ViewType): void {
     this.activeView = view;
+    this.closeSidebarOnMobile();
   }
 
   showDashboard(): void {
@@ -94,33 +91,55 @@ export class DashboardComponent implements OnInit {
   showAchievements(): void {
     this.navigateTo('achievements');
   }
-
-  toggleFinanceDropdown(): void {
-    this.financeDropdownOpen = !this.financeDropdownOpen;
-  }
   
-  navigateToFinanceSection(section: 'revenue' | 'refunds' | 'bookings'): void {
-    this.navigateTo('finance');
-    this.financeSection = section;
-  }
-
-  toggleSubscriptionDropdown(): void {
-    this.subscriptionDropdownOpen = !this.subscriptionDropdownOpen;
-  }
-
-  navigateToSubscriptionSection(section:'management' | 'plans'): void {
-    this.navigateTo('subscription');
-    this.subscriptionSection = section;
-  }
-
   showSubscriptionList(): void {
     this.navigateTo('subscription');
     if (!this.subscriptionSection) {
       this.subscriptionSection = 'management';
     }
   }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebarOnMobile(): void {
+    if (window.innerWidth < 1024) {
+      this.sidebarOpen = false;
+    }
+  }
+
+  toggleFinanceDropdown(): void {
+    this.financeDropdownOpen = !this.financeDropdownOpen;
+    if (this.financeDropdownOpen) {
+      this.subscriptionDropdownOpen = false;
+    }
+  }
+  
+  toggleSubscriptionDropdown(): void {
+    this.subscriptionDropdownOpen = !this.subscriptionDropdownOpen;
+    if (this.subscriptionDropdownOpen) {
+      this.financeDropdownOpen = false;
+    }
+  }
+
+  navigateToFinanceSection(section: 'revenue' | 'refunds' | 'bookings'): void {
+    this.navigateTo('finance');
+    this.financeSection = section;
+  }
+
+  navigateToSubscriptionSection(section: 'management' | 'plans'): void {
+    this.navigateTo('subscription');
+    this.subscriptionSection = section;
+  }
+
   logout(): void {
-    this.store.dispatch(AuthActions.logout());
+    this._store.dispatch(AuthActions.logout());
     Notiflix.Notify.success('Admin Logout Successfully');
+  }
+
+  
+  private _setSidebarStateBasedOnScreenSize(): void {
+    this.sidebarOpen = window.innerWidth >= 1024;
   }
 }

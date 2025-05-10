@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
 
+/**
+ * Transaction model representing booking/payment transaction data
+ */
 export interface Transaction {
   bookingId?: string;
   eventName: string;
@@ -18,6 +21,9 @@ export interface Transaction {
   rawData?: any;
 }
 
+/**
+ * Revenue statistics model for dashboard metrics
+ */
 export interface RevenueStats {
   totalRevenue: string;
   totalRevenueChange: number;
@@ -27,6 +33,9 @@ export interface RevenueStats {
   monthlyRevenueChange: number;
 }
 
+/**
+ * Detailed booking information model
+ */
 export interface BookingDetail {
   bookingId: string;
   eventName: string;
@@ -49,93 +58,226 @@ export interface BookingDetail {
   stripeSessionId?: string;
 }
 
+/**
+ * API response structure for finance data
+ */
+export interface FinanceApiResponse<T> {
+  success: boolean;
+  data: T;
+  totalItems?: number;
+  message?: string;
+}
+
+/**
+ * Service for managing financial operations including revenue tracking,
+ * transaction history, and refund management
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class FinanceService {
-  baseUrl: string = environment.baseUrl;
-  
-  constructor(private http: HttpClient) { }
+  private readonly _baseUrl: string = environment.baseUrl;
+  private readonly _httpOptions = { withCredentials: true };
 
-  // event distribution history
+  constructor(private _http: HttpClient) { }
 
-  getDistributedRevenue(page: number = 1, limit: number = 10): Observable<any> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString())
+  // EVENT DISTRIBUTION METHODS
+
+  /**
+   * Fetch distributed revenue history with pagination
+   */
+  getDistributedRevenue(page: number = 1, limit: number = 10): Observable<FinanceApiResponse<any[]>> {
+    const params = this._buildPaginationParams(page, limit)
       .set('is_distributed', 'true');
-      
-    return this.http.get(`${this.baseUrl}admin/dist/recent`, { params , withCredentials: true});
+
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/dist/recent`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
-  
-  getRevenueStats(): Observable<any> {
-    return this.http.get(`${this.baseUrl}admin/dist/stats`,{withCredentials:true});
+
+  /**
+   * Get revenue distribution statistics
+   */
+  getRevenueStats(): Observable<FinanceApiResponse<any>> {
+    return this._http.get<FinanceApiResponse<any>>(
+      `${this._baseUrl}admin/dist/stats`,
+      this._httpOptions
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
+
+  /**
+   * Get events by array of IDs
+   */
   getEventsByIds(eventIds: string[]): Observable<any[]> {
     const params = new HttpParams().set('ids', eventIds.join(','));
-    return this.http.get<any[]>(`${this.baseUrl}admin/dist/batch`, { params , withCredentials: true});
+
+    return this._http.get<any[]>(
+      `${this._baseUrl}admin/dist/batch`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
-  getRevenueByDateRange(startDate: string, endDate: string, page: number = 1, limit: number = 10): Observable<any> {
-    let params = new HttpParams()
+
+  /**
+   * Get distributed revenue within a specific date range
+   */
+  getRevenueByDateRange(
+    startDate: string,
+    endDate: string,
+    page: number = 1,
+    limit: number = 10
+  ): Observable<FinanceApiResponse<any[]>> {
+    const params = this._buildPaginationParams(page, limit)
       .set('startDate', startDate)
       .set('endDate', endDate)
-      .set('page', page.toString())
-      .set('limit', limit.toString())
       .set('is_distributed', 'true');
-      
-    return this.http.get(`${this.baseUrl}admin/dist/date-range`, { params, withCredentials: true });
+
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/dist/date-range`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
 
-  //refund history
+  // REFUND HISTORY METHODS
 
-  getRefundTransactions(page: number = 1, limit: number = 5): Observable<any> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
-    return this.http.get(`${this.baseUrl}admin/finance/refunds`, { params, withCredentials: true });
+  /**
+   * Get refund transactions with pagination
+   */
+  getRefundTransactions(page: number = 1, limit: number = 5): Observable<FinanceApiResponse<any[]>> {
+    const params = this._buildPaginationParams(page, limit);
+
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/finance/refunds`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
-  getRefundsByDateRange(startDate: string, endDate: string, page: number = 1, limit: number = 5, search: string = ''): Observable<any> {
-    let params = new HttpParams()
+
+  /**
+   * Get refunds within a specific date range with optional search term
+   */
+  getRefundsByDateRange(
+    startDate: string,
+    endDate: string,
+    page: number = 1,
+    limit: number = 5,
+    search: string = ''
+  ): Observable<FinanceApiResponse<any[]>> {
+    let params = this._buildPaginationParams(page, limit)
       .set('startDate', startDate)
-      .set('endDate', endDate)
-      .set('page', page.toString())
-      .set('limit', limit.toString());
-    
+      .set('endDate', endDate);
+
     if (search) {
       params = params.set('search', search);
     }
-    
-    return this.http.get(`${this.baseUrl}admin/finance/refunds/range`, { params, withCredentials: true });
+
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/finance/refunds/range`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
 
-  // booking history
+  // BOOKING HISTORY METHODS
 
-  fetchRevenue(page: number = 1, limit: number = 10): Observable<any> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+  /**
+   * Fetch revenue transactions with pagination
+   */
+  fetchRevenue(page: number = 1, limit: number = 10): Observable<FinanceApiResponse<any[]>> {
+    const params = this._buildPaginationParams(page, limit);
 
-    return this.http.get(`${this.baseUrl}admin/finance/revenue`, { params, withCredentials: true });
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/finance/revenue`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
-  
+
+  /**
+   * Fetch revenue statistics for dashboard display
+   */
   fetchRevenueStats(): Observable<RevenueStats> {
-    return this.http.get<RevenueStats>(`${this.baseUrl}admin/finance/stats`, { withCredentials: true });
+    return this._http.get<RevenueStats>(
+      `${this._baseUrl}admin/finance/stats`,
+      this._httpOptions
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
-  
-  getTransactionByDateRange(startDate: string, endDate: string): Observable<any> {    
-    let params = new HttpParams()
+
+  /**
+   * Get transactions within a specific date range
+   */
+  getTransactionByDateRange(startDate: string, endDate: string): Observable<FinanceApiResponse<any[]>> {
+    const params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate);
-    
-    return this.http.get(`${this.baseUrl}admin/finance/revenue/range`, { params, withCredentials: true });
+
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/finance/revenue/range`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
   }
-  
-  getTransactionsByUser(userId: string, page: number = 1, limit: number = 10): Observable<any> {
-    let params = new HttpParams()
-      .set('userId', userId)
+
+  /**
+   * Get transactions for a specific user
+   */
+  getTransactionsByUser(
+    userId: string,
+    page: number = 1,
+    limit: number = 10
+  ): Observable<FinanceApiResponse<any[]>> {
+    const params = this._buildPaginationParams(page, limit)
+      .set('userId', userId);
+
+    return this._http.get<FinanceApiResponse<any[]>>(
+      `${this._baseUrl}admin/finance/revenue/user`,
+      { params, ...this._httpOptions }
+    ).pipe(
+      catchError(this._handleError)
+    );
+  }
+
+  /**
+   * Build pagination params for API requests
+   * @private
+   */
+  private _buildPaginationParams(page: number, limit: number): HttpParams {
+    return new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
-    
-    return this.http.get(`${this.baseUrl}admin/finance/revenue/user`, { params, withCredentials: true });
+  }
+
+  /**
+   * Handle HTTP errors consistently
+   * @private
+   */
+  private _handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Client Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage = error.error?.message ||
+        `Server Error: ${error.status} - ${error.statusText}`;
+    }
+
+    console.error(errorMessage, error);
+    return throwError(() => new Error(errorMessage));
   }
 }

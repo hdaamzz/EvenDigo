@@ -1,11 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+
 import { StatCard } from '../../../../core/models/admin/finance.interfaces';
 import { TableColumn, ReusableTableComponent, PageEvent } from '../../../../shared/reusable-table/reusable-table.component';
 import { FinanceService } from '../../../../core/services/admin/finance/finance.service';
-import { FormBuilder, FormGroup } from '@angular/forms';
 
+/**
+ * Interface representing revenue data from the API
+ */
 interface RevenueData {
   _id: string;
   event: string;
@@ -21,11 +25,19 @@ interface RevenueData {
   updatedAt: string;
 }
 
+/**
+ * Interface representing a date range for filtering
+ */
 interface DateRange {
   startDate: Date;
   endDate: Date;
 }
 
+/**
+ * Finance Revenue Component
+ * 
+ * Displays and manages revenue data including statistics and filterable revenue transactions
+ */
 @Component({
   selector: 'app-finance-revenue',
   standalone: true,
@@ -33,29 +45,31 @@ interface DateRange {
   templateUrl: './finance-revenue.component.html',
   styleUrl: './finance-revenue.component.css'
 })
-export class FinanceRevenueComponent implements OnInit {
-  statCards: StatCard[] = [
+export class FinanceRevenueComponent implements OnInit, OnDestroy {
+  /** Statistical cards displayed at the top of the page */
+  public statCards: StatCard[] = [
     {
       title: 'Total Revenue',
-      value: '0.00',
+      value: '₹0.00',
       change: '0% vs last month',
       isNegative: false
     },
     {
       title: 'Today\'s Revenue',
-      value: '0.00',
+      value: '₹0.00',
       change: '0% vs yesterday',
       isNegative: false
     },
     {
       title: 'This Month',
-      value: '0.00',
+      value: '₹0.00',
       change: '0% vs last month',
       isNegative: false
     }
   ];
   
-  tableColumns: TableColumn[] = [
+  /** Table column configuration */
+  public tableColumns: TableColumn[] = [
     { key: 'eventName', header: 'Event Name' },
     { key: 'distributed_at', header: 'Distributed Date' },
     { key: 'total_participants', header: 'Total Bookings' },
@@ -64,60 +78,188 @@ export class FinanceRevenueComponent implements OnInit {
     { key: 'admin_percentage', header: 'Commission %' }
   ];
 
-  revenueData: any[] = [];
-  currentPage: number = 1;
-  totalItems: number = 0;
-  itemsPerPage: number = 5;
-  isLoading: boolean = false;
+  /** Revenue data displayed in the table */
+  public revenueData: RevenueData[] = [];
   
-  // Date filter
-  filterForm: FormGroup;
-  filterOptions: string[] = ['All', 'Daily', 'Weekly', 'Monthly', 'Custom'];
-  selectedFilter: string = 'All';
-  showCustomDatePicker: boolean = false;
-  customDateRange: DateRange = {
+  /** Pagination properties */
+  public currentPage = 1;
+  public totalItems = 0;
+  public itemsPerPage = 5;
+  
+  /** Loading state for API requests */
+  public isLoading = false;
+  
+  /** Filter form and options */
+  public filterForm: FormGroup;
+  public filterOptions: string[] = ['All', 'Daily', 'Weekly', 'Monthly', 'Custom'];
+  public selectedFilter = 'All';
+  public showCustomDatePicker = false;
+  
+  /** Custom date range for filtering */
+  private _customDateRange: DateRange = {
     startDate: new Date(),
     endDate: new Date()
   };
   
+  /** Subject for unsubscribing from observables */
+  private _destroy$ = new Subject<void>();
+  
+  /**
+   * @param financeService Service for finance-related API calls
+   * @param fb FormBuilder for creating reactive forms
+   */
   constructor(
-    private financeService: FinanceService,
-    private fb: FormBuilder
+    private _financeService: FinanceService,
+    private _fb: FormBuilder
   ) {
-    this.filterForm = this.fb.group({
+    this.filterForm = this._fb.group({
       filterType: ['All'],
-      startDate: [this.getFormattedDate(new Date())],
-      endDate: [this.getFormattedDate(new Date())]
+      startDate: [this._getFormattedDate(new Date())],
+      endDate: [this._getFormattedDate(new Date())]
     });
   }
   
+  /**
+   * Lifecycle hook that is called after data-bound properties are initialized
+   */
   ngOnInit(): void {
-    this.loadRevenueData();
-    this.loadStatCardData();
+    this._loadRevenueData();
+    this._loadStatCardData();
     
-    this.filterForm.get('filterType')?.valueChanges.subscribe(value => {
-      this.selectedFilter = value;
-      this.showCustomDatePicker = value === 'Custom';
-      
-      if (value !== 'Custom') {
-        const dateRange = this.getDateRangeForFilter(value);
-        if (dateRange) {
-          this.customDateRange = dateRange;
-          this.filterForm.patchValue({
-            startDate: this.getFormattedDate(dateRange.startDate),
-            endDate: this.getFormattedDate(dateRange.endDate)
-          });
+    // Subscribe to filter type changes
+    this.filterForm.get('filterType')?.valueChanges
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(value => {
+        this.selectedFilter = value;
+        this.showCustomDatePicker = value === 'Custom';
+        
+        if (value !== 'Custom') {
+          const dateRange = this._getDateRangeForFilter(value);
+          if (dateRange) {
+            this._customDateRange = dateRange;
+            this.filterForm.patchValue({
+              startDate: this._getFormattedDate(dateRange.startDate),
+              endDate: this._getFormattedDate(dateRange.endDate)
+            });
+          }
+          this.applyFilter();
         }
-        this.applyFilter();
-      }
+      });
+  }
+  
+  /**
+   * Lifecycle hook that is called when the component is destroyed
+   */
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+  
+  /**
+   * Applies the selected filter to the revenue data
+   */
+  public applyFilter(): void {
+    this.isLoading = true;
+    this.currentPage = 1;
+    
+    if (this.selectedFilter === 'All') {
+      this._loadRevenueData();
+      return;
+    }
+    
+    const startDate = this.filterForm.get('startDate')?.value;
+    const endDate = this.filterForm.get('endDate')?.value;
+    
+    if (!startDate || !endDate) {
+      this.isLoading = false;
+      return;
+    }
+    
+    this._financeService.getRevenueByDateRange(startDate, endDate, this.currentPage, this.itemsPerPage)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.totalItems = response.total || 0;
+          this.revenueData = [];
+          
+          if (response?.data?.length > 0) {
+            const revenueItems = response.data;
+            const eventIds = revenueItems.map((item: { event: any; }) => item.event);
+            
+            this._financeService.getEventsByIds(eventIds)
+              .pipe(takeUntil(this._destroy$))
+              .subscribe({
+                next: (events: any[]) => {
+                  const eventMap = new Map<string, string>();
+                  events.forEach(event => {
+                    eventMap.set(event._id, event.eventTitle);
+                  });
+                  
+                  this.revenueData = this._processRevenueData(revenueItems, eventMap);
+                  this.isLoading = false;
+                },
+                error: (err) => {
+                  console.error('Error fetching event data:', err);
+                  this.isLoading = false;
+                }
+              });
+          } else {
+            this.isLoading = false;
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching filtered revenue data:', err);
+          this.isLoading = false;
+        }
+      });
+  }
+  
+  /**
+   * Handles page change events from the reusable table component
+   * @param event Page change event containing the new page number
+   */
+  public onPageChange(event: PageEvent): void {
+    this.currentPage = event.page || 1;
+    
+    if (this.selectedFilter === 'All') {
+      this._loadRevenueData(this.currentPage);
+    } else {
+      this.applyFilter();
+    }
+  }
+  
+  /**
+   * Formats a date string to a human-readable format
+   * @param dateString ISO date string to format
+   * @returns Formatted date string
+   */
+  public formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
   
-  getFormattedDate(date: Date): string {
+  /**
+   * Converts a date object to YYYY-MM-DD format
+   * @param date Date object to format
+   * @returns Formatted date string in YYYY-MM-DD format
+   */
+  private _getFormattedDate(date: Date): string {
     return date.toISOString().split('T')[0];
   }
   
-  getDateRangeForFilter(filterType: string): DateRange | null {
+  /**
+   * Determines the date range based on the selected filter type
+   * @param filterType Type of filter (Daily, Weekly, Monthly, All)
+   * @returns DateRange object or null if filter is 'All'
+   */
+  private _getDateRangeForFilter(filterType: string): DateRange | null {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -144,120 +286,88 @@ export class FinanceRevenueComponent implements OnInit {
           endDate: endOfMonth
         };
       case 'All':
-        return null;
       default:
         return null;
     }
   }
   
-  applyFilter(): void {
+  /**
+   * Loads revenue data from the API
+   * @param page Page number to load (defaults to 1)
+   */
+  private _loadRevenueData(page: number = 1): void {
     this.isLoading = true;
     
-    if (this.selectedFilter === 'All') {
-      this.loadRevenueData(this.currentPage);
-      return;
-    }
-    
-    const startDate = this.filterForm.get('startDate')?.value;
-    const endDate = this.filterForm.get('endDate')?.value;
-    
-    if (!startDate || !endDate) {
-      this.isLoading = false;
-      return;
-    }
-    
-    this.financeService.getRevenueByDateRange(startDate, endDate, this.currentPage, this.itemsPerPage).subscribe({
-      next: (response: any) => {
-        this.totalItems = response.total || 0;
-        this.revenueData = [];
-        
-        if (response && response.data && response.data.length > 0) {
-          const revenueItems = response.data;
-          const eventIds = revenueItems.map((item: { event: any; }) => item.event);
+    this._financeService.getDistributedRevenue(page, this.itemsPerPage)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.totalItems = response.total || 0;
+          this.revenueData = [];
           
-          this.financeService.getEventsByIds(eventIds).subscribe({
-            next: (events: any[]) => {
-              const eventMap = new Map();
-              events.forEach(event => {
-                eventMap.set(event._id, event.eventTitle);
+          if (response?.length > 0) {
+            const revenueItems = response;
+            const eventIds = revenueItems.map((item: { event: any; }) => item.event);
+            
+            this._financeService.getEventsByIds(eventIds)
+              .pipe(takeUntil(this._destroy$))
+              .subscribe({
+                next: (events: any[]) => {
+                  const eventMap = new Map<string, string>();
+                  events.forEach(event => {
+                    eventMap.set(event._id, event.eventTitle);
+                  });
+                  
+                  this.revenueData = this._processRevenueData(revenueItems, eventMap);
+                  this.isLoading = false;
+                },
+                error: (err) => {
+                  console.error('Error fetching event data:', err);
+                  this.isLoading = false;
+                }
               });
-              
-              this.revenueData = this.processRevenueData(revenueItems, eventMap);
-              this.isLoading = false;
-            },
-            error: (err) => {
-              console.error('Error fetching event data:', err);
-              this.isLoading = false;
-            }
-          });
-        } else {
+          } else {
+            this.isLoading = false;
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching revenue data:', err);
           this.isLoading = false;
         }
-      },
-      error: (err) => {
-        console.error('Error fetching filtered revenue data:', err);
-        this.isLoading = false;
-      }
-    });
+      });
   }
   
-  processRevenueData(revenueItems: any[], eventMap: Map<string, string>): any[] {
+  /**
+   * Processes raw revenue data and formats it for display
+   * @param revenueItems Raw revenue items from API
+   * @param eventMap Map of event IDs to event names
+   * @returns Processed revenue data ready for display
+   */
+  private _processRevenueData(revenueItems: any[], eventMap: Map<string, string>): RevenueData[] {
     return revenueItems.map((item: any) => {
-      const organizerAmount = this.safeGetNumericValue(item.organizer_amount);
-      const adminAmount = this.safeGetNumericValue(item.admin_amount);
-      const totalRevenue = this.safeGetNumericValue(item.total_revenue);
+      const organizerAmount = this._safeGetNumericValue(item.organizer_amount);
+      const adminAmount = this._safeGetNumericValue(item.admin_amount);
+      const totalRevenue = this._safeGetNumericValue(item.total_revenue);
       
       return {
         ...item,
         eventName: eventMap.get(item.event) || 'Unknown Event',
         distributed_at: this.formatDate(item.distributed_at),
-        organizer_amount: this.formatCurrency(organizerAmount),
-        admin_amount: this.formatCurrency(adminAmount),
-        total_revenue: this.formatCurrency(totalRevenue),
+        organizer_amount: this._formatCurrency(organizerAmount),
+        admin_amount: this._formatCurrency(adminAmount),
+        total_revenue: this._formatCurrency(totalRevenue),
         admin_percentage: item.admin_percentage ? 
-          `${this.safeGetNumericValue(item.admin_percentage)}%` : '0%'
+          `${this._safeGetNumericValue(item.admin_percentage)}%` : '0%'
       };
     });
   }
   
-  loadRevenueData(page: number = 1): void {
-    this.isLoading = true;
-    this.financeService.getDistributedRevenue(page, this.itemsPerPage).subscribe({
-      next: (response: any) => {
-        this.totalItems = response.total || 0;
-        this.revenueData = [];
-        
-        if (response && response.length > 0) {
-          const revenueItems = response;
-          const eventIds = revenueItems.map((item: { event: any; }) => item.event);
-          
-          this.financeService.getEventsByIds(eventIds).subscribe({
-            next: (events: any[]) => {
-              const eventMap = new Map();
-              events.forEach(event => {
-                eventMap.set(event._id, event.eventTitle);
-              });
-              
-              this.revenueData = this.processRevenueData(revenueItems, eventMap);
-              this.isLoading = false;
-            },
-            error: (err) => {
-              console.error('Error fetching event data:', err);
-              this.isLoading = false;
-            }
-          });
-        } else {
-          this.isLoading = false;
-        }
-      },
-      error: (err) => {
-        console.error('Error fetching revenue data:', err);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  safeGetNumericValue(value: any): number {
+  /**
+   * Safely extracts a numeric value from various possible formats
+   * @param value Value to convert to number
+   * @returns Numeric value or 0 if conversion fails
+   */
+  private _safeGetNumericValue(value: any): number {
     if (value === null || value === undefined) return 0;
     
     if (typeof value === 'number') return value;
@@ -270,62 +380,50 @@ export class FinanceRevenueComponent implements OnInit {
     return isNaN(parsed) ? 0 : parsed;
   }
   
-  formatCurrency(value: any): string {
-    const numValue = this.safeGetNumericValue(value);
+  /**
+   * Formats a numeric value as a currency string
+   * @param value Value to format as currency
+   * @returns Formatted currency string
+   */
+  private _formatCurrency(value: any): string {
+    const numValue = this._safeGetNumericValue(value);
     return numValue === 0 ? '₹0.00' : `₹${numValue.toFixed(2)}`;
   }
   
-  loadStatCardData(): void {
-    this.financeService.getRevenueStats().subscribe({
-      next: (stats: any) => {
-        if (stats) {
-          this.statCards = [
-            {
-              title: 'Total Revenue',
-              value: this.formatCurrency(stats.totalRevenue || 0),
-              change: `${stats.totalRevenueChange || 0}% vs last month`,
-              isNegative: (stats.totalRevenueChange || 0) < 0
-            },
-            {
-              title: 'Today\'s Revenue',
-              value: this.formatCurrency(stats.todayRevenue || 0),
-              change: `${stats.todayRevenueChange || 0}% vs yesterday`,
-              isNegative: (stats.todayRevenueChange || 0) < 0
-            },
-            {
-              title: 'This Month',
-              value: this.formatCurrency(stats.monthlyRevenue || 0),
-              change: `${stats.monthlyRevenueChange || 0}% vs last month`,
-              isNegative: (stats.monthlyRevenueChange || 0) < 0
-            }
-          ];
+  /**
+   * Loads statistical data for the stat cards
+   */
+  private _loadStatCardData(): void {
+    this._financeService.getRevenueStats()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (stats: any) => {
+          if (stats) {
+            this.statCards = [
+              {
+                title: 'Total Revenue',
+                value: this._formatCurrency(stats.totalRevenue || 0),
+                change: `${stats.totalRevenueChange || 0}% vs last month`,
+                isNegative: (stats.totalRevenueChange || 0) < 0
+              },
+              {
+                title: 'Today\'s Revenue',
+                value: this._formatCurrency(stats.todayRevenue || 0),
+                change: `${stats.todayRevenueChange || 0}% vs yesterday`,
+                isNegative: (stats.todayRevenueChange || 0) < 0
+              },
+              {
+                title: 'This Month',
+                value: this._formatCurrency(stats.monthlyRevenue || 0),
+                change: `${stats.monthlyRevenueChange || 0}% vs last month`,
+                isNegative: (stats.monthlyRevenueChange || 0) < 0
+              }
+            ];
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching revenue stats:', err);
         }
-      },
-      error: (err) => {
-        console.error('Error fetching revenue stats:', err);
-      }
-    });
-  }
-  
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.page || 1;
-    
-    if (this.selectedFilter === 'All') {
-      this.loadRevenueData(this.currentPage);
-    } else {
-      this.applyFilter();
-    }
-  }
-  
-  formatDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+      });
   }
 }
