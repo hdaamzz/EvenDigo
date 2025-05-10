@@ -22,7 +22,7 @@
                     <ng-template pTemplate="header">
                         <div class="plan-header" [ngClass]="{'premium-plan': plan.type === 'premium'}">
                             <div class="plan-title">
-                                <h2>{{ plan.type === 'basic' ? 'Basic' : 'Premium' }}</h2>
+                                <h2>{{ plan.type === 'Basic' ? 'Basic' : 'Premium' }}</h2>
                                 <p-tag *ngIf="plan.isPopular" severity="success" value="POPULAR"></p-tag>
                             </div>
                             <div class="plan-price">

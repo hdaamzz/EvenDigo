@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Subscription } from '../../../models/admin/subscription.interface';
+import { SubscriptionPlan } from '../../admin/subscription-plan/subscription-plan.service';
 
 export enum SubscriptionType {
   PREMIUM = 'premium',
@@ -59,7 +60,7 @@ export class PremiumService {
 
   createStripeSubscription(payload: PremiumSubscriptionPayload): Observable<ApiResponse<StripeSessionResponse>> {
     return this.http.post<ApiResponse<StripeSessionResponse>>(
-      `${this.baseUrl}user/subscription/create-checkout`, 
+      `${this.baseUrl}user/subscription/create-checkout`,
       payload,
       { withCredentials: true }
     ).pipe(
@@ -69,7 +70,7 @@ export class PremiumService {
 
   processWalletUpgrade(payload: PremiumSubscriptionPayload): Observable<ApiResponse<SubscriptionResponse>> {
     return this.http.post<ApiResponse<SubscriptionResponse>>(
-      `${this.baseUrl}user/subscription/wallet-upgrade`, 
+      `${this.baseUrl}user/subscription/wallet-upgrade`,
       payload,
       { withCredentials: true }
     ).pipe(
@@ -88,25 +89,35 @@ export class PremiumService {
 
   cancelSubscription(subscriptionId: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}user/subscription/cancel`, 
+      `${this.baseUrl}user/subscription/cancel`,
       { subscriptionId },
       { withCredentials: true }
     ).pipe(
       catchError(this.handleError)
     );
   }
-    getSubscriptionBySessionId(sessionId: string): Observable<ApiResponse<Subscription>> {
-      return this.http.get<ApiResponse<Subscription>>(
-        `${this.baseUrl}user/subscription/confirm/${sessionId}`,
-        { withCredentials: true }
-      ).pipe(
-        catchError(this.handleError)
-      );
-    }
+
+  getSubscriptionBySessionId(sessionId: string): Observable<ApiResponse<Subscription>> {
+    return this.http.get<ApiResponse<Subscription>>(
+      `${this.baseUrl}user/subscription/confirm/${sessionId}`,
+      { withCredentials: true }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getSubscriptionByType(type: string): Observable<ApiResponse<SubscriptionPlan>> {
+    return this.http.get<ApiResponse<SubscriptionPlan>>(
+      `${this.baseUrl}user/subscription/type/${type}`,
+      { withCredentials: true }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -137,9 +148,9 @@ export class PremiumService {
         }
       }
     }
-    
+
     console.error('API Error:', error);
-    
+
     return throwError(() => new Error(errorMessage));
   }
 }

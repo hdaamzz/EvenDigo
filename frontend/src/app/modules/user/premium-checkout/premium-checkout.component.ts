@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
 import { UserFooterComponent } from "../../../shared/user-footer/user-footer.component";
 import { catchError, delay, finalize, of, tap } from 'rxjs';
@@ -12,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { WalletService } from '../../../core/services/user/wallet/wallet.service';
 import { IWallet } from '../../../core/models/wallet.interface';
 import { PremiumService } from '../../../core/services/user/subscription/premium.service';
+import { SubscriptionPlan } from '../../../core/models/subscription.interface';
 
 @Component({
   selector: 'app-premium-checkout',
@@ -27,27 +28,38 @@ export class PremiumCheckoutComponent implements OnInit {
   isWalletLoading: boolean = true;
   errorMessage: string | null = null;
   planPrice: number = 499;
-  planDetails = {
-    name: 'Premium Plan',
-    price: 499,
-    billing: 'Monthly',
-    features: [
-      'Unlimited Participants',
-      'Paid Event Creation',
-      'Live Event Streaming',
-      'No Platform Fee',
-      'Full Refund Options',
-      'Priority Support'
-    ]
-  };
+  planDetails:SubscriptionPlan={
+    id: '',
+    price: 0,
+    description: '',
+    discountPercentage: 0,
+    isPopular: false,
+    billingCycle: '',
+    features: []
+  }
+  // planDetails = {
+  //   name: 'Premium Plan',
+  //   price: 499,
+  //   billing: 'Monthly',
+  //   features: [
+  //     'Unlimited Participants',
+  //     'Paid Event Creation',
+  //     'Live Event Streaming',
+  //     'No Platform Fee',
+  //     'Full Refund Options',
+  //     'Priority Support'
+  //   ]
+  // };
 
   constructor(
     private router: Router,
     private walletService: WalletService,
-    private premiumService: PremiumService
+    private premiumService: PremiumService,
+    private route: ActivatedRoute,
   ) { }
 
   async ngOnInit() {
+    this.getPlan();
     this.getUserWallet();
     await this.initializeStripe();
   }
@@ -65,6 +77,8 @@ export class PremiumCheckoutComponent implements OnInit {
       Notiflix.Notify.failure(this.errorMessage);
     }
   }
+
+    
 
   getUserWallet() {
     this.isWalletLoading = true;
@@ -86,6 +100,26 @@ export class PremiumCheckoutComponent implements OnInit {
         this.isWalletLoading = false;
       })
     ).subscribe();
+  }
+
+  getPlan() {
+    this.isWalletLoading = true;
+    const planType = this.route.snapshot.queryParamMap.get('type');
+    if(planType){
+      this.premiumService.getSubscriptionByType(planType).subscribe(
+        (response) => {
+          this.isWalletLoading = false;
+          if(response.data){
+            this.planDetails = response.data
+          }
+        },
+        (error) => {
+          console.error("Error fetching subscription details:", error);
+          this.router.navigate(['/']);
+        }
+      );
+    }
+    
   }
 
   selectPaymentMethod(method: 'wallet' | 'card') {

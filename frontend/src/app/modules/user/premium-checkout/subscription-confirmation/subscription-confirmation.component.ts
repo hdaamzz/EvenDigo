@@ -23,7 +23,7 @@ export class SubscriptionConfirmationComponent {
   // http://localhost:4200/premium/success?session_id=cs_test_a1oZ910BA4ec8L6wPbA5lI2Di2mQBN5eAQHhSqVZl7LXvTS7EdCdBkW2Gw
   ngOnInit() {
     const sessionId = this.route.snapshot.queryParamMap.get('session_id');
-    console.log(sessionId);
+    
     
     if (sessionId) {
       this.premiumService.getSubscriptionBySessionId(sessionId).subscribe(

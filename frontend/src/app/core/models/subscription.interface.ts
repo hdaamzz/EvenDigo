@@ -1,9 +1,11 @@
 
 export interface SubscriptionPlan {
-    id: string;
-    name: string;
-    price: string;
+    id?: string;
+    price: number;
     description: string;
+    discountPercentage?:number;
+    isPopular?:boolean;
+    billingCycle?:string;
     features: string[];
   }
   

@@ -4,6 +4,7 @@ import { injectable } from 'tsyringe';
 export interface ISubscriptionPlanRepository {
   findAll(): Promise<ISubscriptionPlan[]>;
   findById(id: string): Promise<ISubscriptionPlan | null>;
+  findByType(type: string): Promise<ISubscriptionPlan | null>;
   create(data: Partial<ISubscriptionPlan>): Promise<ISubscriptionPlan>;
   update(id: string, data: Partial<ISubscriptionPlan>): Promise<ISubscriptionPlan | null>;
   delete(id: string): Promise<boolean>;
@@ -17,6 +18,10 @@ export class SubscriptionPlanRepository implements ISubscriptionPlanRepository {
 
   async findById(planId: string): Promise<ISubscriptionPlan | null> {
     return await SubscriptionPlanModel.findById(planId);
+  }
+
+  async findByType(planType: string): Promise<ISubscriptionPlan | null> {
+    return await SubscriptionPlanModel.findOne({type:planType});
   }
 
   async create(data: Partial<ISubscriptionPlan>): Promise<ISubscriptionPlan> {

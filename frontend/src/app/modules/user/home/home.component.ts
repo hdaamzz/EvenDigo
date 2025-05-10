@@ -60,7 +60,11 @@ export class HomeComponent implements OnInit {
   
   subscribeToPlan(plan: SubscriptionPlan) {
     if (plan.type === 'Premium') {
-      this.router.navigate(['/premium/checkout']);
+      this.router.navigate(['/premium/checkout'], { 
+        queryParams: { 
+          type: plan.type
+        }
+      });
       return;
     }
     
