@@ -1,66 +1,62 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserFooterComponent } from "../../../shared/user-footer/user-footer.component";
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { Router } from '@angular/router';
-import { SubscriptionPlan, SubscriptionPlanService } from '../../../core/services/admin/subscription-plan/subscription-plan.service';
-import { takeUntil } from 'rxjs';
+import { SubscriptionPlan } from '../../../core/services/admin/subscription-plan/subscription-plan.service';
+import { Subject, takeUntil } from 'rxjs';
 import Notiflix from 'notiflix';
 import { AuthService } from '../../../core/services/user/auth/auth.service';
 
 @Component({
   selector: 'app-home',
+  standalone: true, 
   imports: [UserFooterComponent, UserNavComponent, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit {
-  plans: SubscriptionPlan[] = [{
-    _id: '',
-    type: '',
-    price: 0,
-    description: '',
-    features: []
-  },{
-    _id: '',
-    type: '',
-    price: 0,
-    description: '',
-    features: []
-  }]
+export class HomeComponent implements OnInit, OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+  plans: SubscriptionPlan[] = [];
   selectedPlan?: SubscriptionPlan;
-
+  
   constructor(
-    private router: Router,
-    private authService:AuthService,
+    private _router: Router,
+    private _authService: AuthService,
   ) {}
 
-  ngOnInit() {
-    this.loadPlans();
+  ngOnInit(): void {
+    this._loadPlans();
+  }
+
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
   
-  loadPlans() {
-    this.authService.getPlans()
-          .subscribe({
-            next: (response ) => {
-              if(response.data){
-                this.plans = response.data;
-              }
-            },
-            error: (error) => {
-              Notiflix.Notify.failure('Failed to load subscription plans');
-              console.error('Error loading plans:', error);
-            }
-          });
+  private _loadPlans(): void {
+    this._authService.getPlans()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.data) {
+            this.plans = response.data;
+          }
+        },
+        error: (error) => {
+          Notiflix.Notify.failure('Failed to load subscription plans');
+          console.error('Error loading plans:', error);
+        }
+      });
   }
   
-  selectPlan(plan: SubscriptionPlan) {
+  selectPlan(plan: SubscriptionPlan): void {
     this.selectedPlan = plan;
   }
   
-  subscribeToPlan(plan: SubscriptionPlan) {
+  subscribeToPlan(plan: SubscriptionPlan): void {
     if (plan.type === 'Premium') {
-      this.router.navigate(['/premium/checkout'], { 
+      this._router.navigate(['/premium/checkout'], { 
         queryParams: { 
           type: plan.type
         }
@@ -69,7 +65,7 @@ export class HomeComponent implements OnInit {
     }
     
     if (plan.type === 'Basic') {
-      this.router.navigate(['/dashboard']);
+      this._router.navigate(['/dashboard']);
     }
   }
 }

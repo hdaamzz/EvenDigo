@@ -9,7 +9,7 @@
             <p class="text-[#A4A4A4] text-base">Log in now to make your event Awesome!</p>
         </div>
 
-        <form class="space-y-6" [formGroup]="loginFrom" (ngSubmit)="signIn()">
+        <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="signIn()">
             <div class="mb-0">
                 <label class="text-[#A4A4A4] text-base mb-2 block" for="email">Email*</label>
                 <div class="relative">
@@ -33,11 +33,11 @@
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                 </div>
-                @if(hasError('email','required') && (loginFrom.get('email')?.dirty || loginFrom.get('email')?.touched)) {
+                @if(hasError('email','required') && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Email is required</p>
-                } @else if (hasError('email', 'fullSpaces') && (loginFrom.get('email')?.dirty || loginFrom.get('email')?.touched)) {
+                } @else if (hasError('email', 'fullSpaces') && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Email cannot contain spaces</p>
-                } @else if (hasError('email','email') && (loginFrom.get('email')?.dirty || loginFrom.get('email')?.touched)) {
+                } @else if (hasError('email','email') && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Please enter a valid email address</p>
                 }
             </div>
@@ -104,9 +104,9 @@
                     </button>
                 </div>
                 
-                @if(hasError('password','required') && (loginFrom.get('password')?.dirty || loginFrom.get('password')?.touched)) {
+                @if(hasError('password','required') && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Password field is required</p>
-                } @else if (hasError('password', 'strongPassword') && (loginFrom.get('password')?.dirty || loginFrom.get('password')?.touched)) {
+                } @else if (hasError('password', 'strongPassword') && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
                     <p class="mt-2 text-center text-sm font-light text-red-500">Password must be at least 8 characters long and include: an uppercase letter, a lowercase letter, a number, and a special character.</p>
                 }
             </div>

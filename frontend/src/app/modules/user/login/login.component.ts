@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { UserFooterComponent } from '../../../shared/user-footer/user-footer.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,117 +8,124 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { selectLoading } from '../../../core/store/auth/auth.selectors';
 import { AuthActions } from '../../../core/store/auth/auth.actions';
-import { Observable } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import { GoogleAuthService } from '../../../core/services/user/googleAuth/google-auth.service';
 import Notiflix from 'notiflix';
 import { AuthService } from '../../../core/services/user/auth/auth.service';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [UserNavComponent, UserFooterComponent, ReactiveFormsModule, CommonModule, RouterModule, AsyncPipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
-  loginFrom!: FormGroup;
+export class LoginComponent implements OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+  loginForm!: FormGroup; 
   forgotForm!: FormGroup;
-  showPassword = false;
+  showPassword: boolean = false;
   loading$: Observable<boolean>;
-  showForgotpassword: boolean = false
+  showForgotpassword: boolean = false;
+  
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private googleAuthService: GoogleAuthService,
-    private store: Store,
-    private router:Router
+    private _fb: FormBuilder,
+    private _authService: AuthService,
+    private _googleAuthService: GoogleAuthService,
+    private _store: Store,
+    private _router: Router
   ) {
-    this.showForgotpassword = false
-    this.initializeForms();
-    this.loading$ = this.store.select(selectLoading);
+    this.showForgotpassword = false;
+    this._initializeForms();
+    this.loading$ = this._store.select(selectLoading);
   }
 
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
 
-  private initializeForms() {
-      this.loginFrom = this.fb.group({
-        email: [
-          '',
-          [
-            Validators.required,
-            spacesValidator(),
-            emailValidator(),
-          ],
+  private _initializeForms(): void {
+    this.loginForm = this._fb.group({
+      email: [
+        '',
+        [
+          Validators.required,
+          spacesValidator(),
+          emailValidator(),
         ],
-        password: [
-          '',
-          [
-            Validators.required,
-            passwordValidator()
-          ]
+      ],
+      password: [
+        '',
+        [
+          Validators.required,
+          passwordValidator()
         ]
-      }),
-      this.forgotForm = this.fb.group({
-        email: [
-          '',
-          [
-            Validators.required,
-            spacesValidator(),
-            emailValidator(),
-          ],
-        ]
-      })
+      ]
+    });
+    
+    this.forgotForm = this._fb.group({
+      email: [
+        '',
+        [
+          Validators.required,
+          spacesValidator(),
+          emailValidator(),
+        ],
+      ]
+    });
   }
 
-  signIn() {
-    if (!this.loginFrom.valid) {
-      this.loginFrom.markAllAsTouched();
+  signIn(): void {
+    if (!this.loginForm.valid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
-    const formData = this.loginFrom.value;
-    this.store.dispatch(AuthActions.login(formData));
-  };
+    const formData = this.loginForm.value;
+    this._store.dispatch(AuthActions.login(formData));
+  }
 
-  
-  forgotPassword() {
-    
-    
+  forgotPassword(): void {
     if (!this.forgotForm.valid) {
       this.forgotForm.markAllAsTouched();
       return;
     }
     
     const formData = this.forgotForm.value;
-    this.authService.forgotPassword(formData).subscribe({
-      next:(response) => {
-        this.router.navigateByUrl('/')
-        Notiflix.Notify.success('Reset email sent to your inbox')
-      },
-      error:(err) => {
-        Notiflix.Notify.failure(err.error.message)
-      }
-    })
+    this._authService.forgotPassword(formData)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          this._router.navigateByUrl('/');
+          Notiflix.Notify.success('Reset email sent to your inbox');
+        },
+        error: (err) => {
+          Notiflix.Notify.failure(err.error.message);
+        }
+      });
   }
 
-  hasError(controlName: string, errorName: string) {
-    return this.loginFrom.controls[controlName].hasError(errorName);
+  hasError(controlName: string, errorName: string): boolean {
+    return this.loginForm.controls[controlName].hasError(errorName);
   }
   
-  hasErrorForgot(controlName: string, errorName: string) {
+  hasErrorForgot(controlName: string, errorName: string): boolean {
     return this.forgotForm.controls[controlName].hasError(errorName);
   }
   
-  hasFormError(errorName: string) {
-    return this.loginFrom.hasError(errorName);
+  hasFormError(errorName: string): boolean {
+    return this.loginForm.hasError(errorName);
   }
   
-  togglePasswordVisibility() {
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
   
-  loginWithGoogle() {
-    this.store.dispatch(AuthActions.googleLogin());
+  loginWithGoogle(): void {
+    this._store.dispatch(AuthActions.googleLogin());
   }
   
-  openForgotpassword() {
-    this.showForgotpassword = !this.showForgotpassword
+  openForgotpassword(): void {
+    this.showForgotpassword = !this.showForgotpassword;
   }
 }

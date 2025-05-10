@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
 import { UserFooterComponent } from "../../../shared/user-footer/user-footer.component";
-import { catchError, delay, finalize, of, tap } from 'rxjs';
+import { catchError, finalize, Observable, of, Subject, takeUntil, tap } from 'rxjs';
 import Notiflix from 'notiflix';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
@@ -14,21 +14,23 @@ import { IWallet } from '../../../core/models/wallet.interface';
 import { PremiumService } from '../../../core/services/user/subscription/premium.service';
 import { SubscriptionPlan } from '../../../core/models/subscription.interface';
 
+type PaymentMethod = 'wallet' | 'card';
+
 @Component({
   selector: 'app-premium-checkout',
+  standalone: true,
   imports: [CommonModule, FormsModule, UserNavComponent, UserFooterComponent],
   templateUrl: './premium-checkout.component.html',
   styleUrl: './premium-checkout.component.css'
 })
-export class PremiumCheckoutComponent implements OnInit {
+export class PremiumCheckoutComponent implements OnInit, OnDestroy {
+  // Public properties
   wallet!: IWallet;
-  selectedPaymentMethod: 'wallet' | 'card' = 'card';
-  stripe!: Stripe | null;
-  proceedLoading: boolean = false;
-  isWalletLoading: boolean = true;
+  selectedPaymentMethod: PaymentMethod = 'card';
+  proceedLoading = false;
+  isWalletLoading = true;
   errorMessage: string | null = null;
-  planPrice: number = 499;
-  planDetails:SubscriptionPlan={
+  planDetails: SubscriptionPlan = {
     id: '',
     price: 0,
     description: '',
@@ -36,38 +38,64 @@ export class PremiumCheckoutComponent implements OnInit {
     isPopular: false,
     billingCycle: '',
     features: []
-  }
-  // planDetails = {
-  //   name: 'Premium Plan',
-  //   price: 499,
-  //   billing: 'Monthly',
-  //   features: [
-  //     'Unlimited Participants',
-  //     'Paid Event Creation',
-  //     'Live Event Streaming',
-  //     'No Platform Fee',
-  //     'Full Refund Options',
-  //     'Priority Support'
-  //   ]
-  // };
+  };
+
+  // Private properties
+  private _stripe: Stripe | null = null;
+  private _destroy$ = new Subject<void>();
 
   constructor(
-    private router: Router,
-    private walletService: WalletService,
-    private premiumService: PremiumService,
-    private route: ActivatedRoute,
-  ) { }
+    private _router: Router,
+    private _walletService: WalletService,
+    private _premiumService: PremiumService,
+    private _route: ActivatedRoute,
+  ) {}
 
-  async ngOnInit() {
-    this.getPlan();
-    this.getUserWallet();
-    await this.initializeStripe();
+  ngOnInit(): void {
+    this._loadPlanDetails();
+    this._loadWalletDetails();
+    this._initializeStripe();
   }
 
-  private async initializeStripe() {
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  selectPaymentMethod(method: PaymentMethod): void {
+    this.selectedPaymentMethod = method;
+    this.errorMessage = null;
+  }
+
+  get hasInsufficientBalance(): boolean {
+    return this.wallet && this.wallet.walletBalance < this.planDetails.price;
+  }
+
+  async completePurchase(): Promise<void> {
+    if (this.proceedLoading) return;
+    
+    this.proceedLoading = true;
+    this.errorMessage = null;
+    
     try {
-      this.stripe = await loadStripe(environment.stripePublishKey);
-      if (!this.stripe) {
+      if (this.selectedPaymentMethod === 'wallet') {
+        await this._processWalletPayment();
+      } else {
+        await this._processCardPayment();
+      }
+    } catch (error: any) {
+      this.errorMessage = error.message || 'Payment processing failed. Please try again.';
+      console.error('Payment error:', error);
+      Notiflix.Notify.failure(this.errorMessage ?? 'An error occurred');
+    } finally {
+      this.proceedLoading = false;
+    }
+  }
+
+  private async _initializeStripe(): Promise<void> {
+    try {
+      this._stripe = await loadStripe(environment.stripePublishKey);
+      if (!this._stripe) {
         this.errorMessage = 'Payment service unavailable. Please try again later.';
         Notiflix.Notify.failure(this.errorMessage);
       }
@@ -78,98 +106,74 @@ export class PremiumCheckoutComponent implements OnInit {
     }
   }
 
+  private _loadWalletDetails(): void {
+    this.isWalletLoading = true;
     
-
-  getUserWallet() {
-    this.isWalletLoading = true;
-    this.walletService.getWalletDetails().pipe(
-      tap((response) => {
-        if (response.data) {
-          this.wallet = response.data;
-        } else {
-          throw new Error('Wallet data not available');
-        }
-      }),
-      catchError((error) => {
-        console.error('Error fetching wallet:', error);
-        const errorMsg = error.error?.error || 'Error fetching wallet details';
-        Notiflix.Notify.failure(errorMsg);
-        return of(null);
-      }),
-      finalize(() => {
-        this.isWalletLoading = false;
-      })
-    ).subscribe();
-  }
-
-  getPlan() {
-    this.isWalletLoading = true;
-    const planType = this.route.snapshot.queryParamMap.get('type');
-    if(planType){
-      this.premiumService.getSubscriptionByType(planType).subscribe(
-        (response) => {
-          this.isWalletLoading = false;
-          if(response.data){
-            this.planDetails = response.data
+    this._walletService.getWalletDetails()
+      .pipe(
+        takeUntil(this._destroy$),
+        tap(response => {
+          if (response.data) {
+            this.wallet = response.data;
+          } else {
+            throw new Error('Wallet data not available');
           }
-        },
-        (error) => {
-          console.error("Error fetching subscription details:", error);
-          this.router.navigate(['/']);
-        }
-      );
-    }
+        }),
+        catchError(error => {
+          console.error('Error fetching wallet:', error);
+          const errorMsg = error.error?.error || 'Error fetching wallet details';
+          Notiflix.Notify.failure(errorMsg);
+          return of(null);
+        }),
+        finalize(() => {
+          this.isWalletLoading = false;
+        })
+      )
+      .subscribe();
+  }
+
+  private _loadPlanDetails(): void {
+    this.isWalletLoading = true;
+    const planType = this._route.snapshot.queryParamMap.get('type');
     
-  }
-
-  selectPaymentMethod(method: 'wallet' | 'card') {
-    this.selectedPaymentMethod = method;
-    this.errorMessage = null;
-  }
-
-  get hasInsufficientBalance(): boolean {
-    return this.wallet && this.wallet.walletBalance < this.planPrice;
-  }
-
-  async completePurchase() {
-    if (this.proceedLoading) return;
-    this.proceedLoading = true;
-    this.errorMessage = null;
-    
-    try {
-      if (this.selectedPaymentMethod === 'wallet') {
-        setTimeout(async ()=>{
-          await this.processWalletPayment();
-        },2000)
-      } else {
-        await this.processCardPayment();
-      }
-    } catch (error: any) {
-      this.errorMessage = error.message || 'Payment processing failed. Please try again.';
-      console.error('Payment error:', error);
-      Notiflix.Notify.failure(`${this.errorMessage}`);
-    } finally {
-      this.proceedLoading = false;
+    if (planType) {
+      this._premiumService.getSubscriptionByType(planType)
+        .pipe(
+          takeUntil(this._destroy$),
+          tap(response => {
+            if (response.data) {
+              this.planDetails = response.data;
+            }
+          }),
+          catchError(error => {
+            console.error("Error fetching subscription details:", error);
+            this._router.navigate(['/']);
+            return of(null);
+          }),
+          finalize(() => {
+            this.isWalletLoading = false;
+          })
+        )
+        .subscribe();
     }
   }
 
-  private async processWalletPayment() {
+  private async _processWalletPayment(): Promise<void> {
     if (this.hasInsufficientBalance) {
       throw new Error('Insufficient wallet balance. Please add funds or use a card.');
     }
     
     const payload = {
       planType: 'premium',
-      amount: this.planPrice,
-      successUrl: window.location.origin + '/premium/success',
-      cancelUrl: window.location.origin + '/premium/checkout'
+      amount: this.planDetails.price,
+      successUrl: `${window.location.origin}/premium/success`,
+      cancelUrl: `${window.location.origin}/premium/checkout`
     };
     
-    const response = await firstValueFrom(this.premiumService.processWalletUpgrade(payload));
-    console.log(response);
+    const response = await firstValueFrom(this._premiumService.processWalletUpgrade(payload));
     
     if (response.success) {
-      this.router.navigate(['/premium/success'], { 
+      this._router.navigate(['/premium/success'], { 
         queryParams: { 
           session_id: response.data?.stripeSessionId
         }
@@ -180,25 +184,25 @@ export class PremiumCheckoutComponent implements OnInit {
     }
   }
 
-  private async processCardPayment() {
-    if (!this.stripe) {
+  private async _processCardPayment(): Promise<void> {
+    if (!this._stripe) {
       throw new Error('Payment service not initialized. Please refresh the page.');
     }
     
     const payload = {
       planType: 'premium',
-      amount: this.planPrice,
-      successUrl: window.location.origin + '/payment/success',
-      cancelUrl: window.location.origin + '/premium/checkout'
+      amount: this.planDetails.price,
+      successUrl: `${window.location.origin}/payment/success`,
+      cancelUrl: `${window.location.origin}/premium/checkout`
     };
     
-    const response = await firstValueFrom(this.premiumService.createStripeSubscription(payload));
+    const response = await firstValueFrom(this._premiumService.createStripeSubscription(payload));
     
     if (!response.success || !response.data?.sessionId) {
       throw new Error(response.error || 'Failed to create payment session.');
     }
     
-    const { error } = await this.stripe.redirectToCheckout({ 
+    const { error } = await this._stripe.redirectToCheckout({ 
       sessionId: response.data.sessionId 
     });
     

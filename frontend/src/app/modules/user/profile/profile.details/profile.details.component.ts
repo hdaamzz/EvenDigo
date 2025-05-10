@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -10,7 +10,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { alphabetsValidator, changePasswordMatchValidator, mobileNumberValidator, repeateCharacterValidator, spacesValidator } from '../../../../validators/formValidators';
 import { CloudinaryService } from '../../../../core/services/utility/cloudinary.service';
 import { UserProfileService } from '../../../../core/services/user/profile/user.profile.service';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, of, tap, Subscription } from 'rxjs';
 import { passwordValidator } from '../../../../validators/formValidators';
 
 
@@ -23,7 +23,7 @@ import { passwordValidator } from '../../../../validators/formValidators';
   styleUrl: './profile.details.component.css',
   encapsulation: ViewEncapsulation.None
 })
-export class ProfileDetailsComponent implements OnInit {
+export class ProfileDetailsComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef;
   user: any = {};
   userForm!: FormGroup;
@@ -53,7 +53,7 @@ export class ProfileDetailsComponent implements OnInit {
   showNewPassword = false;
   showConfirmPassword = false;
 
-
+  private subscriptions: Subscription[] = [];
 
   badgeCategoryColors: Record<string, { gradient: string; icon: string; glow: string; border: string }> = {
     'event': { gradient: 'from-blue-600 to-cyan-400', icon: 'text-cyan-100', glow: 'cyan-400/30', border: 'cyan-400' },
@@ -103,7 +103,12 @@ export class ProfileDetailsComponent implements OnInit {
     this.verificationRequestDetails();
     this.loadUserBadges();
     this.fetchEventCount();
-    this.fetchUserBookingCount()
+    this.fetchUserBookingCount();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   getBadgeStyles(badge: any, index: number): any {
@@ -140,6 +145,7 @@ export class ProfileDetailsComponent implements OnInit {
       gender: [this.user.gender || '', [Validators.required, alphabetsValidator()]]
     });
   }
+  
   initializePasswordForm(): void {
     this.changePasswordForm = this.fb.group({
       currentPassword: ['', [Validators.required]],
@@ -149,17 +155,19 @@ export class ProfileDetailsComponent implements OnInit {
       validators: changePasswordMatchValidator
     });
   }
+  
   openChangePasswordDialog(): void {
     this.showChangePasswordDialog = true;
     this.initializePasswordForm();
   }
+  
   closeChangePasswordDialog(): void {
     this.showChangePasswordDialog = false;
     this.changePasswordForm.reset();
   }
 
   loadUserProfile(): void {
-    this.userProfileService.userDetails().subscribe({
+    const sub = this.userProfileService.userDetails().subscribe({
       next: (userData) => {
         this.user = userData.data;
         if (this.user.dateOfBirth) {
@@ -174,44 +182,49 @@ export class ProfileDetailsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+    this.subscriptions.push(sub);
   }
+  
   fetchEventCount() {
-      this.userProfileService.getUserEvents().pipe(
-        tap((response) => {
-          if(response.data){
-            this.eventOrganized = response.data.length;
-          }
-        }),
-        catchError((error) => {
-          console.error('Error fetching events:', error);
-          Notiflix.Notify.failure('Error fetching events');
-          return of(null);
-        })
-      ).subscribe();
+    const sub = this.userProfileService.getUserEvents().pipe(
+      tap((response) => {
+        if(response.data){
+          this.eventOrganized = response.data.length;
+        }
+      }),
+      catchError((error) => {
+        console.error('Error fetching events:', error);
+        Notiflix.Notify.failure('Error fetching events');
+        return of(null);
+      })
+    ).subscribe();
+    this.subscriptions.push(sub);
   }
 
   loadUserBadges(): void {
-    this.userProfileService.getBadgeById().subscribe({
+    const sub = this.userProfileService.getBadgeById().subscribe({
       next: (response) => {
         this.achievements = response.data;
       }
     });
+    this.subscriptions.push(sub);
   }
 
   fetchUserBookingCount() {
-      this.userProfileService.getUserBookings().subscribe({
-        next: (response) => {
-          if (response) {
-            this.eventParticipated = response.data.length;
-          } else {
-            Notiflix.Notify.failure('Failed to load your events.');
-          }
-        },
-        error: (error) => {
-          console.error('Error loading events:', error);
-          Notiflix.Notify.failure('Error loading your events.');
-        },
-      });
+    const sub = this.userProfileService.getUserBookings().subscribe({
+      next: (response) => {
+        if (response) {
+          this.eventParticipated = response.data.length;
+        } else {
+          Notiflix.Notify.failure('Failed to load your events.');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading events:', error);
+        Notiflix.Notify.failure('Error loading your events.');
+      },
+    });
+    this.subscriptions.push(sub);
   }
 
   updateProfile(): void {
@@ -224,7 +237,7 @@ export class ProfileDetailsComponent implements OnInit {
       this.isLoading = true;
       const updatedData = this.userForm.value;
       
-      this.userProfileService.updateUserProfile(updatedData).subscribe({
+      const sub = this.userProfileService.updateUserProfile(updatedData).subscribe({
         next: (response) => {
           this.user = { ...this.user, ...updatedData };
           Notiflix.Notify.success('Profile updated successfully');
@@ -237,8 +250,10 @@ export class ProfileDetailsComponent implements OnInit {
           this.isLoading = false;
         }
       });
+      this.subscriptions.push(sub);
     }
   }
+  
   submitPasswordChange(): void {
     if (this.changePasswordForm.invalid) {
       this.changePasswordForm.markAllAsTouched();
@@ -252,7 +267,7 @@ export class ProfileDetailsComponent implements OnInit {
       confirmPassword: this.changePasswordForm.value.confirmPassword
     };
   
-    this.userProfileService.changePassword(passwordData).subscribe({
+    const sub = this.userProfileService.changePassword(passwordData).subscribe({
       next: (response) => {
         Notiflix.Notify.success('Password changed successfully');
         this.closeChangePasswordDialog();
@@ -264,6 +279,7 @@ export class ProfileDetailsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+    this.subscriptions.push(sub);
   }
 
   cancelEdit(): void {
@@ -279,7 +295,7 @@ export class ProfileDetailsComponent implements OnInit {
   }
 
   sendVerificationRequest(): void {
-    this.userProfileService.verificationRequest().subscribe({
+    const sub = this.userProfileService.verificationRequest().subscribe({
       next: (response) => {
         this.verificationRequestDetails();
         Notiflix.Notify.success(response.message);
@@ -289,10 +305,11 @@ export class ProfileDetailsComponent implements OnInit {
         Notiflix.Notify.failure(error.message);
       }
     });
+    this.subscriptions.push(sub);
   }
 
   verificationRequestDetails(): void {
-    this.userProfileService.verificationRequestDetails().subscribe({
+    const sub = this.userProfileService.verificationRequestDetails().subscribe({
       next: (response) => {
         this.verificationData = response.data;
       },
@@ -300,9 +317,8 @@ export class ProfileDetailsComponent implements OnInit {
         console.error('Error getting verification profile:', error);
       }
     });
+    this.subscriptions.push(sub);
   }
-
-
 
   openFileSelector(): void {
     this.fileInput.nativeElement.click();
@@ -315,7 +331,7 @@ export class ProfileDetailsComponent implements OnInit {
     if (file) {
       this.isLoading = true;
       
-      this.cloudinaryService.uploadProfileImage(file).subscribe({
+      const sub = this.cloudinaryService.uploadProfileImage(file).subscribe({
         next: (response) => {
           if (response.success) {
             this.user.profileImg = response.imageUrl;
@@ -334,6 +350,7 @@ export class ProfileDetailsComponent implements OnInit {
           this.imageError = true;
         }
       });
+      this.subscriptions.push(sub);
     }
   }
 
@@ -367,9 +384,11 @@ export class ProfileDetailsComponent implements OnInit {
     return !!(this.user.name && this.user.email && this.user.phone &&
       this.user.bio && this.user.location && this.user.dateOfBirth);
   }
+  
   hasError(controlName: string, errorName: string): boolean {
     return this.userForm.controls[controlName].hasError(errorName);
   }
+  
   hasPasswordError(controlName: string, errorName: string): boolean {
     return this.changePasswordForm.controls[controlName].hasError(errorName);
   }

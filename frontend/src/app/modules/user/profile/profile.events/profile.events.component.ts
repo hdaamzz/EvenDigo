@@ -47,7 +47,6 @@ export class ProfileEventsComponent implements OnInit{
       ).subscribe();
     }
     editEvent(eventId: string) {
-      // Navigate to edit page or open edit dialog
       this.router.navigate(['/profile/edit-event', eventId]);
     }
   

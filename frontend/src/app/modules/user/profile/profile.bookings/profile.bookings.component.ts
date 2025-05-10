@@ -1,85 +1,73 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Notiflix from 'notiflix';
+import { Subject, takeUntil } from 'rxjs';
 import { UserProfileService } from '../../../../core/services/user/profile/user.profile.service';
 import { IBooking, ITicket } from '../../../../core/models/booking.interface';
 
 @Component({
-  selector: 'app-profile.bookings',
+  selector: 'app-profile-bookings',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './profile.bookings.component.html',
   styleUrl: './profile.bookings.component.css'
 })
-export class ProfileBookingsComponent implements OnInit{
+export class ProfileBookingsComponent implements OnInit, OnDestroy {
+  // Public properties
   bookings: IBooking[] = [];
-
-
-  showModal: boolean = false;
-  showBookingDetailsModal: boolean = false;
-  showQRModal: boolean = false;
-
-
-  selectedBookingId: string = '';
+  showModal = false;
+  showBookingDetailsModal = false;
+  showQRModal = false;
+  selectedBookingId = '';
   selectedTicket: ITicket | null = null;
   selectedBooking: IBooking | null = null;
   
-  constructor(private userProfileService: UserProfileService) {}
+  // Private properties
+  private _destroy$ = new Subject<void>();
   
-  ngOnInit() {
-    this.loadUserEvents();
+  constructor(private _userProfileService: UserProfileService) {}
+  
+  ngOnInit(): void {
+    this._loadUserBookings();
   }
   
-  loadUserEvents() {
-    this.userProfileService.getUserBookings().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.bookings = response.data;
-        } else {
-          Notiflix.Notify.failure('Failed to load your events.');
-        }
-      },
-      error: (error) => {
-        console.error('Error loading events:', error);
-        Notiflix.Notify.failure('Error loading your events.');
-      },
-    });
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
-
-  showBookingDetails(booking: IBooking) {
+  
+  showBookingDetails(booking: IBooking): void {
     this.selectedBooking = booking;
     this.showBookingDetailsModal = true;
   }
   
-  hideBookingDetailsModal() {
+  hideBookingDetailsModal(): void {
     this.showBookingDetailsModal = false;
     this.selectedBooking = null;
   }
   
-  showQRCode(ticket: ITicket) {
+  showQRCode(ticket: ITicket): void {
     this.selectedTicket = ticket;
     this.showQRModal = true;
   }
   
-  hideQRModal() {
+  hideQRModal(): void {
     this.showQRModal = false;
     this.selectedTicket = null;
   }
   
-
-
-
-  showCancellationModal(bookingId: string, ticket: ITicket) {
+  showCancellationModal(bookingId: string, ticket: ITicket): void {
     this.showBookingDetailsModal = false;
     this.selectedBookingId = bookingId;
     this.selectedTicket = ticket;
     this.showModal = true;    
   }
 
-  hideModal() {
+  hideModal(): void {
     this.showModal = false;
   }
 
-  downloadTicket(booking: IBooking) {
+  downloadTicket(booking: IBooking): void {
     Notiflix.Notify.info('Downloading your tickets...');
     // Implement the download logic or API call here
     setTimeout(() => {
@@ -87,41 +75,23 @@ export class ProfileBookingsComponent implements OnInit{
     }, 1500);
   }
 
-
-  proceedWithCancellation() {
+  proceedWithCancellation(): void {
     this.hideModal();
-    console.log("cancell");
     
     if (!this.selectedBookingId || !this.selectedTicket) {
       return;
     }
     
     const ticketPrice = this.selectedTicket.price;
-    const refundAmount = Math.floor((ticketPrice * 0.9)*this.selectedTicket.quantity);
-    console.log(ticketPrice,refundAmount); 
+    const refundAmount = Math.floor((ticketPrice * 0.9) * this.selectedTicket.quantity);
     
     Notiflix.Confirm.show(
       'Confirm Cancellation',
-      `Are you sure you want to cancel ${this.selectedTicket.quantity} ${this.selectedTicket.type} Tickets  ₹${refundAmount.toFixed(2)} will be credited to your wallet.`,
+      `Are you sure you want to cancel ${this.selectedTicket.quantity} ${this.selectedTicket.type} Tickets? ₹${refundAmount.toFixed(2)} will be credited to your wallet.`,
       'Yes, Cancel Ticket',
       'No, Keep Ticket',
-      () => {
-        this.userProfileService.cancelTicket(this.selectedBookingId, this.selectedTicket!.uniqueId).subscribe({
-          next: (response) => {
-            this.loadUserEvents();
-            Notiflix.Notify.success('Ticket cancelled successfully. Amount credited to your wallet.');
-          },  
-          error: (err) => {
-            console.error('Error cancelling ticket:', err);
-            Notiflix.Notify.failure('Failed to cancel ticket. Please try again.');
-          }
-        });
-      },
-      () => {
-            this.selectedBookingId = '';
-            this.selectedTicket = null;
-        console.log('Ticket cancellation aborted');
-      },
+      () => this._cancelTicket(refundAmount),
+      () => this._resetCancellationState(),
       {
         width: '320px',
         borderRadius: '8px',
@@ -133,5 +103,47 @@ export class ProfileBookingsComponent implements OnInit{
         messageMaxLength: 1000
       }
     );
+  }
+  
+  private _loadUserBookings(): void {
+    this._userProfileService.getUserBookings()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.bookings = response.data;
+          } else {
+            Notiflix.Notify.failure('Failed to load your events.');
+          }
+        },
+        error: (error) => {
+          console.error('Error loading events:', error);
+          Notiflix.Notify.failure('Error loading your events.');
+        },
+      });
+  }
+  
+  private _cancelTicket(refundAmount: number): void {
+    if (!this.selectedBookingId || !this.selectedTicket) {
+      return;
+    }
+    
+    this._userProfileService.cancelTicket(this.selectedBookingId, this.selectedTicket.uniqueId)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: () => {
+          this._loadUserBookings();
+          Notiflix.Notify.success('Ticket cancelled successfully. Amount credited to your wallet.');
+        },  
+        error: (err) => {
+          console.error('Error cancelling ticket:', err);
+          Notiflix.Notify.failure('Failed to cancel ticket. Please try again.');
+        }
+      });
+  }
+  
+  private _resetCancellationState(): void {
+    this.selectedBookingId = '';
+    this.selectedTicket = null;
   }
 }
