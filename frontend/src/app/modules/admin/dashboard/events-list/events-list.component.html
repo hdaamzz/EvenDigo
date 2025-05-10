@@ -11,12 +11,12 @@
   
             <!-- Event List - Card  -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @if (loading && eventList.length === 0) {
+                @if (isLoading && events.length === 0) {
                   <div class="col-span-full text-center py-4 text-gray-500">Loading events...</div>
-                } @else if (eventList.length === 0) {
+                } @else if (events.length === 0) {
                   <div class="col-span-full text-center py-4 text-gray-500">No events found</div>
                 } @else {
-                  @for (event of eventList; track event._id) {
+                  @for (event of events; track event._id) {
                     <app-admin-card 
                       [statusBadge]="getEventStatusBadge(event)" 
                       [menuItems]="getMenuItems(event)"
@@ -60,12 +60,12 @@
             
             <!-- Loading indicator and intersection observer target -->
             <div class="mt-6 text-center" #endOfList>
-                @if (loading && eventList.length > 0) {
+                @if (isLoading && events.length > 0) {
                     <div class="flex justify-center items-center py-4">
                         <div class="w-8 h-8 border-4 border-t-green-500 border-b-green-300 border-l-green-300 border-r-green-300 rounded-full animate-spin"></div>
                         <span class="ml-3 text-green-600">Loading more events...</span>
                     </div>
-                } @else if (!hasMoreEvents && eventList.length > 0) {
+                } @else if (!hasMoreEvents && events.length > 0) {
                     <div class="py-4 text-gray-500">
                         <span class="bg-gray-100 px-4 py-2 rounded-full text-sm">No more events to load</span>
                     </div>
@@ -107,7 +107,7 @@
                         <p class="flex items-center text-gray-700"><i class="pi pi-map-marker mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.city }} | {{ selectedEvent?.venueName }}</p>
                         <p class="flex items-center text-gray-700"><i class="pi pi-calendar mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.startDate | date:'MMM d yyyy' }}, {{ selectedEvent?.startTime | date:'h:mm a' }}</p>
                         <p class="flex items-center text-gray-700"><i class="pi pi-clock mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.endingDate | date:'MMM d yyyy' }}, {{ selectedEvent?.endingTime | date:'h:mm a' }}</p>
-                        <p class="flex items-center text-gray-700"><i class="pi pi-user mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.user_id.name }}</p>
+                        <p class="flex items-center text-gray-700"><i class="pi pi-user mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.user_id?.name }}</p>
                     </div>
                     <div class="space-y-3">
                         <p class="flex items-center text-gray-700"><i class="pi pi-globe mr-2 text-green-600 text-lg"></i>Visibility: {{ selectedEvent?.eventVisibility }}</p>
@@ -119,7 +119,7 @@
                             </span>
                         </p> 
                         <p class="flex items-center text-gray-700"><i class="pi pi-id-card mr-2 text-green-600 text-lg"></i>Age Restriction: {{ selectedEvent?.ageRestriction ? 'Yes' : 'No' }}</p>
-                        <p class="flex items-center text-gray-700"><i class="pi pi-envelope mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.user_id.email }}</p>
+                        <p class="flex items-center text-gray-700"><i class="pi pi-envelope mr-2 text-green-600 text-lg"></i>{{ selectedEvent?.user_id?.email }}</p>
                         <p class="flex items-center text-gray-700"><i class="pi pi-calendar-plus mr-2 text-green-600 text-lg"></i>Created: {{ selectedEvent?.createdAt | date:'MMM d yyyy' }}</p>
                     </div>
                 </div>

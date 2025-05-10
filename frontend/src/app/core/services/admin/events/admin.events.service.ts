@@ -1,23 +1,33 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { EventsApiResponse } from '../../../models/admin/admin.interface';
 import { IEvent } from '../../../models/event.interface';
 
+/**
+ * Service for managing admin events operations
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class AdminEventsService {
-  private baseUrl=environment.baseUrl;
-  constructor(private http :HttpClient) { }
+  private readonly _baseUrl = environment.baseUrl;
+  
+  constructor(private _http: HttpClient) { }
 
-  eventList(page: number = 1, limit: number = 9): Observable<EventsApiResponse> {
+  /**
+   * Retrieves a paginated list of events
+   * @param page The page number to retrieve
+   * @param limit Number of events per page
+   * @returns Observable with events response data
+   */
+  getEvents(page = 1, limit = 9): Observable<EventsApiResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<IEvent[]>(`${this.baseUrl}admin/events`, {
+    return this._http.get<IEvent[]>(`${this._baseUrl}admin/events`, {
       withCredentials: true,
       params
     }).pipe(
@@ -25,25 +35,39 @@ export class AdminEventsService {
         success: true as const,
         data: events
       })),
-      catchError((error: HttpErrorResponse) => {
-        const errMsg = error.error?.message || 'An error occurred while fetching events';
-        return of({
-          success: false as const,
-          message: errMsg
-        });
-      })
+      catchError(this._handleError)
     );
   }
   
+  /**
+   * Updates the visibility status of an event
+   * @param eventId ID of the event to update
+   * @param status New status value
+   * @returns Observable with the API response
+   */
+  updateEventStatus(eventId: string, status: boolean): Observable<EventsApiResponse> {
+    return this._http.patch<any>(
+      `${this._baseUrl}admin/events/${eventId}/status`, 
+      { status },
+      { withCredentials: true }
+    ).pipe(
+      map(response => response),
+      catchError(this._handleError)
+    );
+  }
 
-  updateEventStatus(eventId: string, status: boolean) {
-    return this.http.patch<any>(`${this.baseUrl}admin/events/${eventId}/status`, { status },{withCredentials: true})
-      .pipe(
-        map(response => response),
-        catchError(error => {
-          console.error('Error updating event status:', error);
-          return throwError(() => error);
-        })
-      );
+  /**
+   * Common error handler for HTTP requests
+   * @param error The HTTP error response
+   * @returns Observable with standardized error response
+   */
+  private _handleError(error: HttpErrorResponse): Observable<EventsApiResponse> {
+    const errorMessage = error.error?.message || 'An error occurred while processing your request';
+    console.error('API Error:', error);
+    
+    return throwError(() => ({
+      success: false as const,
+      message: errorMessage
+    }));
   }
 }
