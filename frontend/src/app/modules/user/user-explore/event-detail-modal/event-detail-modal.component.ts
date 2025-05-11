@@ -2,11 +2,12 @@ import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, EventEmitte
 import { CommonModule } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { LucideAngularModule, X, Calendar, MapPin, Users, Share2, Heart } from 'lucide-angular';
+import { Router } from '@angular/router';
+import { Subject, catchError, of, takeUntil, tap } from 'rxjs';
+import Notiflix from 'notiflix';
+
 import { IEvent } from '../../../../core/models/event.interface';
 import { UserDashboardService } from '../../../../core/services/user/dashboard/user.dashboard.service';
-import { catchError, of, tap } from 'rxjs';
-import Notiflix from 'notiflix';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-event-detail-modal',
@@ -34,68 +35,51 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
   isLoading = true;
   liked = false;
   ticketCounts: { [key: string]: number } = { regular: 0, vip: 0, gold: 0 };
-  totalTickets: number = 0;
-  maxTicketsPerUser: number = 5;
+  totalTickets = 0;
+  readonly maxTicketsPerUser = 5;
+
+  // Lucide icons
+  readonly X = X;
+  readonly Calendar = Calendar;
+  readonly MapPin = MapPin;
+  readonly Users = Users;
+  readonly Share2 = Share2;
+  readonly Heart = Heart;
+
+  private readonly _destroy$ = new Subject<void>();
+  private readonly _handleClickOutside = this._clickOutsideHandler.bind(this);
 
   constructor(
-    private dashboardService: UserDashboardService,
-    private router: Router
-  ) { }
+    private readonly _dashboardService: UserDashboardService,
+    private readonly _router: Router
+  ) {}
 
-  ngOnInit() {
-    this.showEventDetails(this.id);
-    document.addEventListener('mousedown', this.handleClickOutside.bind(this));
+  ngOnInit(): void {
+    this._fetchEventDetails(this.id);
+    document.addEventListener('mousedown', this._handleClickOutside);
   }
 
-  ngOnDestroy() {
-    document.removeEventListener('mousedown', this.handleClickOutside.bind(this));
+  ngOnDestroy(): void {
+    document.removeEventListener('mousedown', this._handleClickOutside);
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
-  showEventDetails(id: string) {
-    this.isLoading = true;
-    this.dashboardService.getEventById(id).pipe(
-      tap((response) => {
-        if (response.data) {
-          this.eventData = response.data;
-          this.isLoading = false;
-          this.eventData.tickets.forEach((ticket: any) => {
-            const type = ticket.type.toLowerCase();
-            if (!this.ticketCounts[type]) {
-              this.ticketCounts[type] = 0;
-            }
-          });
-        }
-
-      }),
-      catchError((error) => {
-        console.error('Error fetching event:', error);
-        Notiflix.Notify.failure('Error fetching event details');
-        this.isLoading = false;
-        return of(null);
-      })
-    ).subscribe();
-  }
-
-  handleClose() {
+  handleClose(): void {
     this.close.emit();
   }
 
-  toggleLike() {
+  toggleLike(): void {
     this.liked = !this.liked;
-  }
-
-  handleClickOutside(event: MouseEvent) {
-    if (this.modalRef && !this.modalRef.nativeElement.contains(event.target as Node)) {
-      this.handleClose();
-    }
   }
 
   incrementTicket(index: number): void {
     const ticket = this.eventData.tickets[index];
     const ticketType = ticket.type.toLowerCase();
+    
     if (this.totalTickets < this.maxTicketsPerUser && this.ticketCounts[ticketType] < ticket.quantity) {
       this.ticketCounts[ticketType]++;
-      this.totalTickets = Object.values(this.ticketCounts).reduce((sum, count) => sum + count, 0);
+      this._updateTotalTickets();
     } else if (this.totalTickets >= this.maxTicketsPerUser) {
       Notiflix.Notify.warning(`You can only purchase up to ${this.maxTicketsPerUser} tickets.`);
     }
@@ -104,19 +88,20 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
   decrementTicket(index: number): void {
     const ticket = this.eventData.tickets[index];
     const ticketType = ticket.type.toLowerCase();
+    
     if (this.ticketCounts[ticketType] > 0) {
       this.ticketCounts[ticketType]--;
-      this.totalTickets = Object.values(this.ticketCounts).reduce((sum, count) => sum + count, 0);
+      this._updateTotalTickets();
     }
   }
 
   calculateTotal(): number {
-    let total = 0;
-    this.eventData.tickets.forEach((ticket: any) => {
+    if (!this.eventData?.tickets) return 0;
+    
+    return this.eventData.tickets.reduce((total, ticket) => {
       const type = ticket.type.toLowerCase();
-      total += this.ticketCounts[type] * ticket.price;
-    });
-    return total;
+      return total + (this.ticketCounts[type] * ticket.price);
+    }, 0);
   }
 
   proceedToCheckout(): void {
@@ -125,7 +110,6 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Prepare ticket data for checkout
     const ticketFormData = {
       tickets: this.ticketCounts,
       totalAmount: this.calculateTotal(),
@@ -133,14 +117,51 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
       eventTitle: this.eventData.eventTitle,
     };
 
-    this.router.navigate(['/checkout'], { state: { ticketData: ticketFormData } });
+    this._router.navigate(['/checkout'], { state: { ticketData: ticketFormData } });
     this.handleClose();
   }
 
-  readonly X = X;
-  readonly Calendar = Calendar;
-  readonly MapPin = MapPin;
-  readonly Users = Users;
-  readonly Share2 = Share2;
-  readonly Heart = Heart;
+  private _fetchEventDetails(id: string): void {
+    this.isLoading = true;
+    
+    this._dashboardService.getEventById(id)
+      .pipe(
+        tap((response) => {
+          if (response.data) {
+            this.eventData = response.data;
+            this._initializeTicketCounts();
+            this.isLoading = false;
+          }
+        }),
+        catchError((error) => {
+          console.error('Error fetching event:', error);
+          Notiflix.Notify.failure('Error fetching event details');
+          this.isLoading = false;
+          return of(null);
+        }),
+        takeUntil(this._destroy$)
+      )
+      .subscribe();
+  }
+
+  private _initializeTicketCounts(): void {
+    if (!this.eventData?.tickets) return;
+    
+    this.eventData.tickets.forEach((ticket: any) => {
+      const type = ticket.type.toLowerCase();
+      if (!this.ticketCounts[type]) {
+        this.ticketCounts[type] = 0;
+      }
+    });
+  }
+
+  private _updateTotalTickets(): void {
+    this.totalTickets = Object.values(this.ticketCounts).reduce((sum, count) => sum + count, 0);
+  }
+
+  private _clickOutsideHandler(event: MouseEvent): void {
+    if (this.modalRef && !this.modalRef.nativeElement.contains(event.target as Node)) {
+      this.handleClose();
+    }
+  }
 }

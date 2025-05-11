@@ -1,28 +1,134 @@
-
-
-.shape {
+/* profile.component.css */
+:host {
+    display: block;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Sidebar styles */
+  .sidebar-nav {
+    height: calc(100% - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+  }
+  
+  .nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+  }
+  
+  /* Card hover effects */
+  .start-card {
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .start-card::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background-color: #00ff66;
+    transition: height 0.3s ease;
+  }
+  
+  .start-card:hover::before {
+    height: 70%;
+  }
+  
+  /* Scrollbar customization */
+  .sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-track {
+    background: #1E1E1E;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background: #00ff66;
+    border-radius: 4px;
+  }
+  
+  /* Animations */
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  @keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes progressFill {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  
+  @keyframes barRise {
+    from { height: 0; }
+    to { height: 100%; }
+  }
+  
+  /* Apply animations */
+  .shape {
     animation: float 6s ease-in-out infinite;
-}
-
-.header {
+  }
+  
+  .header {
     animation: slideDown 0.5s ease-out;
-}
-
-.stat-card {
+  }
+  
+  .stat-card {
     animation: slideUp 0.5s ease-out;
-}
-
-.card {
+  }
+  
+  .card {
     animation: fadeIn 0.5s ease-out;
-}
-
-.progress {
+  }
+  
+  .progress {
     animation: progressFill 1s ease-out;
-}
-
-.chart-bar {
+  }
+  
+  .chart-bar {
     animation: barRise 1s ease-out;
-}
-
-/* font-family: 'Poppins', sans-serif; */
-
+  }
+  
+  .header-logo {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  /* Accessibility improvements */
+  a:focus, button:focus {
+    outline: 2px solid #00ff66;
+    outline-offset: 2px;
+  }
+  
+  /* Respect user's reduced motion settings */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }

@@ -56,7 +56,7 @@
       <div class="flex gap-2">
         <input type="text" [(ngModel)]="couponCode" placeholder="Enter coupon code"
           class="flex-1 p-3 bg-[#a4a4a441] rounded-md text-white border-none focus:outline-none"
-          [disabled]="appliedCoupon">
+          [disabled]="!!appliedCoupon">
         <button *ngIf="!appliedCoupon" (click)="applyCoupon()"
           class="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors">
           Apply

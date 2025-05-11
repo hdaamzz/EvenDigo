@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { Subject, takeUntil } from 'rxjs';
+
 import { WalletService } from '../../../../core/services/user/wallet/wallet.service';
 
 interface Transaction {
@@ -17,8 +19,13 @@ interface Transaction {
   metadata?: any;
 }
 
+interface TransactionTypeStyle {
+  [key: string]: string;
+}
+
 @Component({
-  selector: 'app-profile.wallet',
+  selector: 'app-profile-wallet',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './profile.wallet.component.html',
   styleUrl: './profile.wallet.component.css',
@@ -40,64 +47,86 @@ interface Transaction {
     ])
   ]
 })
-export class ProfileWalletComponent implements OnInit {
+export class ProfileWalletComponent implements OnInit, OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+  private readonly _transactionTypeStyles: TransactionTypeStyle = {
+    'credit': 'text-green-500',
+    'debit': 'text-red-500',
+    'refund': 'text-blue-500',
+    'withdrawal': 'text-orange-500'
+  };
 
-  initialLoadComplete: boolean = false;
-  currentBalance: number = 0;
+  isInitialLoadComplete = false;
+  currentBalance = 0;
   transactions: Transaction[] = [];
-
   selectedTransaction: Transaction | null = null;
-
   isLoading = false;
   errorMessage: string | null = null;
 
   readonly currencySymbol = '₹';
-  transactionTypes = ['all', 'credit', 'debit', 'refund', 'withdrawal'];
+  readonly transactionTypes = ['all', 'credit', 'debit', 'refund', 'withdrawal'];
   selectedType = 'all';
 
   currentPage = 1;
   pageSize = 5;
   totalPages = 1;
 
-  constructor(private walletService: WalletService) { }
+  constructor(private _walletService: WalletService) {}
 
   ngOnInit(): void {
-    this.loadWalletData();
+    this._loadWalletData();
   }
 
-  private loadWalletData(): void {
+  ngOnDestroy(): void {
+    document.body.style.overflow = 'auto'; // Reset overflow in case component is destroyed with modal open
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  private _loadWalletData(): void {
     this.isLoading = true;
     this.errorMessage = null;
 
-    this.walletService.getWalletDetails().subscribe({
-      next: (response) => {
-        console.log(response);
-        
-        if (response.success) {
-          this.currentBalance = response.data.walletBalance;
-          this.transactions = response.data.transactions;
-          this.calculateTotalPages();
-          this.initialLoadComplete = true;
-        } else {
-          this.errorMessage = response.message || 'Failed to load wallet data';
+    this._walletService.getWalletDetails()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.currentBalance = response.data.walletBalance;
+            this.transactions = response.data.transactions;
+            this._calculateTotalPages();
+            this.isInitialLoadComplete = true;
+          } else {
+            this.errorMessage = response.message || 'Failed to load wallet data';
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading wallet:', error);
+          this.errorMessage = 'Failed to connect to server';
+          this.isLoading = false;
         }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading wallet:', error);
-        this.errorMessage = 'Failed to connect to server';
-        this.isLoading = false;
-      }
-    });
+      });
   }
 
-  private calculateTotalPages(): void {
-    const filteredCount = this.getFilteredTransactions().length;
+  private _calculateTotalPages(): void {
+    const filteredCount = this._getFilteredTransactions().length;
     this.totalPages = Math.max(1, Math.ceil(filteredCount / this.pageSize));
     
     if (this.currentPage > this.totalPages) {
       this.currentPage = 1;
     }
+  }
+
+  private _getFilteredTransactions(): Transaction[] {
+    if (this.selectedType === 'all') return this.transactions;
+    return this.transactions.filter(transaction => transaction.type === this.selectedType);
+  }
+
+  get filteredTransactions(): Transaction[] {
+    const filtered = this._getFilteredTransactions();
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
   openTransactionDetails(transaction: Transaction): void {
@@ -121,15 +150,10 @@ export class ProfileWalletComponent implements OnInit {
   }
 
   getTransactionClass(transaction: Transaction): string {
-    return {
-      'credit': 'text-green-500',
-      'debit': 'text-red-500',
-      'refund': 'text-blue-500',
-      'withdrawal': 'text-orange-500'
-    }[transaction.type] || 'text-gray-300';
+    return this._transactionTypeStyles[transaction.type] || 'text-gray-300';
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: Date | string): string {
     return new Date(date).toLocaleDateString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -137,19 +161,8 @@ export class ProfileWalletComponent implements OnInit {
     });
   }
 
-  private getFilteredTransactions(): Transaction[] {
-    if (this.selectedType === 'all') return this.transactions;
-    return this.transactions.filter(t => t.type === this.selectedType);
-  }
-
-  get filteredTransactions(): Transaction[] {
-    const filtered = this.getFilteredTransactions();
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    return filtered.slice(startIndex, startIndex + this.pageSize);
-  }
-
   onFilterChange(): void {
-    this.calculateTotalPages();
+    this._calculateTotalPages();
   }
 
   nextPage(): void {

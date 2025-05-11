@@ -1,42 +1,57 @@
-import { Component, OnInit } from '@angular/core';
-import { PremiumService, SubscriptionResponse, SubscriptionType } from '../../../../core/services/user/subscription/premium.service';
-import { catchError, delay, of } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subject, catchError, delay, finalize, of, takeUntil } from 'rxjs';
+
+import { 
+  PremiumService, 
+  SubscriptionResponse, 
+  SubscriptionType 
+} from '../../../../core/services/user/subscription/premium.service';
 
 @Component({
-  selector: 'app-profile.subscription',
+  selector: 'app-profile-subscription',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './profile.subscription.component.html',
   styleUrl: './profile.subscription.component.css'
 })
-export class ProfileSubscriptionComponent  implements OnInit {
+export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+  
   subscription: SubscriptionResponse | null = null;
-  loading = true;
-  error: string | null = null;
-  cancelingSubscription = false;
+  isLoading = true;
+  errorMessage: string | null = null;
+  isCancelingSubscription = false;
 
-  constructor(private premiumService: PremiumService,
-    private router:Router
+  constructor(
+    private _premiumService: PremiumService,
+    private _router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadSubscriptionDetails();
   }
 
-  loadSubscriptionDetails(): void {
-    this.loading = true;
-    this.error = null;
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+    loadSubscriptionDetails(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
     
-    this.premiumService.getCurrentSubscription()
+    this._premiumService.getCurrentSubscription()
       .pipe(
+        takeUntil(this._destroy$),
         catchError(err => {
-          this.error = err.message || 'Failed to load subscription details';
+          this.errorMessage = err.message || 'Failed to load subscription details';
           return of({ success: false, data: null });
-        })
+        }),
+        finalize(() => this.isLoading = false)
       )
       .subscribe(response => {
-        this.loading = false;
         if (response.success && response.data) {
           this.subscription = response.data;
         }
@@ -44,25 +59,31 @@ export class ProfileSubscriptionComponent  implements OnInit {
   }
 
   cancelSubscription(): void {
-    this.cancelingSubscription = true;
-    setTimeout(()=>{
-      if (!this.subscription) return;
-      this.premiumService.cancelSubscription(this.subscription.subscriptionId)
-      .pipe(delay(500),
-        catchError(err => {
-          this.error = err.message || 'Failed to cancel subscription';
-          this.cancelingSubscription = false;
-          return of({ success: false });
-        })
-      )
-      .subscribe(response => {
-        this.cancelingSubscription = false;
-        if (response.success) {
-          this.loadSubscriptionDetails();
-        }
-      });
-    },2000);
-    this.ngOnInit()
+    if (!this.subscription) {
+      return;
+    }
+    
+    this.isCancelingSubscription = true;
+    
+    const timeoutId = setTimeout(() => {
+      this._premiumService.cancelSubscription(this.subscription!.subscriptionId)
+        .pipe(
+          takeUntil(this._destroy$),
+          delay(500),
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to cancel subscription';
+            return of({ success: false });
+          }),
+          finalize(() => this.isCancelingSubscription = false)
+        )
+        .subscribe(response => {
+          if (response.success) {
+            this.loadSubscriptionDetails();
+          }
+        });
+    }, 2000);
+    
+    this._destroy$.subscribe(() => clearTimeout(timeoutId));
   }
 
   getFormattedSubscriptionType(): string {
@@ -74,8 +95,13 @@ export class ProfileSubscriptionComponent  implements OnInit {
       case SubscriptionType.STANDARD:
         return 'Standard Plan';
       default:
-        return (this.subscription.type as string).charAt(0).toUpperCase() + (this.subscription.type as string).slice(1);
+        return this._capitalizeFirstLetter(this.subscription.type as string);
     }
+  }
+
+  private _capitalizeFirstLetter(text: string): string {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   }
 
   formatDate(date: Date | string): string {
@@ -117,7 +143,11 @@ export class ProfileSubscriptionComponent  implements OnInit {
     return Math.floor((elapsed / totalDuration) * 100);
   }
 
-  navigateToCheckout(){
-    this.router.navigate(['/premium/checkout']);
+  navigateToCheckout(): void {
+    this._router.navigate(['/premium/checkout'], { 
+      queryParams: { 
+        type: "Premium"
+      }
+    });
   }
 }

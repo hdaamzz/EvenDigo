@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -12,7 +12,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { dateRangeValidator, futureDateValidator } from '../../../../../validators/formValidators';
 import { UserNavComponent } from '../../../../../shared/user-nav/user-nav.component';
 import Notiflix from 'notiflix';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, finalize, of, Subject, takeUntil, tap } from 'rxjs';
 
 interface TicketItem {
   type: string;
@@ -20,10 +20,11 @@ interface TicketItem {
   quantity: number;
 }
 
-
 @Component({
   selector: 'app-event-edit',
-  imports: [CommonModule, 
+  standalone: true,
+  imports: [
+    CommonModule, 
     ReactiveFormsModule, 
     FormsModule, 
     DatePickerModule, 
@@ -31,31 +32,33 @@ interface TicketItem {
     InputNumberModule, 
     ButtonModule, 
     InputTextModule,
-    UserNavComponent],
+    UserNavComponent
+  ],
   templateUrl: './event-edit.component.html',
   styleUrl: './event-edit.component.css'
 })
-export class EventEditComponent {
-  eventId: string | null = null;
+export class EventEditComponent implements OnInit, OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+  private _eventId: string | null = null;
+  private _mainBannerFile: File | null = null;
+  private _promotionalImageFile: File | null = null;
+
   eventForm!: FormGroup;
   event: IEvent | null = null;
-  loading = false;
-  loadingEvent = false;
+  isLoading = false;
+  isLoadingEvent = false;
 
   mainBannerPreview: string | null = null;
   promotionalImagePreview: string | null = null;
-  mainBannerFile: File | null = null;
-  promotionalImageFile: File | null = null;
-
+  
   currentTicketType: string | null = '';
   currentTicketPrice: number | null = null;
-  currentTicketQuantity: number = 0;
+  currentTicketQuantity = 0;
   ticketsList: TicketItem[] = [];
 
-  today = new Date();
+  readonly today = new Date();
   
-  // Define options for form dropdowns
-  eventTypes = [
+  readonly eventTypes = [
     { label: 'Conference', value: 'Conference' },
     { label: 'Concert', value: 'Concert' },
     { label: 'Workshop', value: 'Workshop' },
@@ -75,12 +78,12 @@ export class EventEditComponent {
     { label: 'Entertainment', value: 'Entertainment' },
   ];
   
-  visibilityOptions = [
+  readonly visibilityOptions = [
     { label: 'Public', value: 'Public' },
     { label: 'Private', value: 'Private' }
   ];
   
-  cities = [
+  readonly cities = [
     { label: 'Mumbai', value: 'Mumbai' },
     { label: 'Delhi', value: 'Delhi' },
     { label: 'Bangalore', value: 'Bangalore' },
@@ -93,36 +96,43 @@ export class EventEditComponent {
     { label: 'Surat', value: 'Surat' }
   ];
   
-  availableTicketTypes = [
+  readonly availableTicketTypes = [
     { label: 'Regular', value: 'Regular' },
     { label: 'VIP', value: 'VIP' },
     { label: 'Gold', value: 'Gold' }
   ];
   
-  ageRestrictionOptions = [
+  readonly ageRestrictionOptions = [
     { label: 'Yes', value: 'true' },
     { label: 'No', value: 'false' }
   ];
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private fb: FormBuilder,
-    private profileService: UserProfileService
+    private _route: ActivatedRoute,
+    private _router: Router,
+    private _fb: FormBuilder,
+    private _profileService: UserProfileService
   ) {}
 
   ngOnInit(): void {
-    this.initForm();
-    this.route.params.subscribe(params => {
-      this.eventId = params['id'];
-      if (this.eventId) {
-        this.loadEvent(this.eventId);
-      }
-    });
+    this._initForm();
+    this._route.params
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(params => {
+        this._eventId = params['id'];
+        if (this._eventId) {
+          this._loadEvent(this._eventId);
+        }
+      });
   }
 
-  initForm(): void {
-    this.eventForm = this.fb.group({
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  private _initForm(): void {
+    this.eventForm = this._fb.group({
       eventTitle: ['', Validators.required],
       eventDescription: ['', Validators.required],
       eventType: [null, Validators.required],
@@ -138,53 +148,33 @@ export class EventEditComponent {
     }, { validators: dateRangeValidator });
   }
 
-  loadEvent(id: string): void {
-    this.loadingEvent = true;
-    this.profileService.getEventById(id).pipe(
-      tap((response) => {
-        if (response.data) {
-          this.event = response.data;
-          this.populateForm(this.event);
-          this.loadingEvent = false;
-        }
-      }),
-      catchError((error) => {
-        console.error('Error fetching event:', error);
-        Notiflix.Notify.failure('Error fetching event details');
-        this.loadingEvent = false;
-        return of(null);
-      })
-    ).subscribe();
+  private _loadEvent(id: string): void {
+    this.isLoadingEvent = true;
+    this._profileService.getEventById(id)
+      .pipe(
+        takeUntil(this._destroy$),
+        tap((response) => {
+          if (response.data) {
+            this.event = response.data;
+            this._populateForm(this.event);
+          }
+        }),
+        catchError((error) => {
+          console.error('Error fetching event:', error);
+          Notiflix.Notify.failure('Error fetching event details');
+          return of(null);
+        }),
+        finalize(() => this.isLoadingEvent = false)
+      )
+      .subscribe();
   }
 
-  populateForm(event: IEvent): void {
+  private _populateForm(event: IEvent): void {
     const startDate = event.startDate ? new Date(event.startDate) : null;
     const endingDate = event.endingDate ? new Date(event.endingDate) : null;
     
-    let startTime = null;
-    let endingTime = null;
-    
-   if (typeof event.startTime === 'string') {
-      if (event.startTime.includes('GMT')) {
-        startTime = new Date(event.startTime);
-      } else {
-        const today = new Date();
-        const [hours, minutes] = event.startTime.split(':');
-        today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
-        startTime = today;
-      }
-    }
-    
-    if (typeof event.endingTime === 'string') {
-      if (event.endingTime.includes('GMT')) {
-        endingTime = new Date(event.endingTime);
-      } else {
-        const today = new Date();
-        const [hours, minutes] = event.endingTime.split(':');
-        today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
-        endingTime = today;
-      }
-    }
+    const startTime = this._parseTimeString(event.startTime);
+    const endingTime = this._parseTimeString(event.endingTime);
     
     this.eventForm.patchValue({
       eventTitle: event.eventTitle,
@@ -218,6 +208,19 @@ export class EventEditComponent {
     }
   }
 
+  private _parseTimeString(timeString: string | undefined): Date | null {
+    if (!timeString) return null;
+    
+    if (timeString.includes('GMT')) {
+      return new Date(timeString);
+    } else {
+      const today = new Date();
+      const [hours, minutes] = timeString.split(':');
+      today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
+      return today;
+    }
+  }
+
   addTicketType(): void {
     if (this.currentTicketType && 
         this.currentTicketPrice !== null && 
@@ -229,10 +232,8 @@ export class EventEditComponent {
       );
       
       if (existingTicketIndex >= 0) {
-        // Update existing ticket
         this.ticketsList[existingTicketIndex].quantity += this.currentTicketQuantity;
       } else {
-        // Add new ticket type
         this.ticketsList.push({
           type: this.currentTicketType,
           price: this.currentTicketPrice,
@@ -240,13 +241,17 @@ export class EventEditComponent {
         });
       }
       
-      this.currentTicketType = null;
-      this.currentTicketPrice = null;
-      this.currentTicketQuantity = 0;
+      this._resetTicketForm();
     }
   }
 
-  removeTicketType(index: number) {
+  private _resetTicketForm(): void {
+    this.currentTicketType = null;
+    this.currentTicketPrice = null;
+    this.currentTicketQuantity = 0;
+  }
+
+  removeTicketType(index: number): void {
     this.ticketsList.splice(index, 1);
   }
 
@@ -255,43 +260,42 @@ export class EventEditComponent {
   }
 
   uploadMainBanner(): void {
+    this._createFileInput('image/*', (file: File) => {
+      this._mainBannerFile = file;
+      this._createImagePreview(file, (preview: string) => {
+        this.mainBannerPreview = preview;
+      });
+    });
+  }
+
+  uploadPromotionalImage(): void {
+    this._createFileInput('image/*', (file: File) => {
+      this._promotionalImageFile = file;
+      this._createImagePreview(file, (preview: string) => {
+        this.promotionalImagePreview = preview;
+      });
+    });
+  }
+
+  private _createFileInput(accept: string, onFileSelected: (file: File) => void): void {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = 'image/*';
+    fileInput.accept = accept;
     fileInput.onchange = (event: any) => {
       const file = event.target.files[0];
       if (file) {
-        this.mainBannerFile = file;
-        
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.mainBannerPreview = e.target.result;
-        };
-        reader.readAsDataURL(file);
+        onFileSelected(file);
       }
     };
     fileInput.click();
   }
 
-  uploadPromotionalImage(): void {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (event: any) => {
-      const file = event.target.files[0];
-      if (file) {
-        this.promotionalImageFile = file;
-        
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.promotionalImagePreview = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
+  private _createImagePreview(file: File, callback: (preview: string) => void): void {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      callback(e.target.result);
     };
-    fileInput.click();
+    reader.readAsDataURL(file);
   }
 
   hasError(controlName: string, errorName: string): boolean {
@@ -301,9 +305,7 @@ export class EventEditComponent {
 
   submitForm(): void {
     if (this.eventForm.invalid) {
-      Object.keys(this.eventForm.controls).forEach(key => {
-        this.eventForm.get(key)?.markAsTouched();
-      });
+      this._markFormGroupTouched(this.eventForm);
       return;
     }
     
@@ -312,45 +314,61 @@ export class EventEditComponent {
       return;
     }
     
-    this.loading = true;
+    if (!this._eventId) {
+      Notiflix.Notify.failure('Event ID is missing');
+      return;
+    }
+
+    this.isLoading = true;
+    const formData = this._prepareFormData();
     
+    this._profileService.updateEvent(this._eventId, formData)
+      .pipe(
+        takeUntil(this._destroy$),
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe({
+        next: () => {
+          Notiflix.Notify.success('Event updated successfully!');
+          this._router.navigate(['/profile/events']);
+        },
+        error: (error: any) => {
+          console.error('Event update error:', error);
+          Notiflix.Notify.failure('Failed to update event. Please try again.');
+        }
+      });
+  }
+
+  private _markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      formGroup.get(key)?.markAsTouched();
+    });
+  }
+
+  private _prepareFormData(): FormData {
     const formData = new FormData();
     
     Object.keys(this.eventForm.value).forEach(key => {
-      formData.append(key, this.eventForm.value[key]);
+      const value = this.eventForm.value[key];
+      if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
     });
     
     formData.append('tickets', JSON.stringify(this.ticketsList));
     
-    if (this.mainBannerFile) {
-      formData.append('mainBanner', this.mainBannerFile);
+    if (this._mainBannerFile) {
+      formData.append('mainBanner', this._mainBannerFile);
     }
     
-    if (this.promotionalImageFile) {
-      formData.append('promotionalImage', this.promotionalImageFile);
+    if (this._promotionalImageFile) {
+      formData.append('promotionalImage', this._promotionalImageFile);
     }
 
-    if (!this.eventId) {
-      Notiflix.Notify.failure('Event ID is missing');
-      this.loading = false;
-      return;
-    }
-
-    this.profileService.updateEvent(this.eventId, formData).subscribe({
-      next: (response) => {
-        this.loading = false;
-        Notiflix.Notify.success('Event updated successfully!');
-        this.router.navigate(['/profile/events']);
-      },
-      error: (error: any) => {
-        this.loading = false;
-        console.error('Event update error:', error);
-        Notiflix.Notify.failure('Failed to update event. Please try again.');
-      }
-    });
+    return formData;
   }
 
   cancelEdit(): void {
-    this.router.navigate(['/profile/events']);
+    this._router.navigate(['/profile/events']);
   }
 }

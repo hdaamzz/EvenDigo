@@ -1,80 +1,101 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { Subject, catchError, finalize, of, takeUntil, tap } from "rxjs";
+import Notiflix from "notiflix";
+
 import { IEvent } from "../../../../core/models/event.interface";
 import { UserProfileService } from "../../../../core/services/user/profile/user.profile.service";
-import Notiflix from "notiflix";
-import { catchError, of, tap } from "rxjs";
-import { Router } from "@angular/router";
-
 
 @Component({
-  selector: 'app-profile.events',
+  selector: 'app-profile-events',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './profile.events.component.html',
   styleUrl: './profile.events.component.css'
 })
-export class ProfileEventsComponent implements OnInit{
- eventList: IEvent[] = [];
- eventListLoading: boolean = false;
- selectedEventId: string | null = null; 
- deleteConfirmDialogVisible: boolean = false;
- eventToDelete: string | null = null;
+export class ProfileEventsComponent implements OnInit, OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+  
+  events: IEvent[] = [];
+  isLoadingEvents = false;
+  selectedEventId: string | null = null; 
+  isDeleteConfirmDialogVisible = false;
+  eventToDeleteId: string | null = null;
 
- constructor(private profileService:UserProfileService,
-  private router: Router
- ){}
+  constructor(
+    private _profileService: UserProfileService,
+    private _router: Router
+  ) {}
+  
   ngOnInit(): void {
-    this.fetchAllEvents()
+    this._fetchEvents();
   }
 
-    fetchAllEvents() {
-      this.eventListLoading = true;
-      this.profileService.getUserEvents().pipe(
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  private _fetchEvents(): void {
+    this.isLoadingEvents = true;
+    
+    this._profileService.getUserEvents()
+      .pipe(
+        takeUntil(this._destroy$),
         tap((response) => {
-          if(response.data){
-            this.eventList = response.data;
-            console.log(this.eventList);
-            
-            this.eventListLoading = false;
+          if (response.data) {
+            this.events = response.data;
           }
         }),
         catchError((error) => {
           console.error('Error fetching events:', error);
           Notiflix.Notify.failure('Error fetching events');
-          this.eventListLoading = false;
           return of(null);
-        })
-      ).subscribe();
-    }
-    editEvent(eventId: string) {
-      this.router.navigate(['/profile/edit-event', eventId]);
-    }
+        }),
+        finalize(() => this.isLoadingEvents = false)
+      )
+      .subscribe();
+  }
   
-    confirmDelete(eventId: string) {
-      this.eventToDelete = eventId;
-      this.deleteConfirmDialogVisible = true;
+  editEvent(eventId: string): void {
+    this._router.navigate(['/profile/edit-event', eventId]);
+  }
+
+  confirmDelete(eventId: string): void {
+    this.eventToDeleteId = eventId;
+    this.isDeleteConfirmDialogVisible = true;
+  }
+
+  cancelDelete(): void {
+    this.eventToDeleteId = null;
+    this.isDeleteConfirmDialogVisible = false;
+  }
+
+  deleteEvent(): void {
+    if (!this.eventToDeleteId) {
+      return;
     }
-  
-    cancelDelete() {
-      this.eventToDelete = null;
-      this.deleteConfirmDialogVisible = false;
-    }
-  
-    deleteEvent() {
-      if (!this.eventToDelete) return;
-      
-      this.profileService.deleteEvent(this.eventToDelete).pipe(
-        tap((response) => {
+    
+    this._profileService.deleteEvent(this.eventToDeleteId)
+      .pipe(
+        takeUntil(this._destroy$),
+        tap(() => {
           Notiflix.Notify.success('Event deleted successfully');
-          this.deleteConfirmDialogVisible = false;
-          this.eventToDelete = null;
-          this.fetchAllEvents();
+          this._resetDeleteState();
+          this._fetchEvents();
         }),
         catchError((error) => {
           console.error('Error deleting event:', error);
           Notiflix.Notify.failure('Failed to delete event');
           return of(null);
         })
-      ).subscribe();
-    }
+      )
+      .subscribe();
+  }
+
+  private _resetDeleteState(): void {
+    this.eventToDeleteId = null;
+    this.isDeleteConfirmDialogVisible = false;
+  }
 }

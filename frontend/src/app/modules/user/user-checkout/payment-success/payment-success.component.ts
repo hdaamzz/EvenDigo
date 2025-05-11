@@ -1,85 +1,105 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+
 import { UserNavComponent } from "../../../../shared/user-nav/user-nav.component";
 import { PaymentService } from '../../../../core/services/user/payment/payment.service';
 import { IBooking } from '../../../../core/models/booking.interface';
 
 @Component({
   selector: 'app-payment-success',
+  standalone: true,
   imports: [CommonModule, UserNavComponent],
   templateUrl: './payment-success.component.html',
   styleUrl: './payment-success.component.css',
 })
-export class PaymentSuccessComponent{
+export class PaymentSuccessComponent implements OnInit, OnDestroy {
   booking: IBooking | undefined;
-  isLoading: boolean = false;
-
+  isLoading = false;
+  
+  private readonly _destroy$ = new Subject<void>();
+  
   constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private paymentService:PaymentService
+    private readonly _router: Router,
+    private readonly _route: ActivatedRoute,
+    private readonly _paymentService: PaymentService
   ) {}
-  ngOnInit() {
-    // Get session_id from query params
-    const sessionId = this.route.snapshot.queryParamMap.get('session_id');
+  
+  ngOnInit(): void {
+    const sessionId = this._route.snapshot.queryParamMap.get('session_id');
     
     if (sessionId) {
-      this.paymentService.getBooking(sessionId).subscribe(
-        (bookingDetails) => {
+      this._fetchBookingDetails(sessionId);
+    } else {
+      this._navigateToHome();
+    }
+  }
+  
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+  
+  downloadTickets(): void {
+    if (!this.booking?.bookingId) return;
+    
+    this.isLoading = true;
+    this._paymentService.downloadTickets(this.booking.bookingId)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          this._downloadFile(response, `Event_Tickets_${this.booking?.bookingId}.pdf`);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error downloading tickets:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+  
+  downloadInvoice(): void {
+    if (!this.booking?.bookingId) return;
+    
+    this.isLoading = true;
+    this._paymentService.downloadInvoice(this.booking.bookingId)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          this._downloadFile(response, `Invoice_${this.booking?.bookingId}.pdf`);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error downloading invoice:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+  
+  private _fetchBookingDetails(sessionId: string): void {
+    this._paymentService.getBooking(sessionId)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (bookingDetails) => {
           this.booking = bookingDetails.data;
         },
-        (error) => {
-          console.error("Error fetching booking details:", error);
-          this.router.navigate(['/']);
+        error: (error) => {
+          console.error('Error fetching booking details:', error);
+          this._navigateToHome();
         }
-      );
-    } else {
-      this.router.navigate(['/']);
-    }
+      });
   }
-
-
-
-
-
-  downloadTickets() {
-    this.isLoading = true;
-    if (this.booking?.bookingId) {
-      this.paymentService.downloadTickets(this.booking.bookingId).subscribe(
-        (response) => {
-          this.downloadFile(response, `Event_Tickets_${this.booking?.bookingId}.pdf`);
-          this.isLoading = false;
-        },
-        (error) => {
-          console.error("Error downloading tickets:", error);
-          this.isLoading = false;
-        }
-      );
-    }
+  
+  private _navigateToHome(): void {
+    this._router.navigate(['/']);
   }
-
-
-  downloadInvoice() {
-    this.isLoading = true;
-    if (this.booking?.bookingId) {
-      this.paymentService.downloadInvoice(this.booking.bookingId).subscribe(
-        (response) => {
-          this.downloadFile(response, `Invoice_${this.booking?.bookingId}.pdf`);
-          this.isLoading = false;
-        },
-        (error) => {
-          console.error("Error downloading invoice:", error);
-          this.isLoading = false;
-        }
-      );
-    }
-  }
-
-  private downloadFile(data: Blob, fileName: string) {
+  
+  private _downloadFile(data: Blob, fileName: string): void {
     const blob = new Blob([data], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
+    
     link.href = url;
     link.download = fileName;
     document.body.appendChild(link);

@@ -74,7 +74,7 @@
           </ng-container>
           <tr *ngFor="let transaction of filteredTransactions; let i = index"
             class="hover:bg-[#262626] transition-colors duration-150"
-            [ngClass]="{'animate-fadeIn': !initialLoadComplete}" [style.animation-delay]="(i * 100) + 'ms'">
+            [ngClass]="{'animate-fadeIn': !isInitialLoadComplete}" [style.animation-delay]="(i * 100) + 'ms'">
             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-300">
               {{ formatDate(transaction.date) }}
             </td>

@@ -1,49 +1,39 @@
-import { Component, OnInit } from '@angular/core';
-import { UserDashboardService } from '../../../core/services/user/dashboard/user.dashboard.service';
-import { IEvent } from '../../../core/models/event.interface';
-import { catchError, of, tap } from 'rxjs';
-import Notiflix from 'notiflix';
-import { UserExploreService } from '../../../core/services/user/explore/user.explore.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subject, catchError, of, takeUntil, tap } from 'rxjs';
+import Notiflix from 'notiflix';
+
+import { UserExploreService } from '../../../core/services/user/explore/user.explore.service';
+import { IEvent } from '../../../core/models/event.interface';
 import { TruncatePipe } from '../../../core/pipes/truncate.pipe';
 import { EventDetailModalComponent } from './event-detail-modal/event-detail-modal.component';
 import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
 
 @Component({
   selector: 'app-user-explore',
+  standalone: true,
   imports: [CommonModule, RouterModule, TruncatePipe, EventDetailModalComponent, UserNavComponent],
   templateUrl: './user-explore.component.html',
   styleUrls: ['./user-explore.component.css']
 })
-export class UserExploreComponent implements OnInit{
+export class UserExploreComponent implements OnInit, OnDestroy {
   eventList: IEvent[] = [];
-  eventListLoading: boolean = false;
-  selectedEventId: string | null = null; 
-  isModalOpen: boolean = false; 
+  isLoading = false;
+  selectedEventId: string | null = null;
+  isModalOpen = false;
 
-  constructor(private exploreService: UserExploreService) {}
+  private readonly _destroy$ = new Subject<void>();
+
+  constructor(private readonly _exploreService: UserExploreService) {}
 
   ngOnInit(): void {
-    this.fetchAllEvents();
+    this._fetchAllEvents();
   }
 
-  fetchAllEvents() {
-    this.eventListLoading = true;
-    this.exploreService.getAllEvents().pipe(
-      tap((response) => {
-        if(response.data){
-          this.eventList = response.data;
-          this.eventListLoading = false;
-        }
-      }),
-      catchError((error) => {
-        console.error('Error fetching events:', error);
-        Notiflix.Notify.failure('Error fetching events');
-        this.eventListLoading = false;
-        return of(null);
-      })
-    ).subscribe();
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   getLowestTicketPrice(event: IEvent): number {
@@ -53,21 +43,34 @@ export class UserExploreComponent implements OnInit{
     return Math.min(...event.tickets.map(ticket => ticket.price));
   }
 
-  // Show event details in the modal
-  showEventDetails(eventId: string) {
-    console.log(eventId);
-    
+  showEventDetails(eventId: string): void {
     this.selectedEventId = eventId;
     this.isModalOpen = true;
   }
 
-  // Close the modal
-  closeModal = () => {
-    console.log('closeModal function called from parent');
+  closeModal = (): void => {
     this.isModalOpen = false;
-    console.log('isModalOpen set to:', this.isModalOpen);
     this.selectedEventId = null;
   }
-  
 
+  private _fetchAllEvents(): void {
+    this.isLoading = true;
+    
+    this._exploreService.getAllEvents()
+      .pipe(
+        tap((response) => {
+          if (response.data) {
+            this.eventList = response.data;
+          }
+        }),
+        catchError((error) => {
+          console.error('Error fetching events:', error);
+          Notiflix.Notify.failure('Error fetching events');
+          return of(null);
+        }),
+        takeUntil(this._destroy$),
+        tap(() => this.isLoading = false)
+      )
+      .subscribe();
+  }
 }
