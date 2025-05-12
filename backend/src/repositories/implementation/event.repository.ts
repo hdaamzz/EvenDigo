@@ -15,6 +15,22 @@ export class EventRepository implements IEventRepository {
     return await EventModel.find({ user_id: userId }).sort({ createdAt: -1 });
   }
 
+  async findCompletedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    const now = new Date();
+    return await EventModel.find({
+      user_id: userId,
+      endingDate: { $lt: now }
+    }).sort({ createdAt: -1 });
+  }
+  
+  async findCurrentEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    const now = new Date();
+    return await EventModel.find({
+      user_id: userId,
+      endingDate: { $gte: now } 
+    }).sort({ createdAt: -1 });
+  }
+
   async findAllEventWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     return await EventModel.find({ user_id: { $ne: userId }, status: true }).sort({ createdAt: -1 });
   }

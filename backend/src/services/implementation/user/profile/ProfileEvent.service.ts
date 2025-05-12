@@ -14,7 +14,9 @@ export class ProfileEventService implements IProfileEventService {
 
   async getUserEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     try {
-      const events = await this.eventRepository.findEventByUserId(userId);
+      const events = await this.eventRepository.findCurrentEventByUserId(userId);
+      console.log(events);
+      
       return events;
     } catch (error) {
       throw new Error(`Failed to fetch user events: ${(error as Error).message}`);

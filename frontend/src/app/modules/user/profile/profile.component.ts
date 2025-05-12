@@ -90,7 +90,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
   
   private _initUserData(): void {
-    // Subscribing to store data with takeUntil for proper cleanup
     this.user$ = this._store.select(selectUser);
     
     this.user$
@@ -98,7 +97,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       .subscribe(user => {
         if (user) {
           this.userId = user.id;
-          // Additional user data handling
         }
       });
   }
