@@ -6,6 +6,7 @@ export interface IEventRepository {
   findEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findCompletedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findCurrentEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
+  findNotStartedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> ;
   findAllEventWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findUpcomingEventsWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null>;

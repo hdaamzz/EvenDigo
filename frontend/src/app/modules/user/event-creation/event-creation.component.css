@@ -1,0 +1,65 @@
+:host ::ng-deep .event-dialog .p-dialog-header {
+    border-bottom: 1px solid #333;
+    padding: 1rem 1.5rem;
+  }
+  :host ::ng-deep .event-dialog .p-dialog-content {
+    background-color: #1a1a1a;
+    color: white;
+    padding: 1.5rem;
+  }
+  :host ::ng-deep .event-dialog .p-dialog-footer {
+    border-top: 1px solid #333;
+    padding: 1rem 1.5rem;
+    background-color: #1a1a1a;
+  }
+  :host ::ng-deep .p-inputtext,
+  :host ::ng-deep .p-dropdown,
+  :host ::ng-deep .p-calendar .p-inputtext,
+  :host ::ng-deep .p-chips .p-inputtext {
+    background-color: #222;
+    border: 1px solid #444;
+    color: white;
+  }
+  :host ::ng-deep .p-inputtext:focus,
+  :host ::ng-deep .p-dropdown:focus,
+  :host ::ng-deep .p-calendar .p-inputtext:focus,
+  :host ::ng-deep .p-chips .p-inputtext:focus {
+    border-color: #00c853;
+    box-shadow: 0 0 0 1px #00c853;
+  }
+  :host ::ng-deep .p-dropdown-panel {
+    background-color: #222;
+    color: white;
+  }
+  :host ::ng-deep .p-dropdown-item {
+    color: white;
+  }
+  :host ::ng-deep .p-dropdown-item:hover {
+    background-color: #333;
+  }
+  :host ::ng-deep .p-button.p-button-secondary {
+    background-color: #333;
+    border-color: #444;
+  }
+  :host ::ng-deep .p-button {
+    border-radius: 0.375rem;
+  }
+  .active-tab {
+    font-weight: bold;
+  }
+  button:active {
+    transform: scale(0.97);
+    transition: transform 0.1s;
+  }
+  @keyframes ripple {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+  }

@@ -1,0 +1,345 @@
+<button (click)="showDialog()"
+        class="relative px-3 sm:px-5 py-1 bg-[#1E1E1E] text-sm sm:text-md font-sans rounded-lg cursor-pointer overflow-hidden group transition-transform duration-200 hover:scale-105">
+        <span class="relative z-10">Create Event</span>
+    </button>
+
+    <p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [resizable]="false" header="CREATE YOUR EVENT"
+        [style]="{width: '95%', maxWidth: '1280px'}" [contentStyle]="{'max-height': '90vh', 'overflow': 'auto'}"
+        styleClass="event-dialog" [closeOnEscape]="true">
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center w-full">
+          <h2 class="text-[#00c853] text-xl font-semibold">CREATE YOUR EVENT</h2>
+        </div>
+      </ng-template>
+
+      <form [formGroup]="eventForm" (ngSubmit)="submitForm()">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+          <!-- Basic Information Section -->
+          <div class="space-y-4">
+            <h3 class="text-[#00c853] text-lg font-medium mb-4">Basic Information</h3>
+            <div class="space-y-2">
+              <label class="block text-sm">Event Title <span class="text-red-500">*</span></label>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <i class="pi pi-tag"></i>
+                </span>
+                <input type="text" pInputText formControlName="eventTitle" placeholder="Enter event title">
+              </div>
+              <small class="text-red-500" *ngIf="hasError('eventTitle', 'required')">
+                Event title is required
+              </small>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm text-gray-300">Event Description <span class="text-red-500">*</span></label>
+              <textarea pInputTextarea formControlName="eventDescription" rows="4"
+                placeholder="Enter event description"
+                class="w-full bg-[#222] border border-gray-600 rounded text-white p-3 focus:border-[#00c853] focus:ring-1 focus:ring-[#00c853] transition-all"></textarea>
+              <small class="text-red-500" *ngIf="hasError('eventDescription', 'required')">
+                Event description is required
+              </small>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm">Event Type <span class="text-red-500">*</span></label>
+              <p-select formControlName="eventType" [options]="eventTypes" placeholder="Select Event type"
+                [showClear]="true" styleClass="w-full"></p-select>
+              <small class="text-red-500" *ngIf="hasError('eventType', 'required')">
+                Event type is required
+              </small>
+            </div>
+          </div>
+          <!-- Schedule Section -->
+          <div class="space-y-4">
+            <h3 class="text-[#00c853] text-lg font-medium mb-4">Schedule</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="block text-sm">Start Date <span class="text-red-500">*</span></label>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <i class="pi pi-calendar"></i>
+                  </span>
+                  <p-datepicker formControlName="startDate" dateFormat="dd - mm - yy"
+                    [minDate]="today"></p-datepicker>
+                </div>
+                <small class="text-red-500" *ngIf="hasError('startDate', 'required')">
+                  Start date is required
+                </small>
+                <small class="text-red-500" *ngIf="hasError('startDate', 'pastDate')">
+                  Start date must be in the future
+                </small>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-sm">Start Time <span class="text-red-500">*</span></label>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <i class="pi pi-clock"></i>
+                  </span>
+                  <p-datepicker formControlName="startTime" [timeOnly]="true"></p-datepicker>
+                </div>
+                <small class="text-red-500" *ngIf="hasError('startTime', 'required')">
+                  Start time is required
+                </small>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="block text-sm">Ending Date <span class="text-red-500">*</span></label>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <i class="pi pi-calendar"></i>
+                  </span>
+                  <p-datepicker formControlName="endingDate" dateFormat="dd - mm - yy"
+                    [minDate]="today"></p-datepicker>
+                </div>
+                <small class="text-red-500" *ngIf="hasError('endingDate', 'required')">
+                  End date is required
+                </small>
+                <small class="text-red-500" *ngIf="eventForm.hasError('endDateBeforeStart')">
+                  End date must be after start date
+                </small>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-sm">Ending Time</label>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <i class="pi pi-clock"></i>
+                  </span>
+                  <p-datepicker formControlName="endingTime" [timeOnly]="true"></p-datepicker>
+                </div>
+              </div>
+            </div>
+            <h3 class="text-[#00c853] text-lg font-medium mb-2 mt-6">Event Settings</h3>
+            <div class="space-y-2">
+              <label class="block text-sm">Event Visibility <span class="text-red-500">*</span></label>
+              <p-select formControlName="eventVisibility" [options]="visibilityOptions"
+                placeholder="Private OR Public" [showClear]="true" styleClass="w-full"></p-select>
+              <small class="text-red-500" *ngIf="hasError('eventVisibility', 'required')">
+                Event visibility is required
+              </small>
+            </div>
+          </div>
+          <!-- Venue Details Section -->
+          <div class="space-y-4">
+            <h3 class="text-[#00c853] text-lg font-medium mb-4">Venue Details</h3>
+            <div class="space-y-2">
+              <label class="block text-sm text-gray-300">Venue Name <span class="text-red-500">*</span></label>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <i class="pi pi-map-marker"></i>
+                </span>
+                <input type="text" pInputText formControlName="venueName" placeholder="Enter venue name">
+              </div>
+              <small class="text-red-500" *ngIf="hasError('venueName', 'required')">
+                Venue name is required
+              </small>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm text-gray-300">Venue Address</label>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <i class="pi pi-home"></i>
+                </span>
+                <input type="text" pInputText formControlName="venueAddress"
+                  placeholder="Enter full venue address">
+              </div>
+              <small class="text-red-500" *ngIf="hasError('venueAddress', 'required')">
+                Venue address is required
+              </small>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm text-gray-300">City <span class="text-red-500">*</span></label>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <i class="pi pi-building"></i>
+                </span>
+                <p-select formControlName="city" [options]="cities" placeholder="Select City" [showClear]="true"
+                  styleClass="w-full"></p-select>
+              </div>
+              <small class="text-red-500" *ngIf="hasError('city', 'required')">
+                City is required
+              </small>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <h3 class="text-[#00c853] text-lg font-medium mb-4">Ticket Details</h3>
+            <div class="space-y-2">
+              <label class="block text-sm text-gray-300">Add Ticket Types <span class="text-red-500">*</span></label>
+              <div class="border border-gray-700 rounded-lg p-3 sm:p-4 bg-[#1d1d1d]">
+                <div class="mb-4">
+                  <label class="block text-sm text-gray-400 mb-2">Select Ticket Type</label>
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div class="p-inputgroup w-full sm:flex-1">
+                      <span class="p-inputgroup-addon">
+                        <i class="pi pi-ticket"></i>
+                      </span>
+                      <p-select [(ngModel)]="currentTicketType" [ngModelOptions]="{standalone: true}"
+                        [options]="availableTicketTypes" placeholder="Select ticket type"
+                        styleClass="w-full"></p-select>
+                    </div>
+                    <div class="p-inputgroup w-full sm:w-32">
+                      <span class="p-inputgroup-addon">
+                        <i class="pi pi-dollar"></i>
+                      </span>
+                      <input type="number" pInputText [(ngModel)]="currentTicketPrice"
+                        [ngModelOptions]="{standalone: true}" placeholder="Price" class="w-full">
+                    </div>
+                    <div class="p-inputgroup w-full sm:w-32">
+                      <span class="p-inputgroup-addon">
+                        <i class="pi pi-hashtag"></i>
+                      </span>
+                      <input type="number" pInputText [(ngModel)]="currentTicketQuantity"
+                        [ngModelOptions]="{standalone: true}" placeholder="Quantity" class="w-full"
+                        min="1">
+                    </div>
+                    <div class="w-full sm:w-auto mt-2 sm:mt-0">
+                      <p-button icon="pi pi-plus" styleClass="p-button-success w-full sm:w-auto"
+                        (click)="addTicketType()"></p-button>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="ticketsList.length > 0" class="space-y-2">
+                  <label class="block text-sm text-gray-400 mb-2">Added Tickets</label>
+                  <div class="max-h-48 overflow-y-auto">
+                    <div *ngFor="let ticket of ticketsList; let i = index"
+                      class="flex items-center justify-between p-2 mb-2 bg-[#222] rounded border border-gray-700">
+                      <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                        <span
+                          class="bg-[#00c853] text-white text-xs px-2 py-1 rounded whitespace-nowrap">{{ticket.type}}</span>
+                        <span class="text-white">₹{{ticket.price}}</span>
+                        <span class="text-white">Qty: {{ticket.quantity}}</span>
+                      </div>
+                      <button type="button" class="text-gray-400 hover:text-red-500 p-2 flex-shrink-0"
+                        (click)="removeTicketType(i)">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-3 pt-3 border-t border-gray-700">
+                    <span class="text-sm text-gray-300">Total Tickets: <span
+                        class="text-white font-medium">{{getTotalTickets()}}</span></span>
+                  </div>
+                </div>
+                <div *ngIf="ticketsList.length === 0" class="text-center text-gray-500 py-4">
+                  <i class="pi pi-ticket text-2xl mb-2"></i>
+                  <p>No tickets added yet</p>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm text-gray-300">Age Restriction 18+ <span
+                  class="text-red-500">*</span></label>
+              <p-select formControlName="ageRestriction" [options]="ageRestrictionOptions"
+                placeholder="e.g., Yes, No" [showClear]="true" styleClass="w-full"></p-select>
+              <small class="text-red-500" *ngIf="hasError('ageRestriction', 'required')">
+                Age restriction selection is required
+              </small>
+            </div>
+          </div>
+          <!-- Event Branding Section -->
+          <div class="col-span-1 md:col-span-2 space-y-4">
+            <h3 class="text-[#00c853] text-lg font-medium mb-4">Event Branding</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-3">
+                <label class="block text-sm text-gray-300">Main Banner <span class="text-red-500">*</span></label>
+                <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
+                  <div *ngIf="!mainBannerPreview" class="flex flex-col items-center justify-center h-40">
+                    <i class="pi pi-image text-3xl text-gray-500 mb-2"></i>
+                    <p class="text-gray-400 mb-3">Upload a banner image (1920×1080px recommended)</p>
+                    <button type="button" pButton class="p-button-outlined" icon="pi pi-upload"
+                      label="Choose File" (click)="uploadMainBanner()"></button>
+                  </div>
+                  <div *ngIf="mainBannerPreview" class="relative">
+                    <img [src]="mainBannerPreview" class="max-h-40 mx-auto object-contain"
+                      alt="Banner preview">
+                    <button type="button"
+                      class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+                      (click)="mainBannerPreview = null; mainBannerFile = null">
+                      <i class="pi pi-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <small class="text-gray-400">Recommended size: 1920×1080px. Max size: 5MB</small>
+              </div>
+              <div class="space-y-3">
+                <label class="block text-sm text-gray-300">Promotional Image (Optional)</label>
+                <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
+                  <div *ngIf="!promotionalImagePreview"
+                    class="flex flex-col items-center justify-center h-40">
+                    <i class="pi pi-image text-3xl text-gray-500 mb-2"></i>
+                    <p class="text-gray-400 mb-3">Upload a promotional image (800×800px recommended)</p>
+                    <button type="button" pButton class="p-button-outlined" icon="pi pi-upload"
+                      label="Choose File" (click)="uploadPromotionalImage()"></button>
+                  </div>
+                  <div *ngIf="promotionalImagePreview" class="relative">
+                    <img [src]="promotionalImagePreview" class="max-h-40 mx-auto object-contain"
+                      alt="Promotional image preview">
+                    <button type="button"
+                      class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+                      (click)="promotionalImagePreview = null; promotionalImageFile = null">
+                      <i class="pi pi-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <small class="text-gray-400">Recommended size: 800×800px. Max size: 3MB</small>
+              </div>
+            </div>
+          </div>
+          <!-- Submit Buttons Section -->
+          <div class="col-span-1 md:col-span-2 flex justify-end mt-6 space-x-4">
+            <button type="button" pButton class="p-button-text" label="Cancel" (click)="visible = false"></button>
+            <button type="submit" pButton class="p-button-success" label="Create Event"
+              [loading]="loading"></button>
+          </div>
+        </div>
+      </form>
+    </p-dialog>
+
+    <!-- Success Dialog -->
+    <p-dialog [(visible)]="successDialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
+      [style]="{width: '90%', maxWidth: '500px'}" [showHeader]="false" [dismissableMask]="true" styleClass="success-dialog neon-theme">
+      <div class="bg-black text-white rounded-lg overflow-hidden">
+        <div class="bg-green-500 p-6 text-center">
+          <div class="animate-pulse mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Event Created Successfully!</h2>
+        </div>
+        <div class="p-6" *ngIf="createdEvent">
+          <div class="mb-4 p-4 bg-gray-950 rounded-lg">
+            <h3 class="text-xl font-bold text-white mb-2">{{createdEvent.eventTitle}}</h3>
+            <div class="flex items-center text-gray-300 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>{{createdEvent.startDate | date:'MMM d, y'}} at {{createdEvent.startTime | date:'shortTime'}}</span>
+            </div>
+            <div class="flex items-center text-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>{{createdEvent.venueName}}, {{createdEvent.city}}</span>
+            </div>
+          </div>
+          <div class="mb-6">
+            <h4 class="text-green-400 font-medium mb-2">Tickets Created:</h4>
+            <div class="space-y-2">
+              <div *ngFor="let ticket of createdEvent.tickets" class="flex justify-between bg-gray-950 p-2 rounded">
+                <span class="text-white">{{ticket.type}}</span>
+                <div>
+                  <span class="text-green-400 font-medium">₹{{ticket.price}}</span>
+                  <span class="text-gray-400 ml-2">({{ticket.quantity}} available)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-between p-6 bg-[#1E1E1E]">
+          <button type="button" pButton class="p-button-outlined p-button-secondary"
+            label="Create Another Event" (click)="successDialogVisible = false; showDialog()"></button>
+          <button type="button" pButton class="p-button-success"
+            label="View Events" (click)="successDialogVisible = false; onEventCreated.emit(createdEvent ?? undefined)"></button>
+        </div>
+      </div>
+    </p-dialog>
