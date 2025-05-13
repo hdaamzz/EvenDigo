@@ -28,6 +28,10 @@ export interface IEvent {
     updatedAt: Date;
   }
 
+  export interface CardIEvent extends IEvent{
+    bookingId:string;
+  }
+
 export interface EventResponse{
   success:boolean;
   error?:string;

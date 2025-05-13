@@ -4,12 +4,15 @@ import { EventDocument } from '../../../../../src/models/interfaces/event.interf
 import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
 import { IEventService } from '../../../../../src/services/interfaces/user/dashboard/IEvent.service';
 import { inject, injectable } from 'tsyringe';
+import { IBookingRepository } from 'src/repositories/interfaces/IBooking.repository';
+import { IBooking } from 'src/models/interfaces/booking.interface';
 
 
 @injectable()
 export class EventService implements IEventService {
   constructor(
-    @inject("EventRepository") private eventRepository: IEventRepository
+    @inject("EventRepository") private eventRepository: IEventRepository,
+    @inject("BookingRepository") private bookingRepository : IBookingRepository
   ) {}
 
   async createEvent(eventData: Partial<EventDocument>): Promise<EventDocument> {
@@ -18,6 +21,14 @@ export class EventService implements IEventService {
 
   async getEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     return this.eventRepository.findEventByUserId(userId);
+  }
+
+  async getOrganizedEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    return this.eventRepository.findCompletedEventByUserId(userId);
+  }
+
+  async getParticipatedEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
+    return this.bookingRepository.findBookingEventByUserId(userId);
   }
 
   async getEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {

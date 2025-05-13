@@ -25,6 +25,18 @@ export class UserDashboardService {
     });
   }
 
+  getUserOrganizedEvents(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}user/dashboard/events/organized`,{
+      withCredentials: true,
+    });
+  }
+
+  getUserParticipatedEvents(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}user/dashboard/events/participated`,{
+      withCredentials: true,
+    });
+  }
+
   getEventById(eventId: string): Observable<EventResponse> {
     return this.http.get<EventResponse>(`${this.baseUrl}user/dashboard/events/${eventId}`,{
       withCredentials: true,

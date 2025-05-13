@@ -38,6 +38,7 @@
     "@types/google-one-tap": "^1.2.6",
     "angular-oauth2-oidc": "^19.0.0",
     "aws-sdk": "^2.1692.0",
+    "date-fns": "^4.1.0",
     "firebase": "^11.3.1",
     "jwt-decode": "^4.0.0",
     "lucide-angular": "^0.482.0",

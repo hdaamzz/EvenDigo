@@ -15,6 +15,7 @@ import { AuthState, User } from '../../../core/models/userModel';
 import { selectUser } from '../../../core/store/auth/auth.selectors';
 import { EventCreationComponent } from '../event-creation/event-creation.component';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { EventCardComponent } from "./event-card/event-card.component";
 
 interface AppState {
   auth: AuthState;
@@ -29,7 +30,7 @@ interface AppState {
     ButtonModule,
     InputTextModule,
     UserNavComponent,
-    EventCreationComponent],
+    EventCreationComponent, EventCardComponent],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',
   animations: [
@@ -51,7 +52,8 @@ export class UserDashboardComponent implements OnInit {
   user$: Observable<User | null>;
   currentUser: User | null = null;
   isUserVerified: boolean = false;
-  eventList: IEvent[] | undefined = [];
+  eventOrganizedList: IEvent[] | undefined = [];
+  eventParticipatedList: IEvent[] | undefined = [];
   eventLoading = false;
   selectedEvent!: IEvent;
   filters: string[] = ["Category", "Type", "Custom", "Filter"];
@@ -65,6 +67,27 @@ export class UserDashboardComponent implements OnInit {
     this.user$ = this.store.select(selectUser);
   }
 
+    private _loadUserOrganizedEvents(): void {
+      this.eventLoading = true;
+      this.dashboardService.getUserOrganizedEvents()
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.eventLoading = false;
+              this.eventOrganizedList = response.data;
+            } else {
+              Notiflix.Notify.failure('Failed to load your events.');
+            }
+          },
+          error: (error) => {
+            console.error('Error loading events:', error);
+            Notiflix.Notify.failure('Error loading your events.');
+          },
+        });
+    }
+
+  events :IEvent[] | undefined;
+
   ngOnInit(): void {
     this.user$
       .pipe(
@@ -77,6 +100,8 @@ export class UserDashboardComponent implements OnInit {
       )
       .subscribe();
     this.fetchAllEvents();
+    this._loadUserOrganizedEvents();
+    this.fetchAllParticipatedEvents()
   }
 
   tabChange(tab: string) {
@@ -87,7 +112,7 @@ export class UserDashboardComponent implements OnInit {
     this.eventLoading = true;
     this.dashboardService.getUserEvents().pipe(
       tap((response) => {
-        this.eventList = response.data;
+        this.events = response.data;
         this.eventLoading = false;
       }),
       catchError((error) => {
@@ -106,4 +131,21 @@ export class UserDashboardComponent implements OnInit {
   }
 
   purchaseTickets(item: IEvent) {}
+
+  fetchAllParticipatedEvents() {
+    this.eventLoading = true;
+    this.dashboardService.getUserParticipatedEvents().pipe(
+      tap((response) => {
+        console.log(response.data);
+        
+        this.eventParticipatedList = response.data;
+        this.eventLoading = false;
+      }),
+      catchError((error) => {
+        console.error('Error fetching users:', error);
+        Notiflix.Notify.failure('Error fetching users');
+        return of(null);
+      })
+    ).subscribe();
+  }
 }

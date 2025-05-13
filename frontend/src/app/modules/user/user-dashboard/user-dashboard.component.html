@@ -19,7 +19,7 @@
             [ngClass]="{'scale-100': tabSwitch === false}"></span>
         </button>
       </div>
-      <div class="relative mt-3 mx-4 sm:mx-8 md:mx-11 flex flex-wrap items-center gap-2 sm:gap-3">
+      <div class="relative mt-3 mx-4 sm:mx-8 md:mx-11 flex flex-wrap items-center gap-3 sm:gap-3">
         <app-event-creation [currentUser]="currentUser" [isUserVerified]="isUserVerified" (onEventCreated)="fetchAllEvents()"></app-event-creation>
       </div>
     </div>
@@ -73,28 +73,35 @@
       </div>
 
       <!-- Content -->
-      <div class="w-full mx-auto pt-2 sm:pt-4 bg-[#1E1E1E]">
+      <div class="w-full mx-auto  bg-[#1E1E1E]">
         <div class="max-w-xs md:max-w-7xl m-auto my-6">
           <div [@fadeAnimation]="tabSwitch ? 'participated' : 'organized'" class="transition-opacity duration-300">
             @if (tabSwitch) {
               @if (eventLoading) {
                 <h3 colspan="7" class="text-center py-4">Loading...</h3>
-              } @else if (eventList?.length === 0) {
+              } @else if (eventOrganizedList?.length === 0) {
                 <h3 colspan="7" class="text-center py-4">No Events found</h3>
               } @else {
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                  <h3>PARTICIPATED</h3>
-                </div>
+                @if (eventLoading) {
+                  <h3 colspan="7" class="text-center py-4">Loading...</h3>
+                } @else if (eventParticipatedList?.length === 0) {
+                  <h3 colspan="7" class="text-center py-4">No Events found</h3>
+                } @else if(eventParticipatedList){
+  
+                    <app-event-card [events]="eventParticipatedList"></app-event-card> 
+                  
+                }
               }
+              
             } @else {
               @if (eventLoading) {
                 <h3 colspan="7" class="text-center py-4">Loading...</h3>
-              } @else if (eventList?.length === 0) {
+              } @else if (eventOrganizedList?.length === 0) {
                 <h3 colspan="7" class="text-center py-4">No Events found</h3>
-              } @else {
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                  <h3>ORGANIZED</h3>
-                </div>
+              } @else if(eventOrganizedList){
+
+                  <app-event-card [events]="eventOrganizedList"></app-event-card> 
+                
               }
             }
           </div>

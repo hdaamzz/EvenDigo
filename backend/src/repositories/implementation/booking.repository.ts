@@ -53,6 +53,32 @@ import { inject, injectable } from 'tsyringe';
       throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
     }
   }
+  async findBookingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<any[]> {
+  try {
+    const bookings = await this.bookingModel
+      .find({ userId, paymentStatus: "Completed" })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'eventId',
+        populate: {
+          path: 'user_id'
+        }
+      })
+      .exec();
+
+    return bookings.map(booking => {
+      return {
+        ...(booking.eventId as any)._doc, 
+        bookingId: booking.bookingId
+      };
+    });
+  } catch (error) {
+    console.error('Error in findByUserId:', error);
+    throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
+  }
+}
+
+
   async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> {
     return this.bookingModel.findByIdAndUpdate(
       bookingId,

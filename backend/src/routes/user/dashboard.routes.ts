@@ -11,6 +11,11 @@ const dashboardRouter = Router();
 dashboardRouter.post('/events', authMiddleware, upload.fields([{ name: 'mainBanner', maxCount: 1 },{ name: 'promotionalImage', maxCount: 1 }]), (req, res) => dashboardController.createEvent(req, res));
 
 dashboardRouter.get('/events',authMiddleware,(req, res) => dashboardController.getUserEvents(req, res));
+dashboardRouter.get('/events/organized',authMiddleware,(req, res) => dashboardController.getUserOrganizedEvents(req, res));
+dashboardRouter.get('/events/participated',authMiddleware,(req, res) => dashboardController.getUserParticipatedEvents(req, res));
+
+
+
 
 dashboardRouter.get('/events/:eventId', authMiddleware,(req, res) => dashboardController.getEventById(req, res));
 

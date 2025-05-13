@@ -13,7 +13,6 @@ import { IBooking, ITicket } from '../../../../core/models/booking.interface';
   styleUrl: './profile.bookings.component.css'
 })
 export class ProfileBookingsComponent implements OnInit, OnDestroy {
-  // Public properties
   bookings: IBooking[] = [];
   showModal = false;
   showBookingDetailsModal = false;
@@ -22,7 +21,6 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
   selectedTicket: ITicket | null = null;
   selectedBooking: IBooking | null = null;
   
-  // Private properties
   private _destroy$ = new Subject<void>();
   
   constructor(private _userProfileService: UserProfileService) {}
@@ -69,7 +67,6 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
 
   downloadTicket(booking: IBooking): void {
     Notiflix.Notify.info('Downloading your tickets...');
-    // Implement the download logic or API call here
     setTimeout(() => {
       Notiflix.Notify.success('Tickets downloaded successfully!');
     }, 1500);

@@ -15,8 +15,8 @@ export interface ITicket {
 
 export interface IBooking extends Document {
     bookingId: string;
-    userId: Schema.Types.ObjectId | string;
-    eventId: Schema.Types.ObjectId |string;
+    userId: Schema.Types.ObjectId | string ;
+    eventId: Schema.Types.ObjectId |string ;
     tickets: ITicket[];
     totalAmount: number;
     paymentType: string;
@@ -37,6 +37,6 @@ export interface IBooking extends Document {
     discount?: number;
     coupon?: string | null;
     stripeSessionId?: string; 
-    paymentStatus:string;
+    paymentStatus?:string;
 
   }
