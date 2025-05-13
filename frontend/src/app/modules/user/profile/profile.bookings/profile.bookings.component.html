@@ -19,22 +19,22 @@
         <div class="bg-[#1E1E1E] rounded-lg overflow-hidden border border-gray-600">
             <div class="flex flex-col md:flex-row">
                 <div class="relative w-full md:w-38 h-38 md:h-auto">
-                    <img [src]="booking.eventId.mainBanner" alt="Event Image" class="w-full h-full object-cover">
+                    <img [src]="booking?.event?.mainBanner" alt="Event Image" class="w-full h-full object-cover">
                     <div class="absolute top-2 left-2 bg-green-500 text-xs font-medium px-2 py-1 rounded text-white">
-                        {{booking.eventId.eventType}}
+                        {{booking.event?.eventType}}
                     </div>
                 </div>
                 
                 <div class="flex-1 p-4">
                     <div class="flex justify-between items-start pt-10">
                         <div>
-                            <h3 class="text-lg font-semibold">{{booking.eventId.eventTitle}}</h3>
+                            <h3 class="text-lg font-semibold">{{booking.event?.eventTitle}}</h3>
                             <p class="text-gray-400 text-sm mt-1">Booking ID: <span class="text-gray-300">{{ booking.bookingId }}</span></p>
                             <div class="mt-2 flex items-center text-gray-400 text-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <p>{{ booking.eventId.startDate | date:'MMM d, y' }} at {{ booking.eventId.startTime | date:'shortTime' }}</p>
+                                <p>{{ booking.event?.startDate | date:'MMM d, y' }} at {{ booking.event?.startTime | date:'shortTime' }}</p>
                             </div>
                             
                             <div class="mt-1 flex items-center text-gray-400 text-sm">
@@ -42,11 +42,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>{{booking.eventId.venueName}}, {{booking.eventId.venueAddress}}, {{booking.eventId.city}}</span>
+                                <span>{{booking.event?.venueName}}, {{booking.event?.venueAddress}}, {{booking.event?.city}}</span>
                             </div>
                             
                             <div class="mt-1 text-xs text-gray-400">
-                                <!-- Created by <span class="text-blue-400">{{booking.eventId.user_id.name}}</span> -->
+                                <!-- Created by <span class="text-blue-400">{{booking.event?.user_id.name}}</span> -->
                             </div>
                         </div>
                     </div>
@@ -110,14 +110,14 @@
             @if (selectedBooking) {
                 <div class="space-y-6">
                     <div class="relative rounded-lg overflow-hidden">
-                        <img [src]="selectedBooking.eventId.promotionalImage" alt="Event Banner" class="w-full h-80 object-cover">
+                        <img [src]="selectedBooking.event?.promotionalImage" alt="Event Banner" class="w-full h-80 object-cover">
                         <div class="absolute top-3 left-3 bg-green-500 text-xs font-medium px-2 py-1 rounded text-white">
-                            {{selectedBooking.eventId.eventType}}
+                            {{selectedBooking.event?.eventType}}
                         </div>
                     </div>
 
                     <div>
-                        <h2 class="text-xl font-bold">{{selectedBooking.eventId.eventTitle}}</h2>
+                        <h2 class="text-xl font-bold">{{selectedBooking.event?.eventTitle}}</h2>
                         <p class="text-gray-400 text-sm mt-1">Booking ID: <span class="text-gray-300">{{selectedBooking.bookingId}}</span></p>
                     </div>
 
@@ -129,8 +129,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <div>
-                                <p>Date: {{ selectedBooking.eventId.startDate | date:'EEEE, MMM d, y' }}</p>
-                                <p>Time: {{ selectedBooking.eventId.startTime | date:'shortTime' }}</p>
+                                <p>Date: {{ selectedBooking.event?.startDate | date:'EEEE, MMM d, y' }}</p>
+                                <p>Time: {{ selectedBooking.event?.startTime | date:'shortTime' }}</p>
                             </div>
                         </div>
                         
@@ -140,8 +140,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <div>
-                                <p>Venue: {{selectedBooking.eventId.venueName}}</p>
-                                <p>Address: {{selectedBooking.eventId.venueAddress}}, {{selectedBooking.eventId.city}}</p>
+                                <p>Venue: {{selectedBooking.event?.venueName}}</p>
+                                <p>Address: {{selectedBooking.event?.venueAddress}}, {{selectedBooking.event?.city}}</p>
                             </div>
                         </div>
                     </div>

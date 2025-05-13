@@ -17,6 +17,7 @@ export interface IBooking {
     bookingId: string;
     userId: User | string;
     eventId: IEvent ;
+    event?: IEvent ;
     tickets: ITicket[];
     totalAmount: number;
     paymentType: string;

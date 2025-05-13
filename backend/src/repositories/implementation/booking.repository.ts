@@ -1,13 +1,13 @@
-import { Model, Schema } from 'mongoose';
+import mongoose, { Model, Schema } from 'mongoose';
 import { IBooking } from '../../models/interfaces/booking.interface';
 import { IBookingRepository } from '../interfaces/IBooking.repository';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
- class BookingRepository implements IBookingRepository {
+class BookingRepository implements IBookingRepository {
   constructor(
     @inject("BookingModel") private bookingModel: Model<IBooking>
-  ) {}
+  ) { }
 
   async createBooking(bookingData: Partial<IBooking>): Promise<IBooking> {
     try {
@@ -40,7 +40,7 @@ import { inject, injectable } from 'tsyringe';
   async findBookingByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
     try {
       const bookings = await this.bookingModel
-        .find({ userId,paymentStatus:"Completed" }).sort({ createdAt: -1 })
+        .find({ userId, paymentStatus: "Completed" }).sort({ createdAt: -1 })
         .populate('userId')
         .populate('eventId')
         .populate('eventId.user_id')
@@ -53,30 +53,66 @@ import { inject, injectable } from 'tsyringe';
       throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
     }
   }
-  async findBookingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<any[]> {
-  try {
-    const bookings = await this.bookingModel
-      .find({ userId, paymentStatus: "Completed" })
-      .sort({ createdAt: -1 })
-      .populate({
-        path: 'eventId',
-        populate: {
-          path: 'user_id'
-        }
-      })
-      .exec();
 
-    return bookings.map(booking => {
-      return {
-        ...(booking.eventId as any)._doc, 
-        bookingId: booking.bookingId
-      };
-    });
-  } catch (error) {
-    console.error('Error in findByUserId:', error);
-    throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
+  async findUpcomingEventBookingByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
+    try {
+      const bookings = await this.bookingModel.aggregate([
+        {
+          $match: {
+            userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId,
+            paymentStatus: 'Completed',
+          },
+        },
+        {
+          $lookup: {
+            from: 'events',
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event',
+          },
+        },
+        { $unwind: '$event' },
+        {
+          $match: {
+            'event.startDate': { $gt: new Date() },
+          },
+        },
+        {
+          $sort: { createdAt: -1 },
+        },
+      ]);
+
+      return bookings;
+    } catch (error) {
+      console.error('Error in findByUserId:', error);
+      throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
+    }
   }
-}
+
+  async findBookingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<any[]> {
+    try {
+      const bookings = await this.bookingModel
+        .find({ userId, paymentStatus: "Completed" })
+        .sort({ createdAt: -1 })
+        .populate({
+          path: 'eventId',
+          populate: {
+            path: 'user_id'
+          }
+        })
+        .exec();
+
+      return bookings.map(booking => {
+        return {
+          ...(booking.eventId as any)._doc,
+          bookingId: booking.bookingId
+        };
+      });
+    } catch (error) {
+      console.error('Error in findByUserId:', error);
+      throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
+    }
+  }
 
 
   async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> {
@@ -88,35 +124,35 @@ import { inject, injectable } from 'tsyringe';
   }
   async findByStripeSessionId(sessionId: string): Promise<IBooking | null> {
     const booking = await this.bookingModel.findOne({ stripeSessionId: sessionId })
-    .populate('userId')
-    .populate('eventId')
-    .populate('eventId.user_id')
-    .exec();    
+      .populate('userId')
+      .populate('eventId')
+      .populate('eventId.user_id')
+      .exec();
     return booking;
   }
-  
+
   async updateTicketStatus(
     bookingId: string,
     ticketUniqueId: string,
     status: string
-  ): Promise<IBooking |null> {
+  ): Promise<IBooking | null> {
     return this.bookingModel.findOneAndUpdate(
-      { 
+      {
         bookingId,
-        'tickets.uniqueId': ticketUniqueId 
+        'tickets.uniqueId': ticketUniqueId
       },
-      { 
-        $set: { 'tickets.$.status': status } 
+      {
+        $set: { 'tickets.$.status': status }
       },
       { new: true }
     )
-    .populate('eventId')
-    .populate('userId')
-    .exec();
+      .populate('eventId')
+      .populate('userId')
+      .exec();
   }
 
   async findBookingsByEventId(
-    eventId: Schema.Types.ObjectId | string, 
+    eventId: Schema.Types.ObjectId | string,
     filters: Record<string, any> = {}
   ): Promise<IBooking[]> {
     try {

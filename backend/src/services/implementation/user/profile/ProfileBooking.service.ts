@@ -18,7 +18,7 @@ export class ProfileBookingService implements IProfileBookingService {
 
   async getUserBookings(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
     try {
-      const bookings = await this.bookingRepository.findBookingByUserId(userId);
+      const bookings = await this.bookingRepository.findUpcomingEventBookingByUserId(userId);
       return bookings;
     } catch (error) {
       throw new Error(`Failed to fetch user bookings: ${(error as Error).message}`);
