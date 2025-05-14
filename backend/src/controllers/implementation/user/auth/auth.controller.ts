@@ -96,7 +96,6 @@ export class AuthController implements IAuthController {
         });
         return;
       }
-      console.log("token",token);
       
 
       res.cookie('session', token, {

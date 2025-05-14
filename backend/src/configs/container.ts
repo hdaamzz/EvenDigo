@@ -24,7 +24,6 @@ import { RevenueDistributionRepository } from "../../src/repositories/implementa
 import { RevenueDistributionService } from "../../src/services/implementation/admin/distribution.service";
 import { RevenueDistributionCronService } from "../../src/services/implementation/cronjob/revenue.distribution";
 import { EventModel } from "../../src/models/EventModel";
-// import { Logger } from "../../src/utils/logger";
 import { UserAchievementRepository } from "../../src/repositories/implementation/badge.repository";
 import { UserAchievementService } from "../../src/services/implementation/user/achievements/achivements.service";
 import { SubscriptionController } from "../../src/controllers/implementation/user/premium/subscription.controller";
@@ -67,6 +66,12 @@ import { TokenService } from "../../src/services/implementation/user/auth/TokenS
 import { SubscriptionPlanRepository } from "../../src/repositories/implementation/subscriptionPlan.repository";
 import { SubscriptionPlanService } from "../../src/services/implementation/admin/SubscriptionPlan.service";
 import { SubscriptionPlanController } from "../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
+import { ChatRepository } from "../../src/repositories/implementation/chat.repository";
+import { MessageRepository } from "../../src/repositories/implementation/message.repository";
+import { GroupChatRepository } from "../../src/repositories/implementation/groupChat.repository";
+import { ChatService } from "../../src/services/implementation/user/chat/chat.service";
+import { GroupChatService } from "../../src/services/implementation/user/chat/group.service";
+import { ChatController } from "../../src/controllers/implementation/user/chat/chat.controller";
 
 
 
@@ -83,6 +88,11 @@ container.register("RevenueDistributionRepository", { useClass: RevenueDistribut
 container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
 container.register("SubscriptionRepository", { useClass: SubscriptionRepository });
 container.register('SubscriptionPlanRepository',{useClass:SubscriptionPlanRepository});
+container.register('ChatRepository',{useClass:ChatRepository});
+container.register('MessageRepository',{useClass:MessageRepository});
+container.register('GroupChatRepository',{useClass:GroupChatRepository});
+
+
 
 
 
@@ -110,7 +120,8 @@ container.register("PasswordService", { useClass: PasswordService });
 container.register("EmailService", { useClass: EmailService });
 container.register("FirebaseAuthService", { useClass: FirebaseAuthService });
 container.register("TokenService", { useClass: TokenService });
-
+container.register("ChatService", { useClass: ChatService });
+container.register("GroupChatService", { useClass: GroupChatService });
 
 
 
@@ -148,6 +159,8 @@ container.register("ProfileEventsController", { useClass: ProfileEventsControlle
 container.register("ProfileWalletController", { useClass: ProfileWalletController });
 container.register("ProfileUserController", { useClass: ProfileUserController });
 container.register("SubscriptionPlanController", { useClass: SubscriptionPlanController });
+container.register("ChatController", { useClass: ChatController });
+
 
 
 

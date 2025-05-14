@@ -8,6 +8,7 @@ import { IPaymentService } from '../../../../../src/services/interfaces/user/exp
 import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
 import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
 import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { IGroupChatService } from '../../../../../src/services/interfaces/user/chat/IGroupChatService';
 
 @injectable()
 export class ExploreController implements IExploreController {
@@ -15,7 +16,10 @@ export class ExploreController implements IExploreController {
     @inject("ExploreService") private exploreService: IExploreService,
     @inject("PaymentService") private paymentService: IPaymentService,
     @inject("BookingService") private bookingService: IBookingService,
-    @inject("SubscriptionQueryService") private subscriptionService: ISubscriptionQueryService
+    @inject("SubscriptionQueryService") private subscriptionService: ISubscriptionQueryService,
+    @inject("GroupChatService") private groupChatService: IGroupChatService,
+
+
   ) {}
 
   getAllEvents = async (req: Request, res: Response): Promise<void> => {
@@ -37,13 +41,19 @@ export class ExploreController implements IExploreController {
         const booking = await this.paymentService.processWalletPayment(
           eventId, tickets, amount, userId, couponCode, discount
         );
-        
+        const groupChat = await this.groupChatService.getGroupChatByEventId(eventId);
+        if (groupChat) {
+          await this.groupChatService.addMemberToGroupChat(groupChat._id,userId);
+        }
         ResponseHandler.success(res, booking, 'Booking successful! Payment completed from wallet.');
       } else {
         const session = await this.paymentService.createStripeCheckoutSession(
           eventId, tickets, amount, successUrl, cancelUrl, userId, couponCode, discount
         );
-        
+        const groupChat = await this.groupChatService.getGroupChatByEventId(eventId);
+        if (groupChat) {
+          await this.groupChatService.addMemberToGroupChat(groupChat._id,userId);
+        }
         ResponseHandler.success(res, { sessionId: session.id });
       }
     } catch (error) {

@@ -7,28 +7,38 @@ import * as admin from 'firebase-admin';
 import serviceAccount from './configs/serviceAccountKey.json';
 import dotenv from 'dotenv';
 dotenv.config();
-// import session from "express-session";
 import './configs/container';
 import connectDB from './configs/db';
 import cookieParser from 'cookie-parser';
+import { createServer } from 'http';
 import router from './routes/router';
 import stripeWebhookRouter from "./routes/user/webhook.routes";
 import { container } from "./configs/container";
 import { RevenueDistributionCronService } from "./services/implementation/cronjob/revenue.distribution";
+import { SocketConfig } from "./configs/socket";
 
 const PORT: string | undefined = process.env.PORT;
 
 const app=express();
+const httpServer = createServer(app);
 const corsOptions={
     origin: process.env.CLIENT_SERVER, 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,  
 };
+
+const socketConfig = container.resolve(SocketConfig);
+socketConfig.initializeSocket(httpServer);
+
+
 // stripe listen --forward-to localhost:3000/webhooks/stripe
 const revenueDistributionCron = container.resolve(RevenueDistributionCronService);
 revenueDistributionCron.startCronJob();
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
+
+
+
 
 //Middlewares
 app.use(cors(corsOptions));

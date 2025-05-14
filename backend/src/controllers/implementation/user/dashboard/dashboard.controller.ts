@@ -7,12 +7,16 @@ import { EventMapper } from '../../../../../src/services/implementation/user/das
 import { IEventService } from '../../../../../src/services/interfaces/user/dashboard/IEvent.service';
 import { IFileService } from '../../../../../src/services/interfaces/user/dashboard/IFile.service';
 import { ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
+import { IGroupChatService } from '../../../../../src/services/interfaces/user/chat/IGroupChatService';
+
+
 @injectable()
 export class DashboardController implements IDashboardController {
   constructor(
     @inject("EventService") private eventService: IEventService,
     @inject("FileService") private fileService: IFileService,
     @inject("UserAchievementService") private achievementService: IUserAchievementService,
+    @inject("GroupChatService") private groupChatService: IGroupChatService,
     @inject("EventMapper") private eventMapper: EventMapper
   ) {}
 
@@ -27,6 +31,8 @@ export class DashboardController implements IDashboardController {
       
       const event = await this.eventService.createEvent(eventData);
       await this.achievementService.checkUserAchievements(userId);
+      
+      await this.groupChatService.createGroupChat(event._id as unknown as string, userId)
       
       res.status(StatusCode.CREATED).json({ success: true, data: event });
     } catch (error) {
