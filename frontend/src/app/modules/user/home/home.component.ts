@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
   
   subscribeToPlan(plan: SubscriptionPlan): void {
-    if (plan.type === 'Premium') {
+    if (plan.type === 'premium') {
       this._router.navigate(['/premium/checkout'], { 
         queryParams: { 
           type: plan.type
@@ -64,8 +64,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
     
-    if (plan.type === 'Basic') {
-      this._router.navigate(['/dashboard']);
+    if (plan.type === 'basic') {
+        this._router.navigate(['/premium/checkout'], { 
+        queryParams: { 
+          type: plan.type
+        }
+      });
+      return;
     }
   }
 }

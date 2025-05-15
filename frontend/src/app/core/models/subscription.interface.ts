@@ -1,6 +1,7 @@
 
 export interface SubscriptionPlan {
     id?: string;
+    type:string;
     price: number;
     description: string;
     discountPercentage?:number;

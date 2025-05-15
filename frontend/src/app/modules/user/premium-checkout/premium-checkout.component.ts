@@ -33,6 +33,7 @@ export class PremiumCheckoutComponent implements OnInit, OnDestroy {
   planDetails: SubscriptionPlan = {
     id: '',
     price: 0,
+    type:'',
     description: '',
     discountPercentage: 0,
     isPopular: false,
@@ -188,9 +189,10 @@ export class PremiumCheckoutComponent implements OnInit, OnDestroy {
     if (!this._stripe) {
       throw new Error('Payment service not initialized. Please refresh the page.');
     }
+    console.log(this.planDetails.type);
     
     const payload = {
-      planType: 'premium',
+      planType: this.planDetails.type,
       amount: this.planDetails.price,
       successUrl: `${window.location.origin}/payment/success`,
       cancelUrl: `${window.location.origin}/premium/checkout`

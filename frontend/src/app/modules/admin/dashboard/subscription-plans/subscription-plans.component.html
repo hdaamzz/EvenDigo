@@ -1,13 +1,23 @@
 <div class="p-2 md:p-5 relative z-1">
-    <div class="subscription-plans-container bg-white  rounded-2xl">
-        <div class="header-section">
-            <div class="mb-6">
+    <div class="subscription-plans-container bg-white rounded-2xl">
+        <div class="header-section flex justify-between items-center mb-6">
+            <div>
                 <h2
                     class="text-xl md:text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3 py-1 flex items-center">
                     <span
                         class="gradient-text bg-gradient-to-r from-green-500 to-cyan-400 bg-clip-text text-transparent">Subscription</span>
                     <span class="ml-2 text-xs font-normal text-gray-500 bg-gray-100 rounded-full px-2 py-1">Plans</span>
                 </h2>
+            </div>
+            
+            <!-- Create plan button - only visible if we don't have both Basic and Premium plans -->
+            <div *ngIf="canCreateNewPlan()">
+                <p-button 
+                    label="Create Plan" 
+                    icon="pi pi-plus" 
+                    styleClass="p-button-success" 
+                    (click)="openNewPlanDialog()">
+                </p-button>
             </div>
         </div>
 
@@ -20,10 +30,13 @@
             <div class="plan-card" *ngFor="let plan of plans">
                 <p-card [styleClass]="plan.isPopular ? 'popular-plan' : ''">
                     <ng-template pTemplate="header">
-                        <div class="plan-header" [ngClass]="{'premium-plan': plan.type === 'premium'}">
-                            <div class="plan-title">
-                                <h2>{{ plan.type === 'Basic' ? 'Basic' : 'Premium' }}</h2>
-                                <p-tag *ngIf="plan.isPopular" severity="success" value="POPULAR"></p-tag>
+                        <div class="plan-header" [ngClass]="{'premium-plan': plan.type.toLowerCase() === 'premium'}">
+                            <div class="plan-title flex justify-between items-center">
+                                <h2>{{ plan.type === 'basic' ? 'Basic' : 'Premium' }}</h2>
+                                <div class="flex gap-2">
+                                    <p-tag *ngIf="plan.isPopular" severity="success" value="POPULAR"></p-tag>
+                                    <p-tag [severity]="plan.active ? 'success' : 'danger'" [value]="plan.active ? 'ACTIVE' : 'INACTIVE'"></p-tag>
+                                </div>
                             </div>
                             <div class="plan-price">
                                 <span class="price-value">₹{{ plan.price }}</span>
@@ -43,9 +56,19 @@
                     </div>
 
                     <ng-template pTemplate="footer">
-                        <div class="plan-actions">
-                            <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-info"
-                                (click)="openDialog(plan)" pTooltip="Edit plan"></p-button>
+                        <div class="plan-actions flex justify-end gap-2">
+                            <p-button 
+                                [icon]="plan.active ? 'pi pi-power-off' : 'pi pi-check'" 
+                                [styleClass]="plan.active ? 'p-button-text p-button-danger' : 'p-button-text p-button-success'"
+                                (click)="togglePlanStatus(plan)" 
+                                [pTooltip]="plan.active ? 'Deactivate plan' : 'Activate plan'">
+                            </p-button>
+                            <p-button 
+                                icon="pi pi-pencil" 
+                                styleClass="p-button-text p-button-info"
+                                (click)="openDialog(plan)" 
+                                pTooltip="Edit plan">
+                            </p-button>
                         </div>
                     </ng-template>
                 </p-card>
@@ -56,12 +79,39 @@
         <div class="empty-state" *ngIf="!loading && plans?.length === 0">
             <i class="pi pi-file-excel" style="font-size: 3rem"></i>
             <h3 class="text-green-600">No subscription plans found</h3>
+            <p class="text-gray-500 mt-2">Click the 'Create Plan' button to add your first subscription plan.</p>
         </div>
 
         <p-dialog [(visible)]="showDialog" [header]="dialogTitle" [modal]="true"
             [style]="{width: '90%', maxWidth: '650px'}" [draggable]="false" [resizable]="false">
 
             <form [formGroup]="planForm" (ngSubmit)="savePlan()">
+                <div class="form-section">
+                    <label class="form-label" for="type">Plan Type</label>
+                    <div class="flex gap-4">
+                        <div class="p-field-radiobutton">
+                            <p-radioButton 
+                                name="type" 
+                                value="basic" 
+                                formControlName="type" 
+                                inputId="type_basic"
+                                [disabled]="editMode || (hasBasicPlan && !editMode)">
+                            </p-radioButton>
+                            <label for="type_basic" class="ml-2">Basic</label>
+                        </div>
+                        <div class="p-field-radiobutton">
+                            <p-radioButton 
+                                name="type" 
+                                value="premium" 
+                                formControlName="type" 
+                                inputId="type_premium"
+                                [disabled]="editMode || (hasPremiumPlan && !editMode)">
+                            </p-radioButton>
+                            <label for="type_premium" class="ml-2">Premium</label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-section">
                     <label class="form-label" for="price">Price (₹)</label>
                     <p-inputNumber id="price" formControlName="price" [showButtons]="true" buttonLayout="horizontal"
@@ -76,12 +126,19 @@
                     <input pInputText type="text" formControlName="description" id="description"
                         [style]="{width: '100%'}" placeholder="Describe your plan">
                 </div>
-                <div class="form-section">
+                
+                <div class="form-section flex items-center gap-5">
                     <div class="p-field-checkbox">
                         <p-checkbox formControlName="isPopular" [binary]="true" inputId="isPopular"></p-checkbox>
-                        <label for="isPopular">Mark as Popular</label>
+                        <label for="isPopular" class="ml-2">Mark as Popular</label>
+                    </div>
+                    
+                    <div class="p-field-checkbox">
+                        <p-checkbox formControlName="active" [binary]="true" inputId="active"></p-checkbox>
+                        <label for="active" class="ml-2">Active</label>
                     </div>
                 </div>
+                
                 <div class="form-section">
                     <label class="form-label">Features</label>
                     <div class="features-grid">
@@ -89,11 +146,11 @@
                             <p-checkbox [binary]="true" [(ngModel)]="feature.selected"
                                 [ngModelOptions]="{standalone: true}" [inputId]="feature.id">
                             </p-checkbox>
-                            <label [for]="feature.id">{{ feature.name }}</label>
+                            <label [for]="feature.id" class="ml-2">{{ feature.name }}</label>
                         </div>
                     </div>
 
-                    <div class="custom-feature-section">
+                    <div class="custom-feature-section mt-3">
                         <div class="p-inputgroup">
                             <input pInputText type="text" [(ngModel)]="newFeatureName"
                                 [ngModelOptions]="{standalone: true}" placeholder="Add custom feature">
@@ -112,5 +169,6 @@
             </ng-template>
         </p-dialog>
 
+        <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
     </div>
 </div>

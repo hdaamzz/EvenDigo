@@ -9,6 +9,7 @@ export interface ISubscriptionPlanController {
   getById(req: Request, res: Response): Promise<void>;
   update(req: Request, res: Response): Promise<void>;
   delete(req: Request, res: Response): Promise<void>;
+  create(req: Request, res: Response): Promise<void>
 }
 
 
@@ -18,6 +19,42 @@ export class SubscriptionPlanController implements ISubscriptionPlanController{
     @inject('SubscriptionPlanService')
     private subscriptionPlanService: ISubscriptionPlanService
   ) {}
+
+    create = async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { type, price, description, features, isPopular, active, discountPercentage, billingCycle } = req.body;
+        
+        const newPlan = await this.subscriptionPlanService.createPlan({
+          type,
+          price,
+          description,
+          features,
+          isPopular,
+          active,
+          discountPercentage,
+          billingCycle
+        });
+        
+        res.status(StatusCode.CREATED).json({
+          success: true,
+          data: newPlan
+        });
+      } catch (error) {
+        console.error('Error creating subscription plan:', error);
+        
+        if (error instanceof Error && error.message.includes('duplicate key')) {
+          res.status(StatusCode.BAD_REQUEST).json({
+            success: false,
+            error: 'A plan with this type already exists'
+          });
+        }
+        
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          error: (error as Error).message || 'Failed to create subscription plan'
+        });
+      }
+    };
 
     getAll = async (_req: Request, res: Response): Promise<void> => {
     try {
@@ -58,6 +95,7 @@ export class SubscriptionPlanController implements ISubscriptionPlanController{
       });
     }
   };
+  
 
   getByPlanType = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -83,20 +121,21 @@ export class SubscriptionPlanController implements ISubscriptionPlanController{
     }
   };
 
-    update = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { type, price, description, features, isPopular, discountPercentage, billingCycle } = req.body;
-      
-      const updatedPlan = await this.subscriptionPlanService.updatePlan(id, {
-        type,
-        price,
-        description,
-        features,
-        isPopular,
-        discountPercentage,
-        billingCycle
-      });
+  update = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { type, price, description, features, isPopular, active, discountPercentage, billingCycle } = req.body;
+    
+    const updatedPlan = await this.subscriptionPlanService.updatePlan(id, {
+      type,
+      price,
+      description,
+      features,
+      isPopular,
+      active,
+      discountPercentage,
+      billingCycle
+    });
       
       if (!updatedPlan) {
         res.status(StatusCode.NOT_FOUND).json({

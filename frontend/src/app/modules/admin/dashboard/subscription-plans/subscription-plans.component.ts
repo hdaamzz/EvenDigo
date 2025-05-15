@@ -13,6 +13,7 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import Notiflix from 'notiflix';
 import { Subject, takeUntil } from 'rxjs';
@@ -25,9 +26,6 @@ interface PlanFeature {
   selected: boolean;
 }
 
-/**
- * Component for managing subscription plans
- */
 @Component({
   selector: 'app-subscription-plans',
   standalone: true,
@@ -46,7 +44,8 @@ interface PlanFeature {
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ToggleButtonModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './subscription-plans.component.html',
@@ -75,50 +74,36 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
   newFeatureName = '';
   editMode = false;
   currentPlanId = '';
+  hasBasicPlan = false;
+  hasPremiumPlan = false;
   private readonly _destroy$ = new Subject<void>();
 
-  /**
-   * @param _formBuilder Angular FormBuilder service
-   * @param _subscriptionPlanService Service for subscription plan operations
-   * @param _confirmationService PrimeNG confirmation service
-   */
   constructor(
     private readonly _formBuilder: FormBuilder,
     private readonly _subscriptionPlanService: SubscriptionPlanService,
     private readonly _confirmationService: ConfirmationService
   ) {}
 
-  /**
-   * Initializes the component, form, and loads plans
-   */
   ngOnInit(): void {
     this._initializeForm();
     this._loadPlans();
   }
   
-  /**
-   * Cleans up resources when component is destroyed
-   */
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
   }
 
-  /**
-   * Initializes the plan form with default values
-   */
   private _initializeForm(): void {
     this.planForm = this._formBuilder.group({
       type: ['basic', Validators.required],
       price: [0, [Validators.required, Validators.min(0)]],
       description: ['', Validators.required],
-      isPopular: [false]
+      isPopular: [false],
+      active: [true]
     });
   }
 
-  /**
-   * Loads subscription plans from the service
-   */
   private _loadPlans(): void {
     this.loading = true;
     
@@ -127,6 +112,7 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.plans = response.data || [];
+          this._checkExistingPlanTypes();
           this.loading = false;
         },
         error: (error) => {
@@ -137,10 +123,11 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Opens the dialog to edit an existing plan
-   * @param plan The plan to edit
-   */
+  private _checkExistingPlanTypes(): void {
+    this.hasBasicPlan = this.plans.some(plan => plan.type.toLowerCase() === 'basic');
+    this.hasPremiumPlan = this.plans.some(plan => plan.type.toLowerCase() === 'premium');
+  }
+
   openDialog(plan: SubscriptionPlan): void {
     this.dialogTitle = 'Edit Plan';
     this.editMode = true;
@@ -149,33 +136,60 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
     this.showDialog = true;
   }
 
-  /**
-   * Opens the dialog to create a new plan
-   */
   openNewPlanDialog(): void {
     this.dialogTitle = 'Create New Plan';
     this.editMode = false;
     this.currentPlanId = '';
     this._resetForm();
+    
+    // Set available plan types based on existing plans
+    if (this.hasBasicPlan && !this.hasPremiumPlan) {
+      this.planForm.patchValue({ type: 'premium' });
+    } else if (!this.hasBasicPlan && this.hasPremiumPlan) {
+      this.planForm.patchValue({ type: 'basic' });
+    }
+    
     this.showDialog = true;
   }
 
-  /**
-   * Closes the plan dialog
-   */
   closeDialog(): void {
     this.showDialog = false;
   }
 
-  /**
-   * Resets the form to default values and clears selected features
-   */
+  canCreateNewPlan(): boolean {
+    return !(this.hasBasicPlan && this.hasPremiumPlan);
+  }
+
+  togglePlanStatus(plan: SubscriptionPlan): void {
+    const newStatus = !plan.active;
+    
+    this._confirmationService.confirm({
+      message: `Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this plan?`,
+      header: `${newStatus ? 'Activate' : 'Deactivate'} Plan`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this._subscriptionPlanService.togglePlanStatus(plan._id, newStatus)
+          .pipe(takeUntil(this._destroy$))
+          .subscribe({
+            next: () => {
+              Notiflix.Notify.success(`Plan ${newStatus ? 'activated' : 'deactivated'} successfully`);
+              this._loadPlans();
+            },
+            error: (error) => {
+              console.error(`Error ${newStatus ? 'activating' : 'deactivating'} plan:`, error);
+            }
+          });
+      }
+    });
+  }
+
   private _resetForm(): void {
     this.planForm.reset({
       type: 'basic',
       price: 0,
       description: '',
-      isPopular: false
+      isPopular: false,
+      active: true
     });
     
     this.availableFeatures.forEach(feature => {
@@ -183,16 +197,13 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Populates the form with data from an existing plan
-   * @param plan The plan to populate the form with
-   */
   private _populateForm(plan: SubscriptionPlan): void {
     this.planForm.patchValue({
       type: plan.type,
       price: plan.price,
       description: plan.description,
-      isPopular: plan.isPopular || false
+      isPopular: plan.isPopular || false,
+      active: plan.active !== undefined ? plan.active : true
     });
 
     this.availableFeatures.forEach(feature => {
@@ -215,17 +226,10 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Toggles selection state of a feature
-   * @param feature The feature to toggle
-   */
   toggleFeature(feature: PlanFeature): void {
     feature.selected = !feature.selected;
   }
 
-  /**
-   * Adds a new custom feature to the available features list
-   */
   addCustomFeature(): void {
     const trimmedFeatureName = this.newFeatureName.trim();
     
@@ -234,7 +238,6 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
       return;
     }
     
-    // Check if feature already exists
     const featureExists = this.availableFeatures.some(
       f => f.name.toLowerCase() === trimmedFeatureName.toLowerCase()
     );
@@ -255,9 +258,6 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
     Notiflix.Notify.success('Custom feature added successfully');
   }
 
-  /**
-   * Saves the current plan (creates new or updates existing)
-   */
   savePlan(): void {
     if (!this.planForm.valid) {
       this._markFormControlsAsTouched();
@@ -274,41 +274,55 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const plan: SubscriptionPlan = {
-      _id: this.currentPlanId,
+    const planData: any = {
       type: this.planForm.value.type,
       price: this.planForm.value.price,
       description: this.planForm.value.description,
       features: selectedFeatures,
-      isPopular: this.planForm.value.isPopular
+      isPopular: this.planForm.value.isPopular,
+      active: this.planForm.value.active
     };
 
     this.loading = true;
     
-    const saveOperation = this._subscriptionPlanService.updatePlan(plan);
-    
-    saveOperation
-      .pipe(takeUntil(this._destroy$))
-      .subscribe({
-        next: () => {
-          this.loading = false;
-          const successMessage = 'Plan updated successfully' ;
-          Notiflix.Notify.success(successMessage);
-          this.closeDialog();
-          this._loadPlans();
-        },
-        error: (error) => {
-          this.loading = false;
-          const errorMessage =  'Failed to update plan' ;
-          Notiflix.Notify.failure(errorMessage);
-          console.error('Error saving plan:', error);
-        }
-      });
+    if (this.editMode) {
+      // Update existing plan
+      planData._id = this.currentPlanId;
+      this._subscriptionPlanService.updatePlan(planData)
+        .pipe(takeUntil(this._destroy$))
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            Notiflix.Notify.success('Plan updated successfully');
+            this.closeDialog();
+            this._loadPlans();
+          },
+          error: (error) => {
+            this.loading = false;
+            Notiflix.Notify.failure('Failed to update plan');
+            console.error('Error saving plan:', error);
+          }
+        });
+    } else {
+      // Create new plan
+      this._subscriptionPlanService.createPlan(planData)
+        .pipe(takeUntil(this._destroy$))
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            Notiflix.Notify.success('Plan created successfully');
+            this.closeDialog();
+            this._loadPlans();
+          },
+          error: (error) => {
+            this.loading = false;
+            Notiflix.Notify.failure('Failed to create plan');
+            console.error('Error creating plan:', error);
+          }
+        });
+    }
   }
-  
-  /**
-   * Marks all form controls as touched to trigger validation messages
-   */
+
   private _markFormControlsAsTouched(): void {
     Object.keys(this.planForm.controls).forEach(key => {
       const control = this.planForm.get(key);

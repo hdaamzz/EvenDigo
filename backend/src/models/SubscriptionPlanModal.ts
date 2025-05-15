@@ -8,7 +8,8 @@ export interface ISubscriptionPlan extends Document {
   features: string[];
   isPopular?: boolean;
   discountPercentage?: number;
-  billingCycle?: 'monthly' | 'annually';
+  billingCycle?: 'monthly' | 'annually' | null;
+  active: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -42,6 +43,10 @@ const SubscriptionPlanSchema: Schema = new Schema({
     type: String,
     enum: ['monthly', 'annually'],
     default: 'monthly'
+  },
+  active: {  
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
