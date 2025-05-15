@@ -1,4 +1,4 @@
-import mongoose, { Model, Schema } from 'mongoose';
+import mongoose, { isValidObjectId, Model, Schema } from 'mongoose';
 import { IBooking } from '../../models/interfaces/booking.interface';
 import { IBookingRepository } from '../interfaces/IBooking.repository';
 import { inject, injectable } from 'tsyringe';
@@ -90,29 +90,33 @@ class BookingRepository implements IBookingRepository {
   }
 
   async findBookingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<any[]> {
-    try {
-      const bookings = await this.bookingModel
-        .find({ userId, paymentStatus: "Completed" })
-        .sort({ createdAt: -1 })
-        .populate({
-          path: 'eventId',
-          populate: {
-            path: 'user_id'
-          }
-        })
-        .exec();
+  try {
+    if (!isValidObjectId(userId)) throw new Error("Invalid userId");
 
-      return bookings.map(booking => {
-        return {
-          ...(booking.eventId as any)._doc,
-          bookingId: booking.bookingId
-        };
-      });
-    } catch (error) {
-      console.error('Error in findByUserId:', error);
-      throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
-    }
+    const bookings = await this.bookingModel
+      .find({ userId, paymentStatus: "Completed" })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'eventId',
+        match: { endingDate: { $lt: new Date() } }, 
+        populate: {
+          path: 'user_id'
+        }
+      })
+      .exec();
+
+    return bookings
+      .filter(booking => booking.eventId) 
+      .map(booking => ({
+        ...(booking.eventId as any)._doc,
+        bookingId: booking.bookingId
+      }));
+
+  } catch (error) {
+    console.error('Error in findBookingEventByUserId:', error);
+    throw new Error(`Failed to find finished bookings for user: ${(error as Error).message}`);
   }
+}
 
 
   async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> {
