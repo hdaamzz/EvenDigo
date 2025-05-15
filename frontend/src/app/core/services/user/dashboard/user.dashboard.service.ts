@@ -14,33 +14,23 @@ export class UserDashboardService {
   constructor(private http: HttpClient) {}
 
   createEvent(eventData: FormData): Observable<EventResponse> {
-    return this.http.post<EventResponse>(`${this.baseUrl}user/dashboard/events`, eventData, {
-      withCredentials: true,
-    });
+    return this.http.post<EventResponse>(`${this.baseUrl}user/dashboard/events`, eventData );
   }
 
   getUserEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.baseUrl}user/dashboard/events`,{
-      withCredentials: true,
-    });
+    return this.http.get<AllEventResponse>(`${this.baseUrl}user/dashboard/events`);
   }
 
   getUserOrganizedEvents(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}user/dashboard/events/organized`,{
-      withCredentials: true,
-    });
+    return this.http.get<any>(`${this.baseUrl}user/dashboard/events/organized`);
   }
 
   getUserParticipatedEvents(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}user/dashboard/events/participated`,{
-      withCredentials: true,
-    });
+    return this.http.get<any>(`${this.baseUrl}user/dashboard/events/participated`);
   }
 
   getEventById(eventId: string): Observable<EventResponse> {
-    return this.http.get<EventResponse>(`${this.baseUrl}user/dashboard/events/${eventId}`,{
-      withCredentials: true,
-    });
+    return this.http.get<EventResponse>(`${this.baseUrl}user/dashboard/events/${eventId}`);
   }
 }
 

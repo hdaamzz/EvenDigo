@@ -63,7 +63,7 @@ export class SubscriptionService {
   getSubscriptionById(id: string): Observable<ApiResponse<Subscription>> {
     return this._http.get<ApiResponse<Subscription>>(
       `${this._baseUrl}admin/subscriptions/${id}`,
-      { withCredentials: true }
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -76,7 +76,7 @@ export class SubscriptionService {
   getSubscriptionStats(): Observable<ApiResponse<SubscriptionStats>> {
     return this._http.get<ApiResponse<SubscriptionStats>>(
       `${this._baseUrl}admin/subscriptions/stats`,
-      { withCredentials: true }
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -91,7 +91,7 @@ export class SubscriptionService {
     return this._http.patch<ApiResponse<Subscription>>(
       `${this._baseUrl}admin/subscriptions/status`,
       update,
-      { withCredentials: true }
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -105,7 +105,7 @@ export class SubscriptionService {
   deleteSubscription(id: string): Observable<ApiResponse<any>> {
     return this._http.delete<ApiResponse<any>>(
       `${this._baseUrl}admin/subscriptions/${id}`,
-      { withCredentials: true }
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -118,7 +118,7 @@ export class SubscriptionService {
   getFilterOptions(): Observable<ApiResponse<SubscriptionFilterOptions>> {
     return this._http.get<ApiResponse<SubscriptionFilterOptions>>(
       `${this._baseUrl}admin/subscriptions/filter-options`,
-      { withCredentials: true }
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -132,7 +132,7 @@ export class SubscriptionService {
   getUserSubscriptions(userId: string): Observable<ApiResponse<Subscription[]>> {
     return this._http.get<ApiResponse<Subscription[]>>(
       `${this._baseUrl}admin/subscriptions/user/${userId}`,
-      { withCredentials: true }
+      
     ).pipe(
       catchError(this._handleError)
     );

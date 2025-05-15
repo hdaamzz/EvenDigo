@@ -12,7 +12,7 @@ export class PaymentService {
   constructor(private http:HttpClient) { }
 
   getBooking(id:string):Observable<BookingResponse>{
-        return this.http.get<BookingResponse>(`${this.baseUrl}user/explore/booking?id=${id}`,{withCredentials: true});
+        return this.http.get<BookingResponse>(`${this.baseUrl}user/explore/booking?id=${id}`);
   }
   downloadTickets(bookingId: string): Observable<Blob> {
     const headers = new HttpHeaders({
@@ -21,8 +21,7 @@ export class PaymentService {
     
     return this.http.get(`${this.baseUrl}user/explore/bookings/${bookingId}/tickets`, {
       headers: headers,
-      responseType: 'blob',
-      withCredentials: true
+      responseType: 'blob'
     });
   }
 
@@ -33,8 +32,7 @@ export class PaymentService {
     
     return this.http.get(`${this.baseUrl}user/explore/bookings/${bookingId}/invoice`, {
       headers: headers,
-      responseType: 'blob',
-      withCredentials: true
+      responseType: 'blob'
     });
   }
 

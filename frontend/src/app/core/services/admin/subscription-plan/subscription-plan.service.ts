@@ -28,14 +28,14 @@ export class SubscriptionPlanService {
   constructor(private http: HttpClient) { }
   
   getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
-    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.baseUrl}admin/subscription-plans`, {withCredentials: true}).pipe(
+    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.baseUrl}admin/subscription-plans`).pipe(
       delay(700),
       catchError(error => this.handleApiError(error, 'fetch subscription plans'))
     );
   }
   
   getPlanById(id: string): Observable<SubscriptionPlan> {
-    return this.http.get<SubscriptionPlan>(`${this.baseUrl}admin/subscription-plans/${id}`, {withCredentials: true}).pipe(
+    return this.http.get<SubscriptionPlan>(`${this.baseUrl}admin/subscription-plans/${id}`).pipe(
       catchError(error => this.handleApiError(error, 'fetch plan details'))
     );
   }
@@ -43,7 +43,7 @@ export class SubscriptionPlanService {
   createPlan(plan: Omit<SubscriptionPlan, '_id'>): Observable<SubscriptionPlan> {
     Notiflix.Loading.circle('Creating plan...');
     
-    return this.http.post<SubscriptionPlan>(`${this.baseUrl}admin/subscription-plans`, plan, {withCredentials: true}).pipe(
+    return this.http.post<SubscriptionPlan>(`${this.baseUrl}admin/subscription-plans`, plan).pipe(
       delay(700),
       tap(() => Notiflix.Loading.remove()),
       catchError(error => this.handleApiError(error, 'create subscription plan'))
@@ -53,7 +53,7 @@ export class SubscriptionPlanService {
   updatePlan(plan: SubscriptionPlan): Observable<SubscriptionPlan> {
     Notiflix.Loading.circle('Updating plan...');
     
-    return this.http.put<SubscriptionPlan>(`${this.baseUrl}admin/subscription-plans/${plan._id}`, plan, {withCredentials: true}).pipe(
+    return this.http.put<SubscriptionPlan>(`${this.baseUrl}admin/subscription-plans/${plan._id}`, plan).pipe(
       delay(700), 
       tap(() => Notiflix.Loading.remove()),
       catchError(error => this.handleApiError(error, 'update subscription plan'))
@@ -66,7 +66,7 @@ export class SubscriptionPlanService {
     return this.http.put<SubscriptionPlan>(
       `${this.baseUrl}admin/subscription-plans/${id}`, 
       { active }, 
-      {withCredentials: true}
+  
     ).pipe(
       delay(700),
       tap(() => Notiflix.Loading.remove()),
@@ -77,7 +77,7 @@ export class SubscriptionPlanService {
   deletePlan(id: string): Observable<any> {
     Notiflix.Loading.circle('Deleting plan...');
     
-    return this.http.delete<any>(`${this.baseUrl}admin/subscription-plans/${id}`, {withCredentials: true}).pipe(
+    return this.http.delete<any>(`${this.baseUrl}admin/subscription-plans/${id}`).pipe(
       delay(700),
       tap(() => Notiflix.Loading.remove()),
       catchError(error => this.handleApiError(error, 'delete subscription plan'))

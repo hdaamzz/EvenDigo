@@ -11,9 +11,7 @@ export class AdminAuthService {
   private baseUrl = environment.baseUrl;
   constructor(private http: HttpClient) { }
   adminLogin(adminData: IAdminLogin): Observable<any> {
-    return this.http.post(`${this.baseUrl}admin/auth/sign-in`, adminData, {
-      withCredentials: true,
-    }).pipe(
+    return this.http.post(`${this.baseUrl}admin/auth/sign-in`, adminData).pipe(
       catchError((error) => {
         return of({ success: false, message: error.error.message });
       })

@@ -4,9 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AchievementResponse, IAchievement } from '../../../models/admin/achievements.interface';
 
-/**
- * Service for managing achievement data through admin API endpoints
- */
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,7 +22,7 @@ export class AdminAchievementService {
   getAchievementsWithPagination(page: number, limit: number): Observable<AchievementResponse> {
     return this._http.get<AchievementResponse>(
       `${this._baseUrl}?page=${page}&limit=${limit}`,
-      { withCredentials: true }
+      
     );
   }
 
@@ -36,7 +34,7 @@ export class AdminAchievementService {
   getAchievementById(achievementId: string): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.get<{ success: boolean; data: IAchievement }>(
       `${this._baseUrl}/${achievementId}`,
-      { withCredentials: true }
+      
     );
   }
 
@@ -49,7 +47,7 @@ export class AdminAchievementService {
     return this._http.post<{ success: boolean; data: IAchievement }>(
       this._baseUrl, 
       achievement,
-      { withCredentials: true }
+      
     );
   }
 
@@ -63,7 +61,7 @@ export class AdminAchievementService {
     return this._http.put<{ success: boolean; data: IAchievement }>(
       `${this._baseUrl}/${achievementId}`, 
       achievement,
-      { withCredentials: true }
+      
     );
   }
 
@@ -75,7 +73,7 @@ export class AdminAchievementService {
   deleteAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.delete<{ success: boolean; message: string }>(
       `${this._baseUrl}/${achievementId}`,
-      { withCredentials: true }
+      
     );
   }
 
@@ -88,7 +86,7 @@ export class AdminAchievementService {
     return this._http.patch<{ success: boolean; message: string }>(
       `${this._baseUrl}/${achievementId}/activate`,
       {},
-      { withCredentials: true }
+      
     );
   }
 
@@ -101,7 +99,7 @@ export class AdminAchievementService {
     return this._http.patch<{ success: boolean; message: string }>(
       `${this._baseUrl}/${achievementId}/deactivate`,
       {},
-      { withCredentials: true }
+      
     );
   }
 }

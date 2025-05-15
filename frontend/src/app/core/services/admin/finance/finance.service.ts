@@ -77,8 +77,6 @@ export interface FinanceApiResponse<T> {
 })
 export class FinanceService {
   private readonly _baseUrl: string = environment.baseUrl;
-  private readonly _httpOptions = { withCredentials: true };
-
   constructor(private _http: HttpClient) { }
 
   // EVENT DISTRIBUTION METHODS
@@ -92,7 +90,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/dist/recent`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -104,7 +102,7 @@ export class FinanceService {
   getRevenueStats(): Observable<FinanceApiResponse<any>> {
     return this._http.get<FinanceApiResponse<any>>(
       `${this._baseUrl}admin/dist/stats`,
-      this._httpOptions
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -118,7 +116,7 @@ export class FinanceService {
 
     return this._http.get<any[]>(
       `${this._baseUrl}admin/dist/batch`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -140,7 +138,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/dist/date-range`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -156,7 +154,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/finance/refunds`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -182,7 +180,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/finance/refunds/range`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -198,7 +196,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/finance/revenue`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -210,7 +208,7 @@ export class FinanceService {
   fetchRevenueStats(): Observable<RevenueStats> {
     return this._http.get<RevenueStats>(
       `${this._baseUrl}admin/finance/stats`,
-      this._httpOptions
+      
     ).pipe(
       catchError(this._handleError)
     );
@@ -226,7 +224,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/finance/revenue/range`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );
@@ -245,7 +243,7 @@ export class FinanceService {
 
     return this._http.get<FinanceApiResponse<any[]>>(
       `${this._baseUrl}admin/finance/revenue/user`,
-      { params, ...this._httpOptions }
+      { params }
     ).pipe(
       catchError(this._handleError)
     );

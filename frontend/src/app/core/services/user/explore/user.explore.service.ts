@@ -14,19 +14,18 @@ export class UserExploreService {
   constructor(private http: HttpClient) {}
 
   getAllEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.baseUrl}user/explore`,{withCredentials: true});
+    return this.http.get<AllEventResponse>(`${this.baseUrl}user/explore`);
   }
 
   createStripeCheckoutSession(data:PayloadData): Observable<{ success: boolean, data: { sessionId: string } }> {
-    const respo=this.http.post<{ success: boolean, data: { sessionId: string } }>(`${this.baseUrl}user/explore/checkout`, data, { withCredentials: true });
+    const respo=this.http.post<{ success: boolean, data: { sessionId: string } }>(`${this.baseUrl}user/explore/checkout`, data);
     return respo
   }
 
   createWalletCheckout(payload: PayloadData): Observable<any> {
     return this.http.post<any>(
       `${this.baseUrl}user/explore/checkout`, 
-      payload, 
-      { withCredentials: true }
+      payload
     );
   }
 }

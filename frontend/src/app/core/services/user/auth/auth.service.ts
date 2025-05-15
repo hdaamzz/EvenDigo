@@ -33,7 +33,7 @@ export class AuthService {
   }
   userLogin(userData: ILogin): Observable<any> {
     return this.http.post(`${this.baseUrl}user/auth/sign-in`, userData, {
-      withCredentials: true,
+      
     }).pipe(
       catchError((error) => {
         console.error('Login error:', error);
@@ -61,7 +61,7 @@ export class AuthService {
 
 
     return this.http.post(`${this.baseUrl}user/auth/firebase-signin`, payload, {
-      withCredentials: true,
+      
     });
   }
 
@@ -74,7 +74,7 @@ export class AuthService {
 
   logout(): Observable<CommonResponse> {
     return this.http.get<CommonResponse>(`${this.baseUrl}user/auth/logout`, {
-      withCredentials: true,
+      
     }).pipe(
       catchError((error) => {
         console.error('Logout error:', error);

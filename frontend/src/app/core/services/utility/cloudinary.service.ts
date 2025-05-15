@@ -20,8 +20,7 @@ export class CloudinaryService {
     
     return this.http.post<CloudinaryResponse>(
       `${this.baseUrl}user/profile/image`, 
-      formData,
-      { withCredentials: true }
+      formData
     );
   }
 }

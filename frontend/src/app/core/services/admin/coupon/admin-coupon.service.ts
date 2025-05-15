@@ -21,7 +21,7 @@ export class AdminCouponService {
    * @returns Observable of coupon list
    */
   getCoupons(): Observable<ICoupon[]> {
-    return this.http.get<AllCouponResponse>(this.baseUrl, { withCredentials: true })
+    return this.http.get<AllCouponResponse>(this.baseUrl, )
       .pipe(
         map((response) => response.data)
       );
@@ -50,7 +50,7 @@ export class AdminCouponService {
    * @returns Observable of created coupon
    */
   createCoupon(coupon: ICoupon): Observable<ICoupon> {
-    return this.http.post<CouponResponse>(this.baseUrl, coupon, { withCredentials: true })
+    return this.http.post<CouponResponse>(this.baseUrl, coupon, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -63,7 +63,7 @@ export class AdminCouponService {
    * @returns Observable of updated coupon
    */
   updateCoupon(couponId: string, coupon: Partial<ICoupon>): Observable<ICoupon> {
-    return this.http.put<CouponResponse>(`${this.baseUrl}/${couponId}`, coupon, { withCredentials: true })
+    return this.http.put<CouponResponse>(`${this.baseUrl}/${couponId}`, coupon, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -75,7 +75,7 @@ export class AdminCouponService {
    * @returns Observable of activated coupon
    */
   activateCoupon(couponId: string): Observable<ICoupon> {
-    return this.http.patch<CouponResponse>(`${this.baseUrl}/active/${couponId}`, {}, { withCredentials: true })
+    return this.http.patch<CouponResponse>(`${this.baseUrl}/active/${couponId}`, {}, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -87,7 +87,7 @@ export class AdminCouponService {
    * @returns Observable of deactivated coupon
    */
   deactivateCoupon(couponId: string): Observable<ICoupon> {
-    return this.http.patch<CouponResponse>(`${this.baseUrl}/deactivate/${couponId}`, {}, { withCredentials: true })
+    return this.http.patch<CouponResponse>(`${this.baseUrl}/deactivate/${couponId}`, {}, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -99,6 +99,6 @@ export class AdminCouponService {
    * @returns Observable of void
    */
   deleteCoupon(couponId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${couponId}`, { withCredentials: true });
+    return this.http.delete<void>(`${this.baseUrl}/${couponId}`, );
   }
 }

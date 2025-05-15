@@ -61,8 +61,7 @@ export class PremiumService {
   createStripeSubscription(payload: PremiumSubscriptionPayload): Observable<ApiResponse<StripeSessionResponse>> {
     return this.http.post<ApiResponse<StripeSessionResponse>>(
       `${this.baseUrl}user/subscription/create-checkout`,
-      payload,
-      { withCredentials: true }
+      payload
     ).pipe(
       catchError(this.handleError)
     );
@@ -71,8 +70,7 @@ export class PremiumService {
   processWalletUpgrade(payload: PremiumSubscriptionPayload): Observable<ApiResponse<SubscriptionResponse>> {
     return this.http.post<ApiResponse<SubscriptionResponse>>(
       `${this.baseUrl}user/subscription/wallet-upgrade`,
-      payload,
-      { withCredentials: true }
+      payload
     ).pipe(
       catchError(this.handleError)
     );
@@ -80,8 +78,7 @@ export class PremiumService {
 
   getCurrentSubscription(): Observable<ApiResponse<SubscriptionResponse>> {
     return this.http.get<ApiResponse<SubscriptionResponse>>(
-      `${this.baseUrl}user/subscription/current`,
-      { withCredentials: true }
+      `${this.baseUrl}user/subscription/current`
     ).pipe(
       catchError(this.handleError)
     );
@@ -90,8 +87,7 @@ export class PremiumService {
   cancelSubscription(subscriptionId: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}user/subscription/cancel`,
-      { subscriptionId },
-      { withCredentials: true }
+      { subscriptionId }
     ).pipe(
       catchError(this.handleError)
     );
@@ -99,8 +95,7 @@ export class PremiumService {
 
   getSubscriptionBySessionId(sessionId: string): Observable<ApiResponse<Subscription>> {
     return this.http.get<ApiResponse<Subscription>>(
-      `${this.baseUrl}user/subscription/confirm/${sessionId}`,
-      { withCredentials: true }
+      `${this.baseUrl}user/subscription/confirm/${sessionId}`
     ).pipe(
       catchError(this.handleError)
     );
@@ -108,8 +103,7 @@ export class PremiumService {
 
   getSubscriptionByType(type: string): Observable<ApiResponse<SubscriptionPlan>> {
     return this.http.get<ApiResponse<SubscriptionPlan>>(
-      `${this.baseUrl}user/subscription/type/${type}`,
-      { withCredentials: true }
+      `${this.baseUrl}user/subscription/type/${type}`
     ).pipe(
       catchError(this.handleError)
     );

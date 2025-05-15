@@ -28,7 +28,6 @@ export class AdminEventsService {
       .set('limit', limit.toString());
 
     return this._http.get<IEvent[]>(`${this._baseUrl}admin/events`, {
-      withCredentials: true,
       params
     }).pipe(
       map(events => ({
@@ -49,7 +48,7 @@ export class AdminEventsService {
     return this._http.patch<any>(
       `${this._baseUrl}admin/events/${eventId}/status`, 
       { status },
-      { withCredentials: true }
+      
     ).pipe(
       map(response => response),
       catchError(this._handleError)
