@@ -11,20 +11,10 @@ import { CardIEvent, IEvent } from '../../../../core/models/event.interface';
 })
 export class EventCardComponent implements OnInit {
   @Input() events: CardIEvent[] = [];
-  
   expandedEventId = signal<string | null>(null);
-  
   @ViewChild('eventElement', { read: ElementRef }) lastEventElementRef?: ElementRef;
-
   constructor() {}
-
   ngOnInit(): void {
-    this.abc()
-  }
-
-  abc(){
-    console.log(this.events);
-    
   }
 
   toggleEventDetails(eventId: string): void {

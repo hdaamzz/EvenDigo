@@ -5,9 +5,7 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 import { EventsApiResponse } from '../../../models/admin/admin.interface';
 import { IEvent } from '../../../models/event.interface';
 
-/**
- * Service for managing admin events operations
- */
+
 @Injectable({
   providedIn: 'root'
 })
@@ -16,12 +14,7 @@ export class AdminEventsService {
   
   constructor(private _http: HttpClient) { }
 
-  /**
-   * Retrieves a paginated list of events
-   * @param page The page number to retrieve
-   * @param limit Number of events per page
-   * @returns Observable with events response data
-   */
+
   getEvents(page = 1, limit = 9): Observable<EventsApiResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
@@ -38,12 +31,7 @@ export class AdminEventsService {
     );
   }
   
-  /**
-   * Updates the visibility status of an event
-   * @param eventId ID of the event to update
-   * @param status New status value
-   * @returns Observable with the API response
-   */
+
   updateEventStatus(eventId: string, status: boolean): Observable<EventsApiResponse> {
     return this._http.patch<any>(
       `${this._baseUrl}admin/events/${eventId}/status`, 
@@ -55,11 +43,7 @@ export class AdminEventsService {
     );
   }
 
-  /**
-   * Common error handler for HTTP requests
-   * @param error The HTTP error response
-   * @returns Observable with standardized error response
-   */
+
   private _handleError(error: HttpErrorResponse): Observable<EventsApiResponse> {
     const errorMessage = error.error?.message || 'An error occurred while processing your request';
     console.error('API Error:', error);

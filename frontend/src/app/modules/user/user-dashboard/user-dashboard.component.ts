@@ -92,9 +92,7 @@ export class UserDashboardComponent implements OnInit {
     this.user$
       .pipe(
         tap(user => {
-          this.currentUser = user;
-          console.log(this.currentUser);
-          
+          this.currentUser = user;          
           this.isUserVerified = user?.status=="active"  || false;
         })
       )
@@ -135,9 +133,7 @@ export class UserDashboardComponent implements OnInit {
   fetchAllParticipatedEvents() {
     this.eventLoading = true;
     this.dashboardService.getUserParticipatedEvents().pipe(
-      tap((response) => {
-        console.log(response.data);
-        
+      tap((response) => {        
         this.eventParticipatedList = response.data;
         this.eventLoading = false;
       }),

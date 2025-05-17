@@ -12,28 +12,16 @@ import {
   SubscriptionStatusUpdate 
 } from '../../../models/admin/subscription.interface';
 
-/**
- * Service for handling subscription-related API operations
- */
+
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
-  /** Base API URL from environment */
   private readonly _baseUrl = environment.baseUrl;
 
-  /**
-   * @param _http Angular HTTP client for API requests
-   */
+
   constructor(private readonly _http: HttpClient) {}
 
-  /**
-   * Retrieves subscriptions with optional pagination and filtering
-   * @param page Page number for pagination
-   * @param limit Results per page
-   * @param filters Optional filter parameters
-   * @returns Observable with subscription data and pagination info
-   */
   getSubscriptions(
     page = 1, 
     limit = 10, 
@@ -55,11 +43,6 @@ export class SubscriptionService {
     );
   }
 
-  /**
-   * Get a specific subscription by ID
-   * @param id Subscription ID
-   * @returns Observable with subscription data
-   */
   getSubscriptionById(id: string): Observable<ApiResponse<Subscription>> {
     return this._http.get<ApiResponse<Subscription>>(
       `${this._baseUrl}admin/subscriptions/${id}`,
@@ -69,10 +52,7 @@ export class SubscriptionService {
     );
   }
 
-  /**
-   * Get subscription statistics
-   * @returns Observable with subscription stats
-   */
+
   getSubscriptionStats(): Observable<ApiResponse<SubscriptionStats>> {
     return this._http.get<ApiResponse<SubscriptionStats>>(
       `${this._baseUrl}admin/subscriptions/stats`,
@@ -82,11 +62,6 @@ export class SubscriptionService {
     );
   }
 
-  /**
-   * Update a subscription's active status
-   * @param update Status update parameters
-   * @returns Observable with updated subscription
-   */
   updateSubscriptionStatus(update: SubscriptionStatusUpdate): Observable<ApiResponse<Subscription>> {
     return this._http.patch<ApiResponse<Subscription>>(
       `${this._baseUrl}admin/subscriptions/status`,
@@ -138,12 +113,7 @@ export class SubscriptionService {
     );
   }
 
-  /**
-   * Builds HTTP params based on provided filters
-   * @param params Initial HttpParams object
-   * @param filters Filter parameters
-   * @returns Updated HttpParams object
-   */
+
   private _buildFilterParams(params: HttpParams, filters: SubscriptionFilter): HttpParams {
     let updatedParams = params;
     
@@ -170,19 +140,13 @@ export class SubscriptionService {
     return updatedParams;
   }
 
-  /**
-   * Error handler for HTTP requests
-   * @param error HTTP error response
-   * @returns Observable with error message
-   */
+
   private _handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';
     
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       if (error.error?.error) {
         errorMessage = error.error.error;
       } else if (error.status) {

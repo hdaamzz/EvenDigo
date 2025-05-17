@@ -108,8 +108,6 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            console.log(response.data);
-            
             this.bookings = response.data;
           } else {
             Notiflix.Notify.failure('Failed to load your events.');

@@ -13,12 +13,7 @@ export class AdminAchievementService {
 
   constructor(private readonly _http: HttpClient) { }
 
-  /**
-   * Gets paginated list of achievements
-   * @param page Current page number
-   * @param limit Number of items per page
-   * @returns Observable with achievement response data
-   */
+
   getAchievementsWithPagination(page: number, limit: number): Observable<AchievementResponse> {
     return this._http.get<AchievementResponse>(
       `${this._baseUrl}?page=${page}&limit=${limit}`,
@@ -26,11 +21,7 @@ export class AdminAchievementService {
     );
   }
 
-  /**
-   * Gets a single achievement by ID
-   * @param achievementId ID of the achievement to retrieve
-   * @returns Observable with achievement data
-   */
+
   getAchievementById(achievementId: string): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.get<{ success: boolean; data: IAchievement }>(
       `${this._baseUrl}/${achievementId}`,
@@ -38,11 +29,7 @@ export class AdminAchievementService {
     );
   }
 
-  /**
-   * Creates a new achievement
-   * @param achievement Achievement data to create
-   * @returns Observable with created achievement data
-   */
+
   createAchievement(achievement: IAchievement): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.post<{ success: boolean; data: IAchievement }>(
       this._baseUrl, 
@@ -51,12 +38,7 @@ export class AdminAchievementService {
     );
   }
 
-  /**
-   * Updates an existing achievement
-   * @param achievementId ID of the achievement to update
-   * @param achievement Updated achievement data
-   * @returns Observable with updated achievement data
-   */
+
   updateAchievement(achievementId: string, achievement: IAchievement): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.put<{ success: boolean; data: IAchievement }>(
       `${this._baseUrl}/${achievementId}`, 
@@ -65,11 +47,7 @@ export class AdminAchievementService {
     );
   }
 
-  /**
-   * Deletes an achievement
-   * @param achievementId ID of the achievement to delete
-   * @returns Observable with success message
-   */
+
   deleteAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.delete<{ success: boolean; message: string }>(
       `${this._baseUrl}/${achievementId}`,
@@ -77,11 +55,7 @@ export class AdminAchievementService {
     );
   }
 
-  /**
-   * Activates an achievement
-   * @param achievementId ID of the achievement to activate
-   * @returns Observable with success message
-   */
+
   activateAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.patch<{ success: boolean; message: string }>(
       `${this._baseUrl}/${achievementId}/activate`,
@@ -90,11 +64,7 @@ export class AdminAchievementService {
     );
   }
 
-  /**
-   * Deactivates an achievement
-   * @param achievementId ID of the achievement to deactivate
-   * @returns Observable with success message
-   */
+
   deactivateAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.patch<{ success: boolean; message: string }>(
       `${this._baseUrl}/${achievementId}/deactivate`,
