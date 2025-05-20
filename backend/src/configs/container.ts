@@ -67,6 +67,7 @@ import { TokenService } from "../../src/services/implementation/user/auth/TokenS
 import { SubscriptionPlanRepository } from "../../src/repositories/implementation/subscriptionPlan.repository";
 import { SubscriptionPlanService } from "../../src/services/implementation/admin/SubscriptionPlan.service";
 import { SubscriptionPlanController } from "../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
+import { ChatService } from "../../src/services/implementation/user/chat/chat.service";
 
 
 
@@ -110,6 +111,7 @@ container.register("PasswordService", { useClass: PasswordService });
 container.register("EmailService", { useClass: EmailService });
 container.register("FirebaseAuthService", { useClass: FirebaseAuthService });
 container.register("TokenService", { useClass: TokenService });
+container.register("ChatService", { useClass: ChatService });
 
 
 

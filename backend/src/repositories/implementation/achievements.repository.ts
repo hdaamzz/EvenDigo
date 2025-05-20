@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { injectable } from 'tsyringe';
 import { IAchievementRepository } from '../interfaces/IAchievements.repository';
-import AchievementModel from '../../../src/models/AchievementsModal';
+import AchievementModel from '../../models/AchievementsModel';
 import { IAchievement, IAchievementPagination } from '../../../src/models/interfaces/achievements.interface';
 
 @injectable()

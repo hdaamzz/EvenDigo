@@ -14,6 +14,7 @@ import distributionRouter from './admin/distribution.revenue.routes';
 import subscriptionRoutes from './user/subscription.routes';
 import adminSubscriptionRoutes from './admin/subscription.routes';
 import subscriptionPlanRouter from './admin/subscriptionPlan.route';
+import chatRoutes from './user/chat.routes';
 
 
 const router = express.Router();
@@ -30,7 +31,7 @@ router.use('/user/profile',profileRouter);
 router.use('/user/dashboard',dashboardRouter);
 router.use('/user/explore',exploreRoutes);
 router.use('/user/subscription',subscriptionRoutes);
-
+router.use('/user/chats', chatRoutes);
 
 
 //Admin - Routes
