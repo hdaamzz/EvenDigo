@@ -1,5 +1,5 @@
 import express from 'express';
-import { container } from '../../configs/container';
+import { container } from '../../configs/container/index';
 import { ChatController } from '../../../src/controllers/implementation/user/chat/chat.controller';
 
 const router = express.Router();

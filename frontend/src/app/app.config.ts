@@ -21,7 +21,8 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [provideZoneChangeDetection({ eventCoalescing: true }),
   provideRouter(routes), provideAnimationsAsync(), 
-  providePrimeNG({ theme: { preset: Aura } }), provideHttpClient(withInterceptors([authInterceptor])),
+  providePrimeNG({ theme: { preset: Aura } }),
+  provideHttpClient(withInterceptors([authInterceptor])),
   provideStore({ router: routerReducer, auth: authReducer }), 
   provideEffects([AuthEffects]), provideRouterStore(), 
   provideFirebaseApp(() => initializeApp(environment.firebase)), 

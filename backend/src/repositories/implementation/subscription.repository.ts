@@ -155,6 +155,16 @@ export class SubscriptionRepository implements ISubscriptionRepository {
     }
   }
 
+    async findAllActiveSubscriptions(): Promise<ISubscription[]> {
+    try {
+      return await this.subscriptionModel.find({status:'active'})
+        .sort({ createdAt: -1 })
+        .exec();
+    } catch (error) {
+      throw new Error(`Failed to find all subscriptions: ${(error as Error).message}`);
+    }
+  }
+
   async deleteSubscription(subscriptionId: string): Promise<boolean> {
     try {
       const result = await this.subscriptionModel.deleteOne({ subscriptionId }).exec();

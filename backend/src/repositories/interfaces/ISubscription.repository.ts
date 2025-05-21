@@ -24,5 +24,6 @@ export interface ISubscriptionRepository {
 
   findSubscriptionsWithPagination(query: any, skip: number, limit: number): Promise<ISubscription[]>;
   findAllSubscriptions(): Promise<ISubscription[]>;
+  findAllActiveSubscriptions(): Promise<ISubscription[]>;
   deleteSubscription(subscriptionId: string): Promise<boolean>;
 }

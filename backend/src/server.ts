@@ -8,7 +8,7 @@ import * as admin from 'firebase-admin';
 import serviceAccount from './configs/serviceAccountKey.json';
 import dotenv from 'dotenv';
 dotenv.config();
-import './configs/container';
+import './configs/container/index';
 import connectDB from './configs/db';
 import cookieParser from 'cookie-parser';
 import router from './routes/router';
@@ -59,6 +59,7 @@ if(!PORT) {
     throw new Error('PORT is not defined in env')
 }
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-})
+});
+

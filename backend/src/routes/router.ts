@@ -15,6 +15,7 @@ import subscriptionRoutes from './user/subscription.routes';
 import adminSubscriptionRoutes from './admin/subscription.routes';
 import subscriptionPlanRouter from './admin/subscriptionPlan.route';
 import chatRoutes from './user/chat.routes';
+import adminDashboardRouter from './admin/home.routes';
 
 
 const router = express.Router();
@@ -43,6 +44,8 @@ router.use('/admin/finance', financeRouter);
 router.use('/admin/dist',distributionRouter);
 router.use('/admin/subscriptions', adminSubscriptionRoutes);
 router.use('/admin/subscription-plans', subscriptionPlanRouter);
+router.use('/admin/dashboard', adminDashboardRouter);
+
 
 
 
