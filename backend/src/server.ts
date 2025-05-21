@@ -16,6 +16,8 @@ import stripeWebhookRouter from "./routes/user/webhook.routes";
 import { container } from "./configs/container";
 import { RevenueDistributionCronService } from "./services/implementation/cronjob/revenue.distribution";
 import configureSocketIO from "./configs/socket";
+import { debounceMiddleware } from './middlewares/debounce.middleware';
+
 
 const PORT: string | undefined = process.env.PORT;
 
@@ -41,6 +43,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 
+app.use('/api', debounceMiddleware(500));
 //Database Connection
 connectDB();
 
