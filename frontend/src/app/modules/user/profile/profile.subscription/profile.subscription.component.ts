@@ -8,6 +8,7 @@ import {
   SubscriptionResponse, 
   SubscriptionType 
 } from '../../../../core/services/user/subscription/premium.service';
+import { SubscriptionPlan } from '../../../../core/services/admin/subscription-plan/subscription-plan.service';
 
 @Component({
   selector: 'app-profile-subscription',
@@ -23,6 +24,7 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
   isLoading = true;
   errorMessage: string | null = null;
   isCancelingSubscription = false;
+  showCancelDialog = false;
 
   constructor(
     private _premiumService: PremiumService,
@@ -38,7 +40,7 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 
-    loadSubscriptionDetails(): void {
+  loadSubscriptionDetails(): void {
     this.isLoading = true;
     this.errorMessage = null;
     
@@ -58,32 +60,59 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
       });
   }
 
+  // Show confirmation dialog
+  showCancelConfirmation(): void {
+    this.showCancelDialog = true;
+  }
+
+  // Hide confirmation dialog
+  hideCancelConfirmation(): void {
+    this.showCancelDialog = false;
+  }
+
+  // Confirm and proceed with cancellation
+  confirmCancelSubscription(): void {
+    this.hideCancelConfirmation();
+    this.cancelSubscription();
+  }
+
   cancelSubscription(): void {
     if (!this.subscription) {
       return;
     }
     
     this.isCancelingSubscription = true;
-    
-    const timeoutId = setTimeout(() => {
-      this._premiumService.cancelSubscription(this.subscription!.subscriptionId)
-        .pipe(
-          takeUntil(this._destroy$),
-          delay(500),
-          catchError(err => {
-            this.errorMessage = err.message || 'Failed to cancel subscription';
-            return of({ success: false });
-          }),
-          finalize(() => this.isCancelingSubscription = false)
-        )
-        .subscribe(response => {
-          if (response.success) {
-            this.loadSubscriptionDetails();
-          }
-        });
-    }, 2000);
-    
-    this._destroy$.subscribe(() => clearTimeout(timeoutId));
+    this.errorMessage = null;
+    setTimeout(()=>{
+
+    },2000)
+    this._premiumService.cancelSubscription(this.subscription.subscriptionId)
+      .pipe(
+        takeUntil(this._destroy$),
+        delay(2000),
+        catchError(err => {
+          this.errorMessage = err.message || 'Failed to cancel subscription';
+          return of({ success: false });
+        }),
+        finalize(() => this.isCancelingSubscription = false)
+      )
+      .subscribe(response => {
+        if (response.success) {
+          this.subscription = null; 
+          this.loadSubscriptionDetails();
+        }
+      });
+  }
+
+  subscribeToPlan(plan: string): void {
+    if (plan === 'premium') {
+      this._router.navigate(['/premium/checkout'], { 
+        queryParams: { 
+          type: plan
+        }
+      });
+      return;
+    }
   }
 
   getFormattedSubscriptionType(): string {
