@@ -16,7 +16,6 @@ import adminSubscriptionRoutes from './admin/subscription.routes';
 import subscriptionPlanRouter from './admin/subscriptionPlan.route';
 import chatRoutes from './user/chat.routes';
 import adminDashboardRouter from './admin/home.routes';
-import { createRouteDebounce } from '../../src/middlewares/debounce.middleware';
 
 
 const router = express.Router();
@@ -24,18 +23,18 @@ const router = express.Router();
 
 router.use(express.json());
 
-const authDebounce = createRouteDebounce(500);      // 500ms for auth routes
-const dashboardDebounce = createRouteDebounce(300); // 300ms for dashboard routes
-// const chatDebounce = createRouteDebounce(200);      // 200ms for chat routes
+// const authDebounce = createRouteDebounce(500);     
+// const dashboardDebounce = createRouteDebounce(300);
+// const chatDebounce = createRouteDebounce(200);
 // const searchDebounce = createRouteDebounce(400); 
 
-router.use('/user/auth',authDebounce,authRouter);
-router.use('/admin/auth',authDebounce,adminAuthRouter);
+router.use('/user/auth',authRouter);
+router.use('/admin/auth',adminAuthRouter);
 router.use(authMiddleware);
 
 //User - Routes
 router.use('/user/profile',profileRouter);
-router.use('/user/dashboard',dashboardDebounce,dashboardRouter);
+router.use('/user/dashboard',dashboardRouter);
 router.use('/user/explore',exploreRoutes);
 router.use('/user/subscription',subscriptionRoutes);
 router.use('/user/chats', chatRoutes);
