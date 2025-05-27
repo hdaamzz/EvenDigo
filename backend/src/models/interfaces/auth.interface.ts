@@ -69,8 +69,14 @@ export interface ILogin {
 export interface IAuthResponse {
   success: boolean;
   message: string;
-  token?: string;
-  user?: Partial<IUser>;
+  accessToken?: string;
+  refreshToken?: string;
+  user?: {
+    id: string | Schema.Types.ObjectId;
+    email: string;
+    name: string;
+    role?: string;
+  };
 }
 
 export interface IJwtPayload {

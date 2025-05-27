@@ -26,7 +26,7 @@ const server = http.createServer(app);
 const corsOptions={
     origin: process.env.CLIENT_SERVER, 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     credentials: true,  
 };
 const io = configureSocketIO(server);

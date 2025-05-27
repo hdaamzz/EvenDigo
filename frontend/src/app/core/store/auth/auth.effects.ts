@@ -30,7 +30,10 @@ export class AuthEffects {
             ofType(routerNavigatedAction),
             filter(() => {
                 const currentUrl = this.router.url;
-                return !currentUrl.includes('/login') && !currentUrl.includes('/register') && !currentUrl.includes('/reset-password');
+                return !currentUrl.includes('/login') && 
+                       !currentUrl.includes('/register') && 
+                       !currentUrl.includes('/reset-password') &&
+                       !currentUrl.includes('/admin/login');
             }),
             switchMap(() =>
                 this.authService.checkAuthStatus().pipe(
@@ -41,15 +44,19 @@ export class AuthEffects {
                                 token: response.token || ""
                             });
                         }
-                        return AuthActions.loginFailure({ error: 'No session found' });
+                        return { type: 'NO_ACTION' } as any;
                     }),
                     catchError((error) => {
-                        return of(AuthActions.loginFailure({
-                            error: error.message || 'Failed to check auth status'
-                        }));
+                        if (error.status !== 401) {
+                            return of(AuthActions.loginFailure({
+                                error: error.message || 'Failed to check auth status'
+                            }));
+                        }
+                        return of({ type: 'NO_ACTION' } as any);
                     })
                 )
-            )
+            ),
+            filter(action => action.type !== 'NO_ACTION')
         )
     );
 
@@ -182,6 +189,7 @@ export class AuthEffects {
                 )
             )
     );
+    
 
     googleLogin$ = createEffect(() =>
         this.actions$.pipe(

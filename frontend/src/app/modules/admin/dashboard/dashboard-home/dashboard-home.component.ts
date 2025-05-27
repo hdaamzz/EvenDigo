@@ -1,4 +1,3 @@
-// src/app/components/admin/dashboard-home/dashboard-home.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
@@ -17,7 +16,6 @@ import {
   ApiResponse,
   NewCounts,
 } from '../../../../core/services/admin/dashboard/dashboard.service';
-import Notiflix from 'notiflix';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -84,7 +82,6 @@ export class DashboardHomeComponent implements OnInit {
       next: (response: ApiResponse<StatCard[]>) => {
         if (response.success) {
           this.statCards = response.data;
-          Notiflix.Notify.success('Stats loaded successfully');
         } else {
           this.errors['stats'] = response.message || 'Failed to load stats';
         }
@@ -104,7 +101,6 @@ export class DashboardHomeComponent implements OnInit {
       next: (response: ApiResponse<ChartData>) => {
         if (response.success) {
           this.revenueData = response.data;
-          Notiflix.Notify.success('Revenue data loaded successfully');
         } else {
           this.errors['revenue'] = response.message || 'Failed to load revenue data';
         }
@@ -124,7 +120,6 @@ export class DashboardHomeComponent implements OnInit {
       next: (response: ApiResponse<ChartData>) => {
         if (response.success) {
           this.userRegistrationData = response.data;
-          Notiflix.Notify.success('User registration data loaded successfully');
         } else {
           this.errors['userRegistrations'] = response.message || 'Failed to load user registration data';
         }
@@ -144,7 +139,6 @@ export class DashboardHomeComponent implements OnInit {
       next: (response: ApiResponse<Transaction[]>) => {
         if (response.success) {
           this.transactions = response.data;
-          Notiflix.Notify.success('Transactions loaded successfully');
         } else {
           this.errors['transactions'] = response.message || 'Failed to load transactions';
         }
@@ -164,7 +158,6 @@ export class DashboardHomeComponent implements OnInit {
       next: (response: ApiResponse<Subscription[]>) => {
         if (response.success) {
           this.subscriptions = response.data;
-          Notiflix.Notify.success('Subscriptions loaded successfully');
         } else {
           this.errors['subscriptions'] = response.message || 'Failed to load subscriptions';
         }
@@ -184,7 +177,6 @@ export class DashboardHomeComponent implements OnInit {
       next: (response: ApiResponse<Activity[]>) => {
         if (response.success) {
           this.activities = response.data;
-          Notiflix.Notify.success('Activities loaded successfully');
         } else {
           this.errors['activities'] = response.message || 'Failed to load activities';
         }
@@ -196,10 +188,6 @@ export class DashboardHomeComponent implements OnInit {
       },
     });
   }
-
-  
-
- 
 
   changePeriod(period: string): void {
     this.selectedPeriod = period;

@@ -17,8 +17,7 @@ export class AuthRepository implements IAuthRepository {
 
   async storeOTPData(email: string, otp: string, userData: IUser): Promise<void> {
     const otpData: IOtpData = { email, otp, userData };
-    // Store OTP data with 3 minutes expiration
-    await this.redis.setex(`otp:${email}`, 300, JSON.stringify(otpData));
+    await this.redis.setex(`otp:${email}`, 300, JSON.stringify(otpData));//3 minute
     
     
   }
@@ -34,8 +33,7 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async storeResetToken(email: string, token: string): Promise<void> {
-    // Store reset token with 10 minutes expiration
-    await this.redis.setex(`reset:${email}`, 600, token);
+    await this.redis.setex(`reset:${email}`, 600, token);//10 minute
   }
   
   async getResetToken(email: string): Promise<string | null> {

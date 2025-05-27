@@ -41,6 +41,7 @@ import { DashboardService } from "../../../src/services/implementation/admin/adm
 export function registerServices() {
   // User services
   container.register("AuthService", { useClass: AuthService });
+  container.register("UserAuthService", { useClass: UserAuthService });
   container.register("OTPService", { useClass: OTPService });
   container.register("PasswordService", { useClass: PasswordService });
   container.register("EmailService", { useClass: EmailService });
