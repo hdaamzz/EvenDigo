@@ -15,13 +15,14 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { environment } from './environments/environment';
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { tokenRefreshInterceptor } from './core/interceptors/auth.interceptor';
 
 
 export const appConfig: ApplicationConfig = {
   providers: [provideZoneChangeDetection({ eventCoalescing: true }),
   provideRouter(routes), provideAnimationsAsync(), 
-  providePrimeNG({ theme: { preset: Aura } }), provideHttpClient(withInterceptors([authInterceptor])),
+  providePrimeNG({ theme: { preset: Aura } }),
+  provideHttpClient(withInterceptors([tokenRefreshInterceptor])),
   provideStore({ router: routerReducer, auth: authReducer }), 
   provideEffects([AuthEffects]), provideRouterStore(), 
   provideFirebaseApp(() => initializeApp(environment.firebase)), 

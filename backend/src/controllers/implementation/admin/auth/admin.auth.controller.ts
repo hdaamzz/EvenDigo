@@ -5,49 +5,60 @@ import { IAuthAdminController } from '../../../../../src/controllers/interfaces/
 import { IAuthAdminService } from '../../../../../src/services/interfaces/IAuth.admin.service';
 import StatusCode from '../../../../../src/types/statuscode';
 
-
 @injectable()
-export class AdminAuthController implements IAuthAdminController{
-    constructor(
-      @inject("AdminAuthService")  private adminAuthService: IAuthAdminService,
-    ){}
+export class AdminAuthController implements IAuthAdminController {
+  constructor(
+    @inject('AdminAuthService') private adminAuthService: IAuthAdminService
+  ) {}
 
-
-    async verifyAdmin(req: Request, res: Response): Promise<void> {
-        try {
-          const loginData: ILogin = req.body;
-          if (!loginData.email || !loginData.password) {
-            res.status(StatusCode.BAD_REQUEST).json({
-              success: false,
-              message: 'Email and password are required'
-            });
-            return;
-          }
-    
-          const result = await this.adminAuthService.login(loginData);
-          if (!result.success) {
-            res.status(StatusCode.UNAUTHORIZED).json(result);
-            return;
-          }
-    
-    
-          const token = result.token;
-    
-          res.cookie('session', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000,
-            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined 
-          });
-    
-          res.status(StatusCode.OK).json(result);
-        } catch (error) {
-          console.error('Login error:', error);
-          res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: 'Internal server error'
-          });
-        }
+  async verifyAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const loginData: ILogin = req.body;
+      if (!loginData.email || !loginData.password) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          success: false,
+          message: 'Email and password are required',
+        });
+        return;
       }
+
+      const result = await this.adminAuthService.login(loginData);
+      if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
+        res.status(StatusCode.UNAUTHORIZED).json(result);
+        return;
+      }
+
+      res.cookie('accessToken', result.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 15 * 60 * 1000, 
+      });
+
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, 
+      });
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          name: result.user.name,
+          role: result.user.role,
+          token:result.accessToken
+        },
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
 }

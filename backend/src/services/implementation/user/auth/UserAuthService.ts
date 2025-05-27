@@ -13,11 +13,11 @@ import { ConflictException, InternalServerErrorException, NotFoundException } fr
 @injectable()
 export class UserAuthService implements IUserAuthService {
   constructor(
-    @inject("UserRepository") private userRepository: IUserRepository,
-    @inject("PasswordService") private passwordService: IPasswordService,
-    @inject("TokenService") private tokenService: ITokenService,
-    @inject("EmailService") private emailService: IEmailService,
-    @inject("OTPService") private otpService: IOTPService
+    @inject('UserRepository') private userRepository: IUserRepository,
+    @inject('PasswordService') private passwordService: IPasswordService,
+    @inject('TokenService') private tokenService: ITokenService,
+    @inject('EmailService') private emailService: IEmailService,
+    @inject('OTPService') private otpService: IOTPService
   ) {}
 
   async registerUser(userData: IUser, hashedPassword: string): Promise<IUser> {
@@ -25,9 +25,9 @@ export class UserAuthService implements IUserAuthService {
       const user = await this.userRepository.createUser({
         ...userData,
         password: hashedPassword,
-        role: "user",
+        role: 'user',
         status: 'active',
-        verified: false
+        verified: false,
       });
 
       return user;
@@ -45,7 +45,7 @@ export class UserAuthService implements IUserAuthService {
     if (!user) {
       return {
         success: false,
-        message: "Invalid email or password"
+        message: 'Invalid email or password',
       };
     }
 
@@ -57,14 +57,14 @@ export class UserAuthService implements IUserAuthService {
     if (!isPasswordMatch) {
       return {
         success: false,
-        message: "Invalid email or password"
+        message: 'Invalid email or password',
       };
     }
 
-    if (user.status == 'blocked') {
+    if (user.status === 'blocked') {
       return {
         success: false,
-        message: "EvenDigo blocked you!"
+        message: 'EvenDigo blocked you!',
       };
     }
 
@@ -74,19 +74,23 @@ export class UserAuthService implements IUserAuthService {
 
     await this.userRepository.updateUserLastLogin(user._id);
 
-    const token = this.tokenService.generateToken(user);
+    const accessToken = this.tokenService.generateToken(user);
+    const refreshToken = this.tokenService.generateRefreshToken(user);
 
     const userResponse = {
       id: user._id,
       email: user.email,
-      name: user.name
+      name: user.name,
+      role: user.role,
     };
+
 
     return {
       success: true,
       message: 'Login successful',
-      token,
-      user: userResponse
+      accessToken,
+      refreshToken,
+      user: userResponse,
     };
   }
 
@@ -120,25 +124,23 @@ export class UserAuthService implements IUserAuthService {
       if (!user) {
         return {
           success: false,
-          message: "No account found with this email"
+          message: 'No account found with this email',
         };
       }
-  
+
       const resetToken = this.otpService.generateOTP();
-      
       await this.passwordService.storeResetToken(email, resetToken);
-      
       await this.emailService.sendPasswordResetEmail(email, user.name, resetToken);
-      
+
       return {
         success: true,
-        message: "Password reset instructions sent to your email"
+        message: 'Password reset instructions sent to your email',
       };
     } catch (error) {
-      console.error("Forgot password error:", error);
+      console.error('Forgot password error:', error);
       return {
         success: false,
-        message: "Failed to process password reset request"
+        message: 'Failed to process password reset request',
       };
     }
   }

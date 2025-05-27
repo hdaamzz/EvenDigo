@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, delay, Observable, of } from 'rxjs';
+import { catchError, delay, Observable, of, tap } from 'rxjs';
 import { ILogin, IRegister, User } from '../../../models/userModel';
 import { environment } from '../../../../environments/environment';
 import { CommonResponse } from '../../../models/user.auth.interface';
@@ -12,6 +12,7 @@ import { ApiResponse } from '../subscription/premium.service';
 })
 export class AuthService {
   private baseUrl = environment.baseUrl;
+  
   constructor(private http: HttpClient) { }
 
   userRegister(userData: IRegister): Observable<CommonResponse> {
@@ -31,25 +32,33 @@ export class AuthService {
       })
     );
   }
+
   userLogin(userData: ILogin): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/auth/sign-in`, userData, {
-      
-    }).pipe(
+    return this.http.post(`${this.baseUrl}user/auth/sign-in`, userData).pipe(
       catchError((error) => {
         console.error('Login error:', error);
-        return of({ success: false, message: error.error.message });
+        return of({ success: false, message: error.error?.message || error.message });
       })
     );
   }
+
+  // Updated to handle token refresh automatically via interceptor
   checkAuthStatus(): Observable<{
     isAuthenticated: boolean; user?: User; token?: string, role?: string
   }> {
     return this.http.get<{ isAuthenticated: boolean; user?: User; token?: string, role?: string }>(
-      `${this.baseUrl}user/auth/status`,
-      { withCredentials: true }
+      `${this.baseUrl}user/auth/status`
+    ).pipe(
+      catchError((error) => {
+        return of({ 
+          isAuthenticated: false, 
+          user: undefined, 
+          token: undefined, 
+          role: undefined 
+        });
+      })
     );
   }
-
 
   loginWithFirebase(idToken: string, name?: string | null, email?: string | null, profileImg?: string | null): Observable<any> {
     const payload = {
@@ -59,39 +68,43 @@ export class AuthService {
       profileImg: profileImg || '',
     };
 
-
-    return this.http.post(`${this.baseUrl}user/auth/firebase-signin`, payload, {
-      
-    });
+    return this.http.post(`${this.baseUrl}user/auth/firebase-signin`, payload);
   }
 
   forgotPassword(formData: {email:string}): Observable<CommonResponse> {
     return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/forgot-password`, formData)
   }
+
   resetPassword(resetData: {email:string,newPassword:string,token:string}): Observable<CommonResponse> {
     return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/reset-password`, resetData);
   }
 
   logout(): Observable<CommonResponse> {
-    return this.http.get<CommonResponse>(`${this.baseUrl}user/auth/logout`, {
-      
-    }).pipe(
+    return this.http.get<CommonResponse>(`${this.baseUrl}user/auth/logout`).pipe(
       catchError((error) => {
         console.error('Logout error:', error);
         return of({ success: false, message: 'Logout failed. Please try again.' });
       })
     );
   }
+
+  // New method for manual token refresh if needed
+  refreshToken(): Observable<any> {
+    return this.http.post(`${this.baseUrl}user/auth/refresh-token`, {}).pipe(
+      catchError((error) => {
+        console.error('Token refresh error:', error);
+        return of({ success: false, message: 'Token refresh failed' });
+      })
+    );
+  }
+
   getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
-      
-      return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.baseUrl}user/auth/plans`).pipe(
-        delay(700),
-        catchError(error => {
-          console.error('Logout error:', error);
+    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.baseUrl}user/auth/plans`).pipe(
+      delay(700),
+      catchError(error => {
+        console.error('Get plans error:', error);
         return of({ success: false, message: 'fetch subscription plans' });
-        })
-      );
-    }
-
-
+      })
+    );
+  }
 }

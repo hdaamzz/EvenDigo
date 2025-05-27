@@ -20,6 +20,7 @@ import { EventEditComponent } from './modules/user/profile/profile.events/event-
 import { PremiumCheckoutComponent } from './modules/user/premium-checkout/premium-checkout.component';
 import { ProfileSubscriptionComponent } from './modules/user/profile/profile.subscription/profile.subscription.component';
 import { SubscriptionConfirmationComponent } from './modules/user/premium-checkout/subscription-confirmation/subscription-confirmation.component';
+import { ChatComponent } from './modules/user/chat/chat.component';
 
 export const routes: Routes = [
     //user - side 
@@ -79,6 +80,11 @@ export const routes: Routes = [
                 component: ProfileWalletComponent
             }
         ],
+        canActivate: [isLogged]
+    },
+    {
+        path: 'chats',
+        component: ChatComponent,
         canActivate: [isLogged]
     },
     {

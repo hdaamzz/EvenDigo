@@ -1,32 +1,23 @@
-import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { catchError, map } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { CanActivateFn, Router } from '@angular/router';
+import { catchError, map, of } from 'rxjs';
 import { AuthService } from '../../services/user/auth/auth.service';
 
 export const isLogged: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const authService = inject(AuthService);
-  // console.log('Checking protected route access...');
 
   return authService.checkAuthStatus().pipe(
     map(response => {
-      
-      if (response.isAuthenticated && response.role=='user') {
-        
-        console.log('Access granted to protected route');
+      if (response.isAuthenticated && response?.user?.role === 'user') {
         return true;
       } else {
-        console.log('No authentication, redirecting to login');
         router.navigate(['/login']);
         return false;
       }
     }),
     catchError(error => {
-      // console.error('Auth check error:', error);
-      if (error.status === 401) {
-        router.navigate(['/login']);
-      }
+      router.navigate(['/login']);
       return of(false);
     })
   );
@@ -35,62 +26,46 @@ export const isLogged: CanActivateFn = (route, state) => {
 export const isLogout: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const authService = inject(AuthService);
-  // console.log('Checking auth status in guard...');
 
   return authService.checkAuthStatus().pipe(
     map(response => {
-      console.log('Auth response in logout guard:', response);
-      
       if (response.isAuthenticated) {
-        
-        console.log('User is authenticated, redirecting to home');
-        router.navigate(['/']);
+        // Redirect based on role
+        if (response?.user?.role === 'admin') {
+          router.navigate(['/admin/dashboard']);
+        } else {
+          router.navigate(['/']);
+        }
         return false;
       } else {
-        console.log('No authentication, allowing access to login');
         return true;
       }
     }),
     catchError(error => {
-      // console.log('Auth check error:', error);
-      // If 401 error (no/invalid token), allow access to login
-      if (error.status === 401) {
-        return of(true);
-      }
+      // If auth check fails, allow access to login/register pages
       return of(true);
     })
   );
 };
 
-
 export const isAdmin: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const authService = inject(AuthService);
-  // console.log('Checking auth status in guard...');
 
   return authService.checkAuthStatus().pipe(
     map(response => {
-      // console.log('Auth response in logout guard:', response);
-      
       if (response.isAuthenticated) {
-        if(response.role !=='user'){
-          router.navigate(['admin/dashboard']);
+        if (response?.user?.role === 'admin') {
+          router.navigate(['/admin/dashboard']);
           return false;
-        }else{
-          console.log('No authentication, allowing access to login');
-        return true;
+        } else {
+          return true; // User can access regular pages
         }
       } else {
-        console.log('No authentication, allowing access to login');
-        return true;
+        return true; // Allow anonymous access
       }
     }),
     catchError(error => {
-      // console.log('Auth check error:', error);
-      // If 401 error (no/invalid token), allow access to login
-      if (error.status === 401) {
-        return of(true);
-      }
       return of(true);
     })
   );

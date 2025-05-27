@@ -1,165 +1,150 @@
 <div class="p-5 relative z-1">
-    <!-- Header -->
-    <div class="header bg-white p-5 rounded-lg shadow-sm mb-5">
-        <div class="welcome-text text-2xl text-gray-800">Welcome back, Admin!</div>
+  <!-- Header -->
+  <p-card styleClass="mb-5 shadow-sm">
+    <div class="welcome-text text-2xl text-gray-800">Welcome back, Admin!</div>
+  </p-card>
+
+  <div class="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
+    <p-card *ngFor="let stat of statCards" styleClass="shadow-sm transition-transform hover:-translate-y-1">
+      <div class="flex items-center gap-2 text-gray-600 text-sm mb-2">
+        <i [class]="stat.icon"></i> {{ stat.title }}
+      </div>
+      <div class="text-2xl font-bold text-gray-800">{{ stat.value }}</div>
+      <div [ngClass]="{'text-green-500': stat.isPositive, 'text-red-500': !stat.isPositive}" class="text-sm mt-1">
+        {{ stat.isPositive ? '↑' : '↓' }} {{ stat.change }}
+      </div>
+    </p-card>
+    <div *ngIf="loading.stats" class="col-span-full flex justify-center items-center">
+      <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
     </div>
+    <div *ngIf="errors['stats']" class="col-span-full text-red-500 text-center">{{ errors['stats'] }}</div>
+  </div>
 
-    <!-- Stats Grid -->
-    <!-- <div class="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
-        <div class="stat-card bg-white p-5 rounded-lg shadow-sm hover:-translate-y-1 transition-all">
-            <div class="stat-title flex items-center gap-2 text-gray-600 text-sm mb-2">
-                <i class="fas fa-users"></i> Total Customers
-            </div>
-            <div class="stat-value text-2xl font-bold text-gray-800">2,847</div>
-            <div class="stat-change text-green-500 text-sm mt-1">↑ 12% this month</div>
+  <!-- Charts -->
+  <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+    <!-- Revenue Chart -->
+    <p-card styleClass="shadow-sm">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2 text-gray-800 text-lg">
+          <i class="fas fa-chart-line"></i> Revenue Overview
         </div>
-        <div class="stat-card bg-white p-5 rounded-lg shadow-sm hover:-translate-y-1 transition-all">
-            <div class="stat-title flex items-center gap-2 text-gray-600 text-sm mb-2">
-                <i class="fas fa-calendar-alt"></i> Active Events
-            </div>
-            <div class="stat-value text-2xl font-bold text-gray-800">124</div>
-            <div class="stat-change text-green-500 text-sm mt-1">↑ 8% this month</div>
+        <div class="flex gap-2">
+          <p-button *ngFor="let period of ['monthly', 'weekly', 'daily']"
+            [label]="period | titlecase"
+            [styleClass]="selectedPeriod === period ? 'p-button-primary' : 'p-button-secondary'"
+            (click)="changePeriod(period)"></p-button>
         </div>
-        <div class="stat-card bg-white p-5 rounded-lg shadow-sm hover:-translate-y-1 transition-all">
-            <div class="stat-title flex items-center gap-2 text-gray-600 text-sm mb-2">
-                <i class="fas fa-money-bill-wave"></i> Revenue
-            </div>
-            <div class="stat-value text-2xl font-bold text-gray-800">$45,289</div>
-            <div class="stat-change text-green-500 text-sm mt-1">↑ 15% this month</div>
+      </div>
+      <div class="chart-container h-64 relative">
+        <p-chart *ngIf="revenueData" type="bar" [data]="revenueData" [options]="revenueChartOptions"></p-chart>
+        <div *ngIf="loading.revenue" class="flex items-center justify-center h-full">
+          <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
         </div>
-        <div class="stat-card bg-white p-5 rounded-lg shadow-sm hover:-translate-y-1 transition-all">
-            <div class="stat-title flex items-center gap-2 text-gray-600 text-sm mb-2">
-                <i class="fas fa-ticket-alt"></i> Tickets Sold
-            </div>
-            <div class="stat-value text-2xl font-bold text-gray-800">1,234</div>
-            <div class="stat-change text-green-500 text-sm mt-1">↑ 18% this month</div>
-        </div>
-    </div> -->
+        <div *ngIf="errors['revenue']" class="flex items-center justify-center h-full text-red-500">{{ errors['revenue'] }}</div>
+      </div>
+    </p-card>
 
-    <!-- Money Stats -->
-    <!-- <div class="money-stats grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-        <div class="money-card bg-white p-5 rounded-lg shadow-sm">
-            <div class="card-title flex items-center gap-2 text-gray-800 text-lg mb-5">
-                <i class="fas fa-chart-line"></i> Monthly Revenue
-            </div>
-            <div class="chart h-48 bg-gray-100 rounded-lg overflow-hidden relative">
-                <div class="chart-bar absolute bottom-0 w-6 bg-green-500 rounded-t-lg" style="height: 60%; left: 20px;"></div>
-                <div class="chart-bar absolute bottom-0 w-6 bg-green-500 rounded-t-lg" style="height: 80%; left: 60px;"></div>
-                <div class="chart-bar absolute bottom-0 w-6 bg-green-500 rounded-t-lg" style="height: 40%; left: 100px;"></div>
-                <div class="chart-bar absolute bottom-0 w-6 bg-green-500 rounded-t-lg" style="height: 90%; left: 140px;"></div>
-            </div>
+    <!-- User Registration Chart -->
+    <p-card styleClass="shadow-sm">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2 text-gray-800 text-lg">
+          <i class="fas fa-users"></i> User Registrations
         </div>
-        <div class="money-card bg-white p-5 rounded-lg shadow-sm">
-            <div class="card-title flex items-center gap-2 text-gray-800 text-lg mb-5">
-                <i class="fas fa-wallet"></i> Transaction Overview
-            </div>
-            <div class="money-list">
-                <div class="money-item flex items-center py-3 border-b border-gray-200">
-                    <div class="money-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-arrow-up"></i>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-gray-600">Income</div>
-                        <div class="stat-value text-xl font-bold text-gray-800">$12,428</div>
-                    </div>
-                </div>
-                <div class="money-item flex items-center py-3">
-                    <div class="money-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-gray-600">Expenses</div>
-                        <div class="stat-value text-xl font-bold text-gray-800">$4,305</div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="chart-container h-64 relative">
+        <p-chart *ngIf="userRegistrationData" type="bar" [data]="userRegistrationData" [options]="userRegistrationChartOptions"></p-chart>
+        <div *ngIf="loading.userRegistrations" class="flex items-center justify-center h-full">
+          <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
         </div>
-    </div> -->
+        <div *ngIf="errors['userRegistrations']" class="flex items-center justify-center h-full text-red-500">{{ errors['userRegistrations'] }}</div>
+      </div>
+    </p-card>
+  </div>
 
-    <!-- Cards Grid -->
-    <!-- <div class="cards-grid grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-        <div class="card bg-white p-5 rounded-lg shadow-sm lg:col-span-2">
-            <div class="card-header flex justify-between items-center mb-5">
-                <div class="card-title flex items-center gap-2 text-gray-800 text-lg">
-                    <i class="fas fa-star"></i> Premium Subscriptions
-                </div>
-                <div class="badge bg-green-500 text-white px-3 py-1 rounded-full text-sm">5 New</div>
-            </div>
-            <div class="subscription-list">
-                <div class="subscription-item flex items-center py-3 border-b border-gray-200">
-                    <div class="subscription-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <div class="flex-1 ml-3">
-                        <div class="text-gray-800">Gold Plan</div>
-                        <div class="progress-bar w-full h-2 bg-gray-100 rounded mt-2">
-                            <div class="progress h-full bg-green-500 rounded" style="width: 85%"></div>
-                        </div>
-                    </div>
-                    <div class="text-gray-800">854 Users</div>
-                </div>
-                <div class="subscription-item flex items-center py-3 border-b border-gray-200">
-                    <div class="subscription-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-gem"></i>
-                    </div>
-                    <div class="flex-1 ml-3">
-                        <div class="text-gray-800">Premium Plan</div>
-                        <div class="progress-bar w-full h-2 bg-gray-100 rounded mt-2">
-                            <div class="progress h-full bg-green-500 rounded" style="width: 65%"></div>
-                        </div>
-                    </div>
-                    <div class="text-gray-800">642 Users</div>
-                </div>
-                <div class="subscription-item flex items-center py-3">
-                    <div class="subscription-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="flex-1 ml-3">
-                        <div class="text-gray-800">Basic Plan</div>
-                        <div class="progress-bar w-full h-2 bg-gray-100 rounded mt-2">
-                            <div class="progress h-full bg-green-500 rounded" style="width: 45%"></div>
-                        </div>
-                    </div>
-                    <div class="text-gray-800">1,254 Users</div>
-                </div>
-            </div>
+  <!-- Transactions and Subscriptions -->
+  <div class="cards-grid grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+    <!-- Transactions -->
+    <p-card styleClass="shadow-sm">
+      <div class="flex items-center gap-2 text-gray-800 text-lg mb-5">
+        <i class="fas fa-wallet"></i> Transaction Overview
+      </div>
+      <div class="money-list">
+        <div *ngFor="let transaction of transactions; let last = last"
+          class="flex items-center py-2"
+          [ngClass]="{'border-b border-gray-200': !last}">
+          <div class="w-10 h-6 bg-gray-100 rounded-full flex items-center justify-center"
+            [ngClass]="{'text-green-500': transaction.isPositive, 'text-red-500': !transaction.isPositive}">
+            <i [class]="transaction.icon"></i>
+          </div>
+          <div class="ml-3">
+            <div class="text-gray-600">{{ transaction.type }}</div>
+            <div class="text-xl font-bold text-gray-800">{{ transaction.amount }}</div>
+          </div>
         </div>
-        <div class="card bg-white p-5 rounded-lg shadow-sm">
-            <div class="card-header flex justify-between items-center mb-5">
-                <div class="card-title flex items-center gap-2 text-gray-800 text-lg">
-                    <i class="fas fa-bell"></i> Recent Activities
-                </div>
-                <div class="badge bg-green-500 text-white px-3 py-1 rounded-full text-sm">12 New</div>
-            </div>
-            <div class="subscription-list">
-                <div class="subscription-item flex items-center py-3 border-b border-gray-200">
-                    <div class="subscription-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-gray-800">New Event Created</div>
-                        <small class="text-gray-500">2 minutes ago</small>
-                    </div>
-                </div>
-                <div class="subscription-item flex items-center py-3 border-b border-gray-200">
-                    <div class="subscription-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-gray-800">New Customer Registration</div>
-                        <small class="text-gray-500">15 minutes ago</small>
-                    </div>
-                </div>
-                <div class="subscription-item flex items-center py-3">
-                    <div class="subscription-icon w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-gray-800">New Ticket Purchase</div>
-                        <small class="text-gray-500">1 hour ago</small>
-                    </div>
-                </div>
-            </div>
+        <div *ngIf="loading.transactions" class="flex items-center justify-center h-full">
+          <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
         </div>
-    </div> -->
+        <div *ngIf="errors['transactions']" class="text-red-500 text-center">{{ errors['transactions'] }}</div>
+      </div>
+    </p-card>
+
+    <!-- Subscriptions -->
+    <p-card styleClass="shadow-sm">
+      <div class="flex justify-between items-center mb-5">
+        <div class="flex items-center gap-2 text-gray-800 text-lg">
+          <i class="fas fa-star"></i> Premium Subscriptions
+        </div>
+        <span *ngIf="newCounts.newSubscriptions" class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">
+          {{ newCounts.newSubscriptions }} New
+        </span>
+      </div>
+      <div class="subscription-list">
+        <div *ngFor="let sub of subscriptions; let last = last"
+          class="flex items-center py-3"
+          [ngClass]="{'border-b border-gray-200': !last}">
+          <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
+            <i [class]="sub.icon"></i>
+          </div>
+          <div class="flex-1 ml-3">
+            <div class="text-gray-800">{{ sub.name }}</div>
+            <p-progressBar [value]="sub.percentage" [showValue]="false" styleClass="h-2 mt-2"></p-progressBar>
+          </div>
+          <div class="text-gray-800">{{ sub.users }} Users</div>
+        </div>
+        <div *ngIf="loading.subscriptions" class="flex items-center justify-center h-full">
+          <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
+        </div>
+        <div *ngIf="errors['subscriptions']" class="text-red-500 text-center">{{ errors['subscriptions'] }}</div>
+      </div>
+    </p-card>
+
+    <!-- Activities -->
+    <p-card styleClass="shadow-sm">
+      <div class="flex justify-between items-center mb-5">
+        <div class="flex items-center gap-2 text-gray-800 text-lg">
+          <i class="fas fa-bell"></i> Recent Activities
+        </div>
+        <span *ngIf="newCounts.newActivities" class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">
+          {{ newCounts.newActivities }} New
+        </span>
+      </div>
+      <div class="activity-list">
+        <div *ngFor="let activity of activities; let last = last"
+          class="flex items-center py-3"
+          [ngClass]="{'border-b border-gray-200': !last}">
+          <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-green-500">
+            <i [class]="activity.icon"></i>
+          </div>
+          <div class="ml-3">
+            <div class="text-gray-800">{{ activity.title }}</div>
+            <small class="text-gray-500">{{ activity.timeAgo }}</small>
+          </div>
+        </div>
+        <div *ngIf="loading.activities" class="flex items-center justify-center h-full">
+          <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
+        </div>
+        <div *ngIf="errors['activities']" class="text-red-500 text-center">{{ errors['activities'] }}</div>
+      </div>
+    </p-card>
+  </div>
 </div>
