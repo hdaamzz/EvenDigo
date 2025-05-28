@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { LucideAngularModule, X, Calendar, MapPin, Users, Share2, Heart } from 'lucide-angular';
+import { LucideAngularModule, X, Calendar, MapPin, Users, Share2, Heart, MessageCircle } from 'lucide-angular';
 import { Router } from '@angular/router';
 import { Subject, catchError, of, takeUntil, tap } from 'rxjs';
 import Notiflix from 'notiflix';
@@ -29,6 +29,7 @@ import { UserDashboardService } from '../../../../core/services/user/dashboard/u
 export class EventDetailModalComponent implements OnInit, OnDestroy {
   @Input() id!: string;
   @Output() close = new EventEmitter<void>();
+  @Output() chat = new EventEmitter<string>(); // Emit organizer ID for chat
   @ViewChild('modalRef') modalRef!: ElementRef;
 
   eventData!: IEvent;
@@ -45,6 +46,7 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
   readonly Users = Users;
   readonly Share2 = Share2;
   readonly Heart = Heart;
+  readonly MessageCircle = MessageCircle;
 
   private readonly _destroy$ = new Subject<void>();
   private readonly _handleClickOutside = this._clickOutsideHandler.bind(this);
@@ -71,6 +73,27 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
 
   toggleLike(): void {
     this.liked = !this.liked;
+  }
+
+  handleChat(): void {
+    this.chat.emit(this.eventData.user_id._id);
+  }
+
+  shareEvent(): void {
+    if (navigator.share) {
+      navigator.share({
+        title: this.eventData.eventTitle,
+        text: this.eventData.eventDescription,
+        url: window.location.href
+      }).catch(console.error);
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        Notiflix.Notify.success('Event link copied to clipboard!');
+      }).catch(() => {
+        Notiflix.Notify.failure('Failed to copy link');
+      });
+    }
   }
 
   incrementTicket(index: number): void {
@@ -102,6 +125,11 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
       const type = ticket.type.toLowerCase();
       return total + (this.ticketCounts[type] * ticket.price);
     }, 0);
+  }
+
+  getRemainingTickets(ticket: any): number {
+    const ticketType = ticket.type.toLowerCase();
+    return ticket.quantity - (this.ticketCounts[ticketType] || 0);
   }
 
   proceedToCheckout(): void {
@@ -164,4 +192,8 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
       this.handleClose();
     }
   }
+  onChatWithOrganizer(organizerId: string) {
+  // Navigate to chat or open chat modal
+  this._router.navigate(['/chat', organizerId]);
+}
 }

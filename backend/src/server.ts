@@ -52,7 +52,6 @@ app.set('io', io);
 app.use('/api',router)
 
 
-//firebase config
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
 });

@@ -1,134 +1,173 @@
-<div @fade class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto p-2 md:p-4">
+<div @fade class="fixed inset-0 z-50 flex items-start sm:items-center justify-center backdrop-blur-sm overflow-y-auto p-2 sm:p-4">
   <div
     #modalRef
     @modal
-    class="bg-[#121212] text-white w-full max-w-3xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl max-h-[90vh]"
+    class="bg-[#121212] text-white w-full max-w-3xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl max-h-[90vh] my-4"
   >
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex items-center justify-center h-full w-full">
-      <p class="text-white">Loading...</p>
+    <div *ngIf="isLoading" class="flex items-center justify-center h-64 w-full">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
     </div>
 
-    <!-- Content -->
-    <div *ngIf="!isLoading && eventData" class="flex flex-col md:flex-row h-full">
-      <!-- Left Section (Image and Basic Details) -->
-      <div class="md:w-[45%] bg-[#121212] flex flex-col flex-shrink-0">
-        <!-- Image -->
-        <div class="relative w-full aspect-[2/3] overflow-hidden">
+    <div *ngIf="!isLoading && eventData" class="flex flex-col md:flex-row h-full min-h-[500px]">
+      <div class="md:w-1/2 bg-[#121212] flex flex-col">
+        <div class="relative w-full h-64 md:h-80 overflow-hidden flex-shrink-0">
           <img
             [src]="eventData.mainBanner"
             [alt]="eventData.eventTitle"
             class="w-full h-full object-cover"
           />
-          <!-- Close Button -->
           <button
             (click)="handleClose()"
-            class="absolute top-2 right-2 w-6 h-6 md:w-8 md:h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/70 transition-colors z-10"
+            class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors z-10 group"
             aria-label="Close modal"
           >
-          <lucide-icon [name]="X" [size]="14" class="close-icon"></lucide-icon>          </button>
+            <lucide-icon [name]="X" [size]="16" class="text-white group-hover:scale-110 transition-transform"></lucide-icon>
+          </button>
         </div>
 
-        <!-- Organizer Section -->
-        <div class="p-3 flex-shrink-0">
-          <div @fade class="pt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <img
-                [src]="eventData.user_id.profileImg"
-                [alt]="eventData.user_id.name"
-                class="w-8 h-8 rounded-full object-cover"
-              />
-              <div>
-                <p class="font-medium text-sm text-white">{{ eventData.user_id.name }}</p>
-                <p class="text-xs text-gray-400">{{ eventData.user_id.email }}</p>
+        <div class="p-4 flex-1 flex flex-col justify-between">
+          <div class="mb-4">
+            <h1 class="text-xl md:text-2xl font-bold mb-3 text-white leading-tight">{{ eventData.eventTitle }}</h1>
+            
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-gray-300">
+                <lucide-icon [name]="Calendar" [size]="16" class="text-blue-400 flex-shrink-0"></lucide-icon>
+                <span class="text-sm">{{ eventData.startDate }} • {{ eventData.startTime }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-300">
+                <lucide-icon [name]="MapPin" [size]="16" class="text-blue-400 flex-shrink-0"></lucide-icon>
+                <span class="text-sm">{{ eventData.city }}</span>
               </div>
             </div>
-            <div class="flex gap-1">
-              <button class="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 transition-colors">
-                <lucide-icon [name]="Share2" [size]="12" class="share-heart-icon"></lucide-icon>              </button>
-              <button
-                (click)="toggleLike()"
-                [ngClass]="{
-                  'w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center transition-colors': true,
-                  'bg-pink-600/20 text-pink-500': liked,
-                  'bg-gray-800 hover:bg-gray-700': !liked
-                }"
-              >
-              <lucide-icon [name]="Heart" [size]="12" [color]="liked ? '#ec4899' : 'white'" class="share-heart-icon"></lucide-icon>              </button>
+          </div>
+
+          <div class="border-t border-gray-800 pt-4">
+            <div @fade class="flex items-center justify-between">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <img
+                  [src]="eventData.user_id.profileImg"
+                  [alt]="eventData.user_id.name"
+                  class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                />
+                <div class="min-w-0 flex-1">
+                  <p class="font-semibold text-white truncate">{{ eventData.user_id.name }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ eventData.user_id.email }}</p>
+                </div>
+              </div>
+
+              <div class="flex gap-2 flex-shrink-0">
+                <button
+                  (click)="shareEvent()"
+                  class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 transition-colors group"
+                  title="Share Event"
+                >
+                  <lucide-icon [name]="Share2" [size]="16" class="text-gray-300 group-hover:text-white transition-colors"></lucide-icon>
+                </button>
+
+                <button
+                  (click)="handleChat()"
+                  class="w-9 h-9 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 transition-colors group"
+                  title="Chat with Organizer"
+                >
+                  <lucide-icon [name]="MessageCircle" [size]="16" class="text-white group-hover:scale-110 transition-transform"></lucide-icon>
+                </button>
+
+                <button
+                  (click)="toggleLike()"
+                  [ngClass]="{
+                    'w-9 h-9 rounded-full flex items-center justify-center transition-all group': true,
+                    'bg-pink-600/20 text-pink-500': liked,
+                    'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white': !liked
+                  }"
+                  title="Like Event"
+                >
+                  <lucide-icon
+                    [name]="Heart"
+                    [size]="16"
+                    [color]="liked ? '#ec4899' : undefined"
+                    [class]="liked ? 'fill-current' : 'group-hover:scale-110 transition-transform'"
+                  ></lucide-icon>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Section (Event Details and Tickets) -->
-      <div class="md:w-[55%] flex flex-col bg-[#1a1a1a] overflow-y-auto">
-        <div class="p-3 md:p-4">
-          <!-- Event Title and Info -->
-          <h1 @fade class="text-base md:text-lg font-bold mb-3 text-white">{{ eventData.eventTitle }}</h1>
-          <div @fade class="flex items-center gap-1 text-gray-300 mb-1 text-xs md:text-sm">
-            <lucide-icon [name]="Calendar" [size]="12" class="text-blue-400 calendar-map-icon"></lucide-icon>            <span>{{ eventData.startDate }} • {{ eventData.startTime }}</span>
-          </div>
-          <div @fade class="flex items-center gap-1 text-gray-300 mb-1 text-xs md:text-sm">
-            <lucide-icon [name]="MapPin" [size]="12" class="text-blue-400 calendar-map-icon"></lucide-icon>            <span>{{ eventData.city }}</span>
-          </div>
+      <div class="md:w-1/2 flex flex-col bg-[#1a1a1a] overflow-hidden">
+        <div class="overflow-y-auto flex-1 custom-scrollbar">
+          <div class="p-4">
+            <div @fade class="mb-6">
+              <h2 class="text-lg font-semibold text-white mb-2">About this event</h2>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                {{ eventData.eventDescription | slice:0:200 }}{{eventData.eventDescription.length > 200 ? '...' : ''}}
+              </p>
+            </div>
 
-          <!-- About Event -->
-          <div class="mt-4">
-            <h2 class="text-base md:text-lg font-semibold text-white">About this event</h2>
-            <p class="text-gray-300 text-xs md:text-sm">{{ eventData.eventDescription }}</p>
-          </div>
+            <div @fade class="mb-4">
+              <h2 class="text-lg font-semibold text-white mb-3">Select Tickets</h2>
+              <div class="space-y-3">
+                <div
+                  *ngFor="let ticket of eventData.tickets; let i = index"
+                  class="bg-gray-800/50 rounded-xl p-4 hover:bg-gray-700/50 transition-colors border border-gray-700/50 ticket-card"
+                >
+                  <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-white text-base">{{ ticket.type }}</h3>
+                      <p class="text-gray-400 text-sm">{{ getRemainingTickets(ticket) }} remaining</p>
+                    </div>
+                    <div class="text-right">
+                      <span class="text-xl font-bold text-white">₹{{ ticket.price }}</span>
+                    </div>
+                  </div>
 
-          <!-- Tickets -->
-          <div class="mt-4">
-            <h2 class="text-base md:text-lg font-semibold text-white mb-3">Tickets</h2>
-            <div class="space-y-3">
-              <div
-                *ngFor="let ticket of eventData.tickets; let i = index"
-                class="bg-gray-800/50 rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:bg-gray-700 transition-colors"
-              >
-                <div>
-                  <h3 class="font-semibold text-white text-sm md:text-base">{{ ticket.type }}</h3>
-                  <p class="text-gray-400 text-xs">{{ ticket.quantity }} available</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-base font-semibold text-white">₹{{ ticket.price }}</span>
-                  <!-- Ticket Counter -->
-                  <div class="flex items-center gap-1">
-                    <button
-                      (click)="decrementTicket(i)"
-                      class="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-white"
-                      [disabled]="ticketCounts[ticket.type.toLowerCase()] === 0"
-                    >
-                      <span class="text-sm">-</span>
-                    </button>
-                    <span class="text-white text-sm">{{ ticketCounts[ticket.type.toLowerCase()] }}</span>
-                    <button
-                      (click)="incrementTicket(i)"
-                      class="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-white"
-                      [disabled]="totalTickets >= maxTicketsPerUser || ticketCounts[ticket.type.toLowerCase()] >= ticket.quantity"
-                    >
-                      <span class="text-sm">+</span>
-                    </button>
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-400">
+                      Selected: {{ ticketCounts[ticket.type.toLowerCase()] || 0 }}
+                    </div>
+                    <div class="flex items-center gap-3 bg-gray-700 rounded-lg p-1">
+                      <button
+                        (click)="decrementTicket(i)"
+                        class="w-8 h-8 rounded-md bg-gray-600 hover:bg-gray-500 flex items-center justify-center text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ticket-counter-btn"
+                        [disabled]="ticketCounts[ticket.type.toLowerCase()] === 0"
+                      >
+                        <span class="text-lg font-bold">−</span>
+                      </button>
+                      <span class="text-white font-semibold min-w-[2rem] text-center">
+                        {{ ticketCounts[ticket.type.toLowerCase()] || 0 }}
+                      </span>
+                      <button
+                        (click)="incrementTicket(i)"
+                        class="w-8 h-8 rounded-md bg-gray-600 hover:bg-gray-500 flex items-center justify-center text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ticket-counter-btn"
+                        [disabled]="totalTickets >= maxTicketsPerUser || ticketCounts[ticket.type.toLowerCase()] >= ticket.quantity"
+                      >
+                        <span class="text-lg font-bold">+</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Total and Purchase -->
-          <div class="mt-4 pt-3 border-t border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="bg-[#1a1a1a] border-t border-gray-700 p-4 flex-shrink-0">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <p class="text-gray-400 text-xs">Total</p>
-              <p class="text-base md:text-lg font-semibold text-white">
-                {{ totalTickets === 0 ? 'No tickets selected' : '₹' + calculateTotal() }}
+              <p class="text-gray-400 text-sm">Total Amount</p>
+              <p class="text-xl font-bold text-white">
+                {{ totalTickets === 0 ? 'No tickets selected' : '₹' + calculateTotal().toLocaleString() }}
+              </p>
+              <p *ngIf="totalTickets > 0" class="text-sm text-gray-400 mt-1">
+                {{ totalTickets }} ticket{{ totalTickets !== 1 ? 's' : '' }} selected
               </p>
             </div>
             <button
               (click)="proceedToCheckout()"
-              class="bg-green-600 hover:bg-green-500 text-white font-medium py-1.5 px-3 md:px-4 rounded-lg transition-colors w-full sm:w-auto text-sm"
-              
+              class="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto text-center shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none btn-gradient"
+              [disabled]="totalTickets === 0"
             >
-              Purchase Tickets
+              {{ totalTickets === 0 ? 'Select Tickets' : 'Purchase Tickets' }}
             </button>
           </div>
         </div>

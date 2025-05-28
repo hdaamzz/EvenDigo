@@ -178,7 +178,7 @@
 
     <!-- Event Detail Modal (shown conditionally) -->
     @if (isModalOpen) {
-    <app-event-detail-modal [id]="selectedEventId!" (close)="closeModal()">
+    <app-event-detail-modal [id]="selectedEventId!" (close)="closeModal()" (chat)="onChatWithOrganizer($event)">
     </app-event-detail-modal>
     }
   </div>

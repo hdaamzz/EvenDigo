@@ -1,61 +1,223 @@
-/* Ensure the modal content is compact */
-.max-w-3xl {
-    max-width: 42rem; /* Reduced from max-w-5xl (which is ~80rem) */
+/* Custom scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #4B5563 #1F2937;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1F2937;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+@media (max-width: 640px) {
+  .text-responsive-base {
+    font-size: 0.875rem;
   }
   
-  /* Adjust font sizes for smaller modal */
-  .text-base {
-    font-size: 0.875rem; /* 14px */
+  .text-responsive-lg {
+    font-size: 1rem; 
   }
   
-  .text-lg {
-    font-size: 1rem; /* 16px */
+  .text-responsive-xl {
+    font-size: 1.125rem; 
+  }
+}
+
+@media (min-width: 641px) {
+  .text-responsive-base {
+    font-size: 1rem; 
   }
   
-  .text-sm {
-    font-size: 0.75rem; /* 12px */
+  .text-responsive-lg {
+    font-size: 1.125rem; 
   }
   
-  .text-xs {
-    font-size: 0.625rem; /* 10px */
+  .text-responsive-xl {
+    font-size: 1.25rem; 
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.btn-hover-scale {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.btn-hover-scale:active {
+  transform: scale(0.95);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.bg-gradient-primary:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.ticket-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ticket-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transition: left 0.5s;
+}
+
+.ticket-card:hover::before {
+  left: 100%;
+}
+
+@media (max-width: 1024px) {
+  .modal-container {
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100vh - 1rem);
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-container {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
   }
   
-  /* Ensure the right section scrolls if needed */
-  .overflow-y-auto {
-    scrollbar-width: thin;
-    scrollbar-color: #888 #1a1a1a;
+  .modal-container .rounded-2xl {
+    border-radius: 0;
   }
   
-  .overflow-y-auto::-webkit-scrollbar {
-    width: 6px;
+  .modal-container .lg\:rounded-2xl {
+    border-radius: 0;
   }
-  
-  .overflow-y-auto::-webkit-scrollbar-track {
-    background: #1a1a1a;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
+  to {
+    transform: rotate(360deg);
   }
-  
-  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #555;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+/* Better focus states for accessibility */
+button:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Improved button disabled states */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button:disabled:hover {
+  transform: none;
+}
+
+/* Enhanced gradient button */
+.btn-gradient {
+  background: linear-gradient(135deg, #10B981, #059669);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #059669, #047857);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.btn-gradient:hover::before {
+  left: 0;
+}
+
+/* Ticket counter button enhancements */
+.ticket-counter-btn {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ticket-counter-btn:hover:not(:disabled) {
+  background-color: #374151;
+  transform: scale(1.1);
+}
+
+.ticket-counter-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Modal backdrop improvements */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.8);
+}
+.modal-container {
+  max-width: 1024px !important;
+}
+
+@media (max-width: 768px) {
+  .modal-container {
+    max-width: calc(100vw - 1rem) !important;
+    margin: 0.5rem !important;
   }
-  
-  /* Adjust icon sizes for buttons */
-  button svg {
-    width: 14px;
-    height: 14px;
-  }
-  
-  /* Specific adjustments for the calendar and map pin icons */
-  .text-blue-400 {
-    width: 12px;
-    height: 12px;
-  }
-  
-  /* Adjust the +/- buttons in the ticket counter */
-  .ticket-counter button {
-    font-size: 0.75rem; /* Smaller +/- symbols */
-  }
+}
+
+/* Organizer section enhancements */
+.organizer-info {
+  background: linear-gradient(145deg, #1F2937, #111827);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+/* Ticket selection visual feedback */
+.ticket-selected {
+  border-color: #10B981;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

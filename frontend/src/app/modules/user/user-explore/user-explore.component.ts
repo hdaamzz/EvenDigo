@@ -18,6 +18,7 @@ import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
   styleUrls: ['./user-explore.component.css']
 })
 export class UserExploreComponent implements OnInit, OnDestroy {
+
   eventList: IEvent[] = [];
   isLoading = false;
   selectedEventId: string | null = null;
@@ -25,7 +26,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
 
   private readonly _destroy$ = new Subject<void>();
 
-  constructor(private readonly _exploreService: UserExploreService) {}
+  constructor(private readonly _exploreService: UserExploreService) { }
 
   ngOnInit(): void {
     this._fetchAllEvents();
@@ -55,7 +56,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
 
   private _fetchAllEvents(): void {
     this.isLoading = true;
-    
+
     this._exploreService.getAllEvents()
       .pipe(
         tap((response) => {
@@ -72,5 +73,8 @@ export class UserExploreComponent implements OnInit, OnDestroy {
         tap(() => this.isLoading = false)
       )
       .subscribe();
+  }
+  onChatWithOrganizer($event: string) {
+    throw new Error('Method not implemented.');
   }
 }
