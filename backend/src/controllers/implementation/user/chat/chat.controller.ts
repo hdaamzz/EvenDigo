@@ -9,9 +9,7 @@ export class ChatController {
     @inject('ChatService') private chatService: IChatService
   ) {}
 
-  /**
-   * Create a newchat or return existing chat between users
-   */
+
   async createChat(req: Request, res: Response): Promise<void> {
     try {
       const { participants } = req.body;
@@ -29,9 +27,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Get a chat by ID
-   */
+
   async getChatById(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -43,9 +39,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Get all chats for current user
-   */
+
   async getUserChats(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
@@ -63,9 +57,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Get messages from a chat
-   */
+
   async getChatMessages(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -80,9 +72,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Find chat between two users
-   */
+
   async getChatBetweenUsers(req: Request, res: Response): Promise<void> {
     try {
       const { otherUserId } = req.params;
@@ -107,9 +97,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Mark messages as read
-   */
+
   async markMessagesAsRead(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -128,9 +116,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Get unread message count
-   */
+
   async getUnreadMessageCount(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
@@ -148,9 +134,7 @@ export class ChatController {
     }
   }
 
-  /**
-   * Delete a chat
-   */
+
   async deleteChat(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;

@@ -18,24 +18,19 @@ import adminSubscriptionRoutes from './admin/subscription.routes';
 import subscriptionPlanRouter from './admin/subscriptionPlan.route';
 import chatRoutes from './user/chat.routes';
 import adminDashboardRouter from './admin/home.routes';
-// import { errorHandler } from '../../src/middlewares/errorHandler.middleware';
 
 const router = express.Router();
 
-// Apply security middleware
 router.use(securityHeaders);
 router.use(express.json({ limit: '10mb' }));
 router.use(express.urlencoded({ extended: true, limit: '10mb' }));
 router.use(sanitizeInput);
 
-// Public routes (no authentication required)
 router.use('/user/auth', authRouter);
 router.use('/admin/auth', adminAuthRouter);
 
-// Protected routes (authentication required)
 router.use(authMiddleware);
 
-// User routes
 router.use('/user/profile', profileRouter);
 router.use('/user/dashboard', dashboardRouter);
 router.use('/user/explore', exploreRoutes);
@@ -53,7 +48,6 @@ router.use('/admin/subscriptions', adminSubscriptionRoutes);
 router.use('/admin/subscription-plans', subscriptionPlanRouter);
 router.use('/admin/dashboard', adminDashboardRouter);
 
-// Health check endpoint
 router.get('/health', (_req, res) => {
   res.status(200).json({
     success: true,
