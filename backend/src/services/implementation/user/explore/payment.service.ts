@@ -9,6 +9,7 @@ import { IBooking } from '../../../../../src/models/interfaces/booking.interface
 import { BadRequestException } from '../../../../../src/error/error-handlers';
 import { IWallet, TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
 import { generateRandomId } from '../../../../../src/utils/helpers';
+import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
 
 
 @injectable()
@@ -16,10 +17,10 @@ export class PaymentService implements IPaymentService {
   private stripe: Stripe;
 
   constructor(
-    // @inject("EventRepository") private eventRepository: IEventRepository,
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
-    @inject("BookingService") private bookingService: IBookingService
+    @inject("BookingService") private bookingService: IBookingService,
+    @inject('ChatService') private chatService: IChatService,
   ) {
     const stripeKey = process.env.STRIPE_KEY;
     if (!stripeKey) {
@@ -137,6 +138,8 @@ export class PaymentService implements IPaymentService {
           }
         }
       );
+      await this.chatService.autoJoinUserToEventChat(eventId, userId);
+      console.log(`User ${userId} automatically joined event chat for event ${eventId}`);
       
       return booking;
     } catch (error) {
@@ -179,6 +182,8 @@ export class PaymentService implements IPaymentService {
       }
       booking.paymentStatus = 'Completed';
       await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
+      await this.chatService.autoJoinUserToEventChat(booking.eventId.toString(), booking.userId.toString());
+      console.log(`User ${booking.userId} automatically joined event chat for event ${booking.eventId}`);
     } catch (error) {
       console.error("Error in updateBookingPaymentStatus:", error);
       throw new Error(`Failed to update booking status: ${(error as Error).message}`);

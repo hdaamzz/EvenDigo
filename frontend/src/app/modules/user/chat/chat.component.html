@@ -1,9 +1,7 @@
-
-
 <app-user-nav></app-user-nav>
 <div class="flex h-screen bg-[#121212] text-white pt-20">
   <!-- Sidebar -->
-  <div class="w-80 bg-[#1a1a1a] border-r border-gray-800 flex flex-col">
+  <div class="w-80 bg-[#1a1a1a] border-r border-gray-800 flex flex-col chat-sidebar">
     <!-- Header with Tabs -->
     <div class="p-4 border-b border-gray-800">
       <div class="flex space-x-1 bg-[#121212] rounded-lg p-1">
@@ -30,19 +28,60 @@
           class="w-full pl-10 pr-4 py-2 bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent"
         />
       </div>
+      
+      <!-- Refresh Button -->
+      <button
+        (click)="refreshChats()"
+        [disabled]="isLoading"
+        class="mt-2 w-full px-3 py-2 bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <i [class]="'pi ' + (isLoading ? 'pi-spinner pi-spin' : 'pi-refresh')"></i>
+        {{ isLoading ? 'Loading...' : 'Refresh' }}
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="p-4 bg-red-900/50 border-b border-red-800">
+      <div class="flex items-center justify-between">
+        <p class="text-red-300 text-sm">{{ error }}</p>
+        <button 
+          (click)="error = ''"
+          class="text-red-300 hover:text-red-100 p-1"
+        >
+          <i class="pi pi-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading && users.length === 0" class="flex-1 flex items-center justify-center">
+      <div class="text-center text-gray-400">
+        <i class="pi pi-spinner pi-spin text-2xl mb-2"></i>
+        <p>Loading chats...</p>
+      </div>
     </div>
 
     <!-- Chat List -->
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 overflow-y-auto" *ngIf="!isLoading || users.length > 0">
+      <!-- No Chats -->
+      <div *ngIf="getFilteredUsers().length === 0 && !isLoading" class="flex-1 flex items-center justify-center p-4">
+        <div class="text-center text-gray-400">
+          <i class="pi pi-comments text-4xl mb-2"></i>
+          <p class="text-sm">{{ searchTerm ? 'No chats found' : 'No chats available' }}</p>
+          <p class="text-xs mt-1">{{ searchTerm ? 'Try a different search term' : 'Start a conversation!' }}</p>
+        </div>
+      </div>
+
+      <!-- Chat Items -->
       <div
-        *ngFor="let user of getFilteredUsers()"
+        *ngFor="let user of getFilteredUsers(); trackBy: trackByUserId"
         (click)="selectUser(user)"
         [class]="'p-4 border-b border-gray-800 cursor-pointer hover:bg-[#121212] transition-colors duration-200 ' + 
-                 (selectedUser?.id === user.id ? 'bg-[#121212]' : '')"
+                 (selectedUser?.id === user.id ? 'bg-[#121212] border-l-2 border-l-[#00ff66]' : '')"
       >
         <div class="flex items-center space-x-3">
           <!-- Avatar -->
-          <div class="relative">
+          <div class="relative flex-shrink-0">
             <div class="w-12 h-12 bg-[#00ff66] rounded-full flex items-center justify-center">
               <span class="text-lg font-semibold text-black">{{ user.name.charAt(0).toUpperCase() }}</span>
             </div>
@@ -55,16 +94,20 @@
           <!-- User Info -->
           <div class="flex-1 min-w-0">
             <div class="flex justify-between items-start">
-              <h3 class="font-semibold text-white truncate">{{ user.name }}</h3>
-              <span class="text-xs text-gray-400">{{ formatLastMessageTime(user.lastMessageTime) }}</span>
+              <h3 [class]="'font-semibold truncate ' + (user.unreadCount > 0 ? 'text-white' : 'text-gray-300')">
+                {{ user.name }}
+              </h3>
+              <span class="text-xs text-gray-400 flex-shrink-0 ml-2">{{ formatLastMessageTime(user.lastMessageTime) }}</span>
             </div>
             <div class="flex justify-between items-center mt-1">
-              <p class="text-sm text-gray-400 truncate">{{ user.lastMessage }}</p>
+              <p [class]="'text-sm truncate ' + (user.unreadCount > 0 ? 'text-gray-300 font-medium' : 'text-gray-400')">
+                {{ user.lastMessage }}
+              </p>
               <span
                 *ngIf="user.unreadCount > 0"
-                class="ml-2 px-2 py-1 bg-[#00ff66] text-black text-xs rounded-full min-w-[20px] text-center font-medium"
+                class="ml-2 px-2 py-1 bg-[#00ff66] text-black text-xs rounded-full min-w-[20px] text-center font-medium flex-shrink-0"
               >
-                {{ user.unreadCount }}
+                {{ user.unreadCount > 99 ? '99+' : user.unreadCount }}
               </span>
             </div>
           </div>
@@ -73,12 +116,27 @@
     </div>
   </div>
 
+  <!-- Mobile Overlay -->
+  <div 
+    *ngIf="selectedUser" 
+    class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+    (click)="closeMobileChat()"
+  ></div>
+
   <!-- Chat Area -->
-  <div class="flex-1 flex flex-col">
+  <div class="flex-1 flex flex-col chat-area">
     <!-- Chat Header -->
     <div *ngIf="selectedUser" class="p-4 bg-[#1a1a1a] border-b border-gray-800 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="relative">
+        <!-- Mobile Back Button -->
+        <button 
+          class="md:hidden p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors"
+          (click)="closeMobileChat()"
+        >
+          <i class="pi pi-arrow-left text-lg"></i>
+        </button>
+        
+        <div class="relative flex-shrink-0">
           <div class="w-10 h-10 bg-[#00ff66] rounded-full flex items-center justify-center">
             <span class="font-semibold text-black">{{ selectedUser.name.charAt(0).toUpperCase() }}</span>
           </div>
@@ -87,15 +145,26 @@
             class="absolute -bottom-1 -right-1 w-3 h-3 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full"
           ></div>
         </div>
-        <div>
-          <h2 class="font-semibold text-white">{{ selectedUser.name }}</h2>
-          <p class="text-sm text-gray-400">
+        <div class="min-w-0">
+          <h2 class="font-semibold text-white truncate">{{ selectedUser.name }}</h2>
+          <p class="text-sm text-gray-400 truncate">
             {{ selectedUser.isOnline ? 'Active now' : 'Last seen ' + formatLastMessageTime(selectedUser.lastSeenTime || selectedUser.lastMessageTime) }}
           </p>
         </div>
       </div>
       
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2 flex-shrink-0">
+        <!-- Event Chat Actions -->
+        <div *ngIf="selectedUser.section === 'events'" class="flex items-center space-x-2 mr-2">
+          <button 
+            *ngIf="selectedUser.eventId"
+            (click)="leaveEventChat(selectedUser.eventId)"
+            class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
+          >
+            Leave Chat
+          </button>
+        </div>
+        
         <button class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors">
           <i class="pi pi-phone text-lg"></i>
         </button>
@@ -110,28 +179,58 @@
 
     <!-- Messages -->
     <div #messageContainer class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#121212]" *ngIf="selectedUser">
+      <!-- Loading Messages -->
+      <div *ngIf="isLoading" class="flex justify-center">
+        <div class="text-center text-gray-400">
+          <i class="pi pi-spinner pi-spin text-lg mb-2"></i>
+          <p class="text-sm">Loading messages...</p>
+        </div>
+      </div>
+
+      <!-- No Messages -->
+      <div *ngIf="messages.length === 0 && !isLoading" class="flex-1 flex items-center justify-center">
+        <div class="text-center text-gray-400">
+          <i class="pi pi-comment text-4xl mb-2"></i>
+          <p class="text-sm">No messages yet</p>
+          <p class="text-xs mt-1">Start the conversation!</p>
+        </div>
+      </div>
+
+      <!-- Message Bubbles -->
       <div
-        *ngFor="let message of messages"
-        [class]="'flex ' + (message.senderId === 'current-user' ? 'justify-end' : 'justify-start')"
+        *ngFor="let message of messages; trackBy: trackByMessageId"
+        [class]="'flex ' + (isCurrentUserMessage(message) ? 'justify-end' : 'justify-start')"
       >
         <div
-          [class]="'max-w-xs lg:max-w-md px-4 py-2 rounded-lg ' + 
-                   (message.senderId === 'current-user' 
-                     ? 'bg-[#00ff66] text-black' 
-                     : 'bg-[#1a1a1a] text-white')"
+          [class]="'max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow-sm ' + 
+                   (isCurrentUserMessage(message)
+                     ? 'bg-[#00ff66] text-black rounded-tr-sm' 
+                     : 'bg-[#1a1a1a] text-white rounded-tl-sm')"
         >
-          <p class="text-sm">{{ message.content }}</p>
-          <p class="text-xs mt-1 opacity-70">{{ formatTime(message.timestamp) }}</p>
+          <!-- Message Content -->
+          <p class="text-sm whitespace-pre-wrap break-words">{{ message.content }}</p>
+          
+          <!-- Message Footer -->
+          <div [class]="'flex items-center justify-between mt-1 text-xs opacity-70 ' + 
+                       (isCurrentUserMessage(message) ? 'text-black' : 'text-gray-300')">
+            <span>{{ formatTime(message.timestamp) }}</span>
+            
+            <!-- Read Status for sent messages -->
+            <div *ngIf="isCurrentUserMessage(message)" class="flex items-center ml-2">
+              <i [class]="'pi text-xs ' + (message.isRead ? 'pi-check-circle text-blue-400' : 'pi-check text-gray-400')"></i>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Typing Indicator -->
       <div *ngIf="isTyping" class="flex justify-start">
-        <div class="bg-[#1a1a1a] text-white px-4 py-2 rounded-lg">
-          <div class="flex space-x-1">
+        <div class="bg-[#1a1a1a] text-white px-4 py-2 rounded-lg rounded-tl-sm">
+          <div class="flex space-x-1 items-center">
             <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
             <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
             <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            <span class="text-xs text-gray-400 ml-2">typing...</span>
           </div>
         </div>
       </div>
@@ -139,36 +238,64 @@
 
     <!-- No Chat Selected -->
     <div *ngIf="!selectedUser" class="flex-1 flex items-center justify-center bg-[#121212]">
-      <div class="text-center text-gray-400">
+      <div class="text-center text-gray-400 p-8">
         <i class="pi pi-comments text-6xl mb-4 text-[#00ff66]"></i>
-        <h3 class="text-xl font-semibold mb-2 text-white">Select a chat to start messaging</h3>
-        <p class="text-gray-400">Choose from your existing conversations or start a new one</p>
+        <h3 class="text-xl font-semibold mb-2 text-white">Welcome to Chat</h3>
+        <p class="text-gray-400 mb-4">Select a chat to start messaging</p>
+        <p class="text-sm text-gray-500">Choose from your existing conversations or start a new one</p>
       </div>
     </div>
 
     <!-- Message Input -->
     <div *ngIf="selectedUser" class="p-4 bg-[#1a1a1a] border-t border-gray-800">
       <div class="flex items-end space-x-3">
-        <button class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors">
+        <!-- Attachment Button -->
+        <button 
+          class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors flex-shrink-0"
+          title="Attach file"
+        >
           <i class="pi pi-paperclip text-lg"></i>
         </button>
         
+        <!-- Message Input -->
         <div class="flex-1 relative">
           <textarea
             [(ngModel)]="newMessage"
             (keypress)="onKeyPress($event)"
+            (input)="adjustTextareaHeight($event)"
             placeholder="Type your message..."
             rows="1"
-            class="w-full px-4 py-2 bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent resize-none"
+            maxlength="1000"
+            class="w-full px-4 py-2 bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent resize-none max-h-32 min-h-[40px]"
+            #messageInput
           ></textarea>
+          
+          <!-- Character Counter -->
+          <div *ngIf="newMessage.length > 800" class="absolute -top-6 right-2 text-xs text-gray-400">
+            {{ newMessage.length }}/1000
+          </div>
         </div>
 
+        <!-- Send Button -->
         <button
           (click)="sendMessage()"
-          [disabled]="!newMessage.trim()"
-          class="p-2 bg-[#00ff66] hover:bg-[#00e055] disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+          [disabled]="!newMessage.trim() || isLoading"
+          class="p-2 bg-[#00ff66] hover:bg-[#00e055] disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors flex-shrink-0"
+          title="Send message"
         >
-          <i class="pi pi-send text-lg text-black"></i>
+          <i [class]="'pi text-lg text-black ' + (isLoading ? 'pi-spinner pi-spin' : 'pi-send')"></i>
+        </button>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="mt-2 flex space-x-2">
+        <button class="text-xs text-gray-400 hover:text-white px-2 py-1 hover:bg-[#121212] rounded transition-colors">
+          <i class="pi pi-smile mr-1"></i>
+          Emoji
+        </button>
+        <button class="text-xs text-gray-400 hover:text-white px-2 py-1 hover:bg-[#121212] rounded transition-colors">
+          <i class="pi pi-image mr-1"></i>
+          Photo
         </button>
       </div>
     </div>

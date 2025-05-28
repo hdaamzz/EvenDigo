@@ -34,16 +34,102 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Message bubble animations */
+.flex > div {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .w-80 {
+  .chat-sidebar {
     width: 100%;
-    position: absolute;
-    z-index: 10;
-    height: 100%;
+    position: fixed;
+    z-index: 30;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
   }
   
-  .chat-mobile-hidden {
-    display: none;
+  .chat-sidebar.active {
+    transform: translateX(0);
   }
+  
+  .chat-area {
+    width: 100%;
+  }
+  
+  .w-80 {
+    width: 100%;
+  }
+}
+
+/* Textarea auto-resize */
+textarea {
+  field-sizing: content;
+}
+
+/* Focus states */
+button:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.3);
+}
+
+/* Loading states */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Custom selection */
+::selection {
+  background-color: rgba(0, 255, 102, 0.3);
+  color: white;
+}
+
+/* Scrollbar for messages */
+#messageContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+#messageContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#messageContainer::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.5);
+  border-radius: 2px;
+}
+
+#messageContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8);
 }

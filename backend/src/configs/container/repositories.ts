@@ -12,6 +12,7 @@ import { RevenueDistributionRepository } from "../../../src/repositories/impleme
 import { UserAchievementRepository } from "../../../src/repositories/implementation/badge.repository";
 import { SubscriptionRepository } from "../../repositories/implementation/subscription.repository";
 import { SubscriptionPlanRepository } from "../../../src/repositories/implementation/subscriptionPlan.repository";
+import { ChatRepository } from "../../../src/repositories/implementation/chat.repository";
 
 export function registerRepositories() {
   container.register("UserRepository", { useClass: UserRepository });
@@ -27,4 +28,5 @@ export function registerRepositories() {
   container.register("UserAchievementRepository", { useClass: UserAchievementRepository });
   container.register("SubscriptionRepository", { useClass: SubscriptionRepository });
   container.register("SubscriptionPlanRepository", { useClass: SubscriptionPlanRepository });
+  container.register("ChatRepository", { useClass: ChatRepository });
 }
