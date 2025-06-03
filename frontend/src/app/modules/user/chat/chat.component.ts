@@ -29,13 +29,13 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   isTyping: boolean = false;
   isLoading: boolean = false;
   isConnecting: boolean = false;
-  isSendingMessage: boolean = false; 
+  isSendingMessage: boolean = false;
   error: string = '';
 
   private subscriptions: Subscription[] = [];
   private typingTimeout: any;
   private shouldScrollToBottom: boolean = false;
-  private isInitialized: boolean = false;
+  public isInitialized: boolean = false;
   private currentUserId: string = '';
   private pendingMessages: Map<string, ChatMessage> = new Map();
   private processedMessageIds: Set<string> = new Set();
@@ -47,12 +47,21 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   ) { }
 
   async ngOnInit() {
+    this.isLoading = true;
+
     try {
       await this.initializeChat();
+
+
       this.loadAllUsers();
+
+
+      this.loadPersonalChats();
+
     } catch (error) {
       console.error('Failed to initialize chat:', error);
       this.error = 'Failed to initialize chat. Please refresh the page.';
+      this.isLoading = false;
     }
   }
 
@@ -75,6 +84,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.error = '';
 
     try {
+
       const authResponse = await this.authService.checkAuthStatus().toPromise();
 
       if (!authResponse?.isAuthenticated || !authResponse.user?.id) {
@@ -91,18 +101,21 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
       await this.socketService.connect(token);
       await this.socketService.waitForConnection();
+
       await this.chatService.initialize(this.socketService);
 
       this.subscribeToRealTimeEvents();
-      this.loadPersonalChats();
 
       this.isInitialized = true;
       this.isConnecting = false;
 
+
     } catch (error) {
       console.error('Chat initialization failed:', error);
       this.isConnecting = false;
+      this.isLoading = false;
       this.error = this.getErrorMessage(error);
+      throw error;
     }
   }
 
@@ -134,7 +147,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   async startChatWithUser(user: User) {
     try {
-      console.log('Starting chat with user:', user);
 
       this.isLoading = true;
       this.error = '';
@@ -200,8 +212,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   getFilteredAllUsers() {
-    console.log(this.allUsers);
-    
+
     if (!this.searchTerm) return this.allUsers;
     return this.allUsers.filter(user =>
       user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -219,18 +230,14 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     });
 
     const newMessageSub = this.socketService.listen<any>('newMessage').subscribe(data => {
-      console.log('Received new message via socket:', data);
       this.handleIncomingMessage(data);
     });
 
     const messageSentSub = this.socketService.listen<any>('messageSent').subscribe(data => {
-      console.log('Message sent confirmation:', data);
       this.isSendingMessage = false;
     });
 
-    const joinedChatSub = this.socketService.listen<any>('joinedChat').subscribe(data => {
-      console.log('Successfully joined chat:', data);
-    });
+    const joinedChatSub = this.socketService.listen<any>('joinedChat').subscribe();
 
     const userTypingSub = this.socketService.listen<any>('userTyping').subscribe(data => {
       if (this.selectedUser && data.chatId === this.selectedUser.chatId &&
@@ -246,7 +253,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     });
 
     const userStatusSub = this.socketService.listen<any>('userStatus').subscribe(data => {
-      console.log('User status update:', data);
       this.updateUserStatus(data.userId, data.status);
     });
 
@@ -255,9 +261,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.error = error.message || 'An error occurred';
     });
 
-    const authenticatedSub = this.socketService.listen<any>('authenticated').subscribe(data => {
-      console.log('Socket authenticated:', data);
-    });
+    const authenticatedSub = this.socketService.listen<any>('authenticated').subscribe();
 
     this.subscriptions.push(
       connectionSub,
@@ -284,7 +288,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       messageType: data.message.messageType || 'text'
     };
 
-    console.log('Processing incoming message:', message);
 
     const existingIndex = this.messages.findIndex(msg =>
       msg.id === message.id ||
@@ -303,7 +306,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private handleMessageSentConfirmation(data: any) {
     this.isSendingMessage = false;
-    console.log('Message sent confirmation:', data);
   }
 
   private handleMessageSendError(tempId: string) {
@@ -367,17 +369,23 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   loadPersonalChats() {
+
     if (!this.isInitialized) {
+      console.warn('Chat not initialized, skipping loadPersonalChats');
       return;
     }
 
-    this.isLoading = true;
+    if (!this.isLoading) {
+      this.isLoading = true;
+    }
+
     this.error = '';
 
     const usersSub = this.chatService.getPersonalChats().subscribe({
       next: (users) => {
         this.users = users;
         this.isLoading = false;
+
         if (this.users.length > 0 && !this.selectedUser) {
           this.selectUser(this.users[0]);
         }
@@ -392,6 +400,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.subscriptions.push(usersSub);
   }
 
+
   async selectUser(user: ChatUser) {
     if (this.selectedUser?.id === user.id) return;
 
@@ -400,7 +409,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       return;
     }
 
-    console.log('Selecting user:', user); 
 
     this.selectedUser = user;
     this.messages = [];
@@ -415,7 +423,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
         const messagesSub = this.chatService.getChatMessages(user.chatId).subscribe({
           next: (messages) => {
-            console.log('Loaded historical messages:', messages);
             this.messages = messages.map(msg => ({
               ...msg,
               senderId: msg.senderId
@@ -485,8 +492,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
         tempId: tempId
       });
 
-      console.log('Message sent via socket');
-
     } catch (error) {
       console.error('Error sending message:', error);
       this.error = 'Failed to send message. Please try again.';
@@ -532,7 +537,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   getFilteredUsers() {
     if (!this.searchTerm) return this.users;
-    console.log('Filtered users:', this.users);
 
     return this.users.filter(user =>
       user.name.toLowerCase().includes(this.searchTerm.toLowerCase())
@@ -593,17 +597,25 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   async refreshChats() {
-    if (!this.socketService.isConnected()) {
-      try {
+
+    this.isLoading = true;
+    this.error = '';
+
+    try {
+      if (!this.socketService.isConnected() || !this.isInitialized) {
         await this.initializeChat();
-      } catch (error) {
-        console.error('Failed to reconnect:', error);
       }
-    } else {
+
       this.loadPersonalChats();
+
       if (this.selectedUser?.chatId) {
-        this.selectUser(this.selectedUser);
+        await this.selectUser(this.selectedUser);
       }
+
+    } catch (error) {
+      console.error('Failed to refresh chats:', error);
+      this.error = 'Failed to refresh. Please try again.';
+      this.isLoading = false;
     }
   }
 
@@ -641,15 +653,38 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   async retryConnection() {
     this.error = '';
+    this.isLoading = true;
+
     try {
-      await this.initializeChat();
+      await this.retryInitialization();
     } catch (error) {
-      console.error('Retry failed:', error);
+      console.error('Retry failed after multiple attempts:', error);
+      this.error = 'Connection failed. Please check your internet connection and try again.';
+      this.isLoading = false;
     }
   }
 
   getUserInitials(name: string): string {
     if (!name) return '';
     return name.charAt(0).toUpperCase();
+  }
+
+  private async retryInitialization(maxRetries: number = 3): Promise<void> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Initialization attempt ${attempt}/${maxRetries}`);
+        await this.initializeChat();
+        this.loadPersonalChats();
+        return; 
+      } catch (error) {
+        console.error(`Initialization attempt ${attempt} failed:`, error);
+
+        if (attempt === maxRetries) {
+          throw new Error(`Failed to initialize after ${maxRetries} attempts`);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
   }
 }

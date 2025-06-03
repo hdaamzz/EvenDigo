@@ -67,22 +67,40 @@
     }
 
     @if (error) {
-      <div class="p-4 bg-red-900/50 border-b border-red-800">
-        <div class="flex items-center justify-between">
-          <p class="text-red-300 text-sm">{{ error }}</p>
-          <button (click)="clearError()" class="text-red-300 hover:text-red-100 p-1">
-            <i class="pi pi-times text-xs"></i>
-          </button>
-        </div>
-        @if (error.includes('Connection lost') || error.includes('Failed to initialize')) {
-          <button (click)="retryConnection()" 
-            class="mt-2 text-xs text-red-200 hover:text-white underline">
-            Retry Connection
-          </button>
-        }
+  <div class="p-4 bg-red-900/50 border-b border-red-800">
+    <div class="flex items-center justify-between">
+      <p class="text-red-300 text-sm">{{ error }}</p>
+      <button (click)="clearError()" class="text-red-300 hover:text-red-100 p-1">
+        <i class="pi pi-times text-xs"></i>
+      </button>
+    </div>
+    
+    <!-- Show retry button for specific errors -->
+    @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not authenticated')) {
+      <div class="mt-2 flex gap-2">
+        <button (click)="retryConnection()" 
+          class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
+          Retry Connection
+        </button>
+        <button (click)="refreshChats()" 
+          class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
+          Refresh Chats
+        </button>
       </div>
     }
+  </div>
+}
 
+
+    @if (isLoading && users.length === 0 && !isInitialized) {
+  <div class="flex-1 flex items-center justify-center">
+    <div class="text-center text-gray-400">
+      <i class="pi pi-spinner pi-spin text-2xl mb-2"></i>
+      <p class="text-lg">Initializing Chat...</p>
+      <p class="text-sm text-gray-500">Connecting to server</p>
+    </div>
+  </div>
+}
     @if (isLoading && users.length === 0) {
       <div class="flex-1 flex items-center justify-center">
         <div class="text-center text-gray-400">
@@ -286,6 +304,14 @@
             <span>Not connected. Messages cannot be sent.</span>
           </div>
         }
+        @if (isConnecting) {
+        <div class="p-2 bg-yellow-900/50 border-b border-yellow-800">
+          <div class="flex items-center justify-center text-yellow-300">
+            <i class="pi pi-spinner pi-spin text-xs mr-2"></i>
+            <p class="text-xs">Connecting...</p>
+          </div>
+        </div>
+      }
       </div>
     } @else {
       <div class="flex-1 flex items-center justify-center bg-[#121212]">
