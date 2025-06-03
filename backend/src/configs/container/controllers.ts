@@ -9,6 +9,10 @@ import { ProfileBookingController } from "../../../src/controllers/implementatio
 import { ProfileEventsController } from "../../../src/controllers/implementation/user/profile/profileEvents.controller";
 import { ProfileWalletController } from "../../../src/controllers/implementation/user/profile/profileWallet.controller";
 import { ProfileUserController } from "../../../src/controllers/implementation/user/profile/profileUser.controller";
+import { PersonalChatController } from "../../../src/controllers/implementation/user/chat/chat-management.controller";
+import { PersonalMessageController } from "../../../src/controllers/implementation/user/chat/message.controller";
+// import { EventChatController } from "../../../src/controllers/implementation/user/chat/event-chat.controller";
+
 
 // Admin Controllers
 import { AdminAuthController } from "../../../src/controllers/implementation/admin/auth/admin.auth.controller";
@@ -21,6 +25,7 @@ import { AdminSubscriptionController } from "../../../src/controllers/implementa
 import { SubscriptionPlanController } from "../../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
 import { AdminHomeController } from "../../../src/controllers/implementation/admin/home/admin.home.controller";
 
+
 export function registerControllers() {
   // User
   container.register("AuthController", { useClass: AuthController });
@@ -32,6 +37,10 @@ export function registerControllers() {
   container.register("ProfileWalletController", { useClass: ProfileWalletController });
   container.register("ProfileUserController", { useClass: ProfileUserController });
   container.register("SubscriptionPlanController", { useClass: SubscriptionPlanController });
+  container.register("PersonalChatController", { useClass:  PersonalChatController});
+  container.register("PersonalMessageController", { useClass: PersonalMessageController });
+  // container.register("EventChatController", { useClass: EventChatController });
+
 
   // Admin
   container.register("AdminAuthController", { useClass: AdminAuthController });

@@ -3,6 +3,7 @@ import { Server as SocketIOServer, Socket } from 'socket.io';
 import { ChatService } from '../../src/services/implementation/user/chat/chat.service';
 import { container } from 'tsyringe';
 import jwt from 'jsonwebtoken';
+import { TokenService } from '../../src/services/implementation/user/auth/TokenService';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -11,204 +12,155 @@ interface AuthenticatedSocket extends Socket {
 export default function configureSocketIO(server: HttpServer): SocketIOServer {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: process.env.CLIENT_SERVER,
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      origin: process.env.CLIENT_URL || "http://localhost:4200",
+      methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE'],
       credentials: true
-    }
+    },
+    allowEIO3: true,
+    transports: ['websocket', 'polling'],
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    path: '/socket.io/'
   });
 
   const chatService = container.resolve<ChatService>('ChatService');
   const onlineUsers = new Map<string, string>();
+  const tokenService = container.resolve<TokenService>('TokenService');
 
-  // Authentication middleware for socket
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
-      const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
+      console.log(' Authentication attempt for socket:', socket.id);
+      
+      let token = socket.handshake.auth.token || 
+                  socket.handshake.headers.authorization?.replace('Bearer ', '') ||
+                  socket.request.headers.cookie?.split('accessToken=')[1]?.split(';')[0];
+      
+      console.log(' Token received:', token ? 'Yes' : 'No');
       
       if (!token) {
+        console.log('No authentication token provided');
         return next(new Error('Authentication token required'));
       }
+      
+      const decoded = tokenService.verifyToken(token) as any;
+      socket.userId = decoded.userId;
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      socket.userId = decoded.id || decoded.userId;
+      console.log(' Authentication successful for user:', socket.userId);
       next();
-    } catch (error) {
-      next(new Error('Invalid authentication token'));
+    } catch (error: any) {
+      console.error('Authentication failed:', error.message);
+      if (error instanceof jwt.TokenExpiredError) {
+        console.error('- Token expired at:', error.expiredAt);
+      }
+      next(new Error(`Authentication failed: ${error.message}`));
     }
   });
 
   io.on('connection', (socket: AuthenticatedSocket) => {
-    console.log(`User connected: ${socket.id}, UserId: ${socket.userId}`);
+    console.log(` User connected: ${socket.id}, UserId: ${socket.userId}`);
+    console.log(`Total connected clients: ${io.engine.clientsCount}`);
 
     if (socket.userId) {
       onlineUsers.set(socket.userId, socket.id);
       socket.join(socket.userId);
       
-      // Emit online status to all users
-      socket.broadcast.emit('userStatus', { userId: socket.userId, status: 'online' });
+      socket.broadcast.emit('userStatus', { 
+        userId: socket.userId, 
+        status: 'online' 
+      });
       
-      // Join user to their personal chat rooms
-      socket.emit('authenticated', { userId: socket.userId });
+      socket.emit('authenticated', { 
+        userId: socket.userId,
+        message: 'Successfully connected to chat server'
+      });
+      
+      console.log(` User ${socket.userId} joined personal room`);
     }
 
-    // Join specific chat room
     socket.on('joinChat', async (data: { chatId: string }) => {
       try {
+        console.log(`🏠 Join chat request: ${data.chatId} by user ${socket.userId}`);
         const { chatId } = data;
-        
-        // Verify user is participant in this chat
-        const chat = await chatService.getChatById(chatId);
-        const isParticipant = chat.participants.some(p => p.toString() === socket.userId);
-        
-        if (isParticipant) {
-          socket.join(chatId);
-          console.log(`User ${socket.userId} joined chat ${chatId}`);
-          socket.emit('joinedChat', { chatId });
-        } else {
-          socket.emit('error', { message: 'Not authorized to join this chat' });
-        }
-      } catch (error) {
-        socket.emit('error', { message: 'Failed to join chat' });
-      }
-    });
-
-    // Handle sending messages
-    socket.on('sendMessage', async (data: {
-      chatId: string;
-      content: string;
-      chatType?: 'personal' | 'event';
-    }) => {
-      try {
-        const { chatId, content, chatType } = data;
         
         if (!socket.userId) {
           socket.emit('error', { message: 'User not authenticated' });
           return;
         }
 
-        // Validate message content
+        const hasAccess = await chatService.validateChatAccess(chatId, socket.userId);
+        if (!hasAccess) {
+          console.log(`User ${socket.userId} not authorized for chat ${chatId}`);
+          socket.emit('error', { message: 'Not authorized to join this chat' });
+          return;
+        }
+
+        socket.join(chatId);
+        console.log(` User ${socket.userId} joined chat ${chatId}`);
+        
+        socket.emit('joinedChat', { 
+          chatId,
+          message: 'Successfully joined chat'
+        });
+
+        socket.to(chatId).emit('userJoinedChat', {
+          userId: socket.userId,
+          chatId
+        });
+
+      } catch (error: any) {
+        console.error('Error joining chat:', error);
+        socket.emit('error', { message: 'Failed to join chat' });
+      }
+    });
+
+    socket.on('sendMessage', async (data: {
+      chatId: string;
+      content: string;
+    }) => {
+      try {
+        console.log(` Message from ${socket.userId} to chat ${data.chatId}`);
+        const { chatId, content } = data;
+        
+        if (!socket.userId) {
+          socket.emit('error', { message: 'User not authenticated' });
+          return;
+        }
+
         if (!content.trim()) {
           socket.emit('error', { message: 'Message content cannot be empty' });
           return;
         }
 
+        const hasAccess = await chatService.validateChatAccess(chatId, socket.userId);
+        if (!hasAccess) {
+          socket.emit('error', { message: 'Not authorized to send message to this chat' });
+          return;
+        }
+
         const message = await chatService.addMessage(chatId, socket.userId, content);
         
-        // Emit to all users in the chat room
         io.to(chatId).emit('newMessage', {
           chatId,
-          message,
-          chatType
+          message
         });
 
-        // Send push notification to offline users (if needed)
-        // const chat = await chatService.getChatById(chatId);
-        // const offlineParticipants = chat.participants.filter(p => 
-        //   p.toString() !== socket.userId && !onlineUsers.has(p.toString())
-        // );
+        socket.emit('messageSent', {
+          chatId,
+          messageId: message._id,
+          success: true
+        });
 
-        // Here you can implement push notification logic for offline users
+        console.log(` Message sent to chat ${chatId}`);
         
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error sending message:', error);
         socket.emit('error', { message: 'Failed to send message' });
       }
     });
 
-    // Handle joining event chat automatically
-    socket.on('joinEventChat', async (data: { eventId: string }) => {
-      try {
-        const { eventId } = data;
-        
-        if (!socket.userId) {
-          socket.emit('error', { message: 'User not authenticated' });
-          return;
-        }
-
-        const eventChat = await chatService.joinEventChat(eventId, socket.userId) as { _id: string };
-        socket.join(eventChat._id.toString());
-        
-        // Notify other participants
-        socket.to(eventChat._id.toString()).emit('userJoinedEventChat', {
-          userId: socket.userId,
-          eventId,
-          chatId: eventChat._id
-        });
-
-        socket.emit('joinedEventChat', {
-          chat: eventChat,
-          message: 'Successfully joined event chat'
-        });
-
-      } catch (error) {
-        console.error('Error joining event chat:', error);
-        socket.emit('error', { message: 'Failed to join event chat' });
-      }
-    });
-
-    // Handle leaving event chat
-    socket.on('leaveEventChat', async (data: { eventId: string }) => {
-      try {
-        const { eventId } = data;
-        
-        if (!socket.userId) {
-          socket.emit('error', { message: 'User not authenticated' });
-          return;
-        }
-
-        await chatService.leaveEventChat(eventId, socket.userId);
-        
-        // Leave the socket room
-        const eventChat = await chatService.getEventChat(eventId) as { _id: string };
-        if (eventChat) {
-          socket.leave(eventChat._id.toString());
-          
-          // Notify other participants
-          socket.to(eventChat._id.toString()).emit('userLeftEventChat', {
-            userId: socket.userId,
-            eventId
-          });
-        }
-
-        socket.emit('leftEventChat', {
-          eventId,
-          message: 'Successfully left event chat'
-        });
-
-      } catch (error) {
-        console.error('Error leaving event chat:', error);
-        socket.emit('error', { message: 'Failed to leave event chat' });
-      }
-    });
-
-    // Handle marking messages as read
-    socket.on('markAsRead', async (data: { chatId: string }) => {
-      try {
-        const { chatId } = data;
-        
-        if (!socket.userId) {
-          socket.emit('error', { message: 'User not authenticated' });
-          return;
-        }
-
-        await chatService.markMessagesAsRead(chatId, socket.userId);
-        
-        // Notify other participants that messages were read
-        socket.to(chatId).emit('messagesRead', {
-          chatId,
-          userId: socket.userId,
-          timestamp: new Date()
-        });
-
-      } catch (error) {
-        console.error('Error marking messages as read:', error);
-        socket.emit('error', { message: 'Failed to mark messages as read' });
-      }
-    });
-
-    // Handle typing indicators
     socket.on('typing', (data: { chatId: string }) => {
       const { chatId } = data;
+      console.log(`User ${socket.userId} typing in chat ${chatId}`);
       socket.to(chatId).emit('userTyping', {
         userId: socket.userId,
         chatId
@@ -217,18 +169,46 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
 
     socket.on('stopTyping', (data: { chatId: string }) => {
       const { chatId } = data;
+      console.log(` User ${socket.userId} stopped typing in chat ${chatId}`);
       socket.to(chatId).emit('userStoppedTyping', {
         userId: socket.userId,
         chatId
       });
     });
 
-    // Handle disconnect
-    socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.id}, UserId: ${socket.userId}`);
+    socket.on('markAsRead', async (data: { chatId: string }) => {
+      try {
+        const { chatId } = data;
+        console.log(` User ${socket.userId} marking messages as read in chat ${chatId}`);
+        
+        if (!socket.userId) {
+          socket.emit('error', { message: 'User not authenticated' });
+          return;
+        }
+
+        await chatService.markMessagesAsRead(chatId, socket.userId);
+        
+        socket.to(chatId).emit('messagesRead', {
+          chatId,
+          userId: socket.userId,
+          timestamp: new Date()
+        });
+
+        console.log(` Messages marked as read in chat ${chatId}`);
+        
+      } catch (error: any) {
+        console.error('Error marking messages as read:', error);
+        socket.emit('error', { message: 'Failed to mark messages as read' });
+      }
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log(`User disconnected: ${socket.id}, UserId: ${socket.userId}, Reason: ${reason}`);
+      console.log(`Remaining connected clients: ${io.engine.clientsCount - 1}`);
       
       if (socket.userId) {
         onlineUsers.delete(socket.userId);
+        
         socket.broadcast.emit('userStatus', {
           userId: socket.userId,
           status: 'offline',
@@ -236,7 +216,16 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
         });
       }
     });
+
+    socket.on('error', (error) => {
+      console.error(`Socket error for ${socket.id}:`, error);
+    });
   });
 
+  io.on('error', (error) => {
+    console.error('Socket.IO Server Error:', error);
+  });
+
+  console.log('Socket.IO server configured successfully for person-to-person chat');
   return io;
 }

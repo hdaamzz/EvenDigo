@@ -1,18 +1,34 @@
-import { IChat, IMessage } from '../../../../models/ChatModel';
+import { IChat, IMessage } from "../../../../models/ChatModel";
 
 export interface IChatService {
   createPersonalChat(participantIds: string[]): Promise<IChat>;
-  createEventChat(eventId: string, participantIds: string[]): Promise<IChat>;
   getChatById(chatId: string): Promise<IChat>;
   getUserChats(userId: string): Promise<IChat[]>;
   getChatMessages(chatId: string, limit?: number, skip?: number): Promise<IMessage[]>;
-  addMessage(chatId: string, senderId: string, content: string): Promise<IMessage>;
+  getChatMessagesWithPagination(
+    chatId: string,
+    page?: number,
+    limit?: number
+  ): Promise<{
+    messages: IMessage[];
+    totalMessages: number;
+    totalPages: number;
+    currentPage: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  }>;
+  addMessage(
+    chatId: string,
+    senderId: string,
+    content: string,
+    messageType?: 'text' | 'system' | 'image' | 'file'
+  ): Promise<IMessage>;
   getChatBetweenUsers(userOneId: string, userTwoId: string): Promise<IChat | null>;
-  getEventChat(eventId: string): Promise<IChat | null>;
   markMessagesAsRead(chatId: string, userId: string): Promise<void>;
   getUnreadMessageCount(userId: string): Promise<number>;
   deleteChat(chatId: string): Promise<void>;
-  joinEventChat(eventId: string, userId: string): Promise<IChat>;
-  leaveEventChat(eventId: string, userId: string): Promise<void>;
-  autoJoinUserToEventChat(eventId: string, userId: string): Promise<IChat>;
+  getMessageById(messageId: string): Promise<IMessage | null>;
+  updateMessage(messageId: string, content: string, userId: string): Promise<IMessage>;
+  deleteMessage(messageId: string, userId: string): Promise<void>;
+  validateChatAccess(chatId: string, userId: string): Promise<boolean>;
 }

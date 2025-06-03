@@ -96,7 +96,7 @@ export class AuthController implements IAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 15 * 60 * 1000, 
+        maxAge: 24 * 60 * 60 * 1000, 
         domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
       });
 
@@ -186,7 +186,7 @@ export class AuthController implements IAuthController {
       }
 
       const currentUser = await this.authService.findUserByEmail(req.user.email);
-
+      const token=req.cookies.accessToken
       if (!currentUser) {
         res.status(StatusCode.UNAUTHORIZED).json({
           isAuthenticated: false,
@@ -205,6 +205,7 @@ export class AuthController implements IAuthController {
           role: currentUser.role,
           status: currentUser.status,
         },
+        token:token
       });
     } catch (error) {
       console.error('Auth check error:', error);

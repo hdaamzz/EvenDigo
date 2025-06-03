@@ -12,13 +12,13 @@ import { AllCouponResponse, CouponResponse, ICoupon } from '../../../models/admi
   providedIn: 'root'
 })
 export class AdminCouponService {
-  private readonly baseUrl = `${environment.baseUrl}admin/coupon`;
+  private readonly apiUrl = `${environment.apiUrl}admin/coupon`;
 
   constructor(private http: HttpClient) {}
 
 
   getCoupons(): Observable<ICoupon[]> {
-    return this.http.get<AllCouponResponse>(this.baseUrl, )
+    return this.http.get<AllCouponResponse>(this.apiUrl, )
       .pipe(
         map((response) => response.data)
       );
@@ -30,14 +30,14 @@ export class AdminCouponService {
       .set('page', page.toString())
       .set('limit', limit.toString());
     
-    return this.http.get<AllCouponResponse>(this.baseUrl, { 
+    return this.http.get<AllCouponResponse>(this.apiUrl, { 
       params,
       withCredentials: true 
     });
   }
 
   createCoupon(coupon: ICoupon): Observable<ICoupon> {
-    return this.http.post<CouponResponse>(this.baseUrl, coupon, )
+    return this.http.post<CouponResponse>(this.apiUrl, coupon, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -45,7 +45,7 @@ export class AdminCouponService {
 
 
   updateCoupon(couponId: string, coupon: Partial<ICoupon>): Observable<ICoupon> {
-    return this.http.put<CouponResponse>(`${this.baseUrl}/${couponId}`, coupon, )
+    return this.http.put<CouponResponse>(`${this.apiUrl}/${couponId}`, coupon, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -53,7 +53,7 @@ export class AdminCouponService {
 
 
   activateCoupon(couponId: string): Observable<ICoupon> {
-    return this.http.patch<CouponResponse>(`${this.baseUrl}/active/${couponId}`, {}, )
+    return this.http.patch<CouponResponse>(`${this.apiUrl}/active/${couponId}`, {}, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -61,7 +61,7 @@ export class AdminCouponService {
 
 
   deactivateCoupon(couponId: string): Observable<ICoupon> {
-    return this.http.patch<CouponResponse>(`${this.baseUrl}/deactivate/${couponId}`, {}, )
+    return this.http.patch<CouponResponse>(`${this.apiUrl}/deactivate/${couponId}`, {}, )
       .pipe(
         map((response: CouponResponse) => response.data)
       );
@@ -69,6 +69,6 @@ export class AdminCouponService {
 
 
   deleteCoupon(couponId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${couponId}`, );
+    return this.http.delete<void>(`${this.apiUrl}/${couponId}`, );
   }
 }

@@ -1,25 +1,26 @@
 import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatMessage, ChatSection, ChatService, ChatUser } from '../../../core/services/user/chat/chat.service';
-import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
+import { ChatMessage, ChatService, ChatUser } from '../../../core/services/user/chat/chat.service';
+import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { Subscription } from 'rxjs';
+import { SocketService } from '../../../core/services/user/socket/socket.service';
+import { AuthService } from '../../../core/services/user/auth/auth.service';
+import { User } from '../../../core/models/userModel';
 
 @Component({
   selector: 'app-chat',
+  standalone: true,
   imports: [CommonModule, FormsModule, UserNavComponent],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css'
+  styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
 
-  activeSection: ChatSection = 'personal';
-  chatSections = [
-    { key: 'personal' as ChatSection, label: 'Personal', icon: 'pi pi-user' },
-    { key: 'events' as ChatSection, label: 'Events', icon: 'pi pi-calendar' }
-  ];
-
+  allUsers: User[] = [];
+  showUserList: boolean = false;
+  isLoadingUsers: boolean = false;
   users: ChatUser[] = [];
   selectedUser: ChatUser | null = null;
   messages: ChatMessage[] = [];
@@ -27,59 +28,362 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   searchTerm: string = '';
   isTyping: boolean = false;
   isLoading: boolean = false;
+  isConnecting: boolean = false;
+  isSendingMessage: boolean = false; 
   error: string = '';
 
   private subscriptions: Subscription[] = [];
+  private typingTimeout: any;
+  private shouldScrollToBottom: boolean = false;
+  private isInitialized: boolean = false;
+  private currentUserId: string = '';
+  private pendingMessages: Map<string, ChatMessage> = new Map();
+  private processedMessageIds: Set<string> = new Set();
 
-  constructor(private chatService: ChatService) { }
+  constructor(
+    private chatService: ChatService,
+    public socketService: SocketService,
+    private authService: AuthService
+  ) { }
 
-  ngOnInit() {
-    this.loadUsers();
-    this.subscribeToMessages();
-    this.subscribeToUnreadCount();
+  async ngOnInit() {
+    try {
+      await this.initializeChat();
+      this.loadAllUsers();
+    } catch (error) {
+      console.error('Failed to initialize chat:', error);
+      this.error = 'Failed to initialize chat. Please refresh the page.';
+    }
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
   }
 
   ngAfterViewChecked() {
-    this.scrollToBottom();
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
+    }
   }
 
-  private subscribeToMessages() {
-    const messagesSub = this.chatService.messages$.subscribe(messages => {
-      this.messages = messages;
+  private async initializeChat(): Promise<void> {
+    this.isConnecting = true;
+    this.error = '';
+
+    try {
+      const authResponse = await this.authService.checkAuthStatus().toPromise();
+
+      if (!authResponse?.isAuthenticated || !authResponse.user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      this.currentUserId = authResponse.user.id;
+      this.chatService.setCurrentUserId(authResponse.user.id);
+
+      const token = authResponse.token;
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      await this.socketService.connect(token);
+      await this.socketService.waitForConnection();
+      await this.chatService.initialize(this.socketService);
+
+      this.subscribeToRealTimeEvents();
+      this.loadPersonalChats();
+
+      this.isInitialized = true;
+      this.isConnecting = false;
+
+    } catch (error) {
+      console.error('Chat initialization failed:', error);
+      this.isConnecting = false;
+      this.error = this.getErrorMessage(error);
+    }
+  }
+
+  loadAllUsers() {
+    this.isLoadingUsers = true;
+    this.error = '';
+
+    const usersSub = this.chatService.getAllUsers().subscribe({
+      next: (users) => {
+        this.allUsers = users;
+        this.isLoadingUsers = false;
+      },
+      error: (error) => {
+        console.error('Error loading users:', error);
+        this.error = 'Failed to load users. Please try again.';
+        this.isLoadingUsers = false;
+      }
     });
-    this.subscriptions.push(messagesSub);
+
+    this.subscriptions.push(usersSub);
   }
 
-  private subscribeToUnreadCount() {
-    const unreadSub = this.chatService.unreadCount$.subscribe(count => {
-      // You can use this for notifications or badge counts
-      console.log('Unread count:', count);
+  toggleUserList() {
+    this.showUserList = !this.showUserList;
+    if (this.showUserList && this.allUsers.length === 0) {
+      this.loadAllUsers();
+    }
+  }
+
+  async startChatWithUser(user: User) {
+    try {
+      console.log('Starting chat with user:', user);
+
+      this.isLoading = true;
+      this.error = '';
+
+      if (!user.id) {
+        throw new Error('User ID is undefined');
+      }
+
+      const existingChat = await this.chatService.getChatBetweenUsers(user.id).toPromise();
+
+      if (existingChat) {
+        const chatUser: ChatUser = {
+          id: user.id,
+          name: user.name,
+          lastMessage: existingChat.lastMessage?.content || 'No messages yet',
+          lastMessageTime: existingChat.lastMessageAt ? new Date(existingChat.lastMessageAt) : new Date(),
+          isOnline: true,
+          unreadCount: 0,
+          chatId: existingChat._id,
+          profileImg: user.profileImg
+        };
+
+        this.users = [chatUser, ...this.users.filter(u => u.id !== user.id)];
+        this.selectUser(chatUser);
+      } else {
+        const newChat = await this.chatService.createOrGetPersonalChat(user.id).toPromise();
+        if (!newChat) {
+          throw new Error("Failed to create new chat");
+        }
+
+        const chatUser: ChatUser = {
+          id: user.id,
+          name: user.name,
+          lastMessage: 'No messages yet',
+          lastMessageTime: new Date(),
+          isOnline: true,
+          unreadCount: 0,
+          chatId: newChat._id,
+          profileImg: user.profileImg
+        };
+
+        this.users = [chatUser, ...this.users.filter(u => u.id !== user.id)];
+        this.selectUser(chatUser);
+      }
+
+      this.showUserList = false;
+      this.isLoading = false;
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      this.error = 'Failed to start chat. Please try again.';
+      this.isLoading = false;
+    }
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error?.message) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    return 'An unexpected error occurred';
+  }
+
+  getFilteredAllUsers() {
+    console.log(this.allUsers);
+    
+    if (!this.searchTerm) return this.allUsers;
+    return this.allUsers.filter(user =>
+      user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
+  private subscribeToRealTimeEvents() {
+    const connectionSub = this.socketService.connectionStatus$.subscribe(connected => {
+      if (!connected && this.isInitialized) {
+        this.error = 'Connection lost. Attempting to reconnect...';
+      } else if (connected && this.error.includes('Connection lost')) {
+        this.error = '';
+      }
     });
-    this.subscriptions.push(unreadSub);
+
+    const newMessageSub = this.socketService.listen<any>('newMessage').subscribe(data => {
+      console.log('Received new message via socket:', data);
+      this.handleIncomingMessage(data);
+    });
+
+    const messageSentSub = this.socketService.listen<any>('messageSent').subscribe(data => {
+      console.log('Message sent confirmation:', data);
+      this.isSendingMessage = false;
+    });
+
+    const joinedChatSub = this.socketService.listen<any>('joinedChat').subscribe(data => {
+      console.log('Successfully joined chat:', data);
+    });
+
+    const userTypingSub = this.socketService.listen<any>('userTyping').subscribe(data => {
+      if (this.selectedUser && data.chatId === this.selectedUser.chatId &&
+        data.userId !== this.currentUserId) {
+        this.isTyping = true;
+      }
+    });
+
+    const userStoppedTypingSub = this.socketService.listen<any>('userStoppedTyping').subscribe(data => {
+      if (this.selectedUser && data.chatId === this.selectedUser.chatId) {
+        this.isTyping = false;
+      }
+    });
+
+    const userStatusSub = this.socketService.listen<any>('userStatus').subscribe(data => {
+      console.log('User status update:', data);
+      this.updateUserStatus(data.userId, data.status);
+    });
+
+    const errorSub = this.socketService.listen<any>('error').subscribe(error => {
+      console.error('Socket error:', error);
+      this.error = error.message || 'An error occurred';
+    });
+
+    const authenticatedSub = this.socketService.listen<any>('authenticated').subscribe(data => {
+      console.log('Socket authenticated:', data);
+    });
+
+    this.subscriptions.push(
+      connectionSub,
+      newMessageSub,
+      messageSentSub,
+      joinedChatSub,
+      userTypingSub,
+      userStoppedTypingSub,
+      userStatusSub,
+      errorSub,
+      authenticatedSub
+    );
   }
 
-  loadUsers() {
+  private handleIncomingMessage(data: any) {
+    const message: ChatMessage = {
+      id: data.message.id || data.message._id,
+      senderId: data.message.senderId || data.message.sender?._id,
+      content: data.message.content,
+      timestamp: new Date(data.message.timestamp),
+      createdAt: new Date(data.message.createdAt || data.message.timestamp),
+      isRead: data.message.isRead || false,
+      type: data.message.type || 'text',
+      messageType: data.message.messageType || 'text'
+    };
+
+    console.log('Processing incoming message:', message);
+
+    const existingIndex = this.messages.findIndex(msg =>
+      msg.id === message.id ||
+      (msg.id.toString().startsWith('temp-') && msg.content === message.content && Math.abs(new Date(msg.timestamp).getTime() - new Date(message.timestamp).getTime()) < 5000)
+    );
+
+    if (existingIndex !== -1) {
+      this.messages[existingIndex] = message;
+    } else {
+      this.messages = [...this.messages, message];
+    }
+
+    this.shouldScrollToBottom = true;
+    this.updateUserLastMessage(data.chatId, message);
+  }
+
+  private handleMessageSentConfirmation(data: any) {
+    this.isSendingMessage = false;
+    console.log('Message sent confirmation:', data);
+  }
+
+  private handleMessageSendError(tempId: string) {
+    this.isSendingMessage = false;
+
+    if (tempId && this.pendingMessages.has(tempId)) {
+      const failedMessage = this.pendingMessages.get(tempId);
+      this.pendingMessages.delete(tempId);
+
+      this.messages = this.messages.filter(msg => msg.id !== tempId);
+
+      if (failedMessage) {
+        this.newMessage = failedMessage.content;
+      }
+
+      this.error = 'Failed to send message. Please try again.';
+    }
+  }
+
+  private updateUserLastMessage(chatId: string, message: ChatMessage) {
+    const userIndex = this.users.findIndex(user => user.chatId === chatId);
+    if (userIndex !== -1) {
+      this.users[userIndex] = {
+        ...this.users[userIndex],
+        lastMessage: message.content,
+        lastMessageTime: message.createdAt ?? new Date(),
+        unreadCount: this.users[userIndex].id === this.selectedUser?.id ?
+          this.users[userIndex].unreadCount : this.users[userIndex].unreadCount + 1
+      };
+
+      this.users.sort((a, b) =>
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      );
+    }
+  }
+
+  private updateUserListAfterMessage(chatId: string, message: ChatMessage) {
+    const userIndex = this.users.findIndex(user => user.chatId === chatId);
+    if (userIndex !== -1) {
+      this.users[userIndex] = {
+        ...this.users[userIndex],
+        lastMessage: message.content,
+        lastMessageTime: message.createdAt ?? new Date(),
+        unreadCount: this.users[userIndex].unreadCount + 1
+      };
+
+      this.users.sort((a, b) =>
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      );
+    }
+  }
+
+  private updateUserStatus(userId: string, status: string) {
+    const userIndex = this.users.findIndex(user => user.id === userId);
+    if (userIndex !== -1) {
+      this.users[userIndex] = {
+        ...this.users[userIndex],
+        isOnline: status === 'online'
+      };
+    }
+  }
+
+  loadPersonalChats() {
+    if (!this.isInitialized) {
+      return;
+    }
+
     this.isLoading = true;
     this.error = '';
 
-    const usersSub = this.chatService.getUsersBySection(this.activeSection).subscribe({
+    const usersSub = this.chatService.getPersonalChats().subscribe({
       next: (users) => {
-        this.users = users.sort((a, b) =>
-          new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
-        );
+        this.users = users;
         this.isLoading = false;
-
-        // Auto-select first user if none selected and users exist
         if (this.users.length > 0 && !this.selectedUser) {
           this.selectUser(this.users[0]);
         }
       },
       error: (error) => {
-        console.error('Error loading users:', error);
+        console.error('Error loading personal chats:', error);
         this.error = 'Failed to load chats. Please try again.';
         this.isLoading = false;
       }
@@ -88,84 +392,135 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.subscriptions.push(usersSub);
   }
 
-  switchSection(section: ChatSection) {
-    this.activeSection = section;
-    this.selectedUser = null;
-    this.messages = [];
-    this.loadUsers();
-  }
-
-  selectUser(user: ChatUser) {
+  async selectUser(user: ChatUser) {
     if (this.selectedUser?.id === user.id) return;
+
+    if (!this.socketService.isConnected()) {
+      this.error = 'Connection lost. Please wait while we reconnect...';
+      return;
+    }
+
+    console.log('Selecting user:', user); 
 
     this.selectedUser = user;
     this.messages = [];
+    this.processedMessageIds.clear();
     this.isLoading = true;
     this.error = '';
+    this.isTyping = false;
 
     if (user.chatId) {
-      const messagesSub = this.chatService.getChatMessages(user.chatId).subscribe({
-        next: (messages) => {
-          this.messages = messages;
-          this.isLoading = false;
+      try {
+        await this.socketService.emit('joinChat', { chatId: user.chatId });
 
-          // Mark messages as read
-          this.markMessagesAsRead(user.chatId!);
-        },
-        error: (error) => {
-          console.error('Error loading messages:', error);
-          this.error = 'Failed to load messages. Please try again.';
-          this.isLoading = false;
-        }
-      });
+        const messagesSub = this.chatService.getChatMessages(user.chatId).subscribe({
+          next: (messages) => {
+            console.log('Loaded historical messages:', messages);
+            this.messages = messages.map(msg => ({
+              ...msg,
+              senderId: msg.senderId
+            }));
 
-      this.subscriptions.push(messagesSub);
+            messages.forEach(msg => this.processedMessageIds.add(msg.id));
+
+            this.isLoading = false;
+            this.shouldScrollToBottom = true;
+
+            if (user.unreadCount > 0) {
+              this.markMessagesAsRead(user.chatId!);
+            }
+          },
+          error: (error) => {
+            console.error('Error loading messages:', error);
+            this.error = 'Failed to load messages. Please try again.';
+            this.isLoading = false;
+          }
+        });
+        this.subscriptions.push(messagesSub);
+      } catch (error) {
+        console.error('Error joining chat:', error);
+        this.error = 'Failed to join chat. Please try again.';
+        this.isLoading = false;
+      }
     }
   }
 
-  sendMessage() {
-    if (!this.newMessage.trim() || !this.selectedUser?.chatId) return;
+  async sendMessage() {
+    if (!this.newMessage.trim() || !this.selectedUser?.chatId || this.isSendingMessage) return;
+
+    if (!this.socketService.isConnected()) {
+      this.error = 'Cannot send message. Connection lost.';
+      return;
+    }
 
     const content = this.newMessage.trim();
     this.newMessage = '';
+    this.isSendingMessage = true;
 
-    const sendSub = this.chatService.sendMessage(this.selectedUser.chatId, content).subscribe({
-      next: (message) => {
-        // Add message to local messages array
-        this.messages.push(message);
+    if (this.selectedUser?.chatId) {
+      await this.socketService.emit('stopTyping', { chatId: this.selectedUser.chatId });
+    }
 
-        // Update user's last message
-        if (this.selectedUser) {
-          this.selectedUser.lastMessage = content;
-          this.selectedUser.lastMessageTime = new Date();
+    try {
+      const tempId = 'temp-' + Date.now() + '-' + Math.random();
+      const optimisticMessage: ChatMessage = {
+        id: tempId,
+        content: content,
+        senderId: this.currentUserId,
+        timestamp: new Date(),
+        createdAt: new Date(),
+        isRead: false,
+        type: 'text'
+      };
+
+      this.pendingMessages.set(tempId, optimisticMessage);
+
+      this.messages = [...this.messages, optimisticMessage];
+      this.shouldScrollToBottom = true;
+
+      await this.socketService.emit('sendMessage', {
+        chatId: this.selectedUser.chatId,
+        content: content,
+        senderId: this.currentUserId,
+        tempId: tempId
+      });
+
+      console.log('Message sent via socket');
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      this.error = 'Failed to send message. Please try again.';
+      this.newMessage = content;
+      this.isSendingMessage = false;
+
+      this.messages = this.messages.filter(msg => !msg.id.toString().startsWith('temp-'));
+    }
+  }
+
+  async onMessageInput() {
+    if (this.selectedUser?.chatId && this.socketService.isConnected()) {
+      try {
+        await this.socketService.emit('typing', { chatId: this.selectedUser.chatId });
+
+        if (this.typingTimeout) {
+          clearTimeout(this.typingTimeout);
         }
 
-        // Refresh user list to update order
-        this.loadUsers();
-      },
-      error: (error) => {
-        console.error('Error sending message:', error);
-        this.error = 'Failed to send message. Please try again.';
-        // Restore the message in input
-        this.newMessage = content;
+        this.typingTimeout = setTimeout(async () => {
+          if (this.selectedUser?.chatId) {
+            await this.socketService.emit('stopTyping', { chatId: this.selectedUser.chatId });
+          }
+        }, 2000);
+      } catch (error) {
+        console.error('Error sending typing indicator:', error);
       }
-    });
-
-    this.subscriptions.push(sendSub);
+    }
   }
 
   markMessagesAsRead(chatId: string) {
-    const readSub = this.chatService.markMessagesAsRead(chatId).subscribe({
+    this.chatService.markMessagesAsRead(chatId).subscribe({
       next: () => {
-        // Update local messages as read
-        this.messages.forEach(msg => {
-          if (msg.senderId !== this.chatService.getCurrentUserId()) {
-            msg.isRead = true;
-          }
-        });
-
-        // Update user's unread count
-        if (this.selectedUser) {
+        if (this.selectedUser && this.selectedUser.chatId === chatId) {
           this.selectedUser.unreadCount = 0;
         }
       },
@@ -173,18 +528,21 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
         console.error('Error marking messages as read:', error);
       }
     });
-
-    this.subscriptions.push(readSub);
   }
 
   getFilteredUsers() {
     if (!this.searchTerm) return this.users;
+    console.log('Filtered users:', this.users);
+
     return this.users.filter(user =>
       user.name.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
 
   formatTime(date: Date): string {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
     return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
       minute: '2-digit',
@@ -193,6 +551,10 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   formatLastMessageTime(date: Date): string {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
+
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -210,8 +572,9 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private scrollToBottom() {
     try {
-      if (this.messageContainer) {
-        this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+      if (this.messageContainer?.nativeElement) {
+        const element = this.messageContainer.nativeElement;
+        element.scrollTop = element.scrollHeight;
       }
     } catch (err) {
       console.error('Error scrolling to bottom:', err);
@@ -225,54 +588,25 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  // Utility method to check if message is from current user
   isCurrentUserMessage(message: ChatMessage): boolean {
-    return message.senderId === this.chatService.getCurrentUserId();
+    return message.senderId === this.currentUserId;
   }
 
-  // Refresh chats manually
-  refreshChats() {
-    this.loadUsers();
-    if (this.selectedUser?.chatId) {
-      this.selectUser(this.selectedUser);
+  async refreshChats() {
+    if (!this.socketService.isConnected()) {
+      try {
+        await this.initializeChat();
+      } catch (error) {
+        console.error('Failed to reconnect:', error);
+      }
+    } else {
+      this.loadPersonalChats();
+      if (this.selectedUser?.chatId) {
+        this.selectUser(this.selectedUser);
+      }
     }
   }
 
-  // Join event chat
-  joinEventChat(eventId: string) {
-    const joinSub = this.chatService.joinEventChat(eventId).subscribe({
-      next: (chat) => {
-        console.log('Joined event chat:', chat);
-        this.loadUsers();
-      },
-      error: (error) => {
-        console.error('Error joining event chat:', error);
-        this.error = 'Failed to join event chat.';
-      }
-    });
-
-    this.subscriptions.push(joinSub);
-  }
-
-  // Leave event chat
-  leaveEventChat(eventId: string) {
-    const leaveSub = this.chatService.leaveEventChat(eventId).subscribe({
-      next: () => {
-        console.log('Left event chat');
-        this.loadUsers();
-        if (this.selectedUser?.eventId === eventId) {
-          this.selectedUser = null;
-          this.messages = [];
-        }
-      },
-      error: (error) => {
-        console.error('Error leaving event chat:', error);
-        this.error = 'Failed to leave event chat.';
-      }
-    });
-
-    this.subscriptions.push(leaveSub);
-  }
   trackByUserId(index: number, user: ChatUser): string {
     return user.id;
   }
@@ -287,7 +621,35 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   adjustTextareaHeight(event: any): void {
     const textarea = event.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 128) + 'px';
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 128) + 'px';
+    }
+  }
+
+  clearError(): void {
+    this.error = '';
+  }
+
+  hasUnreadMessages(user: ChatUser): boolean {
+    return user.unreadCount > 0;
+  }
+
+  getUnreadCountText(count: number): string {
+    return count > 99 ? '99+' : count.toString();
+  }
+
+  async retryConnection() {
+    this.error = '';
+    try {
+      await this.initializeChat();
+    } catch (error) {
+      console.error('Retry failed:', error);
+    }
+  }
+
+  getUserInitials(name: string): string {
+    if (!name) return '';
+    return name.charAt(0).toUpperCase();
   }
 }

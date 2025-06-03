@@ -25,12 +25,12 @@ interface WalletDetails {
 })
 export class UserProfileService {
 
-  baseUrl=environment.baseUrl
+  apiUrl=environment.apiUrl
   constructor(private http: HttpClient) { }
 
   
   userDetails(): Observable<UpdateProfileResponse> {
-      return this.http.get<UpdateProfileResponse>(`${this.baseUrl}user/profile/user-details`).pipe(
+      return this.http.get<UpdateProfileResponse>(`${this.apiUrl}user/profile/user-details`).pipe(
         catchError(error => {
           console.error('Error fetching user details:', error);
           return throwError(() => new Error('Failed to fetch user details'));
@@ -39,7 +39,7 @@ export class UserProfileService {
   }
   updateUserProfile( userData: Partial<User>): Observable<UpdateProfileResponse> {
     
-    return this.http.post<UpdateProfileResponse>(`${this.baseUrl}user/profile/update`, {
+    return this.http.post<UpdateProfileResponse>(`${this.apiUrl}user/profile/update`, {
       ...userData
     }).pipe(
       catchError(error => {
@@ -50,7 +50,7 @@ export class UserProfileService {
   }
 
   verificationRequest():Observable<VerificationRequestResponse>{
-    return this.http.post<VerificationRequestResponse>(`${this.baseUrl}user/profile/verification-request`,{}).pipe(
+    return this.http.post<VerificationRequestResponse>(`${this.apiUrl}user/profile/verification-request`,{}).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
         return throwError(() => new Error('Failed to fetch user details'));
@@ -59,7 +59,7 @@ export class UserProfileService {
   }
 
   verificationRequestDetails():Observable<any>{
-    return this.http.get(`${this.baseUrl}user/profile/verification-request`).pipe(
+    return this.http.get(`${this.apiUrl}user/profile/verification-request`).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
         return throwError(() => new Error('Failed to fetch user details'));
@@ -67,32 +67,32 @@ export class UserProfileService {
     )
   }
   getUserEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.baseUrl}user/profile/events`);
+    return this.http.get<AllEventResponse>(`${this.apiUrl}user/profile/events`);
   }
 
   getUserBookings(): Observable<AllBookingResponse> {
-    return this.http.get<AllBookingResponse>(`${this.baseUrl}user/profile/bookings`);
+    return this.http.get<AllBookingResponse>(`${this.apiUrl}user/profile/bookings`);
   }
   cancelTicket(bookingId: string, ticketUniqueId: string): Observable<void> {    
-    return this.http.post<void>(`${this.baseUrl}user/profile/events/cancel`, { bookingId,ticketUniqueId });
+    return this.http.post<void>(`${this.apiUrl}user/profile/events/cancel`, { bookingId,ticketUniqueId });
   }
 
   deleteEvent(eventId: string):Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}user/profile/events/${eventId}`);
+    return this.http.delete<void>(`${this.apiUrl}user/profile/events/${eventId}`);
   }
   updateEvent(eventId: string, formData: FormData): Observable<void> {
     formData.append('eventId', eventId);
     
-    return this.http.put<void>(`${this.baseUrl}user/profile/events`, formData);
+    return this.http.put<void>(`${this.apiUrl}user/profile/events`, formData);
   }
   getEventById(eventId: string) :Observable<EventResponse>{
-    return this.http.get<EventResponse>(`${this.baseUrl}user/profile/events/${eventId}`);
+    return this.http.get<EventResponse>(`${this.apiUrl}user/profile/events/${eventId}`);
   }
   getBadgeById() :Observable<any>{
-    return this.http.get(`${this.baseUrl}user/profile/badge`);
+    return this.http.get(`${this.apiUrl}user/profile/badge`);
   }
   changePassword(data: {currentPassword: string, newPassword: string, confirmPassword: string}): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}user/profile/change-password`, data).pipe(
+    return this.http.post<any>(`${this.apiUrl}user/profile/change-password`, data).pipe(
       catchError(error => {
         console.error('Error changing password:', error);
         return throwError(() => new Error(error.error?.message || 'Failed to change password'));

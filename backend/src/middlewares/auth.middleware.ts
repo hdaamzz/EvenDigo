@@ -58,7 +58,7 @@ export const authMiddleware = async (
         return next();
         
       } catch (tokenError) {
-        console.log('Access token verification failed:', tokenError);
+        console.log('Access token verification failed from miidleware :', tokenError);
       }
     }
     
@@ -90,7 +90,7 @@ export const authMiddleware = async (
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,
         ...(process.env.NODE_ENV === 'production' && {
           domain: process.env.CLIENT_DOMAIN || undefined
         })

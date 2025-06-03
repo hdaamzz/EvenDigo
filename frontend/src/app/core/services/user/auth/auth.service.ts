@@ -11,12 +11,12 @@ import { ApiResponse } from '../subscription/premium.service';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = environment.baseUrl;
+  private apiUrl = environment.apiUrl;
   
   constructor(private http: HttpClient) { }
 
   userRegister(userData: IRegister): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/send-otp`, userData).pipe(
+    return this.http.post<CommonResponse>(`${this.apiUrl}user/auth/send-otp`, userData).pipe(
       catchError((error) => {
         console.error('Registration error:', error);
         return of({ success: false, message: 'Registration failed. Please try again.' });
@@ -25,7 +25,7 @@ export class AuthService {
   }
 
   verifyOTP(email: string, otp: string): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/verify-otp`, { email, otp }).pipe(
+    return this.http.post<CommonResponse>(`${this.apiUrl}user/auth/verify-otp`, { email, otp }).pipe(
       catchError((error) => {
         console.error('OTP verification error:', error);
         return of({ success: false, message: 'OTP verification failed. Please try again.' });
@@ -34,7 +34,7 @@ export class AuthService {
   }
 
   userLogin(userData: ILogin): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/auth/sign-in`, userData).pipe(
+    return this.http.post(`${this.apiUrl}user/auth/sign-in`, userData).pipe(
       catchError((error) => {
         console.error('Login error:', error);
         return of({ success: false, message: error.error?.message || error.message });
@@ -47,7 +47,7 @@ export class AuthService {
     isAuthenticated: boolean; user?: User; token?: string, role?: string
   }> {
     return this.http.get<{ isAuthenticated: boolean; user?: User; token?: string, role?: string }>(
-      `${this.baseUrl}user/auth/status`
+      `${this.apiUrl}user/auth/status`
     ).pipe(
       catchError((error) => {
         return of({ 
@@ -68,19 +68,19 @@ export class AuthService {
       profileImg: profileImg || '',
     };
 
-    return this.http.post(`${this.baseUrl}user/auth/firebase-signin`, payload);
+    return this.http.post(`${this.apiUrl}user/auth/firebase-signin`, payload);
   }
 
   forgotPassword(formData: {email:string}): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/forgot-password`, formData)
+    return this.http.post<CommonResponse>(`${this.apiUrl}user/auth/forgot-password`, formData)
   }
 
   resetPassword(resetData: {email:string,newPassword:string,token:string}): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.baseUrl}user/auth/reset-password`, resetData);
+    return this.http.post<CommonResponse>(`${this.apiUrl}user/auth/reset-password`, resetData);
   }
 
   logout(): Observable<CommonResponse> {
-    return this.http.get<CommonResponse>(`${this.baseUrl}user/auth/logout`).pipe(
+    return this.http.get<CommonResponse>(`${this.apiUrl}user/auth/logout`).pipe(
       catchError((error) => {
         console.error('Logout error:', error);
         return of({ success: false, message: 'Logout failed. Please try again.' });
@@ -90,7 +90,7 @@ export class AuthService {
 
   // New method for manual token refresh if needed
   refreshToken(): Observable<any> {
-    return this.http.post(`${this.baseUrl}user/auth/refresh-token`, {}).pipe(
+    return this.http.post(`${this.apiUrl}user/auth/refresh-token`, {}).pipe(
       catchError((error) => {
         console.error('Token refresh error:', error);
         return of({ success: false, message: 'Token refresh failed' });
@@ -99,7 +99,7 @@ export class AuthService {
   }
 
   getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
-    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.baseUrl}user/auth/plans`).pipe(
+    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.apiUrl}user/auth/plans`).pipe(
       delay(700),
       catchError(error => {
         console.error('Get plans error:', error);

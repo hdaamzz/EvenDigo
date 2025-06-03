@@ -5,8 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 
 // Rate limiting for auth routes
 export const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 5, 
   message: {
     success: false,
     message: 'Too many authentication attempts, please try again later.'
@@ -15,17 +15,15 @@ export const authRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiting for OTP routes
 export const otpRateLimit = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 3, // limit each IP to 3 OTP requests per 5 minutes
+  windowMs: 5 * 60 * 1000,
+  max: 3, 
   message: {
     success: false,
     message: 'Too many OTP requests, please try again later.'
   }
 });
 
-// Security headers middleware
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
@@ -38,7 +36,6 @@ export const securityHeaders = helmet({
   crossOriginEmbedderPolicy: false,
 });
 
-// Input sanitization middleware
 export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
   if (req.body) {
     for (const key in req.body) {

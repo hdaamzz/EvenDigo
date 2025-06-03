@@ -9,14 +9,14 @@ import { AchievementResponse, IAchievement } from '../../../models/admin/achieve
   providedIn: 'root'
 })
 export class AdminAchievementService {
-  private readonly _baseUrl = `${environment.baseUrl}/admin/achievements`;
+  private readonly apiUrl = `${environment.apiUrl}/admin/achievements`;
 
   constructor(private readonly _http: HttpClient) { }
 
 
   getAchievementsWithPagination(page: number, limit: number): Observable<AchievementResponse> {
     return this._http.get<AchievementResponse>(
-      `${this._baseUrl}?page=${page}&limit=${limit}`,
+      `${this.apiUrl}?page=${page}&limit=${limit}`,
       
     );
   }
@@ -24,7 +24,7 @@ export class AdminAchievementService {
 
   getAchievementById(achievementId: string): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.get<{ success: boolean; data: IAchievement }>(
-      `${this._baseUrl}/${achievementId}`,
+      `${this.apiUrl}/${achievementId}`,
       
     );
   }
@@ -32,7 +32,7 @@ export class AdminAchievementService {
 
   createAchievement(achievement: IAchievement): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.post<{ success: boolean; data: IAchievement }>(
-      this._baseUrl, 
+      this.apiUrl, 
       achievement,
       
     );
@@ -41,7 +41,7 @@ export class AdminAchievementService {
 
   updateAchievement(achievementId: string, achievement: IAchievement): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.put<{ success: boolean; data: IAchievement }>(
-      `${this._baseUrl}/${achievementId}`, 
+      `${this.apiUrl}/${achievementId}`, 
       achievement,
       
     );
@@ -50,7 +50,7 @@ export class AdminAchievementService {
 
   deleteAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.delete<{ success: boolean; message: string }>(
-      `${this._baseUrl}/${achievementId}`,
+      `${this.apiUrl}/${achievementId}`,
       
     );
   }
@@ -58,7 +58,7 @@ export class AdminAchievementService {
 
   activateAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.patch<{ success: boolean; message: string }>(
-      `${this._baseUrl}/${achievementId}/activate`,
+      `${this.apiUrl}/${achievementId}/activate`,
       {},
       
     );
@@ -67,7 +67,7 @@ export class AdminAchievementService {
 
   deactivateAchievement(achievementId: string): Observable<{ success: boolean; message: string }> {
     return this._http.patch<{ success: boolean; message: string }>(
-      `${this._baseUrl}/${achievementId}/deactivate`,
+      `${this.apiUrl}/${achievementId}/deactivate`,
       {},
       
     );

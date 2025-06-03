@@ -9,7 +9,9 @@ import { IBooking } from '../../../../../src/models/interfaces/booking.interface
 import { BadRequestException } from '../../../../../src/error/error-handlers';
 import { IWallet, TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
 import { generateRandomId } from '../../../../../src/utils/helpers';
-import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
+// import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
+// import { EventDocument } from 'src/models/interfaces/event.interface';
+// import { IUser } from 'src/models/interfaces/auth.interface';
 
 
 @injectable()
@@ -20,7 +22,7 @@ export class PaymentService implements IPaymentService {
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingService") private bookingService: IBookingService,
-    @inject('ChatService') private chatService: IChatService,
+    // @inject('ChatService') private chatService: IChatService,
   ) {
     const stripeKey = process.env.STRIPE_KEY;
     if (!stripeKey) {
@@ -138,8 +140,8 @@ export class PaymentService implements IPaymentService {
           }
         }
       );
-      await this.chatService.autoJoinUserToEventChat(eventId, userId);
-      console.log(`User ${userId} automatically joined event chat for event ${eventId}`);
+      // await this.chatService.autoJoinUserToEventChat(eventId, userId);
+      // console.log(`User ${userId} automatically joined event chat for event ${eventId}`);
       
       return booking;
     } catch (error) {
@@ -182,7 +184,12 @@ export class PaymentService implements IPaymentService {
       }
       booking.paymentStatus = 'Completed';
       await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
-      await this.chatService.autoJoinUserToEventChat(booking.eventId.toString(), booking.userId.toString());
+
+
+      // let event:EventDocument =booking.eventId as unknown as EventDocument;
+      // let user:IUser =booking.userId as unknown as IUser;
+
+      // await this.chatService.autoJoinUserToEventChat(event._id as unknown as string, user._id as unknown as string);
       console.log(`User ${booking.userId} automatically joined event chat for event ${booking.eventId}`);
     } catch (error) {
       console.error("Error in updateBookingPaymentStatus:", error);

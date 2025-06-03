@@ -17,7 +17,7 @@ import {
   providedIn: 'root'
 })
 export class SubscriptionService {
-  private readonly _baseUrl = environment.baseUrl;
+  private readonly _apiUrl = environment.apiUrl;
 
 
   constructor(private readonly _http: HttpClient) {}
@@ -36,7 +36,7 @@ export class SubscriptionService {
     }
 
     return this._http.get<ApiResponse<{ subscriptions: Subscription[], pagination: PaginationInfo }>>(
-      `${this._baseUrl}admin/subscriptions`,
+      `${this._apiUrl}admin/subscriptions`,
       { params, withCredentials: true }
     ).pipe(
       catchError(this._handleError)
@@ -45,7 +45,7 @@ export class SubscriptionService {
 
   getSubscriptionById(id: string): Observable<ApiResponse<Subscription>> {
     return this._http.get<ApiResponse<Subscription>>(
-      `${this._baseUrl}admin/subscriptions/${id}`,
+      `${this._apiUrl}admin/subscriptions/${id}`,
       
     ).pipe(
       catchError(this._handleError)
@@ -55,7 +55,7 @@ export class SubscriptionService {
 
   getSubscriptionStats(): Observable<ApiResponse<SubscriptionStats>> {
     return this._http.get<ApiResponse<SubscriptionStats>>(
-      `${this._baseUrl}admin/subscriptions/stats`,
+      `${this._apiUrl}admin/subscriptions/stats`,
       
     ).pipe(
       catchError(this._handleError)
@@ -64,7 +64,7 @@ export class SubscriptionService {
 
   updateSubscriptionStatus(update: SubscriptionStatusUpdate): Observable<ApiResponse<Subscription>> {
     return this._http.patch<ApiResponse<Subscription>>(
-      `${this._baseUrl}admin/subscriptions/status`,
+      `${this._apiUrl}admin/subscriptions/status`,
       update,
       
     ).pipe(
@@ -79,7 +79,7 @@ export class SubscriptionService {
    */
   deleteSubscription(id: string): Observable<ApiResponse<any>> {
     return this._http.delete<ApiResponse<any>>(
-      `${this._baseUrl}admin/subscriptions/${id}`,
+      `${this._apiUrl}admin/subscriptions/${id}`,
       
     ).pipe(
       catchError(this._handleError)
@@ -92,7 +92,7 @@ export class SubscriptionService {
    */
   getFilterOptions(): Observable<ApiResponse<SubscriptionFilterOptions>> {
     return this._http.get<ApiResponse<SubscriptionFilterOptions>>(
-      `${this._baseUrl}admin/subscriptions/filter-options`,
+      `${this._apiUrl}admin/subscriptions/filter-options`,
       
     ).pipe(
       catchError(this._handleError)
@@ -106,7 +106,7 @@ export class SubscriptionService {
    */
   getUserSubscriptions(userId: string): Observable<ApiResponse<Subscription[]>> {
     return this._http.get<ApiResponse<Subscription[]>>(
-      `${this._baseUrl}admin/subscriptions/user/${userId}`,
+      `${this._apiUrl}admin/subscriptions/user/${userId}`,
       
     ).pipe(
       catchError(this._handleError)

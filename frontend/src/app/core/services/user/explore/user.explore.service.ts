@@ -9,22 +9,22 @@ import { PayloadData } from '../../../models/booking.interface';
   providedIn: 'root'
 })
 export class UserExploreService {
-  private baseUrl = environment.baseUrl;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getAllEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.baseUrl}user/explore`);
+    return this.http.get<AllEventResponse>(`${this.apiUrl}user/explore`);
   }
 
   createStripeCheckoutSession(data:PayloadData): Observable<{ success: boolean, data: { sessionId: string } }> {
-    const respo=this.http.post<{ success: boolean, data: { sessionId: string } }>(`${this.baseUrl}user/explore/checkout`, data);
+    const respo=this.http.post<{ success: boolean, data: { sessionId: string } }>(`${this.apiUrl}user/explore/checkout`, data);
     return respo
   }
 
   createWalletCheckout(payload: PayloadData): Observable<any> {
     return this.http.post<any>(
-      `${this.baseUrl}user/explore/checkout`, 
+      `${this.apiUrl}user/explore/checkout`, 
       payload
     );
   }

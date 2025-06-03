@@ -1,30 +1,27 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMessage extends Document {
+  _id: mongoose.Types.ObjectId;
+  chatId: mongoose.Types.ObjectId;
   sender: mongoose.Types.ObjectId;
   content: string;
   timestamp: Date;
   read: boolean;
-  messageType?: 'text' | 'system' | 'image' | 'file';
-}
-
-export interface IChat extends Document {
-  _id:mongoose.Types.ObjectId | string
-  participants: mongoose.Types.ObjectId[];
-  messages: IMessage[];
-  chatType: 'personal' | 'event';
-  eventId?: mongoose.Types.ObjectId;
+  messageType: 'text' | 'system' | 'image' | 'file';
   createdAt: Date;
   updatedAt: Date;
-  lastMessage?: IMessage;
-  isActive: boolean;
 }
 
 const MessageSchema = new Schema<IMessage>({
+  chatId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Chat',
+    required: true,
+  },
   sender: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   content: {
     type: String,
@@ -32,18 +29,36 @@ const MessageSchema = new Schema<IMessage>({
   },
   timestamp: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   read: {
     type: Boolean,
-    default: false
+    default: false,
   },
   messageType: {
     type: String,
     enum: ['text', 'system', 'image', 'file'],
     default: 'text'
   }
+}, {
+  timestamps: true
 });
+
+export interface IChat extends Document {
+  _id: mongoose.Types.ObjectId | string;
+  participants: mongoose.Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+  lastMessage?: {
+    content: string;
+    sender: mongoose.Types.ObjectId;
+    timestamp: Date;
+    messageType: string;
+  };
+  lastMessageAt?: Date;
+  messageCount: number;
+  isActive: boolean;
+}
 
 const ChatSchema = new Schema<IChat>({
   participants: [{
@@ -51,23 +66,25 @@ const ChatSchema = new Schema<IChat>({
     ref: 'User',
     required: true
   }],
-  messages: [MessageSchema],
-  chatType: {
-    type: String,
-    enum: ['personal', 'event'],
-    required: true,
-    default: 'personal'
-  },
-  eventId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Event',
-    required: function(this: IChat) {
-      return this.chatType === 'event';
+  lastMessage: {
+    content: String,
+    sender: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    timestamp: Date,
+    messageType: {
+      type: String,
+      default: 'text'
     }
   },
-  lastMessage: {
-    type: MessageSchema,
-    default: null
+  lastMessageAt: {
+    type: Date,
+    default: Date.now
+  },
+  messageCount: {
+    type: Number,
+    default: 0
   },
   isActive: {
     type: Boolean,
@@ -77,10 +94,12 @@ const ChatSchema = new Schema<IChat>({
   timestamps: true
 });
 
-// Indexes for better performance
-// ChatSchema.index({ participants: 1 });
-// ChatSchema.index({ eventId: 1, chatType: 1 });
-// ChatSchema.index({ chatType: 1 });
-// ChatSchema.index({ updatedAt: -1 });
+ChatSchema.pre('save', function(next) {
+  if (this.participants.length !== 2) {
+    return next(new Error('Personal chat must have exactly 2 participants'));
+  }
+  next();
+});
 
-export default mongoose.model<IChat>('Chat', ChatSchema);
+export const MessageModel = mongoose.model<IMessage>('Message', MessageSchema);
+export const ChatModel = mongoose.model<IChat>('Chat', ChatSchema);

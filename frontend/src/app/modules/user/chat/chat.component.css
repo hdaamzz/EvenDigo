@@ -11,7 +11,6 @@
   }
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -29,12 +28,10 @@
   background: #9CA3AF;
 }
 
-/* Smooth transitions */
 * {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Message bubble animations */
 .flex > div {
   animation: fadeInUp 0.3s ease-out;
 }
@@ -50,7 +47,6 @@
   }
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .chat-sidebar {
     width: 100%;
@@ -73,13 +69,28 @@
     width: 100%;
   }
 }
+.chat-sidebar {
+  max-height: 100vh;
+  overflow-y: auto;
+}
 
-/* Textarea auto-resize */
+.chat-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-sidebar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.chat-sidebar::-webkit-scrollbar-thumb {
+  background: #00ff66;
+  border-radius: 3px;
+}
+
 textarea {
   field-sizing: content;
 }
 
-/* Focus states */
 button:focus,
 input:focus,
 textarea:focus {
@@ -87,7 +98,6 @@ textarea:focus {
   box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.3);
 }
 
-/* Loading states */
 .loading-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -101,7 +111,6 @@ textarea:focus {
   }
 }
 
-/* Hover effects */
 .hover-lift {
   transition: transform 0.2s ease;
 }
@@ -110,13 +119,11 @@ textarea:focus {
   transform: translateY(-1px);
 }
 
-/* Custom selection */
 ::selection {
   background-color: rgba(0, 255, 102, 0.3);
   color: white;
 }
 
-/* Scrollbar for messages */
 #messageContainer::-webkit-scrollbar {
   width: 4px;
 }
