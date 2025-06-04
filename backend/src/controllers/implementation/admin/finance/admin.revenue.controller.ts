@@ -38,7 +38,6 @@ export class FinanceController implements IFinanceController {
   async getRevenueStats(_req: Request, res: Response): Promise<void> {
     try {
       const response = await this.financeService.getRevenueStats();
-      console.log(response);
 
       if (response.success) {
         res.status(StatusCode.OK).json(response.data);

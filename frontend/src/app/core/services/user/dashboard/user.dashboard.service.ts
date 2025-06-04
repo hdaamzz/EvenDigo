@@ -21,6 +21,10 @@ export class UserDashboardService {
     return this.http.get<AllEventResponse>(`${this.apiUrl}user/dashboard/events`);
   }
 
+  getOngoingEvents(): Observable<any> {
+    return this.http.get<AllEventResponse>(`${this.apiUrl}user/dashboard/events/ongoing`);
+  }
+
   getUserOrganizedEvents(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}user/dashboard/events/organized`);
   }

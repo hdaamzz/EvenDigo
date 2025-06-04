@@ -5,6 +5,7 @@ export interface IEventRepository {
   createEvent(eventData: Partial<EventDocument>): Promise<EventDocument>;
   findEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findCompletedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
+  findOngoingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findCurrentEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findNotStartedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> ;
   findAllEventWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
