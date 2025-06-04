@@ -27,6 +27,10 @@ export class EventService implements IEventService {
     return this.eventRepository.findCompletedEventByUserId(userId);
   }
 
+  async getOngoingEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    return this.eventRepository.findOngoingEventByUserId(userId);
+  }
+
   async getParticipatedEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
     return this.bookingRepository.findBookingEventByUserId(userId);
   }

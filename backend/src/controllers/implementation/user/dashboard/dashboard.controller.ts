@@ -80,6 +80,20 @@ export class DashboardController implements IDashboardController {
     }
   };
 
+  getUserOngoingEvents = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user._id;
+    const events = await this.eventService.getOngoingEventsByUserId(userId);
+    res.status(StatusCode.OK).json({ success: true, data: events });
+  } catch (error) {
+    console.error('Get user events error:', error);
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
+      success: false, 
+      error: 'Failed to fetch events' 
+    });
+  }
+  };
+
   getEventById = async (req: Request, res: Response): Promise<void> => {
     try {
       const eventId = req.params.eventId;

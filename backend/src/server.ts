@@ -36,7 +36,6 @@ const revenueDistributionCron = container.resolve(RevenueDistributionCronService
 revenueDistributionCron.startCronJob();
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
 
-//Middlewares
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
@@ -44,7 +43,6 @@ app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 
 
-//Database Connection
 connectDB();
 
 app.set('io', io);

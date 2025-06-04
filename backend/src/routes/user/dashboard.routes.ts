@@ -13,6 +13,8 @@ dashboardRouter.post('/events', authMiddleware, upload.fields([{ name: 'mainBann
 dashboardRouter.get('/events',authMiddleware,(req, res) => dashboardController.getUserEvents(req, res));
 dashboardRouter.get('/events/organized',authMiddleware,(req, res) => dashboardController.getUserOrganizedEvents(req, res));
 dashboardRouter.get('/events/participated',authMiddleware,(req, res) => dashboardController.getUserParticipatedEvents(req, res));
+dashboardRouter.get('/events/ongoing',authMiddleware,(req, res) => dashboardController.getUserOngoingEvents(req, res));
+
 
 
 

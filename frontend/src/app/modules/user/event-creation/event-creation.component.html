@@ -1,11 +1,23 @@
 <button (click)="showDialog()"
-        class="relative px-3 sm:px-5 py-1 bg-[#1E1E1E] text-sm sm:text-md font-sans rounded-lg cursor-pointer overflow-hidden group transition-transform duration-200 hover:scale-105">
-        <span class="relative z-10">Create Event</span>
-    </button>
+  class="group relative px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#00ff66] to-[#00cc52] text-white text-sm sm:text-base font-medium rounded-lg cursor-pointer overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl hover:shadow-[#00ff66]/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95">
+    
+  <span class="relative z-10 flex items-center">
+    <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+    </svg>
+    Create Event
+  </span>
+</button>
 
-    <p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [resizable]="false" header="CREATE YOUR EVENT"
-        [style]="{width: '95%', maxWidth: '1280px'}" [contentStyle]="{'max-height': '90vh', 'overflow': 'auto'}"
-        styleClass="event-dialog" [closeOnEscape]="true">
+    <p-dialog [(visible)]="visible" 
+          [modal]="true" 
+          [draggable]="false" 
+          [resizable]="false" 
+          header="CREATE YOUR EVENT"
+          [style]="{width: '95%', maxWidth: '1280px', 'z-index': '60'}" 
+          [contentStyle]="{'max-height': '90vh', 'overflow': 'auto'}"
+          styleClass="event-dialog z-60" 
+          [closeOnEscape]="true">
       <ng-template pTemplate="header">
         <div class="flex justify-between items-center w-full">
           <h2 class="text-[#00c853] text-xl font-semibold">CREATE YOUR EVENT</h2>
@@ -14,7 +26,6 @@
 
       <form [formGroup]="eventForm" (ngSubmit)="submitForm()">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          <!-- Basic Information Section -->
           <div class="space-y-4">
             <h3 class="text-[#00c853] text-lg font-medium mb-4">Basic Information</h3>
             <div class="space-y-2">

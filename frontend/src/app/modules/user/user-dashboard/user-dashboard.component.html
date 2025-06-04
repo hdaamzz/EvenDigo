@@ -1,165 +1,204 @@
 <app-user-nav></app-user-nav>
-    <!-- Tabs -->
-    <div class="flex justify-between pt-20">
-      <div class="relative mt-3 mx-4 sm:mx-8 md:mx-11 flex flex-wrap items-center gap-2 sm:gap-3">
-        <button (click)="tabChange('participated')"
-          class="relative px-3 sm:px-5 py-1 bg-[#1E1E1E] text-sm sm:text-md font-sans rounded-lg cursor-pointer overflow-hidden group transition-transform duration-200 hover:scale-105"
-          [ngClass]="{'active-tab': tabSwitch === true}">
-          <span class="relative z-10">Participated</span>
-          <span
-            class="absolute inset-0 border-2 border-white scale-0 rounded-lg transition-transform duration-300 ease-out"
-            [ngClass]="{'scale-100': tabSwitch === true}"></span>
-        </button>
-        <button (click)="tabChange('organized')"
-          class="relative px-3 sm:px-5 py-1 bg-[#1E1E1E] text-sm sm:text-md font-sans rounded-lg cursor-pointer overflow-hidden group transition-transform duration-200 hover:scale-105"
-          [ngClass]="{'active-tab': tabSwitch === false}">
-          <span class="relative z-10">Organized</span>
-          <span
-            class="absolute inset-0 border-2 border-white scale-0 rounded-lg transition-transform duration-300 ease-out"
-            [ngClass]="{'scale-100': tabSwitch === false}"></span>
-        </button>
-      </div>
-      <div class="relative mt-3 mx-4 sm:mx-8 md:mx-11 flex flex-wrap items-center gap-3 sm:gap-3">
-        <app-event-creation [currentUser]="currentUser" [isUserVerified]="isUserVerified" (onEventCreated)="fetchAllEvents()"></app-event-creation>
-      </div>
+
+<div class="relative pt-20 pb-8 bg-gradient-to-br ">
+  <div class="relative z-10 flex justify-between items-center mx-4 sm:mx-8 md:mx-11">
+    <div class="flex items-center space-x-1  backdrop-blur-sm rounded-xl p-1 gap-3.5 ">
+      <button (click)="tabChange('participated')"
+        class="relative px-4 sm:px-6 py-2.5 text-sm sm:text-base font-medium rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 "
+        [ngClass]="{
+          'bg-[#00ff66] text-white shadow-lg ': activeTab === 'participated',
+          'text-gray-300 hover:text-white hover:bg-[#00ff66]': activeTab !== 'participated'
+        }" [@tabAnimation]="activeTab === 'participated' ? 'active' : 'inactive'">
+        <span class="relative z-10 flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          Participated
+        </span>
+      </button>
+
+      <button (click)="tabChange('organized')"
+        class="relative px-4 sm:px-6 py-2.5 text-sm sm:text-base font-medium rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 "
+        [ngClass]="{
+          'bg-[#00ff66] text-white shadow-lg ': activeTab === 'organized',
+          'text-gray-300 hover:text-white hover:bg-[#00ff66]': activeTab !== 'organized'
+        }" [@tabAnimation]="activeTab === 'organized' ? 'active' : 'inactive'">
+        <span class="relative z-10 flex items-center">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Organized
+        </span>
+      </button>
+
+      <button (click)="tabChange('ongoing')"
+        class="relative px-4 sm:px-6 py-2.5 text-sm sm:text-base font-medium rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 "
+        [ngClass]="{
+          'bg-[#00ff66] text-white shadow-lg ': activeTab === 'ongoing',
+          'text-gray-300 hover:text-white hover:bg-[#00ff66]': activeTab !== 'ongoing'
+        }" [@tabAnimation]="activeTab === 'ongoing' ? 'active' : 'inactive'">
+        <span class="relative z-10 flex items-center">
+          <div class="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Ongoing
+        </span>
+      </button>
     </div>
 
-    <!-- Search -->
-    <div class="relative mt-4 sm:mt-8 md:mt-10 mx-4 sm:mx-8 md:mx-11 w-50">
-      <input type="text"
-        class="w-full pl-10 pr-4 py-2 border-2 border-gray-500 rounded-md text-xs font-serif placeholder-gray-500 focus:outline-none focus:border-[#00ff66] transition-colors duration-300"
-        placeholder="Search events">
-      <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-500" fill="none"
-        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-      </svg>
+    <div class="relative">
+      <app-event-creation [currentUser]="currentUser" [isUserVerified]="isUserVerified"
+        (onEventCreated)="fetchAllEvents()">
+      </app-event-creation>
     </div>
+  </div>
+</div>
 
-    <!-- Main Content -->
-    <div
-      class="bg-[#1E1E1E] p-3 sm:p-4 md:p-6 mx-2 sm:mx-6 md:mx-10 my-4 sm:my-8 md:my-10 min-h-screen h-max rounded-xl sm:rounded-2xl">
-      <!-- Sort Options - Responsive Filter Bar (hidden on mobile) -->
-      <div class="hidden sm:flex justify-end mb-4 sm:mb-6 overflow-x-auto pb-2">
-        <div
-          class="bg-[#121212] rounded-md flex flex-wrap sm:flex-nowrap items-center overflow-hidden px-2 py-1 sm:px-3 sm:py-2 whitespace-nowrap">
+<!-- Main Content Area -->
+<div class="min-h-screen bg-gradient-to-b ">
+  <div class="mx-4 sm:mx-8 md:mx-11 py-8">
+    <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6 shadow-2xl">
+      <div [@fadeSlide]="activeTab" [@cardStagger]="getCurrentEventList()?.length">
+        @if (eventLoading) {
+        <!-- Enhanced Loading State -->
+        <div class="flex flex-col items-center justify-center py-16">
+          <div class="relative">
+            <div class="w-16 h-16 border-4 border-gray-600 border-t-emerald-500 rounded-full animate-spin"></div>
+            <div
+              class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-blue-500 rounded-full animate-spin animate-reverse">
+            </div>
+          </div>
+          <p class="mt-4 text-gray-400 animate-pulse">Loading events...</p>
+        </div>
+        } @else if ((getCurrentEventList()?.length ?? 0) === 0) {
+        <div class="text-center py-16">
+          <div
+            class="mx-auto w-24 h-24 mb-6 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+            <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-300 mb-2">No Events Found</h3>
+          <p class="text-gray-500 mb-6">
+            @switch (activeTab) {
+            @case ('participated') { You haven't participated in any events yet. Discover exciting events to join! }
+            @case ('organized') { You haven't organized any events yet. Create your first event to get started! }
+            @case ('ongoing') { No events are currently ongoing. Check back later! }
+            }
+          </p>
+          @if (activeTab === 'organized') {
           <button
-            class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Newest</button>
-          <span class="text-gray-500 mx-1">|</span>
-          <button
-            class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Oldest</button>
-          <span class="text-gray-500 mx-1">|</span>
-          <button
-            class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Private</button>
-          <span class="text-gray-500 mx-1">|</span>
-          <button
-            class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Public</button>
-          <span class="text-gray-500 mx-1">|</span>
-          <button
-            class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Custom
-            Date</button>
+            class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-lg">
+            Create Your First Event
+          </button>
+          }
+        </div>
+        } @else {
+        <div class="relative">
+        <app-event-card 
+          [events]="getCurrentEventList() || []" 
+          [activeTab]="activeTab">
+        </app-event-card>
+      </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Event Details Dialog -->
+<p-dialog [(visible)]="displayEventDialog" [modal]="true" [style]="{width: '95%', maxWidth: '600px'}"
+  [draggable]="false" [resizable]="false" styleClass="event-details-dialog" [showHeader]="false"
+  [dismissableMask]="true" [baseZIndex]="10000">
+
+  <ng-container *ngIf="selectedEvent">
+    <div class="relative overflow-hidden rounded-xl bg-gray-900 border border-gray-700">
+      <div class="relative h-48 sm:h-56">
+        <img [src]="selectedEvent.mainBanner" alt="Event Banner" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
+
+        <button
+          class="absolute top-4 right-4 p-2 bg-gray-900/80 backdrop-blur-sm text-white rounded-full hover:bg-gray-800 transition-colors duration-200"
+          (click)="displayEventDialog = false">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <!-- Age Restriction Badge -->
+        <div *ngIf="selectedEvent.ageRestriction"
+          class="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full border border-red-400">
+          18+
         </div>
       </div>
 
-      <!-- Alternative Mobile Filter Bar (appears on smallest screens) -->
-      <div class="sm:hidden mb-4">
-        <select class="w-full bg-[#121212] text-white text-xs rounded-md p-2 border border-gray-700">
-          <option>Newest</option>
-          <option>Oldest</option>
-          <option>Private</option>
-          <option>Public</option>
-          <option>Custom Date</option>
-        </select>
-      </div>
-
-      <!-- Content -->
-      <div class="w-full mx-auto  bg-[#1E1E1E]">
-        <div class="max-w-xs md:max-w-7xl m-auto my-6">
-          <div [@fadeAnimation]="tabSwitch ? 'participated' : 'organized'" class="transition-opacity duration-300">
-            @if (tabSwitch) {
-              @if (eventLoading) {
-                <h3 colspan="7" class="text-center py-4">Loading...</h3>
-              } @else if (eventOrganizedList?.length === 0) {
-                <h3 colspan="7" class="text-center py-4">No Events found</h3>
-              } @else {
-                @if (eventLoading) {
-                  <h3 colspan="7" class="text-center py-4">Loading...</h3>
-                } @else if (eventParticipatedList?.length === 0) {
-                  <h3 colspan="7" class="text-center py-4">No Events found</h3>
-                } @else if(eventParticipatedList){
-  
-                    <app-event-card [events]="eventParticipatedList"></app-event-card> 
-                  
-                }
-              }
-              
-            } @else {
-              @if (eventLoading) {
-                <h3 colspan="7" class="text-center py-4">Loading...</h3>
-              } @else if (eventOrganizedList?.length === 0) {
-                <h3 colspan="7" class="text-center py-4">No Events found</h3>
-              } @else if(eventOrganizedList){
-
-                  <app-event-card [events]="eventOrganizedList"></app-event-card> 
-                
-              }
-            }
+      <!-- Event Details -->
+      <div class="p-6 space-y-6">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">{{selectedEvent.eventTitle}}</h2>
+          <div class="flex items-center text-emerald-400">
+            <span class="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
+            <span class="text-sm font-medium">{{selectedEvent.eventType}}</span>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Event Details Dialog -->
-    <p-dialog [(visible)]="displayEventDialog" [modal]="true" [style]="{width: '90%', maxWidth: '500px'}"
-      [draggable]="false" [resizable]="false" styleClass="event-details-dialog neon-theme" [showHeader]="false"
-      [dismissableMask]="true" [baseZIndex]="10000">
-      <ng-container *ngIf="selectedEvent">
-        <div class="relative">
-          <div class="h-40 bg-black relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-green-500/30 to-black/70"></div>
-            <img [src]="selectedEvent.mainBanner" alt="Event Banner" class="w-full h-full object-cover opacity-80">
-            <div *ngIf="selectedEvent.ageRestriction"
-              class="absolute top-3 right-3 bg-black text-green-400 text-xs px-3 py-1 rounded-full border border-green-400 shadow-neon">
-              18+
+        <!-- Event Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex items-center space-x-3 p-3 bg-gray-800/50 rounded-lg">
+            <div class="p-2 bg-emerald-500/20 rounded-lg">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-gray-400 text-xs">Start Date</p>
+              <p class="text-white text-sm font-medium">{{selectedEvent.startDate | date:'MMM d, y'}}</p>
+              <p class="text-gray-300 text-xs">{{selectedEvent.startTime | date:'shortTime'}}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3 p-3 bg-gray-800/50 rounded-lg">
+            <div class="p-2 bg-blue-500/20 rounded-lg">
+              <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-gray-400 text-xs">Location</p>
+              <p class="text-white text-sm font-medium">{{selectedEvent.venueName}}</p>
+              <p class="text-gray-300 text-xs">{{selectedEvent.city}}</p>
             </div>
           </div>
         </div>
-        <div class="p-5 bg-black text-white">
-          <h2 class="text-2xl font-bold mb-3 text-green-400">{{selectedEvent.eventTitle}}</h2>
-          <div class="flex items-center mt-3 text-gray-300 hover:text-green-400 transition-colors duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <p>{{selectedEvent.startDate | date:'MMM d, y'}} at {{selectedEvent.startTime | date:'shortTime'}}</p>
-          </div>
-          <div class="flex items-center mt-3 text-gray-300 hover:text-green-400 transition-colors duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <p>{{selectedEvent.venueName}}, {{selectedEvent.city}}</p>
-          </div>
-          <div class="mt-5 border-t border-green-900 pt-4">
-            <h3 class="font-bold mb-2 text-green-400">Description</h3>
-            <p class="text-gray-300">{{selectedEvent.eventDescription}}</p>
-          </div>
-          <div class="mt-6">
-            <button
-              class="w-full bg-green-600 hover:bg-green-500 text-black font-bold px-4 py-3 rounded-md text-sm flex items-center justify-center transition-all duration-300 shadow-neon-lg"
-              (click)="purchaseTickets(selectedEvent)">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-              </svg>
-              Buy Tickets
-            </button>
-          </div>
+
+        <!-- Description -->
+        <div class="border-t border-gray-700 pt-6">
+          <h3 class="text-lg font-semibold text-white mb-3">About this event</h3>
+          <p class="text-gray-300 leading-relaxed">{{selectedEvent.eventDescription}}</p>
         </div>
-      </ng-container>
-    </p-dialog>
+
+        <!-- Action Button -->
+        <div class="pt-4">
+          <button
+            class="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white font-semibold px-6 py-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-3 shadow-lg"
+            (click)="purchaseTickets(selectedEvent)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+            </svg>
+            <span>Get Tickets</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</p-dialog>

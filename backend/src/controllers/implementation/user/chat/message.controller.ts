@@ -10,9 +10,6 @@ export class PersonalMessageController {
     @inject('ChatService') private chatService: IChatService
   ) {}
 
-  /**
-   * Get messages from a personal chat
-   */
   async getChatMessages(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -64,9 +61,6 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Get paginated messages from a personal chat
-   */
   async getChatMessagesWithPagination(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -130,9 +124,6 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Send a message to a personal chat
-   */
   async sendMessage(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -176,9 +167,6 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Update a message in personal chat
-   */
   async updateMessage(req: Request, res: Response): Promise<void> {
     try {
       const { messageId } = req.params;
@@ -213,9 +201,6 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Delete a message from personal chat
-   */
   async deleteMessage(req: Request, res: Response): Promise<void> {
     try {
       const { messageId } = req.params;
@@ -240,9 +225,7 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Get a specific message by ID (with access validation)
-   */
+
   async getMessageById(req: Request, res: Response): Promise<void> {
     try {
       const { messageId } = req.params;
@@ -284,9 +267,6 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Mark messages as read in a personal chat
-   */
   async markMessagesAsRead(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -318,9 +298,7 @@ export class PersonalMessageController {
     }
   }
 
-  /**
-   * Get unread message count for user across all personal chats
-   */
+
   async getUnreadMessageCount(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
