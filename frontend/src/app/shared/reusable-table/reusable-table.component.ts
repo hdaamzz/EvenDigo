@@ -9,15 +9,11 @@ export interface TableColumn {
   badgeMapping?: {[key: string]: {color: string, bgColor: string}};
 }
 
-/**
- * Interface for pagination events
- */
 export interface PageEvent {
   pageIndex: number;
   pageSize: number;
   page?: number; 
 }
-
 
 @Component({
   selector: 'app-reusable-table',
@@ -39,63 +35,83 @@ export class ReusableTableComponent implements OnChanges {
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() searchChange = new EventEmitter<string>();
   @Output() rowClick = new EventEmitter<any>();
+  
   searchTerm = '';
   private readonly _maxPageButtons = 5;
   
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && !changes['data'].firstChange && 
-        changes['data'].previousValue?.length !== changes['data'].currentValue?.length) {
-      this._resetToFirstPage();
+    // Don't reset page automatically - let parent component handle it
+    if (changes['currentPage'] && changes['currentPage'].currentValue) {
+      // Ensure currentPage is within valid bounds
+      const maxPage = this.totalPages;
+      if (this.currentPage > maxPage && maxPage > 0) {
+        this.currentPage = maxPage;
+      }
     }
   }
   
-
   get filteredData(): any[] {
+    // If totalItems is provided, assume parent handles pagination
     if (this.totalItems > 0) {
-      return this.data;
+      return this.data; // Data is already paginated by parent
     }
+    
+    // Handle pagination internally
     let filtered = this._filterData();
     return this._paginateData(filtered);
   }
 
   get totalPages(): number {
     if (this.totalItems > 0) {
+      // Use totalItems from parent for server-side pagination
       return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
     }
+    
+    // Calculate based on filtered data for client-side pagination
     const filteredLength = this._filterData().length;
     return Math.max(1, Math.ceil(filteredLength / this.pageSize));
   }
+  
   getPageArray(): number[] {
-    return Array.from({ length: Math.min(this._maxPageButtons, this.totalPages) }, (_, i) => {
-      if (this.totalPages <= this._maxPageButtons) return i + 1;
-      if (this.currentPage <= 3) return i + 1;
-      if (this.currentPage >= this.totalPages - 2) {
-        return this.totalPages - this._maxPageButtons + 1 + i;
-      }
-      return this.currentPage - Math.floor(this._maxPageButtons / 2) + i;
-    });
+    const totalPages = this.totalPages;
+    const maxButtons = Math.min(this._maxPageButtons, totalPages);
+    
+    if (totalPages <= this._maxPageButtons) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    
+    // Adjust startPage if we're near the end
+    if (endPage - startPage + 1 < maxButtons) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   }
   
-
   changePage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
     
     this.currentPage = page;
     this._emitPageChange();
   }
   
-
   onSearch(): void {
-    this._resetToFirstPage();
     this.searchChange.emit(this.searchTerm);
+    
+    // Only reset page for client-side pagination
+    if (this.totalItems === 0) {
+      this.currentPage = 1;
+      this._emitPageChange();
+    }
   }
   
-
   onRowClick(item: any): void {
     this.rowClick.emit(item);
   }
   
-
   private _filterData(): any[] {
     if (!this.searchTerm) {
       return this.data;
@@ -112,23 +128,15 @@ export class ReusableTableComponent implements OnChanges {
     );
   }
   
-
   private get _columnKeys(): string[] {
     return this.columns.map(col => col.key);
   }
   
-
   private _paginateData(data: any[]): any[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return data.slice(startIndex, startIndex + this.pageSize);
   }
-
-  private _resetToFirstPage(): void {
-    this.currentPage = 1;
-    this._emitPageChange();
-  }
   
-
   private _emitPageChange(): void {
     this.pageChange.emit({
       pageIndex: this.currentPage - 1,  
