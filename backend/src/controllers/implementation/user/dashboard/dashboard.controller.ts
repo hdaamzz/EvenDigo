@@ -7,6 +7,7 @@ import { EventMapper } from '../../../../../src/services/implementation/user/das
 import { IEventService } from '../../../../../src/services/interfaces/user/dashboard/IEvent.service';
 import { IFileService } from '../../../../../src/services/interfaces/user/dashboard/IFile.service';
 import { ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
+
 @injectable()
 export class DashboardController implements IDashboardController {
   constructor(
@@ -42,7 +43,10 @@ export class DashboardController implements IDashboardController {
     try {
       const userId = req.user._id;
       const events = await this.eventService.getEventsByUserId(userId);
-      res.status(StatusCode.OK).json({ success: true, data: events });
+      
+      const eventsWithSecureUrls = this.generateSecureUrlsForEvents(events);
+      
+      res.status(StatusCode.OK).json({ success: true, data: eventsWithSecureUrls });
     } catch (error) {
       console.error('Get user events error:', error);
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
@@ -56,6 +60,9 @@ export class DashboardController implements IDashboardController {
     try {
       const userId = req.user._id;
       const events = await this.eventService.getOrganizedEventsByUserId(userId);
+      
+      // const eventsWithSecureUrls = this.generateSecureUrlsForEvents(events);
+      
       res.status(StatusCode.OK).json({ success: true, data: events });
     } catch (error) {
       console.error('Get user events error:', error);
@@ -70,7 +77,10 @@ export class DashboardController implements IDashboardController {
     try {
       const userId = req.user._id;
       const events = await this.eventService.getParticipatedEventsByUserId(userId);
-      res.status(StatusCode.OK).json({ success: true, data: events });
+      
+      const eventsWithSecureUrls = this.generateSecureUrlsForEvents(events);
+      
+      res.status(StatusCode.OK).json({ success: true, data: eventsWithSecureUrls });
     } catch (error) {
       console.error('Get user events error:', error);
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
@@ -81,17 +91,20 @@ export class DashboardController implements IDashboardController {
   };
 
   getUserOngoingEvents = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const userId = req.user._id;
-    const events = await this.eventService.getOngoingEventsByUserId(userId);
-    res.status(StatusCode.OK).json({ success: true, data: events });
-  } catch (error) {
-    console.error('Get user events error:', error);
-    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
-      success: false, 
-      error: 'Failed to fetch events' 
-    });
-  }
+    try {
+      const userId = req.user._id;
+      const events = await this.eventService.getOngoingEventsByUserId(userId);
+      
+      // const eventsWithSecureUrls = this.generateSecureUrlsForEvents(events);
+      
+      res.status(StatusCode.OK).json({ success: true, data: events });
+    } catch (error) {
+      console.error('Get user events error:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
+        success: false, 
+        error: 'Failed to fetch events' 
+      });
+    }
   };
 
   getEventById = async (req: Request, res: Response): Promise<void> => {
@@ -107,7 +120,9 @@ export class DashboardController implements IDashboardController {
         return;
       }
       
-      res.status(StatusCode.OK).json({ success: true, data: event });
+      const eventWithSecureUrls = this.generateSecureUrlsForEvent(event);
+      
+      res.status(StatusCode.OK).json({ success: true, data: eventWithSecureUrls });
     } catch (error) {
       console.error('Get event error:', error);
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
@@ -131,7 +146,10 @@ export class DashboardController implements IDashboardController {
       const updateData = this.eventMapper.mapUpdateRequestToEventData(req.body, fileData);
       
       const updatedEvent = await this.eventService.updateEvent(eventId, updateData);
-      res.status(StatusCode.OK).json({ success: true, data: updatedEvent });
+      
+      const eventWithSecureUrls = this.generateSecureUrlsForEvent(updatedEvent);
+      
+      res.status(StatusCode.OK).json({ success: true, data: eventWithSecureUrls });
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(StatusCode.NOT_FOUND).json({ success: false, error: error.message });
@@ -181,4 +199,30 @@ export class DashboardController implements IDashboardController {
       });
     }
   };
+
+
+  private generateSecureUrlsForEvent(event: any): any {
+    const eventWithSecureUrls = { ...event };
+    
+    if (event.mainBanner) {
+      eventWithSecureUrls.mainBannerUrl = this.fileService.generateFreshSecureUrl(
+        event.mainBanner, 
+        2 
+        
+      );
+    }
+    
+    if (event.promotionalImage) {
+      eventWithSecureUrls.promotionalImageUrl = this.fileService.generateFreshSecureUrl(
+        event.promotionalImage, 
+        2 
+      );
+    }
+    
+    return eventWithSecureUrls;
+  }
+
+  private generateSecureUrlsForEvents(events: any[]): any[] {
+    return events.map(event => this.generateSecureUrlsForEvent(event));
+  }
 }
