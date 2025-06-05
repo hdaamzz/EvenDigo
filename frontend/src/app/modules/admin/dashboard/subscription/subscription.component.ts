@@ -22,8 +22,11 @@ import { SubscriptionDetailsDialogComponent } from './subscription-details-dialo
 export class SubscriptionComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   filteredSubscriptions: Subscription[] = [];
+  paginatedSubscriptions: Subscription[] = [];
   loading = true;
   private readonly _destroy$ = new Subject<void>();
+  searchTerm = '';
+  
   stats = {
     totalSubscriptions: 0,
     activeSubscriptions: 0,
@@ -63,38 +66,41 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     private readonly _dialog: MatDialog
   ) {}
 
-  /** Initialize component and load subscription data */
   ngOnInit(): void {
-    this.loadSubscriptions();
+    this.loadAllSubscriptions();
   }
 
-  /** Clean up subscriptions when component is destroyed */
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
   }
 
   /**
-   * Loads subscription data from the API
+   * Load all subscriptions (both active and inactive)
    */
-  loadSubscriptions(): void {
+  loadAllSubscriptions(): void {
     this.loading = true;
     
-    this._subscriptionService.getSubscriptions()
+    // Use getSubscriptions instead of getActiveSubscriptions to get all subscriptions
+    this._subscriptionService.getSubscriptions(1, 1000) // Get a large number to fetch all
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (data) => {
           this.subscriptions = data.data?.subscriptions ?? [];
           
+          // Format dates
           this.subscriptions = this.subscriptions.map(sub => ({
             ...sub,
             startDate: this._formatDate(sub.startDate),
-            endDate: this._formatDate(sub.endDate)
+            endDate: this._formatDate(sub.endDate),
+            // Ensure status matches isActive state
+            status: sub.isActive ? 'active' : 'inactive'
           }));
           
           this.filteredSubscriptions = [...this.subscriptions];
           this.totalItems = this.subscriptions.length;
           this._calculateStats();
+          this._updatePagination();
           this.loading = false;
         },
         error: (error) => {
@@ -104,11 +110,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Formats date string to YYYY-MM-DD format
-   * @param dateString Date string to format
-   * @returns Formatted date string
-   */
   private _formatDate(dateString: string): string {
     if (!dateString) return '';
     
@@ -121,9 +122,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Calculates subscription statistics
-   */
   private _calculateStats(): void {
     this.stats.totalSubscriptions = this.subscriptions.length;
     this.stats.activeSubscriptions = this.subscriptions.filter(s => s.isActive === true).length;
@@ -132,39 +130,47 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handles page change events from the table component
-   * @param event Page change event containing page number
+   * Update pagination based on current filtered data
    */
+  private _updatePagination(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedSubscriptions = this.filteredSubscriptions.slice(startIndex, endIndex);
+  }
+
   onPageChange(event: { page?: number }): void {
     this.currentPage = event.page || 1;
+    this._updatePagination();
   }
 
-  /**
-   * Handles search term changes
-   * @param term Search term
-   */
   onSearchChange(term: string): void {
-    this.applyFilters(term);
+    this.searchTerm = term;
+    this.applyFilters();
   }
 
   /**
-   * Applies filters to the subscription data
-   * @param searchTerm Optional search term
+   * Apply all filters (status, plan type, and search)
    */
-  applyFilters(searchTerm: string = ''): void {
+  applyFilters(): void {
     let filtered = [...this.subscriptions];
     
+    // Apply status filter
     if (this.statusFilter !== 'all') {
-      const isActive = this.statusFilter === 'active';
-      filtered = filtered.filter(sub => sub.isActive === isActive);
+      if (this.statusFilter === 'active') {
+        filtered = filtered.filter(sub => sub.isActive === true);
+      } else if (this.statusFilter === 'inactive') {
+        filtered = filtered.filter(sub => sub.isActive === false);
+      }
     }
-    
+
+    // Apply plan type filter
     if (this.planTypeFilter !== 'all') {
       filtered = filtered.filter(sub => sub.type === this.planTypeFilter);
     }
- 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+
+    // Apply search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(sub => 
         Object.values(sub).some(val => 
           val && val.toString().toLowerCase().includes(term)
@@ -174,24 +180,23 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     
     this.filteredSubscriptions = filtered;
     this.totalItems = filtered.length;
-    this.currentPage = 1;
+    this.currentPage = 1; // Reset to first page when filters change
+    this._updatePagination();
   }
 
   /**
-   * Resets all applied filters
+   * Reset all filters and show all subscriptions
    */
   resetFilters(): void {
     this.statusFilter = 'all';
     this.planTypeFilter = 'all';
+    this.searchTerm = '';
     this.filteredSubscriptions = [...this.subscriptions];
     this.totalItems = this.subscriptions.length;
     this.currentPage = 1;
+    this._updatePagination();
   }
 
-  /**
-   * Toggles the active status of a subscription
-   * @param subscription Subscription to update
-   */
   toggleSubscriptionStatus(subscription: Subscription): void {
     const newStatus = !subscription.isActive;
     
@@ -202,9 +207,20 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this._destroy$))
     .subscribe({
       next: () => {
-        subscription.isActive = newStatus;
-        subscription.status = newStatus ? 'active' : 'inactive';
+        // Update the subscription in all arrays
+        const updateSubscription = (sub: Subscription) => {
+          if (sub.id === subscription.id) {
+            sub.isActive = newStatus;
+            sub.status = newStatus ? 'active' : 'inactive';
+          }
+          return sub;
+        };
+
+        this.subscriptions = this.subscriptions.map(updateSubscription);
+        this.filteredSubscriptions = this.filteredSubscriptions.map(updateSubscription);
+        
         this._calculateStats();
+        this._updatePagination();
       },
       error: (error) => {
         console.error('Error updating subscription status:', error);
@@ -212,10 +228,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Opens a dialog to view detailed subscription information
-   * @param subscription Subscription to view
-   */
   viewSubscriptionDetails(subscription: Subscription): void {
     const dialogRef = this._dialog.open(SubscriptionDetailsDialogComponent, {
       width: '700px',
@@ -226,20 +238,24 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         if (result?.updated) {
+          // Format dates for the updated subscription
+          result.subscription.startDate = this._formatDate(result.subscription.startDate);
+          result.subscription.endDate = this._formatDate(result.subscription.endDate);
+          
+          // Update in main subscriptions array
           const index = this.subscriptions.findIndex(s => s.id === result.subscription.id);
           if (index !== -1) {
-            result.subscription.startDate = this._formatDate(result.subscription.startDate);
-            result.subscription.endDate = this._formatDate(result.subscription.endDate);
-            
             this.subscriptions[index] = result.subscription;
           }
 
+          // Update in filtered subscriptions array
           const filteredIndex = this.filteredSubscriptions.findIndex(s => s.id === result.subscription.id);
           if (filteredIndex !== -1) {
             this.filteredSubscriptions[filteredIndex] = result.subscription;
           }
 
           this._calculateStats();
+          this._updatePagination();
         }
       });
   }

@@ -12,46 +12,47 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   ) {}
 
   getAllSubscriptions = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      
-      const filters: any = {};
-      
-      if (req.query.status && req.query.status !== 'all') {
-        filters.status = req.query.status;
-      }
-      
-      if (req.query.planType && req.query.planType !== 'all') {
-        filters.planType = req.query.planType;
-      }
-      
-      if (req.query.search) {
-        filters.searchTerm = req.query.search;
-      }
-      
-      if (req.query.startDate) {
-        filters.startDate = new Date(req.query.startDate as string);
-      }
-      
-      if (req.query.endDate) {
-        filters.endDate = new Date(req.query.endDate as string);
-      }
-
-      const result = await this.adminSubscriptionService.getAllSubscriptions(page, limit, filters);
-
-      res.status(StatusCode.OK).json({
-        success: true,
-        data: result
-      });
-    } catch (error) {
-      console.error('Error fetching subscriptions:', error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: (error as Error).message || 'Failed to fetch subscriptions'
-      });
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const activeOnly = req.query.activeOnly === 'true';
+    
+    const filters: any = {};
+    
+    if (activeOnly) {
+      filters.activeOnly = true;
     }
-  };
+    
+    if (req.query.planType && req.query.planType !== 'all') {
+      filters.planType = req.query.planType;
+    }
+    
+    if (req.query.search) {
+      filters.searchTerm = req.query.search;
+    }
+    
+    if (req.query.startDate) {
+      filters.startDate = new Date(req.query.startDate as string);
+    }
+    
+    if (req.query.endDate) {
+      filters.endDate = new Date(req.query.endDate as string);
+    }
+
+    const result = await this.adminSubscriptionService.getAllSubscriptions(page, limit, filters);
+
+    res.status(StatusCode.OK).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error);
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: (error as Error).message || 'Failed to fetch subscriptions'
+    });
+  }
+};
 
   getSubscriptionStats = async (_req: Request, res: Response): Promise<void> => {
     try {

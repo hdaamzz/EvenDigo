@@ -24,7 +24,6 @@ type PaymentMethod = 'wallet' | 'card';
   styleUrl: './premium-checkout.component.css'
 })
 export class PremiumCheckoutComponent implements OnInit, OnDestroy {
-  // Public properties
   wallet!: IWallet;
   selectedPaymentMethod: PaymentMethod = 'card';
   proceedLoading = false;
@@ -41,7 +40,6 @@ export class PremiumCheckoutComponent implements OnInit, OnDestroy {
     features: []
   };
 
-  // Private properties
   private _stripe: Stripe | null = null;
   private _destroy$ = new Subject<void>();
 
@@ -165,7 +163,7 @@ export class PremiumCheckoutComponent implements OnInit, OnDestroy {
     }
     
     const payload = {
-      planType: 'premium',
+      planType: this.planDetails.type,
       amount: this.planDetails.price,
       successUrl: `${window.location.origin}/premium/success`,
       cancelUrl: `${window.location.origin}/premium/checkout`

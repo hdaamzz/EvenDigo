@@ -52,6 +52,28 @@ export class SubscriptionService {
     );
   }
 
+  getActiveSubscriptions(
+  page = 1, 
+  limit = 10, 
+  filters?: SubscriptionFilter
+): Observable<ApiResponse<{ subscriptions: Subscription[], pagination: PaginationInfo }>> {
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('limit', limit.toString())
+    .set('activeOnly', 'true');
+  
+  if (filters) {
+    params = this._buildFilterParams(params, filters);
+  }
+
+  return this._http.get<ApiResponse<{ subscriptions: Subscription[], pagination: PaginationInfo }>>(
+    `${this._apiUrl}admin/subscriptions`,
+    { params, withCredentials: true }
+  ).pipe(
+    catchError(this._handleError)
+  );
+}
+
 
   getSubscriptionStats(): Observable<ApiResponse<SubscriptionStats>> {
     return this._http.get<ApiResponse<SubscriptionStats>>(

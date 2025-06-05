@@ -14,67 +14,62 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
   ) {}
 
   async getAllSubscriptions(page: number, limit: number, filters?: SubscriptionFilter): Promise<PaginatedSubscriptions> {
-    try {
-      const skip = (page - 1) * limit;
-      
-      // Build the filter object for MongoDB query
-      const query: any = {};
-      
-      if (filters) {
-        if (filters.status === 'active') {
-          query.isActive = true;
-        } else if (filters.status === 'inactive') {
-          query.isActive = false;
-        }
-        
-        if (filters.planType) {
-          query.type = filters.planType;
-        }
-        
-        if (filters.searchTerm) {
-          // Search in multiple fields
-          query.$or = [
-            { subscriptionId: { $regex: filters.searchTerm, $options: 'i' } },
-            { status: { $regex: filters.searchTerm, $options: 'i' } },
-            { type: { $regex: filters.searchTerm, $options: 'i' } },
-            { paymentMethod: { $regex: filters.searchTerm, $options: 'i' } }
-          ];
-        }
-        
-        if (filters.startDate && filters.endDate) {
-          query.startDate = { 
-            $gte: filters.startDate,
-            $lte: filters.endDate
-          };
-        } else if (filters.startDate) {
-          query.startDate = { $gte: filters.startDate };
-        } else if (filters.endDate) {
-          query.startDate = { $lte: filters.endDate };
-        }
+  try {
+    const skip = (page - 1) * limit;
+    
+    const query: any = {};
+    
+    if (filters) {
+      if (filters.activeOnly) {
+        query.isActive = true;
+        query.status = 'active';
       }
       
-      // Get total count for pagination
-      const totalItems = await this.subscriptionRepository.countSubscriptions(query);
+      if (filters.planType && filters.planType !== 'all') {
+        query.type = filters.planType;
+      }
       
-      // Get subscriptions with pagination
-      const subscriptions = await this.subscriptionRepository.findSubscriptionsWithPagination(query, skip, limit);
+      if (filters.searchTerm) {
+        query.$or = [
+          { subscriptionId: { $regex: filters.searchTerm, $options: 'i' } },
+          { type: { $regex: filters.searchTerm, $options: 'i' } },
+          { paymentMethod: { $regex: filters.searchTerm, $options: 'i' } }
+        ];
+      }
       
-      // Enhance subscriptions with user information if needed
-      const enhancedSubscriptions = await this.enhanceSubscriptionsWithUserInfo(subscriptions);
-      
-      return {
-        subscriptions: enhancedSubscriptions,
-        pagination: {
-          currentPage: page,
-          itemsPerPage: limit,
-          totalItems
-        }
-      };
-    } catch (error) {
-      console.error('Error getting subscriptions:', error);
-      throw new Error(`Failed to get subscriptions: ${(error as Error).message}`);
+      if (filters.startDate && filters.endDate) {
+        query.startDate = { 
+          $gte: filters.startDate,
+          $lte: filters.endDate
+        };
+      } else if (filters.startDate) {
+        query.startDate = { $gte: filters.startDate };
+      } else if (filters.endDate) {
+        query.startDate = { $lte: filters.endDate };
+      }
+    } else {
+      // Default to active subscriptions only
+      query.isActive = true;
+      query.status = 'active';
     }
+    
+    const totalItems = await this.subscriptionRepository.countSubscriptions(query);
+    const subscriptions = await this.subscriptionRepository.findSubscriptionsWithPagination(query, skip, limit);
+    const enhancedSubscriptions = await this.enhanceSubscriptionsWithUserInfo(subscriptions);
+    
+    return {
+      subscriptions: enhancedSubscriptions,
+      pagination: {
+        currentPage: page,
+        itemsPerPage: limit,
+        totalItems
+      }
+    };
+  } catch (error) {
+    console.error('Error getting subscriptions:', error);
+    throw new Error(`Failed to get subscriptions: ${(error as Error).message}`);
   }
+}
 
   async getSubscriptionStats(): Promise<SubscriptionStats> {
     try {

@@ -2,7 +2,7 @@ import { Schema } from "mongoose";
 import { ISubscription } from "../../models/SubscriptionModal";
 
 export interface SubscriptionFilter {
-  status?: string;
+  activeOnly?: boolean;
   planType?: string;
   searchTerm?: string;
   startDate?: Date;

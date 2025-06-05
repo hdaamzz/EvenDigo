@@ -56,10 +56,11 @@ const storage = multer.diskStorage({
   },
 });
 
+
 export const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -87,61 +88,13 @@ export const uploadToCloudinary = async (filePath: string) => {
 };
 
 
-export const generateSecureCloudinaryUrl = (
-  publicId: string, 
-  expirationHours: number = 1
-): string => {
-  const expirationTime = Math.round(Date.now() / 1000) + (expirationHours * 3600);
-  
-  return cloudinary.url(publicId, {
-    sign_url: true,
-    expires_at: expirationTime,
-    secure: true,
-    type: 'upload' 
-  });
-};
-
-
-export const uploadToCloudinaryPrivate = async (filePath: string) => {
-  try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: 'events',
-      type: 'private', 
-      resource_type: 'auto'
-    });
-    fs.unlinkSync(filePath); 
-    return result;
-  } catch (error) {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-    throw error;
-  }
-};
-
-
-export const generateSecurePrivateUrl = (
-  publicId: string, 
-  expirationHours: number = 1
-): string => {
-  const expirationTime = Math.round(Date.now() / 1000) + (expirationHours * 3600);
-  
-  return cloudinary.url(publicId, {
-    type: 'private',
-    sign_url: true,
-    expires_at: expirationTime,
-    secure: true
-  });
-};
-
-
 export function generateUniqueId(): string {
   return uuidv4();
 }
 
-
 export async function generateAndUploadQrCode(data: string): Promise<string> {
   try {
+    
     const qrCodeBuffer = await QRCode.toBuffer(data, {
       errorCorrectionLevel: 'H',
       type: 'png',
@@ -149,6 +102,7 @@ export async function generateAndUploadQrCode(data: string): Promise<string> {
       scale: 8,
     });
 
+    
     const result = await new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'qr_codes', resource_type: 'image' },
@@ -163,46 +117,6 @@ export async function generateAndUploadQrCode(data: string): Promise<string> {
     return result.secure_url; 
   } catch (error) {
     throw new Error(`Failed to generate and upload QR code: ${(error as Error).message}`);
-  }
-}
-
-
-export async function generateAndUploadSecureQrCode(data: string): Promise<{
-  publicId: string;
-  secureUrl: string;
-}> {
-  try {
-    const qrCodeBuffer = await QRCode.toBuffer(data, {
-      errorCorrectionLevel: 'H',
-      type: 'png',
-      margin: 1,
-      scale: 8,
-    });
-
-    const result = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { 
-          folder: 'qr_codes', 
-          resource_type: 'image',
-          type: 'private' 
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      uploadStream.end(qrCodeBuffer);
-    });
-
-    
-    const secureUrl = generateSecurePrivateUrl(result.public_id, 24);
-
-    return {
-      publicId: result.public_id,
-      secureUrl
-    };
-  } catch (error) {
-    throw new Error(`Failed to generate and upload secure QR code: ${(error as Error).message}`);
   }
 }
 
