@@ -1,18 +1,14 @@
 import { inject, injectable } from 'tsyringe';
 import Stripe from 'stripe';
 import { IPaymentService } from '../../../../../src/services/interfaces/user/explore/IPaymentService';
-// import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
 import { IBookingRepository } from '../../../../../src/repositories/interfaces/IBooking.repository';
 import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
 import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
+import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
 import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
 import { BadRequestException } from '../../../../../src/error/error-handlers';
 import { IWallet, TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
 import { generateRandomId } from '../../../../../src/utils/helpers';
-// import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
-// import { EventDocument } from 'src/models/interfaces/event.interface';
-// import { IUser } from 'src/models/interfaces/auth.interface';
-
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -22,7 +18,7 @@ export class PaymentService implements IPaymentService {
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingService") private bookingService: IBookingService,
-    // @inject('ChatService') private chatService: IChatService,
+    @inject("EventRepository") private eventRepository: IEventRepository
   ) {
     const stripeKey = process.env.STRIPE_KEY;
     if (!stripeKey) {
@@ -44,6 +40,17 @@ export class PaymentService implements IPaymentService {
     try {
       this.validateCheckoutParams(eventId, userId, tickets, amount, successUrl, cancelUrl);
 
+      const event = await this.eventRepository.findEventById(eventId);
+      if (!event) {
+        throw new BadRequestException('Event not found');
+      }
+
+      if (!event.tickets || event.tickets.length === 0) {
+        throw new BadRequestException('No tickets available for this event');
+      }
+
+      await this.validateTicketAvailability(eventId, tickets);
+
       const genaratedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
       const ticketDetails = await this.bookingService.prepareTicketDetails(eventId, tickets, genaratedBookingId);
       
@@ -64,7 +71,13 @@ export class PaymentService implements IPaymentService {
         mode: 'payment',
         success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: cancelUrl,
-        metadata: { userId: userId.toString(), eventId, paymentType: 'event_booking', couponCode: couponCode || '' },
+        metadata: { 
+          userId: userId.toString(), 
+          eventId, 
+          paymentType: 'event_booking', 
+          couponCode: couponCode || '',
+          tickets: JSON.stringify(tickets)
+        },
       });
 
       await this.bookingRepository.createBooking({
@@ -105,11 +118,22 @@ export class PaymentService implements IPaymentService {
         throw new BadRequestException('Insufficient wallet balance');
       }
       
+      const event = await this.eventRepository.findEventById(eventId);
+      if (!event) {
+        throw new BadRequestException('Event not found');
+      }
+
+      if (!event.tickets || event.tickets.length === 0) {
+        throw new BadRequestException('No tickets available for this event');
+      }
+      
       this.validateCheckoutParams(eventId, userId, tickets, amount);
+      
+      await this.validateTicketAvailability(eventId, tickets);
       
       const generatedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
       const ticketDetails = await this.bookingService.prepareTicketDetails(eventId, tickets, generatedBookingId);
-      const sessionId = generateRandomId()
+      const sessionId = generateRandomId();
       
       const booking = await this.bookingRepository.createBooking({
         bookingId: generatedBookingId,
@@ -121,8 +145,10 @@ export class PaymentService implements IPaymentService {
         discount,
         coupon: couponCode,
         paymentStatus: 'Completed',
-        stripeSessionId:sessionId
+        stripeSessionId: sessionId
       });
+
+      await this.eventRepository.updateTicketQuantities(eventId, tickets);
 
       await this.walletRepository.addTransaction(
         userId,
@@ -140,8 +166,6 @@ export class PaymentService implements IPaymentService {
           }
         }
       );
-      // await this.chatService.autoJoinUserToEventChat(eventId, userId);
-      // console.log(`User ${userId} automatically joined event chat for event ${eventId}`);
       
       return booking;
     } catch (error) {
@@ -164,8 +188,12 @@ export class PaymentService implements IPaymentService {
         case 'checkout.session.completed':
           const session = event.data.object as Stripe.Checkout.Session;
           if (session.payment_status === 'paid') {
-            await this.updateBookingPaymentStatus(session.id);
+            await this.updateBookingPaymentStatus(session.id, session.metadata);
           }
+          break;
+        case 'checkout.session.expired':
+          const expiredSession = event.data.object as Stripe.Checkout.Session;
+          await this.handleExpiredSession(expiredSession.id);
           break;
       }
     } catch (error) {
@@ -174,7 +202,7 @@ export class PaymentService implements IPaymentService {
     }
   }
 
-  private async updateBookingPaymentStatus(sessionId: string): Promise<void> {
+  private async updateBookingPaymentStatus(sessionId: string, metadata: any): Promise<void> {
     try {
       const booking = await this.bookingRepository.findByStripeSessionId(sessionId);
       
@@ -182,18 +210,54 @@ export class PaymentService implements IPaymentService {
         console.log("No booking found with session ID:", sessionId);
         throw new Error(`No booking found with session ID: ${sessionId}`);
       }
+
       booking.paymentStatus = 'Completed';
       await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
+      
+      if (metadata?.tickets) {
+        const tickets = JSON.parse(metadata.tickets);
+        await this.eventRepository.updateTicketQuantities(booking.eventId, tickets);
+      }
 
-
-      // let event:EventDocument =booking.eventId as unknown as EventDocument;
-      // let user:IUser =booking.userId as unknown as IUser;
-
-      // await this.chatService.autoJoinUserToEventChat(event._id as unknown as string, user._id as unknown as string);
-      console.log(`User ${booking.userId} automatically joined event chat for event ${booking.eventId}`);
     } catch (error) {
       console.error("Error in updateBookingPaymentStatus:", error);
       throw new Error(`Failed to update booking status: ${(error as Error).message}`);
+    }
+  }
+
+  private async handleExpiredSession(sessionId: string): Promise<void> {
+    try {
+      const booking = await this.bookingRepository.findByStripeSessionId(sessionId);
+      
+      if (booking && booking.paymentStatus === 'Pending') {
+        booking.paymentStatus = 'Failed';
+        await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
+        console.log(`Marked booking ${booking.bookingId} as failed due to expired session`);
+      }
+    } catch (error) {
+      console.error("Error handling expired session:", error);
+    }
+  }
+
+  private async validateTicketAvailability(eventId: string, tickets: { [type: string]: number }): Promise<void> {
+    const event = await this.eventRepository.findEventById(eventId);
+    if (!event) {
+      throw new BadRequestException('Event not found');
+    }
+
+    for (const [type, requestedQuantity] of Object.entries(tickets)) {
+      if(requestedQuantity>0){
+        const availableTicket = event.tickets.find(t => t.type.toLowerCase() === type.toLowerCase());
+      
+      if (!availableTicket) {
+        throw new BadRequestException(`Ticket type ${type} not found`);
+      }
+      
+      if (availableTicket.quantity < requestedQuantity) {
+        throw new BadRequestException(`Insufficient tickets available for ${type}. Available: ${availableTicket.quantity}, Requested: ${requestedQuantity}`);
+      }
+      }
+      
     }
   }
 

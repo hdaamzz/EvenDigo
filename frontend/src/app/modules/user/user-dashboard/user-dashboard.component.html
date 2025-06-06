@@ -58,13 +58,11 @@
   </div>
 </div>
 
-<!-- Main Content Area -->
 <div class="min-h-screen bg-gradient-to-b ">
   <div class="mx-4 sm:mx-8 md:mx-11 py-8">
     <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6 shadow-2xl">
       <div [@fadeSlide]="activeTab" [@cardStagger]="getCurrentEventList()?.length">
         @if (eventLoading) {
-        <!-- Enhanced Loading State -->
         <div class="flex flex-col items-center justify-center py-16">
           <div class="relative">
             <div class="w-16 h-16 border-4 border-gray-600 border-t-emerald-500 rounded-full animate-spin"></div>
@@ -91,12 +89,7 @@
             @case ('ongoing') { No events are currently ongoing. Check back later! }
             }
           </p>
-          @if (activeTab === 'organized') {
-          <button
-            class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-lg">
-            Create Your First Event
-          </button>
-          }
+
         </div>
         } @else {
         <div class="relative">
@@ -111,7 +104,6 @@
   </div>
 </div>
 
-<!-- Enhanced Event Details Dialog -->
 <p-dialog [(visible)]="displayEventDialog" [modal]="true" [style]="{width: '95%', maxWidth: '600px'}"
   [draggable]="false" [resizable]="false" styleClass="event-details-dialog" [showHeader]="false"
   [dismissableMask]="true" [baseZIndex]="10000">

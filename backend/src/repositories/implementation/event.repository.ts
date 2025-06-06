@@ -3,6 +3,7 @@ import { EventDocument } from '../../models/interfaces/event.interface';
 import { EventModel } from '../../models/EventModel';
 import { IEventRepository } from '../interfaces/IEvent.repository';
 import { injectable } from 'tsyringe';
+import { BadRequestException } from '../../../src/error/error-handlers';
 
 @injectable()
 export class EventRepository implements IEventRepository {
@@ -99,5 +100,29 @@ export class EventRepository implements IEventRepository {
   
   async findDocumentCount(user_id: Schema.Types.ObjectId | string): Promise<number> {
     return await EventModel.countDocuments({ user_id }).exec();
+  }
+
+  async updateTicketQuantities(eventId: Schema.Types.ObjectId | string, tickets: { [type: string]: number }): Promise<EventDocument | null> {
+    console.log(tickets);
+    
+    const event = await EventModel.findById(eventId);
+    if (!event) {
+      throw new BadRequestException('Event not found');
+    }
+
+    for (const [type, quantity] of Object.entries(tickets)) {
+      if(quantity>0){
+      const ticket = event.tickets.find(t => t.type.toLowerCase() === type.toLowerCase());
+      
+      if (!ticket) {
+        throw new BadRequestException(`Ticket type ${type} not found`);
+      }
+      
+      ticket.quantity -= quantity;
+      }
+      
+    }
+
+    return await event.save();
   }
 }
