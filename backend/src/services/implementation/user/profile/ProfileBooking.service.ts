@@ -5,6 +5,7 @@ import { ProfileServiceResponse } from '../../../../../src/models/interfaces/pro
 import { TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
 import { IBookingRepository } from '../../../../../src/repositories/interfaces/IBooking.repository';
 import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
+import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
 import { IProfileBookingService } from '../../../../../src/services/interfaces/user/profile/IProfileBooking.service';
 import { inject, injectable } from 'tsyringe';
 
@@ -14,6 +15,7 @@ export class ProfileBookingService implements IProfileBookingService {
   constructor(
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
+    @inject("EventRepository") private eventRepository: IEventRepository,
   ) {}
 
   async getUserBookings(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
@@ -63,6 +65,12 @@ export class ProfileBookingService implements IProfileBookingService {
         throw new BadRequestException("Failed to update ticket status");
       }
       
+      await this.restoreTicketQuantity(
+        booking.eventId.toString(),
+        ticketToCancel.type,
+        ticketToCancel.quantity
+      );
+      
       const eventName = 'Event';
       const eventId = booking.eventId.toString();
       
@@ -89,7 +97,8 @@ export class ProfileBookingService implements IProfileBookingService {
             ticketType: ticketToCancel.type,
             quantity: ticketToCancel.quantity,
             originalPrice: ticketToCancel.price * ticketToCancel.quantity,
-            cancellationFee: Math.floor(ticketToCancel.price * ticketToCancel.quantity * 0.1)
+            cancellationFee: Math.floor(ticketToCancel.price * ticketToCancel.quantity * 0.1),
+            restoredQuantity: ticketToCancel.quantity
           }
         }
       );
@@ -100,10 +109,12 @@ export class ProfileBookingService implements IProfileBookingService {
       
       return {
         success: true,
-        message: `Ticket cancelled successfully. ₹${refundAmount.toFixed(2)} has been credited to your wallet.`,
+        message: `Ticket cancelled successfully. ₹${refundAmount.toFixed(2)} has been credited to your wallet and ${ticketToCancel.quantity} ${ticketToCancel.type} ticket(s) have been made available again.`,
         data: {
           updatedBooking,
-          refundAmount
+          refundAmount,
+          restoredQuantity: ticketToCancel.quantity,
+          ticketType: ticketToCancel.type
         }
       };
     } catch (error) {
@@ -122,6 +133,26 @@ export class ProfileBookingService implements IProfileBookingService {
         success: false,
         message: (error as Error).message || "Failed to cancel ticket"
       };
+    }
+  }
+
+
+  private async restoreTicketQuantity(
+    eventId: string,
+    ticketType: string,
+    quantity: number
+  ): Promise<void> {
+    try {
+      const ticketsToRestore = {
+        [ticketType]: -quantity
+      };
+      
+      await this.eventRepository.updateTicketQuantities(eventId, ticketsToRestore);
+      
+      console.log(`Restored ${quantity} ${ticketType} tickets to event ${eventId}`);
+    } catch (error) {
+      console.error(`Failed to restore ticket quantity for event ${eventId}:`, error);
+     
     }
   }
 }

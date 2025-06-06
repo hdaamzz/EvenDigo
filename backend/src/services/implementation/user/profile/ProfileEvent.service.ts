@@ -40,7 +40,6 @@ export class ProfileEventService implements IProfileEventService {
 
   async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {
     try {
-      // First check if the event exists
       const existingEvent = await this.eventRepository.findEventById(eventId);
       
       if (!existingEvent) {
@@ -59,7 +58,6 @@ export class ProfileEventService implements IProfileEventService {
   
   async deleteEvent(eventId: Schema.Types.ObjectId | string): Promise<boolean> {
     try {
-      // First check if the event exists
       const existingEvent = await this.eventRepository.findEventById(eventId);
       
       if (!existingEvent) {

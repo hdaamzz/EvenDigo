@@ -17,6 +17,8 @@ export interface AuthenticatedRequest extends Request {
     data?: {
       updatedBooking: T;
       refundAmount: number;
+      restoredQuantity?: number;
+      ticketType?: string;
     };
   }
   

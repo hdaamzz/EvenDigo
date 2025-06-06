@@ -103,7 +103,7 @@ export class EventRepository implements IEventRepository {
   }
 
   async updateTicketQuantities(eventId: Schema.Types.ObjectId | string, tickets: { [type: string]: number }): Promise<EventDocument | null> {
-    console.log(tickets);
+    console.log('Updating ticket quantities:', tickets);
     
     const event = await EventModel.findById(eventId);
     if (!event) {
@@ -111,16 +111,25 @@ export class EventRepository implements IEventRepository {
     }
 
     for (const [type, quantity] of Object.entries(tickets)) {
-      if(quantity>0){
-      const ticket = event.tickets.find(t => t.type.toLowerCase() === type.toLowerCase());
-      
-      if (!ticket) {
-        throw new BadRequestException(`Ticket type ${type} not found`);
+      if (quantity !== 0) { 
+        const ticket = event.tickets.find(t => t.type.toLowerCase() === type.toLowerCase());
+        
+        if (!ticket) {
+          throw new BadRequestException(`Ticket type ${type} not found`);
+        }
+        
+        if (quantity > 0) {
+          if (ticket.quantity < quantity) {
+            throw new BadRequestException(`Insufficient tickets available for ${type}. Available: ${ticket.quantity}, Requested: ${quantity}`);
+          }
+          ticket.quantity -= quantity;
+          console.log(`Deducted ${quantity} ${type} tickets. Remaining: ${ticket.quantity}`);
+        } else {
+          const addQuantity = Math.abs(quantity); 
+          ticket.quantity += addQuantity;
+          console.log(`Restored ${addQuantity} ${type} tickets. New total: ${ticket.quantity}`);
+        }
       }
-      
-      ticket.quantity -= quantity;
-      }
-      
     }
 
     return await event.save();
