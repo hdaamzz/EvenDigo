@@ -5,6 +5,7 @@ import { inject, injectable } from 'tsyringe';
 import StatusCode from '../../../../types/statuscode';
 import { IAuthController } from '../../../../../src/controllers/interfaces/User/Auth/IAuth.controller';
 import { IAuthService } from '../../../../../src/services/interfaces/IAuth.service';
+import { cookieConfig } from '../../../../../src/configs/cookie.config';
 
 interface AuthenticatedRequest extends Request {
   user?: IUser;
@@ -82,7 +83,6 @@ export class AuthController implements IAuthController {
 
       const result = await this.authService.login(loginData);
       console.log(result);
-      
 
       if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
         res.status(StatusCode.UNAUTHORIZED).json({
@@ -92,21 +92,10 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      res.cookie('accessToken', result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000, 
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      const cookieOptions = cookieConfig.getLoginCookieOptions();
 
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      res.cookie('accessToken', result.accessToken, cookieOptions.accessToken);
+      res.cookie('refreshToken', result.refreshToken, cookieOptions.refreshToken);
 
       res.status(StatusCode.OK).json({
         success: true,
@@ -186,7 +175,8 @@ export class AuthController implements IAuthController {
       }
 
       const currentUser = await this.authService.findUserByEmail(req.user.email);
-      const token=req.cookies.accessToken
+      const token = req.cookies.accessToken;
+      
       if (!currentUser) {
         res.status(StatusCode.UNAUTHORIZED).json({
           isAuthenticated: false,
@@ -205,7 +195,7 @@ export class AuthController implements IAuthController {
           role: currentUser.role,
           status: currentUser.status,
         },
-        token:token
+        token: token
       });
     } catch (error) {
       console.error('Auth check error:', error);
@@ -235,21 +225,10 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      res.cookie('accessToken', result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000, 
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      const cookieOptions = cookieConfig.getTokenCookieOptions();
 
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      res.cookie('accessToken', result.accessToken, cookieOptions.accessToken);
+      res.cookie('refreshToken', result.refreshToken, cookieOptions.refreshToken);
 
       res.status(StatusCode.OK).json({
         success: true,
@@ -292,21 +271,10 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      res.cookie('accessToken', result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000,
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      const cookieOptions = cookieConfig.getTokenCookieOptions();
 
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      res.cookie('accessToken', result.accessToken, cookieOptions.accessToken);
+      res.cookie('refreshToken', result.refreshToken, cookieOptions.refreshToken);
 
       res.status(StatusCode.OK).json({
         success: true,
@@ -329,19 +297,10 @@ export class AuthController implements IAuthController {
 
   logout(_req: Request, res: Response): void {
     try {
-      res.clearCookie('accessToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      const clearOptions = cookieConfig.getClearCookieOptions();
 
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
-      });
+      res.clearCookie('accessToken', clearOptions);
+      res.clearCookie('refreshToken', clearOptions);
 
       res.status(StatusCode.OK).json({
         success: true,

@@ -643,3 +643,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 }
+
+
+
+          @for (user of getFilteredUsers(); track trackByUserId($index, user)) {

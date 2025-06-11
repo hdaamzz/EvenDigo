@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatMessage, ChatService, ChatUser } from '../../../core/services/user/chat/chat.service';
@@ -31,6 +31,8 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   isConnecting: boolean = false;
   isSendingMessage: boolean = false;
   error: string = '';
+  isMobile = false;
+  showMobileSidebar = true;
 
   private subscriptions: Subscription[] = [];
   private typingTimeout: any;
@@ -44,20 +46,17 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     private chatService: ChatService,
     public socketService: SocketService,
     private authService: AuthService
-  ) { }
+  ) {
+    this.checkIsMobile();
+  }
 
   async ngOnInit() {
     this.isLoading = true;
 
     try {
       await this.initializeChat();
-
-
       this.loadAllUsers();
-
-
       this.loadPersonalChats();
-
     } catch (error) {
       console.error('Failed to initialize chat:', error);
       this.error = 'Failed to initialize chat. Please refresh the page.';
@@ -79,12 +78,28 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  private checkIsMobile(): void {
+    this.isMobile = window.innerWidth < 1024;
+  }
+
+  getSidebarClass(): string {
+    if (this.isMobile) {
+      return this.showMobileSidebar ? 'fixed inset-y-0 left-0 z-50' : 'hidden';
+    }
+    return '';
+  }
+
+  closeMobileChat(): void {
+    if (this.isMobile) {
+      this.showMobileSidebar = false;
+    }
+  }
+
   private async initializeChat(): Promise<void> {
     this.isConnecting = true;
     this.error = '';
 
     try {
-
       const authResponse = await this.authService.checkAuthStatus().toPromise();
 
       if (!authResponse?.isAuthenticated || !authResponse.user?.id) {
@@ -101,15 +116,12 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
       await this.socketService.connect(token);
       await this.socketService.waitForConnection();
-
       await this.chatService.initialize(this.socketService);
 
       this.subscribeToRealTimeEvents();
 
       this.isInitialized = true;
       this.isConnecting = false;
-
-
     } catch (error) {
       console.error('Chat initialization failed:', error);
       this.isConnecting = false;
@@ -147,7 +159,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   async startChatWithUser(user: User) {
     try {
-
       this.isLoading = true;
       this.error = '';
 
@@ -193,6 +204,11 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       }
 
       this.showUserList = false;
+      
+      if (this.isMobile) {
+        this.showMobileSidebar = false;
+      }
+      
       this.isLoading = false;
     } catch (error) {
       console.error('Error starting chat:', error);
@@ -212,7 +228,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   getFilteredAllUsers() {
-
     if (!this.searchTerm) return this.allUsers;
     return this.allUsers.filter(user =>
       user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -287,7 +302,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       type: data.message.type || 'text',
       messageType: data.message.messageType || 'text'
     };
-
 
     const existingIndex = this.messages.findIndex(msg =>
       msg.id === message.id ||
@@ -369,7 +383,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   loadPersonalChats() {
-
     if (!this.isInitialized) {
       console.warn('Chat not initialized, skipping loadPersonalChats');
       return;
@@ -400,7 +413,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.subscriptions.push(usersSub);
   }
 
-
   async selectUser(user: ChatUser) {
     if (this.selectedUser?.id === user.id) return;
 
@@ -409,13 +421,16 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       return;
     }
 
-
     this.selectedUser = user;
     this.messages = [];
     this.processedMessageIds.clear();
     this.isLoading = true;
     this.error = '';
     this.isTyping = false;
+
+    if (this.isMobile) {
+      this.showMobileSidebar = false;
+    }
 
     if (user.chatId) {
       try {
@@ -597,7 +612,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   async refreshChats() {
-
     this.isLoading = true;
     this.error = '';
 
@@ -619,16 +633,26 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  trackByUserId(index: number, user: ChatUser): string {
+  trackByUserId(index: number, user: User | ChatUser): string {
+    if(user.id){
     return user.id;
+    }else{
+      return ''
+    }
+
   }
 
   trackByMessageId(index: number, message: ChatMessage): string {
     return message.id;
   }
 
-  closeMobileChat(): void {
-    this.selectedUser = null;
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.isMobile = event.target.innerWidth < 1024;
+    
+    if (!this.isMobile) {
+      this.showMobileSidebar = true;
+    }
   }
 
   adjustTextareaHeight(event: any): void {
@@ -675,7 +699,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
         console.log(`Initialization attempt ${attempt}/${maxRetries}`);
         await this.initializeChat();
         this.loadPersonalChats();
-        return; 
+        return;
       } catch (error) {
         console.error(`Initialization attempt ${attempt} failed:`, error);
 
