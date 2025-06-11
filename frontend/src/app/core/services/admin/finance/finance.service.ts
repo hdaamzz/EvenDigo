@@ -64,7 +64,11 @@ export interface FinanceApiResponse<T> {
   providedIn: 'root'
 })
 export class FinanceService {
-  private readonly _apiUrl: string = environment.apiUrl;
+  private readonly _distApiUrl = `${environment.apiUrl}admin/dist`;
+  private readonly _financeApiUrl = `${environment.apiUrl}admin/finance`;
+
+
+
   constructor(private _http: HttpClient) { }
 
   // EVENT DISTRIBUTION METHODS
@@ -74,7 +78,7 @@ export class FinanceService {
       .set('is_distributed', 'true');
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/dist/recent`,
+      `${this._distApiUrl}/recent`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -84,7 +88,7 @@ export class FinanceService {
 
   getRevenueStats(): Observable<FinanceApiResponse<any>> {
     return this._http.get<FinanceApiResponse<any>>(
-      `${this._apiUrl}admin/dist/stats`,
+      `${this._distApiUrl}/stats`,
       
     ).pipe(
       catchError(this._handleError)
@@ -96,7 +100,7 @@ export class FinanceService {
     const params = new HttpParams().set('ids', eventIds.join(','));
 
     return this._http.get<any[]>(
-      `${this._apiUrl}admin/dist/batch`,
+      `${this._distApiUrl}/batch`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -116,7 +120,7 @@ export class FinanceService {
       .set('is_distributed', 'true');
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/dist/date-range`,
+      `${this._distApiUrl}/date-range`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -130,7 +134,7 @@ export class FinanceService {
     const params = this._buildPaginationParams(page, limit);
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/finance/refunds`,
+      `${this._financeApiUrl}/refunds`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -153,7 +157,7 @@ export class FinanceService {
     }
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/finance/refunds/range`,
+      `${this._financeApiUrl}/refunds/range`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -167,7 +171,7 @@ export class FinanceService {
     const params = this._buildPaginationParams(page, limit);
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/finance/revenue`,
+      `${this._financeApiUrl}/revenue`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -176,7 +180,7 @@ export class FinanceService {
 
   fetchRevenueStats(): Observable<RevenueStats> {
     return this._http.get<RevenueStats>(
-      `${this._apiUrl}admin/finance/stats`,
+      `${this._financeApiUrl}/stats`,
       
     ).pipe(
       catchError(this._handleError)
@@ -190,7 +194,7 @@ export class FinanceService {
       .set('endDate', endDate);
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/finance/revenue/range`,
+      `${this._financeApiUrl}/revenue/range`,
       { params }
     ).pipe(
       catchError(this._handleError)
@@ -207,7 +211,7 @@ export class FinanceService {
       .set('userId', userId);
 
     return this._http.get<FinanceApiResponse<any[]>>(
-      `${this._apiUrl}admin/finance/revenue/user`,
+      `${this._financeApiUrl}/revenue/user`,
       { params }
     ).pipe(
       catchError(this._handleError)

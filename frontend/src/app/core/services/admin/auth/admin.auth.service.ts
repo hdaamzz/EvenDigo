@@ -8,10 +8,10 @@ import { IAdminLogin } from '../../../models/admin/admin.interface';
   providedIn: 'root'
 })
 export class AdminAuthService {
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = `${environment.apiUrl}admin/auth`;
   constructor(private http: HttpClient) { }
   adminLogin(adminData: IAdminLogin): Observable<any> {
-    return this.http.post(`${this.apiUrl}admin/auth/sign-in`, adminData).pipe(
+    return this.http.post(`${this.apiUrl}/sign-in`, adminData).pipe(
       catchError((error) => {
         return of({ success: false, message: error.error.message });
       })

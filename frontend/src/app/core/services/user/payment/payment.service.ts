@@ -8,18 +8,21 @@ import { BookingResponse } from '../../../models/booking.interface';
   providedIn: 'root'
 })
 export class PaymentService {
-  private apiUrl=environment.apiUrl
+  private readonly apiUrl = `${environment.apiUrl}user/explore`;
+
+  
+
   constructor(private http:HttpClient) { }
 
   getBooking(id:string):Observable<BookingResponse>{
-        return this.http.get<BookingResponse>(`${this.apiUrl}user/explore/booking?id=${id}`);
+        return this.http.get<BookingResponse>(`${this.apiUrl}/booking?id=${id}`);
   }
   downloadTickets(bookingId: string): Observable<Blob> {
     const headers = new HttpHeaders({
       'Accept': 'application/pdf',
     });
     
-    return this.http.get(`${this.apiUrl}user/explore/bookings/${bookingId}/tickets`, {
+    return this.http.get(`${this.apiUrl}/bookings/${bookingId}/tickets`, {
       headers: headers,
       responseType: 'blob'
     });
@@ -30,7 +33,7 @@ export class PaymentService {
       'Accept': 'application/pdf'
     });
     
-    return this.http.get(`${this.apiUrl}user/explore/bookings/${bookingId}/invoice`, {
+    return this.http.get(`${this.apiUrl}/bookings/${bookingId}/invoice`, {
       headers: headers,
       responseType: 'blob'
     });

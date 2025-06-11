@@ -6,7 +6,6 @@ import { PersonalChatController } from '../../../src/controllers/implementation/
 
 const chatRoutes = express.Router();
 
-// Resolve controllers from DI container
 const chatManagementController = container.resolve(PersonalChatController);
 const messageController = container.resolve(PersonalMessageController);
 

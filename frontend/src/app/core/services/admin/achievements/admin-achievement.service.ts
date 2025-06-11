@@ -9,7 +9,7 @@ import { AchievementResponse, IAchievement } from '../../../models/admin/achieve
   providedIn: 'root'
 })
 export class AdminAchievementService {
-  private readonly apiUrl = `${environment.apiUrl}/admin/achievements`;
+  private readonly apiUrl = `${environment.apiUrl}admin/achievements`;
 
   constructor(private readonly _http: HttpClient) { }
 

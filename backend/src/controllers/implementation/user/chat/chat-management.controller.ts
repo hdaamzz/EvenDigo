@@ -10,9 +10,6 @@ export class PersonalChatController {
     @inject('ChatService') private chatService: IChatService
   ) {}
 
-  /**
-   * Create or get existing personal chat between two users
-   */
   async createOrGetPersonalChat(req: Request, res: Response): Promise<void> {
     try {
       const { otherUserId } = req.body;
@@ -47,10 +44,8 @@ export class PersonalChatController {
         );
       }
 
-      // First check if chat already exists
       let chat = await this.chatService.getChatBetweenUsers(currentUserId, otherUserId);
       
-      // If no existing chat, create new one
       if (!chat) {
         chat = await this.chatService.createPersonalChat([currentUserId, otherUserId]);
       }
@@ -61,9 +56,6 @@ export class PersonalChatController {
     }
   }
 
-  /**
-   * Get personal chat by chat ID
-   */
   async getChatById(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
@@ -95,9 +87,6 @@ export class PersonalChatController {
     }
   }
 
-  /**
-   * Get all personal chats for current user
-   */
   async getUserChats(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
@@ -122,9 +111,6 @@ export class PersonalChatController {
     }
   }
 
-  /**
-   * Get personal chat between current user and another user
-   */
   async getChatBetweenUsers(req: Request, res: Response): Promise<void> {
     try {
       const { otherUserId } = req.params;
@@ -165,9 +151,6 @@ export class PersonalChatController {
     }
   }
 
-  /**
-   * Delete/deactivate personal chat
-   */
   async deleteChat(req: Request, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;

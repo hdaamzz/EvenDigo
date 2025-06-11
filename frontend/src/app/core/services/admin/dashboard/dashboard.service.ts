@@ -91,12 +91,14 @@ export interface ApiResponse<T> {
   providedIn: 'root',
 })
 export class DashboardService {
-  private readonly _apiUrl: string = environment.apiUrl;
+  
+  private readonly _apiUrl = `${environment.apiUrl}admin/dashboard`;
+
 
   constructor(private _http: HttpClient) {}
 
   getStatCards(): Observable<ApiResponse<StatCard[]>> {
-    return this._http.get<ApiResponse<DashboardStats>>(`${this._apiUrl}admin/dashboard/stats`).pipe(
+    return this._http.get<ApiResponse<DashboardStats>>(`${this._apiUrl}/stats`).pipe(
       map((response) => {
         if (response.success) {
           const stats = response.data;
@@ -141,34 +143,34 @@ export class DashboardService {
   getRevenueData(period: string = 'monthly'): Observable<ApiResponse<ChartData>> {
     const params = new HttpParams().set('period', period);
     return this._http
-      .get<ApiResponse<ChartData>>(`${this._apiUrl}admin/dashboard/revenue-chart`, { params })
+      .get<ApiResponse<ChartData>>(`${this._apiUrl}/revenue-chart`, { params })
       .pipe(catchError(this._handleError));
   }
 
   getUserRegistrationStats(period: string = 'monthly'): Observable<ApiResponse<ChartData>> {
     const params = new HttpParams().set('period', period);
     return this._http
-      .get<ApiResponse<ChartData>>(`${this._apiUrl}admin/dashboard/user-registrations`, { params })
+      .get<ApiResponse<ChartData>>(`${this._apiUrl}/user-registrations`, { params })
       .pipe(catchError(this._handleError));
   }
 
   getTransactions(limit: number = 5): Observable<ApiResponse<Transaction[]>> {
     const params = new HttpParams().set('limit', limit.toString());
     return this._http
-      .get<ApiResponse<Transaction[]>>(`${this._apiUrl}admin/dashboard/transactions`, { params })
+      .get<ApiResponse<Transaction[]>>(`${this._apiUrl}/transactions`, { params })
       .pipe(catchError(this._handleError));
   }
 
   getSubscriptions(): Observable<ApiResponse<Subscription[]>> {
     return this._http
-      .get<ApiResponse<Subscription[]>>(`${this._apiUrl}admin/dashboard/subscriptions`)
+      .get<ApiResponse<Subscription[]>>(`${this._apiUrl}/subscriptions`)
       .pipe(catchError(this._handleError));
   }
 
   getRecentActivities(limit: number = 5): Observable<ApiResponse<Activity[]>> {
     const params = new HttpParams().set('limit', limit.toString());
     return this._http
-      .get<ApiResponse<Activity[]>>(`${this._apiUrl}admin/dashboard/activities`, { params })
+      .get<ApiResponse<Activity[]>>(`${this._apiUrl}/activities`, { params })
       .pipe(catchError(this._handleError));
   }
 

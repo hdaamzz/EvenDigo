@@ -77,7 +77,7 @@ export interface TypingData {
   providedIn: 'root'
 })
 export class ChatService {
-  private readonly apiUrl = environment.apiUrl;
+  private readonly apiUrl = `${environment.apiUrl}user/auth`;
   private currentUserId: string = "";
   private isInitialized = false;
   private destroy$ = new Subject<void>();
@@ -271,7 +271,7 @@ export class ChatService {
   }
 
   getPersonalChats(): Observable<ChatUser[]> {
-    return this.http.get<any>(`${this.apiUrl}user/chats`).pipe(
+    return this.http.get<any>(`${this.apiUrl}`).pipe(
       map(response => {
         const chats = response.data?.chats || response.data || [];
         const chatUsers = this.transformChatsToUsers(chats);
@@ -286,7 +286,7 @@ export class ChatService {
   }
 
   createOrGetPersonalChat(otherUserId: string): Observable<ApiChat> {
-    return this.http.post<any>(`${this.apiUrl}user/chats/personal`, {
+    return this.http.post<any>(`${this.apiUrl}/personal`, {
       otherUserId
     }).pipe(
       map(response => response.data),
@@ -299,7 +299,7 @@ export class ChatService {
   }
 
   getChatBetweenUsers(otherUserId: string): Observable<ApiChat | null> {
-    return this.http.get<any>(`${this.apiUrl}user/chats/personal/user/${otherUserId}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/personal/user/${otherUserId}`).pipe(
       map(response => response.data),
       catchError(error => {
         if (error.status === 404) {
@@ -312,7 +312,7 @@ export class ChatService {
   }
 
   getChatById(chatId: string): Observable<ApiChat> {
-    return this.http.get<any>(`${this.apiUrl}user/chats/${chatId}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/${chatId}`).pipe(
       map(response => response.data),
       catchError(error => {
         this.handleError('Failed to get chat by ID', error);
@@ -322,7 +322,7 @@ export class ChatService {
   }
 
   deleteChat(chatId: string): Observable<void> {
-    return this.http.delete<any>(`${this.apiUrl}user/chats/${chatId}`).pipe(
+    return this.http.delete<any>(`${this.apiUrl}/${chatId}`).pipe(
       map(() => void 0),
       tap(() => this.refreshPersonalChats()),
       catchError(error => {
@@ -337,7 +337,7 @@ export class ChatService {
       .set('limit', limit.toString())
       .set('skip', skip.toString());
 
-    return this.http.get<any>(`${this.apiUrl}user/chats/${chatId}/messages`, { params }).pipe(
+    return this.http.get<any>(`${this.apiUrl}/${chatId}/messages`, { params }).pipe(
       map(response => {
         const messages = this.transformApiMessages(response.data?.messages || response.data || []);
         this.messagesSubject.next(messages);
@@ -355,7 +355,7 @@ export class ChatService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<any>(`${this.apiUrl}user/chats/${chatId}/messages/paginated`, { params }).pipe(
+    return this.http.get<any>(`${this.apiUrl}/${chatId}/messages/paginated`, { params }).pipe(
       map(response => ({
         messages: this.transformApiMessages(response.data?.messages || []),
         pagination: response.data?.pagination
@@ -408,7 +408,7 @@ export class ChatService {
   }
 
   private sendMessageHttp(chatId: string, content: string, tempMessage?: ChatMessage): Observable<ChatMessage> {
-    return this.http.post<any>(`${this.apiUrl}user/chats/${chatId}/messages`, {
+    return this.http.post<any>(`${this.apiUrl}/${chatId}/messages`, {
       content,
       messageType: 'text'
     }).pipe(
@@ -441,7 +441,7 @@ export class ChatService {
     }
 
 
-    return this.http.patch<any>(`${this.apiUrl}user/chats/${chatId}/read`, {}).pipe(
+    return this.http.patch<any>(`${this.apiUrl}/${chatId}/read`, {}).pipe(
       map(() => void 0),
       tap(() => this.calculateUnreadCount()),
       catchError(error => {
@@ -464,7 +464,7 @@ export class ChatService {
 
 
   getMessageById(messageId: string): Observable<ChatMessage> {
-    return this.http.get<any>(`${this.apiUrl}user/chats/messages/${messageId}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/messages/${messageId}`).pipe(
       map(response => this.transformApiMessages([response.data])[0]),
       catchError(error => {
         this.handleError('Failed to get message by ID', error);
@@ -474,7 +474,7 @@ export class ChatService {
   }
 
   updateMessage(messageId: string, content: string): Observable<ChatMessage> {
-    return this.http.put<any>(`${this.apiUrl}user/chats/messages/${messageId}`, {
+    return this.http.put<any>(`${this.apiUrl}/messages/${messageId}`, {
       content
     }).pipe(
       map(response => this.transformApiMessages([response.data])[0]),
@@ -486,7 +486,7 @@ export class ChatService {
   }
 
   deleteMessage(messageId: string): Observable<void> {
-    return this.http.delete<any>(`${this.apiUrl}user/chats/messages/${messageId}`).pipe(
+    return this.http.delete<any>(`${this.apiUrl}/messages/${messageId}`).pipe(
       map(() => void 0),
       catchError(error => {
         this.handleError('Failed to delete message', error);

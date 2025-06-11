@@ -10,13 +10,14 @@ import { ApiResponse } from '../../../models/admin/admin.interface';
   providedIn: 'root'
 })
 export class AdminUsersService {
-  private readonly _apiUrl = environment.apiUrl;
+  private readonly _apiUrl = `${environment.apiUrl}/admin/users`;
+
   constructor(private _http: HttpClient) {}
 
 
   usersList(): Observable<ApiResponse> {
     return this._http.get<User[]>(
-      `${this._apiUrl}admin/users/all-users` 
+      `${this._apiUrl}/all-users` 
      
     ).pipe(
       map(users => ({
@@ -30,7 +31,7 @@ export class AdminUsersService {
 
   verificationUsersList(): Observable<ApiResponse> {
     return this._http.get<User[]>(
-      `${this._apiUrl}admin/users/verification-users` 
+      `${this._apiUrl}/verification-users` 
      
     ).pipe(
       map(users => ({
@@ -44,7 +45,7 @@ export class AdminUsersService {
 
   userDetails(userId: string): Observable<User> {    
     return this._http.post<User>(
-      `${this._apiUrl}admin/users/get-details`, 
+      `${this._apiUrl}/get-details`, 
       { userId }
     ).pipe(
       catchError(error => {
@@ -57,7 +58,7 @@ export class AdminUsersService {
 
   blockUser(userId: string): Observable<User> {
     return this._http.patch<User>(
-      `${this._apiUrl}admin/users/block-user`,
+      `${this._apiUrl}/block-user`,
       { userId }
     ).pipe(
       catchError(this._handleUserActionError('block'))
@@ -67,7 +68,7 @@ export class AdminUsersService {
 
   unblockUser(userId: string): Observable<User> {
     return this._http.patch<User>(
-      `${this._apiUrl}admin/users/unblock-user`,
+      `${this._apiUrl}/unblock-user`,
       { userId }
     ).pipe(
       catchError(this._handleUserActionError('unblock'))
@@ -77,7 +78,7 @@ export class AdminUsersService {
 
   approveUser(userId: string): Observable<User> {
     return this._http.patch<User>(
-      `${this._apiUrl}admin/users/approve-user`,
+      `${this._apiUrl}/approve-user`,
       { userId }
     ).pipe(
       catchError(this._handleUserActionError('approve'))
@@ -87,7 +88,7 @@ export class AdminUsersService {
   
   rejectUser(userId: string): Observable<User> {
     return this._http.patch<User>(
-      `${this._apiUrl}admin/users/reject-user`,
+      `${this._apiUrl}/reject-user`,
       { userId }
     ).pipe(
       catchError(this._handleUserActionError('reject'))

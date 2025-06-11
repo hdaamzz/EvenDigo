@@ -54,13 +54,14 @@ export interface SubscriptionResponse {
   providedIn: 'root'
 })
 export class PremiumService {
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = `${environment.apiUrl}user/subscription`;
+
 
   constructor(private http: HttpClient) { }
 
   createStripeSubscription(payload: PremiumSubscriptionPayload): Observable<ApiResponse<StripeSessionResponse>> {
     return this.http.post<ApiResponse<StripeSessionResponse>>(
-      `${this.apiUrl}user/subscription/create-checkout`,
+      `${this.apiUrl}/create-checkout`,
       payload
     ).pipe(
       catchError(this.handleError)
@@ -69,7 +70,7 @@ export class PremiumService {
 
   processWalletUpgrade(payload: PremiumSubscriptionPayload): Observable<ApiResponse<SubscriptionResponse>> {
     return this.http.post<ApiResponse<SubscriptionResponse>>(
-      `${this.apiUrl}user/subscription/wallet-upgrade`,
+      `${this.apiUrl}/wallet-upgrade`,
       payload
     ).pipe(
       catchError(this.handleError)
@@ -78,7 +79,7 @@ export class PremiumService {
 
   getCurrentSubscription(): Observable<ApiResponse<SubscriptionResponse>> {
     return this.http.get<ApiResponse<SubscriptionResponse>>(
-      `${this.apiUrl}user/subscription/current`
+      `${this.apiUrl}/current`
     ).pipe(
       catchError(this.handleError)
     );
@@ -86,7 +87,7 @@ export class PremiumService {
 
   cancelSubscription(subscriptionId: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
-      `${this.apiUrl}user/subscription/cancel`,
+      `${this.apiUrl}/cancel`,
       { subscriptionId }
     ).pipe(
       catchError(this.handleError)
@@ -95,7 +96,7 @@ export class PremiumService {
 
   getSubscriptionBySessionId(sessionId: string): Observable<ApiResponse<Subscription>> {
     return this.http.get<ApiResponse<Subscription>>(
-      `${this.apiUrl}user/subscription/confirm/${sessionId}`
+      `${this.apiUrl}/confirm/${sessionId}`
     ).pipe(
       catchError(this.handleError)
     );
@@ -103,7 +104,7 @@ export class PremiumService {
 
   getSubscriptionByType(type: string): Observable<ApiResponse<SubscriptionPlan>> {
     return this.http.get<ApiResponse<SubscriptionPlan>>(
-      `${this.apiUrl}user/subscription/type/${type}`
+      `${this.apiUrl}/type/${type}`
     ).pipe(
       catchError(this.handleError)
     );

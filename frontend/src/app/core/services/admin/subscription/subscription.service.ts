@@ -17,7 +17,9 @@ import {
   providedIn: 'root'
 })
 export class SubscriptionService {
-  private readonly _apiUrl = environment.apiUrl;
+  private readonly _apiUrl = `${environment.apiUrl}admin/subscriptions`;
+
+  
 
 
   constructor(private readonly _http: HttpClient) {}
@@ -36,7 +38,7 @@ export class SubscriptionService {
     }
 
     return this._http.get<ApiResponse<{ subscriptions: Subscription[], pagination: PaginationInfo }>>(
-      `${this._apiUrl}admin/subscriptions`,
+      `${this._apiUrl}`,
       { params, withCredentials: true }
     ).pipe(
       catchError(this._handleError)
@@ -45,7 +47,7 @@ export class SubscriptionService {
 
   getSubscriptionById(id: string): Observable<ApiResponse<Subscription>> {
     return this._http.get<ApiResponse<Subscription>>(
-      `${this._apiUrl}admin/subscriptions/${id}`,
+      `${this._apiUrl}/${id}`,
       
     ).pipe(
       catchError(this._handleError)
@@ -67,7 +69,7 @@ export class SubscriptionService {
   }
 
   return this._http.get<ApiResponse<{ subscriptions: Subscription[], pagination: PaginationInfo }>>(
-    `${this._apiUrl}admin/subscriptions`,
+    `${this._apiUrl}`,
     { params, withCredentials: true }
   ).pipe(
     catchError(this._handleError)
@@ -77,7 +79,7 @@ export class SubscriptionService {
 
   getSubscriptionStats(): Observable<ApiResponse<SubscriptionStats>> {
     return this._http.get<ApiResponse<SubscriptionStats>>(
-      `${this._apiUrl}admin/subscriptions/stats`,
+      `${this._apiUrl}/stats`,
       
     ).pipe(
       catchError(this._handleError)
@@ -86,7 +88,7 @@ export class SubscriptionService {
 
   updateSubscriptionStatus(update: SubscriptionStatusUpdate): Observable<ApiResponse<Subscription>> {
     return this._http.patch<ApiResponse<Subscription>>(
-      `${this._apiUrl}admin/subscriptions/status`,
+      `${this._apiUrl}/status`,
       update,
       
     ).pipe(
@@ -94,41 +96,27 @@ export class SubscriptionService {
     );
   }
 
-  /**
-   * Delete a subscription
-   * @param id Subscription ID to delete
-   * @returns Observable with response data
-   */
   deleteSubscription(id: string): Observable<ApiResponse<any>> {
     return this._http.delete<ApiResponse<any>>(
-      `${this._apiUrl}admin/subscriptions/${id}`,
+      `${this._apiUrl}/${id}`,
       
     ).pipe(
       catchError(this._handleError)
     );
   }
 
-  /**
-   * Get available filter options for subscriptions
-   * @returns Observable with filter options
-   */
   getFilterOptions(): Observable<ApiResponse<SubscriptionFilterOptions>> {
     return this._http.get<ApiResponse<SubscriptionFilterOptions>>(
-      `${this._apiUrl}admin/subscriptions/filter-options`,
+      `${this._apiUrl}/filter-options`,
       
     ).pipe(
       catchError(this._handleError)
     );
   }
 
-  /**
-   * Get subscriptions for a specific user
-   * @param userId User ID
-   * @returns Observable with user's subscriptions
-   */
   getUserSubscriptions(userId: string): Observable<ApiResponse<Subscription[]>> {
     return this._http.get<ApiResponse<Subscription[]>>(
-      `${this._apiUrl}admin/subscriptions/user/${userId}`,
+      `${this._apiUrl}/user/${userId}`,
       
     ).pipe(
       catchError(this._handleError)
@@ -181,11 +169,6 @@ export class SubscriptionService {
     return throwError(() => new Error(errorMessage));
   }
 
-  /**
-   * Gets appropriate error message based on HTTP status code
-   * @param status HTTP status code
-   * @returns Error message
-   */
   private _getErrorMessageByStatus(status: number): string {
     switch (status) {
       case 401:

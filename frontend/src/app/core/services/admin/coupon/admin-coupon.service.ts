@@ -5,70 +5,55 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AllCouponResponse, CouponResponse, ICoupon } from '../../../models/admin/coupon.interface';
 
-/**
- * Service for managing coupon operations in the admin panel
- */
 @Injectable({
   providedIn: 'root'
 })
 export class AdminCouponService {
   private readonly apiUrl = `${environment.apiUrl}admin/coupon`;
 
-  constructor(private http: HttpClient) {}
-
+  constructor(private http: HttpClient) { }
 
   getCoupons(): Observable<ICoupon[]> {
-    return this.http.get<AllCouponResponse>(this.apiUrl, )
+    return this.http.get<AllCouponResponse>(this.apiUrl,)
       .pipe(
         map((response) => response.data)
       );
   }
-
-
   getCouponsWithPagination(page: number = 1, limit: number = 10): Observable<AllCouponResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
-    
-    return this.http.get<AllCouponResponse>(this.apiUrl, { 
+
+    return this.http.get<AllCouponResponse>(this.apiUrl, {
       params,
-      withCredentials: true 
+      withCredentials: true
     });
   }
-
   createCoupon(coupon: ICoupon): Observable<ICoupon> {
-    return this.http.post<CouponResponse>(this.apiUrl, coupon, )
+    return this.http.post<CouponResponse>(this.apiUrl, coupon,)
       .pipe(
         map((response: CouponResponse) => response.data)
       );
   }
-
-
   updateCoupon(couponId: string, coupon: Partial<ICoupon>): Observable<ICoupon> {
-    return this.http.put<CouponResponse>(`${this.apiUrl}/${couponId}`, coupon, )
+    return this.http.put<CouponResponse>(`${this.apiUrl}/${couponId}`, coupon,)
       .pipe(
         map((response: CouponResponse) => response.data)
       );
   }
-
-
   activateCoupon(couponId: string): Observable<ICoupon> {
-    return this.http.patch<CouponResponse>(`${this.apiUrl}/active/${couponId}`, {}, )
+    return this.http.patch<CouponResponse>(`${this.apiUrl}/active/${couponId}`, {},)
       .pipe(
         map((response: CouponResponse) => response.data)
       );
   }
-
-
   deactivateCoupon(couponId: string): Observable<ICoupon> {
-    return this.http.patch<CouponResponse>(`${this.apiUrl}/deactivate/${couponId}`, {}, )
+    return this.http.patch<CouponResponse>(`${this.apiUrl}/deactivate/${couponId}`, {},)
       .pipe(
         map((response: CouponResponse) => response.data)
       );
   }
-
-
   deleteCoupon(couponId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${couponId}`, );
+    return this.http.delete<void>(`${this.apiUrl}/${couponId}`,);
   }
 }

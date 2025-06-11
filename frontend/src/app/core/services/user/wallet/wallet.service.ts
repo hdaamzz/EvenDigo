@@ -7,28 +7,29 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class WalletService {
-   private apiUrl=environment.apiUrl
+  private readonly apiUrl = `${environment.apiUrl}user/profile/wallet`;
+
   
   constructor(private http: HttpClient) { }
   
   getWalletDetails(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}user/profile/wallet`);
+    return this.http.get<any>(`${this.apiUrl}`);
   }
 
   addMoney(amount: number, reference?: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}user/profile/wallet/add-money`, {
+    return this.http.post<any>(`${this.apiUrl}/add-money`, {
       amount,
       reference
     });
   }
 
   withdrawMoney(amount: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}user/profile/wallet/withdraw-money`, {
+    return this.http.post<any>(`${this.apiUrl}/withdraw-money`, {
       amount
     });
   }
 
   getTransactionHistory(limit = 10): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}user/profile/wallet/transactions?limit=${limit}`);
+    return this.http.get<any>(`${this.apiUrl}/transactions?limit=${limit}`);
   }
 }

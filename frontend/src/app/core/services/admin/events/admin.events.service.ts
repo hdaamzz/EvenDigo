@@ -10,7 +10,8 @@ import { IEvent } from '../../../models/event.interface';
   providedIn: 'root'
 })
 export class AdminEventsService {
-  private readonly _apiUrl = environment.apiUrl;
+  private readonly _apiUrl = `${environment.apiUrl}admin/events`;
+
   
   constructor(private _http: HttpClient) { }
 
@@ -20,7 +21,7 @@ export class AdminEventsService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this._http.get<IEvent[]>(`${this._apiUrl}admin/events`, {
+    return this._http.get<IEvent[]>(`${this._apiUrl}`, {
       params
     }).pipe(
       map(events => ({
@@ -34,7 +35,7 @@ export class AdminEventsService {
 
   updateEventStatus(eventId: string, status: boolean): Observable<EventsApiResponse> {
     return this._http.patch<any>(
-      `${this._apiUrl}admin/events/${eventId}/status`, 
+      `${this._apiUrl}/${eventId}/status`, 
       { status },
       
     ).pipe(
