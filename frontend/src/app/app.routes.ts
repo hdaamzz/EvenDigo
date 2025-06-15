@@ -21,6 +21,7 @@ import { PremiumCheckoutComponent } from './modules/user/premium-checkout/premiu
 import { ProfileSubscriptionComponent } from './modules/user/profile/profile.subscription/profile.subscription.component';
 import { SubscriptionConfirmationComponent } from './modules/user/premium-checkout/subscription-confirmation/subscription-confirmation.component';
 import { ChatComponent } from './modules/user/chat/chat.component';
+import { LiveStreamComponent } from './modules/user/live-stream/live-stream.component';
 
 export const routes: Routes = [
     //user - side 
@@ -117,7 +118,11 @@ export const routes: Routes = [
         component: SubscriptionConfirmationComponent,
         canActivate: [isLogged]
     },
-
+    {
+        path: 'live-stream',
+        component: LiveStreamComponent,
+        canActivate: [isLogged]
+    },
     //admin - side
     {
         path: 'admin/login',

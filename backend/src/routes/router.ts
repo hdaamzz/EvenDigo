@@ -1,4 +1,3 @@
-// routes/index.ts
 import express from 'express';
 import authRouter from './user/auth.routes';
 import { authMiddleware } from '../../src/middlewares/auth.middleware';
@@ -18,6 +17,7 @@ import adminSubscriptionRoutes from './admin/subscription.routes';
 import subscriptionPlanRouter from './admin/subscriptionPlan.route';
 import chatRoutes from './user/chat.routes';
 import adminDashboardRouter from './admin/home.routes';
+import livestreamRoutes from './user/livestream.routes';
 
 const router = express.Router();
 
@@ -36,6 +36,7 @@ router.use('/user/dashboard', dashboardRouter);
 router.use('/user/explore', exploreRoutes);
 router.use('/user/subscription', subscriptionRoutes);
 router.use('/user/chats', chatRoutes);
+router.use('/user/livestream', livestreamRoutes); 
 
 // Admin routes
 router.use('/admin/coupon', couponRouter);

@@ -37,6 +37,7 @@
     "@stripe/stripe-js": "^6.1.0",
     "@types/google-one-tap": "^1.2.6",
     "@types/socket.io-client": "^3.0.0",
+    "@zegocloud/zego-uikit-prebuilt": "^2.15.0",
     "angular-oauth2-oidc": "^19.0.0",
     "aws-sdk": "^2.1692.0",
     "chart.js": "^4.4.9",

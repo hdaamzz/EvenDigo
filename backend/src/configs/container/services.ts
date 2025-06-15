@@ -37,6 +37,7 @@ import { RevenueDistributionCronService } from "../../../src/services/implementa
 import { AdminSubscriptionService } from "../../../src/services/implementation/admin/admin.subscription.service";
 import { SubscriptionPlanService } from "../../../src/services/implementation/admin/SubscriptionPlan.service";
 import { DashboardService } from "../../../src/services/implementation/admin/admin.dashboard";
+import { LiveStreamService } from "../../../src/services/implementation/user/live-stream/LiveStreamService";
 
 export function registerServices() {
   // User services
@@ -64,6 +65,7 @@ export function registerServices() {
   container.register("UserAuthService", { useClass: UserAuthService });
   container.register("StripeProvider", { useClass: StripeProvider });
   container.register("ChatService", { useClass: ChatService });
+  container.register("LiveStreamService", { useClass: LiveStreamService })
 
   // Admin services
   container.register("AdminAuthService", { useClass: AdminAuthService });

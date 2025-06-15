@@ -5,6 +5,7 @@ import multer from 'multer';
 import cloudinary from '../../src/configs/cloudinary';
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
+// stripe listen --forward-to localhost:3000/webhooks/stripe
 
 export const generateOTP = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();

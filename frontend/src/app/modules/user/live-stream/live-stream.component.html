@@ -1,0 +1,135 @@
+<div class="min-h-screen bg-gray-900 text-white">
+  <!-- Header -->
+  <div class="bg-gray-800 border-b border-gray-700 p-4">
+    <div class="flex items-center justify-between max-w-7xl mx-auto">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack()" class="p-2 hover:bg-gray-700 rounded-full transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-xl font-bold">{{ eventTitle || 'Live Stream' }}</h1>
+          <p class="text-gray-400 text-sm">{{ userRole === 'host' ? 'Broadcasting' : 'Watching' }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div *ngIf="isStreamLive" class="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
+          <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+          <span class="text-sm font-medium">LIVE</span>
+        </div>
+        <div *ngIf="viewerCount > 0" class="flex items-center gap-1 text-gray-300">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="text-sm">{{ viewerCount }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center min-h-[600px]">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <p class="text-gray-300">{{ loadingMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="flex items-center justify-center min-h-[600px]">
+    <div class="text-center">
+      <div class="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-red-400 mb-2">Stream Error</h3>
+      <p class="text-gray-300 mb-4">{{ error }}</p>
+      <button (click)="retryConnection()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
+        Retry Connection
+      </button>
+    </div>
+  </div>
+
+  <!-- Stream Container - Always rendered -->
+  <div class="flex-1 p-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-black rounded-lg overflow-hidden">
+        <div #streamContainer id="streamContainer" class="stream-container w-full bg-gray-900 relative"
+          [style.height.px]="600" [style.min-height.px]="400"
+          style="display: block; position: relative; overflow: hidden;">
+          <div *ngIf="!zegoInitialized && !isLoading && !error"
+            class="absolute inset-0 flex items-center justify-center bg-gray-800">
+            <div class="text-center">
+              <div class="animate-pulse">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="w-16 h-16 text-gray-600 mx-auto mb-4">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+              </div>
+              <p class="text-gray-400">Connecting to stream...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stream Controls (Host Only) -->
+      <div *ngIf="userRole === 'host' && zegoInitialized" class="mt-4 flex justify-center gap-4">
+        <button (click)="toggleCamera()"
+          class="bg-gray-700 hover:bg-gray-600 p-3 rounded-full transition-colors duration-200"
+          [class.bg-red-600]="!cameraEnabled" [class.hover:bg-red-700]="!cameraEnabled">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-6 h-6">
+            <path *ngIf="cameraEnabled" stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+            <path *ngIf="!cameraEnabled" stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25v-9a2.25 2.25 0 012.25-2.25H12m0 0l5.25-5.25M12 18.75l5.25-5.25" />
+          </svg>
+        </button>
+        <button (click)="toggleMicrophone()"
+          class="bg-gray-700 hover:bg-gray-600 p-3 rounded-full transition-colors duration-200"
+          [class.bg-red-600]="!microphoneEnabled" [class.hover:bg-red-700]="!microphoneEnabled">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-6 h-6">
+            <path *ngIf="microphoneEnabled" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 1.5c-1.036 0-1.875.84-1.875 1.875v3.375c0 1.036.84 1.875 1.875 1.875s1.875-.84 1.875-1.875V3.375c0-1.036-.84-1.875-1.875-1.875zM6 10.5a.75.75 0 01.75.75v1.5a5.25 5.25 0 1010.5 0v-1.5a.75.75 0 011.5 0v1.5a6.751 6.751 0 01-6 6.709v2.291h3a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5h3v-2.291A6.751 6.751 0 015.25 12.75v-1.5A.75.75 0 016 10.5z" />
+            <path *ngIf="!microphoneEnabled" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 1.5c-1.036 0-1.875.84-1.875 1.875v3.375c0 1.036.84 1.875 1.875 1.875s1.875-.84 1.875-1.875V3.375c0-1.036-.84-1.875-1.875-1.875zm4.5 9v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 011.5 0zM6 10.5a.75.75 0 01.75.75v1.5a5.25 5.25 0 1010.5 0v-1.5a.75.75 0 011.5 0v1.5a6.751 6.751 0 01-6 6.709v2.291h3a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5h3v-2.291A6.751 6.751 0 015.25 12.75v-1.5A.75.75 0 016 10.5z M3.22 3.22a.75.75 0 011.06 0L20.78 20.78a.75.75 0 11-1.06 1.06L3.22 4.28a.75.75 0 010-1.06z" />
+          </svg>
+        </button>
+        <button (click)="endStream()"
+          class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-white transition-colors duration-200">
+          End Stream
+        </button>
+      </div>
+
+      <!-- Stream Info -->
+      <div *ngIf="isStreamLive" class="mt-6 bg-gray-800 rounded-lg p-4">
+        <h3 class="text-lg font-semibold mb-2">Stream Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="text-gray-400">Status:</span>
+            <span class="ml-2 text-green-400">Live</span>
+          </div>
+          <div>
+            <span class="text-gray-400">Viewers:</span>
+            <span class="ml-2">{{ viewerCount }}</span>
+          </div>
+          <div>
+            <span class="text-gray-400">Duration:</span>
+            <span class="ml-2">{{ streamDuration }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

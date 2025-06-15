@@ -24,6 +24,7 @@ import { RevenueDistributionController } from "../../../src/controllers/implemen
 import { AdminSubscriptionController } from "../../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
 import { SubscriptionPlanController } from "../../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
 import { AdminHomeController } from "../../../src/controllers/implementation/admin/home/admin.home.controller";
+import { LiveStreamController } from "../../../src/controllers/implementation/user/live/LiveStreamController";
 
 
 export function registerControllers() {
@@ -39,6 +40,8 @@ export function registerControllers() {
   container.register("SubscriptionPlanController", { useClass: SubscriptionPlanController });
   container.register("PersonalChatController", { useClass:  PersonalChatController});
   container.register("PersonalMessageController", { useClass: PersonalMessageController });
+  container.register("LiveStreamController", { useClass:  LiveStreamController});
+
   // container.register("EventChatController", { useClass: EventChatController });
 
 
