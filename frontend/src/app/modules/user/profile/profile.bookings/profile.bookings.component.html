@@ -52,12 +52,20 @@
                     </div>
                 </div>
                 
-                <div class="bg-[#121212] p-4 flex md:flex-col justify-center items-center gap-2">
-                    <button (click)="showBookingDetails(booking)" class="bg-[#00ff66] hover:bg-green-600 p-2 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
+                <div class="bg-[#121212] p-4 flex justify-center items-center gap-4">
+                <button (click)="showBookingDetails(booking)" class="flex items-center gap-2 bg-[#00ff66] hover:bg-green-600 text-black px-4 py-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span>Show Details</span>
+                </button>
+
+                <button *ngIf="booking.event" (click)="watchLive(booking.event)" class="flex items-center gap-2 bg-[#00ff66] hover:bg-green-600 text-black px-4 py-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span>Watch Live</span>
+                </button>
                 </div>
             </div>
         </div>

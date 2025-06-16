@@ -4,6 +4,8 @@ import Notiflix from 'notiflix';
 import { Subject, takeUntil } from 'rxjs';
 import { UserProfileService } from '../../../../core/services/user/profile/user.profile.service';
 import { IBooking, ITicket } from '../../../../core/models/booking.interface';
+import { CardIEvent, IEvent } from '../../../../core/models/event.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile-bookings',
@@ -23,7 +25,7 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
   
   private _destroy$ = new Subject<void>();
   
-  constructor(private _userProfileService: UserProfileService) {}
+  constructor(private _userProfileService: UserProfileService,private router: Router) {}
   
   ngOnInit(): void {
     this._loadUserBookings();
@@ -142,5 +144,11 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
   private _resetCancellationState(): void {
     this.selectedBookingId = '';
     this.selectedTicket = null;
+  }
+
+  watchLive(event: IEvent): void {
+    this.router.navigate(['/live-stream'], {
+      queryParams: { role: 'audience',eventId:event._id }
+    });
   }
 }

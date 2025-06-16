@@ -92,6 +92,8 @@ export class EventCardComponent implements OnInit {
   }
 
   goLive(event: CardIEvent): void {
+    console.log("eveeeeent",event);
+    
     const currentState = this.getLiveStreamState(event._id);
     if (currentState.isLive) {
       this.router.navigate(['/live-stream'], {

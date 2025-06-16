@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LivestreamService } from '../../../core/services/user/stream/livestream.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-live-stream',
@@ -26,10 +27,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   streamStartTime: Date | null = null;
   streamDuration = '00:00';
 
-  eventTitle = '';
-
-  cameraEnabled = true;
-  microphoneEnabled = true;
 
   private subscriptions: Subscription[] = [];
   private durationInterval?: number;
@@ -288,7 +285,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (response?.success && response.data) {
         this.streamConfig = {
-          appId: 21216645,
+          appId: environment.zegoAppId,
           token: response.data.token,
           roomId: response.data.roomId,
           userId: this.generateUserId(),
@@ -350,7 +347,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private startDurationTimer(): void {
-  // Clear any existing timer first
   this.stopDurationTimer();
   
   this.durationInterval = window.setInterval(() => {
@@ -417,33 +413,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 1000);
   }
 
-  async toggleCamera(): Promise<void> {
-    if (!this.zegoInitialized) {
-      console.warn('Cannot toggle camera: Zego not initialized');
-      return;
-    }
-    try {
-      this.cameraEnabled = !this.cameraEnabled;
-      await this.zegoService.toggleCamera(this.cameraEnabled);
-    } catch (error) {
-      console.error('Failed to toggle camera:', error);
-      this.cameraEnabled = !this.cameraEnabled;
-    }
-  }
-
-  async toggleMicrophone(): Promise<void> {
-    if (!this.zegoInitialized) {
-      console.warn('Cannot toggle microphone: Zego not initialized');
-      return;
-    }
-    try {
-      this.microphoneEnabled = !this.microphoneEnabled;
-      await this.zegoService.toggleMicrophone(this.microphoneEnabled);
-    } catch (error) {
-      console.error('Failed to toggle microphone:', error);
-      this.microphoneEnabled = !this.microphoneEnabled;
-    }
-  }
 
   async endStream(): Promise<void> {
     if (this.userRole !== 'host') return;
@@ -452,7 +421,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log('Ending stream...');
       const response = await this.livestreamService.endLiveStream(this.eventId).toPromise();
       if (response?.success) {
-        this.router.navigate(['/events']);
+        this.router.navigate(['/dashboard']);
       } else {
         this.error = `Failed to end stream: ${response?.message || 'Unknown error'}`;
       }
