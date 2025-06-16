@@ -110,7 +110,6 @@ export class LiveStreamService implements ILiveStreamService {
       'audience'
     );
 
-    // Increment viewer count
     await LiveStreamModel.findByIdAndUpdate(
       liveStream._id,
       {
@@ -185,28 +184,24 @@ export class LiveStreamService implements ILiveStreamService {
 //     return !!ticket;
 //   }
 
-  private generateZegoToken(userId: string, roomId: string, role: 'host' | 'audience'): string {
-    const timestamp = Math.floor(Date.now() / 1000);
-    const expireTime = timestamp + 7200; 
-    
-    const payload = {
-      app_id: parseInt(this.appId),
-      user_id: userId,
-      room_id: roomId,
-      privilege: role === 'host' ? 1 : 0, 
-      expire_time: expireTime
-    };
+private generateZegoToken(userId: string, roomId: string, role: 'host' | 'audience'): string {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const expireTime = timestamp + 7200; 
+  
+  const payload = {
+    app_id: parseInt(this.appId),
+    user_id: userId,
+    room_id: roomId,
+    privilege: role === 'host' ? 1 : 0,
+    expire_time: expireTime
+  };
 
-    const payloadStr = JSON.stringify(payload);
-    const payloadBase64 = Buffer.from(payloadStr).toString('base64');
-    
-    const signature = crypto
-      .createHmac('sha256', this.serverSecret)
-      .update(payloadBase64)
-      .digest('base64');
-
-    return `${payloadBase64}.${signature}`;
-  }
+  const signContent = JSON.stringify(payload);
+  const signature = crypto.createHmac('sha1', this.serverSecret).update(signContent).digest('hex');
+  console.log(signature);
+  
+  return this.serverSecret;
+}
 
   private generateStreamKey(eventId: string, userId: string): string {
     const timestamp = Date.now();

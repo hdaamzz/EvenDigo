@@ -57,7 +57,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('ngAfterViewInit called');
     this.viewInitialized = true;
     
-    // Use a more conservative approach
     setTimeout(() => {
       this.ensureContainerReady();
     }, 100);
@@ -73,9 +72,9 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Wait for container to be ready with a more reliable approach
+    
     let attempts = 0;
-    const maxAttempts = 30; // 3 seconds max
+    const maxAttempts = 30; 
 
     const checkContainer = async (): Promise<boolean> => {
       if (this.zegoInitialized || this.error) {
@@ -85,9 +84,8 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.streamContainer?.nativeElement) {
         const element = this.streamContainer.nativeElement;
         
-        // Force layout recalculation
         element.style.display = 'block';
-        element.offsetHeight; // Force reflow
+        element.offsetHeight;
         
         console.log('Container check:', {
           offsetWidth: element.offsetWidth,
@@ -108,7 +106,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       return false;
     };
 
-    // Try with intervals
     this.containerCheckInterval = window.setInterval(async () => {
       attempts++;
       
@@ -154,7 +151,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const containerElement = this.streamContainer.nativeElement;
       
-      // Ensure container is properly set up
       this.setupContainerElement(containerElement);
 
       if (!this.streamConfig) {
@@ -169,10 +165,8 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log('Initializing with config:', { ...this.streamConfig, token: '[REDACTED]' });
       this.loadingMessage = 'Connecting to stream...';
       
-      // Clean up any existing instance first
       await this.zegoService.forceCleanup();
       
-      // Wait a bit before initializing
       await new Promise(resolve => setTimeout(resolve, 200));
       
       await this.zegoService.initializeZego(this.streamConfig, containerElement);
@@ -215,10 +209,8 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setupContainerElement(element: HTMLElement): void {
-  // Clear any existing content
   element.innerHTML = '';
   
-  // Ensure proper styling with more explicit properties
   const style = element.style;
   style.width = '100%';
   style.height = '600px';
@@ -232,15 +224,12 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   style.border = 'none';
   style.outline = 'none';
   
-  // Add required attributes
   element.setAttribute('data-stream-container', 'true');
   element.id = 'streamContainer';
   
-  // Force layout recalculation multiple times
   element.offsetHeight;
   element.offsetWidth;
   
-  // Add a timeout to ensure DOM is stable
   setTimeout(() => {
     element.offsetHeight;
   }, 50);
@@ -254,7 +243,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 }
   private initializeFromRoute(): void {
-    this.eventId = this.route.snapshot.queryParamMap.get('event') || 
+    this.eventId = this.route.snapshot.queryParamMap.get('eventId') || 
                   this.route.snapshot.paramMap.get('eventId') || '';
     this.userRole = (this.route.snapshot.queryParamMap.get('role') as 'host' | 'audience') || 'audience';
 
@@ -324,9 +313,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isStreamLive = status.isLive;
     this.viewerCount = status.viewerCount;
     
-    // Fix the date handling
     if (status.isLive && status.startTime && !this.streamStartTime) {
-      // Ensure startTime is a proper Date object
       this.streamStartTime = status.startTime instanceof Date 
         ? status.startTime 
         : new Date(status.startTime);
@@ -401,7 +388,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
 }
 
   goBack(): void {
-    this.router.navigate(['/events']);
+    this.router.navigate(['/dashboard']);
   }
 
   async retryConnection(): Promise<void> {
@@ -414,20 +401,17 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initializationInProgress = false;
     this.loadingMessage = 'Retrying connection...';
     
-    // Clear any existing intervals
     if (this.containerCheckInterval) {
       clearInterval(this.containerCheckInterval);
       this.containerCheckInterval = undefined;
     }
     
-    // Clean up any existing Zego instance
     try {
       await this.zegoService.forceCleanup();
     } catch (e) {
       console.log('No existing instance to clean up');
     }
     
-    // Wait a bit before retrying
     setTimeout(() => {
       this.ensureContainerReady();
     }, 1000);
@@ -481,7 +465,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   private async cleanup(): Promise<void> {
     console.log('Cleaning up live stream component...');
     
-    // Clear intervals
     if (this.containerCheckInterval) {
       clearInterval(this.containerCheckInterval);
     }
