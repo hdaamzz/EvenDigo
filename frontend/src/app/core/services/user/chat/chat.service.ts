@@ -22,6 +22,7 @@ export interface ChatUser {
 
 export interface ChatMessage {
   id: string;
+  chatId?:string;
   senderId: string;
   content: string;
   timestamp: Date;
@@ -385,12 +386,10 @@ export class ChatService {
         messageType: 'text'
       };
 
-      // Add optimistic message
       const currentMessages = this.messagesSubject.getValue();
       this.messagesSubject.next([...currentMessages, tempMessage]);
 
       if (this.checkSocketConnection()) {
-        // Send via socket
         this.socketService!.emit('sendMessage', {
           chatId,
           content: content.trim(),
@@ -401,7 +400,6 @@ export class ChatService {
         subscriber.next(tempMessage);
         subscriber.complete();
       } else {
-        // Fallback to HTTP
         this.sendMessageHttp(chatId, content.trim(), tempMessage).subscribe(subscriber);
       }
     });
@@ -600,7 +598,7 @@ export class ChatService {
   }
 
   getAllUsers(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}admin/users/all-users`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}admin/users/all-users`).pipe(
       map(response => {
         console.log(response);
 
