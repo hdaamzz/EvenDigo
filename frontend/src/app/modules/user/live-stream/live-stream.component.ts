@@ -278,7 +278,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.userRole === 'host') {
       response = await this.livestreamService.startLiveStream(this.eventId).toPromise();        
     } else {
-      // ENHANCED: Better audience flow
       console.log('Checking stream status first...');
       const statusResponse = await this.livestreamService.getLiveStreamStatus(this.eventId).toPromise();
       console.log('Stream status for audience:', statusResponse); 
