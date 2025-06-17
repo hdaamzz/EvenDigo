@@ -34,5 +34,4 @@ export interface ILiveStreamService {
     startTime?: Date;
   }>;
   
-  // validateUserAccess(eventId: string, userId: string): Promise<boolean>;
 }

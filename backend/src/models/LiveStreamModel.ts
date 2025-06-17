@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ILiveStream extends Document {
-  eventId: mongoose.Types.ObjectId;
-  hostId: mongoose.Types.ObjectId;
+  eventId:string | mongoose.Types.ObjectId;
+  hostId:string | mongoose.Types.ObjectId;
   roomId: string;
   streamKey: string;
   rtmpUrl: string;

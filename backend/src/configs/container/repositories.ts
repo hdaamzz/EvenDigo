@@ -13,6 +13,8 @@ import { UserAchievementRepository } from "../../../src/repositories/implementat
 import { SubscriptionRepository } from "../../repositories/implementation/subscription.repository";
 import { SubscriptionPlanRepository } from "../../../src/repositories/implementation/subscriptionPlan.repository";
 import { ChatRepository } from "../../../src/repositories/implementation/chat.repository";
+import { LiveStreamRepository } from "../../../src/repositories/implementation/livestream.repository";
+
 
 export function registerRepositories() {
   container.register("UserRepository", { useClass: UserRepository });
@@ -29,4 +31,6 @@ export function registerRepositories() {
   container.register("SubscriptionRepository", { useClass: SubscriptionRepository });
   container.register("SubscriptionPlanRepository", { useClass: SubscriptionPlanRepository });
   container.register("ChatRepository", { useClass: ChatRepository });
+  container.register("LiveStreamRepository", { useClass: LiveStreamRepository });
+
 }
