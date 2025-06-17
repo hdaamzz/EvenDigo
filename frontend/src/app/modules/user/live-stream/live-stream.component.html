@@ -1,9 +1,10 @@
-<div class="min-h-screen bg-[#121212] text-white">
-  <!-- Header -->
-  <div class="bg-gray-800 border-b border-gray-700 p-4">
+
+<app-user-nav></app-user-nav>
+<div class="min-h-screen bg-[#121212] text-white pt-20">
+  <div class="bg-[#121212] border-b border-gray-700 p-4">
     <div class="flex items-center justify-between max-w-7xl mx-auto">
       <div class="flex items-center gap-4">
-        <button (click)="goBack()" 
+        <button (click)="goBack(userRole)" 
                 class="p-2 hover:bg-[#00ff66] hover:text-black rounded-full transition-all duration-300 group">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" class="w-6 h-6 group-hover:scale-110 transition-transform">
@@ -16,7 +17,6 @@
         </div>
       </div>
       
-      <!-- Stream Status Indicator -->
       @if (zegoInitialized && isStreamLive) {
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
@@ -32,17 +32,11 @@
               {{ viewerCount }}
             </div>
           }
-          @if (streamDuration) {
-            <div class="text-sm text-gray-300 font-mono">
-              {{ streamDuration }}
-            </div>
-          }
         </div>
       }
     </div>
   </div>
 
-  <!-- Loading State -->
   @if (isLoading) {
     <div class="flex items-center justify-center min-h-[600px]">
       <div class="text-center">
@@ -51,14 +45,13 @@
           <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-[#00ff66] absolute top-0 left-1/2 transform -translate-x-1/2"></div>
         </div>
         <p class="text-gray-300 text-lg">{{ loadingMessage }}</p>
-        <div class="mt-4 bg-gray-800 rounded-full h-2 w-64 mx-auto overflow-hidden">
+        <div class="mt-4 bg-black rounded-full h-2 w-64 mx-auto overflow-hidden">
           <div class="bg-[#00ff66] h-full rounded-full animate-pulse"></div>
         </div>
       </div>
     </div>
   }
 
-  <!-- Error State -->
   @if (error && !isLoading) {
     <div class="flex items-center justify-center min-h-[600px]">
       <div class="text-center max-w-md mx-auto p-6">
@@ -80,7 +73,7 @@
         </button>
       </div>
     </div>
-  }
+  }@else {
 
   <div class="flex-1 p-6">
     <div class="max-w-7xl mx-auto">
@@ -113,7 +106,7 @@
       </div>
 
       @if (zegoInitialized) {
-        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-black rounded-xl p-4 border border-gray-700">
           <!-- Stream Info -->
           <div class="flex items-center gap-6">
             @if (isStreamLive) {
@@ -137,21 +130,12 @@
                 <span class="font-medium">{{ viewerCount }} viewers</span>
               </div>
             }
-            
-            @if (streamDuration) {
-              <div class="flex items-center gap-2 text-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="font-mono font-medium">{{ streamDuration }}</span>
-              </div>
-            }
           </div>
 
           @if (userRole === 'host') {
             <div class="flex gap-3">
               <button (click)="retryConnection()"
-                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2">
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                 </svg>
@@ -170,4 +154,5 @@
       }
     </div>
   </div>
+}
 </div>

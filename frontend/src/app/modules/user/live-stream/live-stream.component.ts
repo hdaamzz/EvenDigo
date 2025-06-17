@@ -5,17 +5,18 @@ import { LivestreamService } from '../../../core/services/user/stream/livestream
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
 
 @Component({
   selector: 'app-live-stream',
-  imports: [CommonModule],
+  imports: [CommonModule, UserNavComponent],
   templateUrl: './live-stream.component.html',
   styleUrl: './live-stream.component.css'
 })
 export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('streamContainer', { static: false }) streamContainer!: ElementRef;
 
-  eventId: string = '';
+  eventId = '';
   userRole: 'host' | 'audience' = 'audience';
 
   isLoading = true;
@@ -25,38 +26,39 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   isStreamLive = false;
   viewerCount = 0;
   streamStartTime: Date | null = null;
-  streamDuration = '00:00';
+  streamDuration = '00:00:00';
 
-
-  private subscriptions: Subscription[] = [];
+  private readonly subscriptions: Subscription[] = [];
   private durationInterval?: number;
   private streamConfig: ZegoConfig | null = null;
   private initializationRetryCount = 0;
-  private maxRetries = 3;
+  private readonly maxRetries = 3;
   private viewInitialized = false;
   private containerCheckInterval?: number;
   private initializationInProgress = false;
+  
+  private readonly maxContainerAttempts = 30;
+  private readonly containerCheckDelay = 100;
+  private readonly retryBaseDelay = 2000;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private zegoService: ZegoService,
-    private livestreamService: LivestreamService
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly zegoService: ZegoService,
+    private readonly livestreamService: LivestreamService
   ) {}
 
   ngOnInit(): void {
-    console.log('ngOnInit called');
     this.initializeFromRoute();
     this.subscribeToLiveStreamStatus();
   }
 
   ngAfterViewInit(): void {
-    console.log('ngAfterViewInit called');
     this.viewInitialized = true;
     
     setTimeout(() => {
       this.ensureContainerReady();
-    }, 100);
+    }, this.containerCheckDelay);
   }
 
   ngOnDestroy(): void {
@@ -65,13 +67,10 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private async ensureContainerReady(): Promise<void> {
     if (this.initializationInProgress) {
-      console.log('Initialization already in progress, skipping...');
       return;
     }
 
-    
     let attempts = 0;
-    const maxAttempts = 30; 
 
     const checkContainer = async (): Promise<boolean> => {
       if (this.zegoInitialized || this.error) {
@@ -81,20 +80,11 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.streamContainer?.nativeElement) {
         const element = this.streamContainer.nativeElement;
         
+        // Force layout calculation
         element.style.display = 'block';
         element.offsetHeight;
-        
-        console.log('Container check:', {
-          offsetWidth: element.offsetWidth,
-          offsetHeight: element.offsetHeight,
-          clientWidth: element.clientWidth,
-          clientHeight: element.clientHeight,
-          display: getComputedStyle(element).display,
-          visibility: getComputedStyle(element).visibility
-        });
 
         if (element.offsetWidth > 0 && element.offsetHeight > 0) {
-          console.log('Container is ready, initializing stream...');
           await this.tryInitializeStream();
           return true;
         }
@@ -107,149 +97,171 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
       attempts++;
       
       if (await checkContainer()) {
-        if (this.containerCheckInterval) {
-          clearInterval(this.containerCheckInterval);
-          this.containerCheckInterval = undefined;
-        }
-      } else if (attempts >= maxAttempts) {
-        if (this.containerCheckInterval) {
-          clearInterval(this.containerCheckInterval);
-          this.containerCheckInterval = undefined;
-        }
+        this.clearContainerCheckInterval();
+      } else if (attempts >= this.maxContainerAttempts) {
+        this.clearContainerCheckInterval();
         
         if (!this.zegoInitialized && !this.error) {
-          console.error('Container failed to become ready within timeout');
-          this.error = 'Failed to initialize stream container. Please refresh the page.';
-          this.isLoading = false;
+          this.handleContainerInitializationFailure();
         }
       }
-    }, 100);
+    }, this.containerCheckDelay);
+  }
+
+  private clearContainerCheckInterval(): void {
+    if (this.containerCheckInterval) {
+      clearInterval(this.containerCheckInterval);
+      this.containerCheckInterval = undefined;
+    }
+  }
+
+  private handleContainerInitializationFailure(): void {
+    this.error = 'Failed to initialize stream container. Please refresh the page.';
+    this.isLoading = false;
   }
 
   private async tryInitializeStream(): Promise<void> {
-    if (!this.viewInitialized || this.zegoInitialized || this.initializationInProgress) {
+    if (!this.canInitializeStream()) {
       return;
     }
 
     if (this.initializationRetryCount >= this.maxRetries) {
-      this.error = 'Failed to initialize stream after multiple attempts. Please refresh the page.';
-      this.isLoading = false;
+      this.handleMaxRetriesReached();
       return;
     }
 
     this.initializationInProgress = true;
 
     try {
-      console.log('Trying to initialize stream, attempt:', this.initializationRetryCount + 1);
-      
-      if (!this.streamContainer?.nativeElement) {
-        throw new Error('Stream container not available');
-      }
-
-      const containerElement = this.streamContainer.nativeElement;
-      
-      this.setupContainerElement(containerElement);
-
-      if (!this.streamConfig) {
-        console.log('Stream config not available, loading config...');
-        this.loadingMessage = 'Loading stream configuration...';
-        await this.loadStreamConfig();
-        if (!this.streamConfig) {
-          throw new Error('Failed to load stream configuration');
-        }
-      }
-
-      console.log('Initializing with config:', { ...this.streamConfig, token: '[REDACTED]' });
-      this.loadingMessage = 'Connecting to stream...';
-      
-      await this.zegoService.forceCleanup();
-      
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      await this.zegoService.initializeZego(this.streamConfig, containerElement);
-      
-      this.zegoInitialized = true;
-      this.isLoading = false;
-      this.loadingMessage = '';
-      this.initializationRetryCount = 0;
-      this.error = null;
-
-      console.log('Stream initialized successfully');
-      this.checkStreamStatus();
+      await this.performStreamInitialization();
+      this.handleSuccessfulInitialization();
       
     } catch (error) {
-      console.error('Stream initialization failed:', error);
-      this.initializationRetryCount++;
-      this.error = `Failed to connect to stream: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      
-      if (this.initializationRetryCount < this.maxRetries) {
-        const delay = 2000 * this.initializationRetryCount; // Increase delay
-        console.log(`Retrying initialization in ${delay}ms...`);
-        this.loadingMessage = `Retrying in ${delay/1000} seconds...`;
-        
-        setTimeout(() => {
-          this.error = null;
-          this.loadingMessage = 'Retrying connection...';
-          this.initializationInProgress = false;
-          this.tryInitializeStream();
-        }, delay);
-      } else {
-        this.isLoading = false;
-        this.loadingMessage = '';
-        this.initializationInProgress = false;
-      }
+      await this.handleInitializationError(error);
     } finally {
-      if (this.initializationRetryCount >= this.maxRetries || this.zegoInitialized) {
+      if (this.shouldStopInitializationProgress()) {
         this.initializationInProgress = false;
       }
     }
   }
 
+  private canInitializeStream(): boolean {
+    return this.viewInitialized && !this.zegoInitialized && !this.initializationInProgress;
+  }
+
+  private handleMaxRetriesReached(): void {
+    this.error = 'Failed to initialize stream after multiple attempts. Please refresh the page.';
+    this.isLoading = false;
+  }
+
+  private async performStreamInitialization(): Promise<void> {
+    if (!this.streamContainer?.nativeElement) {
+      throw new Error('Stream container not available');
+    }
+
+    const containerElement = this.streamContainer.nativeElement;
+    this.setupContainerElement(containerElement);
+
+    if (!this.streamConfig) {
+      this.loadingMessage = 'Loading stream configuration...';
+      await this.loadStreamConfig();
+      
+      if (!this.streamConfig) {
+        throw new Error('Failed to load stream configuration');
+      }
+    }
+
+    this.loadingMessage = 'Connecting to stream...';
+    
+    await this.zegoService.forceCleanup();
+    await this.delay(200);
+    await this.zegoService.initializeZego(this.streamConfig, containerElement);
+  }
+
+  private handleSuccessfulInitialization(): void {
+    this.zegoInitialized = true;
+    this.isLoading = false;
+    this.loadingMessage = '';
+    this.initializationRetryCount = 0;
+    this.error = null;
+    this.checkStreamStatus();
+  }
+
+  private async handleInitializationError(error: unknown): Promise<void> {
+    this.initializationRetryCount++;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    this.error = `Failed to connect to stream: ${errorMessage}`;
+    
+    if (this.initializationRetryCount < this.maxRetries) {
+      await this.scheduleRetry();
+    } else {
+      this.finalizeFailedInitialization();
+    }
+  }
+
+  private async scheduleRetry(): Promise<void> {
+    const delay = this.retryBaseDelay * this.initializationRetryCount;
+    this.loadingMessage = `Retrying in ${delay / 1000} seconds...`;
+    
+    setTimeout(() => {
+      this.error = null;
+      this.loadingMessage = 'Retrying connection...';
+      this.initializationInProgress = false;
+      this.tryInitializeStream();
+    }, delay);
+  }
+
+  private finalizeFailedInitialization(): void {
+    this.isLoading = false;
+    this.loadingMessage = '';
+    this.initializationInProgress = false;
+  }
+
+  private shouldStopInitializationProgress(): boolean {
+    return this.initializationRetryCount >= this.maxRetries || this.zegoInitialized;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   private setupContainerElement(element: HTMLElement): void {
-  element.innerHTML = '';
-  
-  const style = element.style;
-  style.width = '100%';
-  style.height = '600px';
-  style.minHeight = '400px';
-  style.maxHeight = '600px';
-  style.position = 'relative';
-  style.backgroundColor = '#000000';
-  style.display = 'block';
-  style.visibility = 'visible';
-  style.overflow = 'hidden';
-  style.border = 'none';
-  style.outline = 'none';
-  
-  element.setAttribute('data-stream-container', 'true');
-  element.id = 'streamContainer';
-  
-  element.offsetHeight;
-  element.offsetWidth;
-  
-  setTimeout(() => {
+    element.innerHTML = '';
+    
+    const style = element.style;
+    Object.assign(style, {
+      width: '100%',
+      height: '600px',
+      minHeight: '400px',
+      maxHeight: '600px',
+      position: 'relative',
+      backgroundColor: '#000000',
+      display: 'block',
+      visibility: 'visible',
+      overflow: 'hidden',
+      border: 'none',
+      outline: 'none'
+    });
+    
+    element.setAttribute('data-stream-container', 'true');
+    element.id = 'streamContainer';
+    
+    // Force layout calculations
     element.offsetHeight;
-  }, 50);
-  
-  console.log('Container element setup complete:', {
-    width: element.offsetWidth,
-    height: element.offsetHeight,
-    display: getComputedStyle(element).display,
-    visibility: getComputedStyle(element).visibility,
-    position: getComputedStyle(element).position
-  });
-}
+    element.offsetWidth;
+    
+    setTimeout(() => {
+      element.offsetHeight;
+    }, 50);
+  }
+
   private initializeFromRoute(): void {
     this.eventId = this.route.snapshot.queryParamMap.get('eventId') || 
                   this.route.snapshot.paramMap.get('eventId') || '';
     this.userRole = (this.route.snapshot.queryParamMap.get('role') as 'host' | 'audience') || 'audience';
 
-    console.log('Route params:', { eventId: this.eventId, userRole: this.userRole });
-
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras?.state;
-
-    console.log('Navigation state:', state);
 
     if (state?.['token'] && state?.['roomId']) {
       this.streamConfig = {
@@ -260,97 +272,86 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
         userName: this.generateUserName(),
         role: this.userRole
       };
-      console.log('Stream config loaded from navigation state');
     }
 
     if (!this.eventId) {
       this.error = 'Invalid event ID';
       this.isLoading = false;
-      return;
     }
   }
 
   private async loadStreamConfig(): Promise<void> {
-  try {
-    console.log(`Loading stream config for ${this.userRole} role...`);
-  
-    let response;
-    if (this.userRole === 'host') {
-      response = await this.livestreamService.startLiveStream(this.eventId).toPromise();        
-    } else {
-      console.log('Checking stream status first...');
-      const statusResponse = await this.livestreamService.getLiveStreamStatus(this.eventId).toPromise();
-      console.log('Stream status for audience:', statusResponse); 
-      
-      if (!statusResponse?.success) {
-        throw new Error('Unable to get stream status');
-      }
-      
-      if (!statusResponse.data?.isLive) {
-        throw new Error('This stream is not currently live. Please wait for the host to start streaming.');
-      }
-      
-      // Add delay before joining to ensure stream is ready
-      console.log('Stream is live, waiting before joining...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      response = await this.livestreamService.joinLiveStream(this.eventId).toPromise();
-    }
+    try {
+      const response = await this.getStreamConfigResponse();
 
-    console.log('Stream config response:', response);
-
-    if (response?.success && response.data) {
-      this.streamConfig = {
-        appId: environment.zegoAppId,
-        token: response.data.token,
-        roomId: response.data.roomId,
-        userId: this.generateUserId(),
-        userName: this.generateUserName(),
-        role: this.userRole
-      };
-      console.log('Stream config loaded from API');
-    } else {
-      throw new Error(response?.message || 'Failed to get stream configuration');
+      if (response?.success && response.data) {
+        this.streamConfig = {
+          appId: environment.zegoAppId,
+          token: response.data.token,
+          roomId: response.data.roomId,
+          userId: this.generateUserId(),
+          userName: this.generateUserName(),
+          role: this.userRole
+        };
+      } else {
+        throw new Error(response?.message || 'Failed to get stream configuration');
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      this.error = `Failed to load stream: ${errorMsg}`;
+      this.isLoading = false;
+      throw error;
     }
-  } catch (error) {
-    console.error('Failed to load stream configuration:', error);
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    this.error = `Failed to load stream: ${errorMsg}`;
-    this.isLoading = false;
-    throw error;
   }
-}
+
+  private async getStreamConfigResponse(): Promise<any> {
+    if (this.userRole === 'host') {
+      return await this.livestreamService.startLiveStream(this.eventId).toPromise();
+    }
+
+    const statusResponse = await this.livestreamService.getLiveStreamStatus(this.eventId).toPromise();
+    
+    if (!statusResponse?.success) {
+      throw new Error('Unable to get stream status');
+    }
+    
+    if (!statusResponse.data?.isLive) {
+      throw new Error('This stream is not currently live. Please wait for the host to start streaming.');
+    }
+    
+    // Wait before joining to ensure stream is ready
+    await this.delay(1000);
+    
+    return await this.livestreamService.joinLiveStream(this.eventId).toPromise();
+  }
 
   private subscribeToLiveStreamStatus(): void {
-  const statusSub = this.livestreamService.liveStreamStatus$.subscribe(status => {
-    console.log('Live stream status update:', status);
-    this.isStreamLive = status.isLive;
-    this.viewerCount = status.viewerCount;
+    const statusSub = this.livestreamService.liveStreamStatus$.subscribe(status => {
+      this.isStreamLive = status.isLive;
+      this.viewerCount = status.viewerCount;
+      
+      if (status.isLive && status.startTime && !this.streamStartTime) {
+        this.streamStartTime = status.startTime instanceof Date 
+          ? status.startTime 
+          : new Date(status.startTime);
+        this.startDurationTimer();
+      } else if (!status.isLive) {
+        this.streamStartTime = null;
+        this.stopDurationTimer();
+      }
+    });
     
-    if (status.isLive && status.startTime && !this.streamStartTime) {
-      this.streamStartTime = status.startTime instanceof Date 
-        ? status.startTime 
-        : new Date(status.startTime);
-      this.startDurationTimer();
-    } else if (!status.isLive) {
-      this.streamStartTime = null;
-      this.stopDurationTimer();
-    }
-  });
-  this.subscriptions.push(statusSub);
-}
+    this.subscriptions.push(statusSub);
+  }
 
   private checkStreamStatus(): void {
-    console.log('Checking stream status...');
     this.livestreamService.getLiveStreamStatus(this.eventId).subscribe({
       next: (response) => {
-        console.log('Stream status response:', response);
         if (response.success) {
           this.livestreamService.updateLiveStreamStatus(response.data);
         }
       },
       error: (error) => {
-        console.error('Failed to get stream status:', error);
       }
     });
   }
@@ -364,21 +365,20 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private startDurationTimer(): void {
-  this.stopDurationTimer();
-  
-  this.durationInterval = window.setInterval(() => {
-    if (this.streamStartTime && this.streamStartTime instanceof Date) {
-      try {
-        const now = new Date();
-        const diff = now.getTime() - this.streamStartTime.getTime();
-        this.streamDuration = this.formatDuration(diff);
-      } catch (error) {
-        console.error('Error calculating stream duration:', error);
-        this.streamDuration = '00:00:00';
+    this.stopDurationTimer();
+    
+    this.durationInterval = window.setInterval(() => {
+      if (this.streamStartTime instanceof Date) {
+        try {
+          const now = new Date();
+          const diff = now.getTime() - this.streamStartTime.getTime();
+          this.streamDuration = this.formatDuration(diff);
+        } catch (error) {
+          this.streamDuration = '00:00:00';
+        }
       }
-    }
-  }, 1000);
-}
+    }, 1000);
+  }
 
   private stopDurationTimer(): void {
     if (this.durationInterval) {
@@ -388,24 +388,41 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private formatDuration(milliseconds: number): string {
-  if (isNaN(milliseconds) || milliseconds < 0) {
-    return '00:00:00';
+    if (isNaN(milliseconds) || milliseconds < 0) {
+      return '00:00:00';
+    }
+    
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
-  
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-  goBack(): void {
-    this.router.navigate(['/dashboard']);
+  goBack(role:string): void {
+    if(role=='host'){
+      this.router.navigate(['/dashboard']);
+    }else{
+      this.router.navigate(['/profile/bookings']); 
+    }
+    
   }
 
   async retryConnection(): Promise<void> {
-    console.log('Retrying connection...');
+    this.resetComponentState();
+    
+    try {
+      await this.zegoService.forceCleanup();
+    } catch (error) {
+    }
+    
+    setTimeout(() => {
+      this.ensureContainerReady();
+    }, 1000);
+  }
+
+  private resetComponentState(): void {
     this.error = null;
     this.isLoading = true;
     this.zegoInitialized = false;
@@ -414,46 +431,30 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initializationInProgress = false;
     this.loadingMessage = 'Retrying connection...';
     
-    if (this.containerCheckInterval) {
-      clearInterval(this.containerCheckInterval);
-      this.containerCheckInterval = undefined;
-    }
-    
-    try {
-      await this.zegoService.forceCleanup();
-    } catch (e) {
-      console.log('No existing instance to clean up');
-    }
-    
-    setTimeout(() => {
-      this.ensureContainerReady();
-    }, 1000);
+    this.clearContainerCheckInterval();
   }
 
-
   async endStream(): Promise<void> {
-    if (this.userRole !== 'host') return;
+    if (this.userRole !== 'host') {
+      return;
+    }
     
     try {
-      console.log('Ending stream...');
       const response = await this.livestreamService.endLiveStream(this.eventId).toPromise();
+      
       if (response?.success) {
         this.router.navigate(['/dashboard']);
       } else {
         this.error = `Failed to end stream: ${response?.message || 'Unknown error'}`;
       }
     } catch (error) {
-      console.error('Failed to end stream:', error);
-      this.error = `Failed to end stream: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.error = `Failed to end stream: ${errorMessage}`;
     }
   }
 
   private async cleanup(): Promise<void> {
-    console.log('Cleaning up live stream component...');
-    
-    if (this.containerCheckInterval) {
-      clearInterval(this.containerCheckInterval);
-    }
+    this.clearContainerCheckInterval();
     
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.stopDurationTimer();
@@ -461,7 +462,6 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       await this.zegoService.forceCleanup();
     } catch (error) {
-      console.error('Failed to cleanup Zego service:', error);
     }
   }
 }
