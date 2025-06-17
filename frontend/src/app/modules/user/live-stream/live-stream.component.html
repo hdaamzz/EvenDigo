@@ -1,0 +1,158 @@
+
+<app-user-nav></app-user-nav>
+<div class="min-h-screen bg-[#121212] text-white pt-20">
+  <div class="bg-[#121212] border-b border-gray-700 p-4">
+    <div class="flex items-center justify-between max-w-7xl mx-auto">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack(userRole)" 
+                class="p-2 hover:bg-[#00ff66] hover:text-black rounded-full transition-all duration-300 group">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-6 h-6 group-hover:scale-110 transition-transform">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-xl font-bold text-[#00ff66]">Live Stream</h1>
+          <p class="text-gray-400 text-sm">{{ userRole === 'host' ? 'Broadcasting' : 'Watching' }}</p>
+        </div>
+      </div>
+      
+      @if (zegoInitialized && isStreamLive) {
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+            <span class="text-sm font-medium">LIVE</span>
+          </div>
+          @if (viewerCount > 0) {
+            <div class="flex items-center gap-1 text-sm text-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              {{ viewerCount }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="flex items-center justify-center min-h-[600px]">
+      <div class="text-center">
+        <div class="relative">
+          <div class="animate-spin rounded-full h-16 w-16 border-2 border-gray-600 mx-auto mb-4"></div>
+          <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-[#00ff66] absolute top-0 left-1/2 transform -translate-x-1/2"></div>
+        </div>
+        <p class="text-gray-300 text-lg">{{ loadingMessage }}</p>
+        <div class="mt-4 bg-black rounded-full h-2 w-64 mx-auto overflow-hidden">
+          <div class="bg-[#00ff66] h-full rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (error && !isLoading) {
+    <div class="flex items-center justify-center min-h-[600px]">
+      <div class="text-center max-w-md mx-auto p-6">
+        <div class="bg-red-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+            class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-red-400 mb-4">Stream Error</h3>
+        <p class="text-gray-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button (click)="retryConnection()"
+          class="bg-[#00ff66] hover:bg-[#00cc52] text-black font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#00ff66]/25">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 inline mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          Retry Connection
+        </button>
+      </div>
+    </div>
+  }@else {
+
+  <div class="flex-1 p-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+        <div #streamContainer 
+             id="streamContainer" 
+             class="stream-container w-full bg-[#121212] relative transition-all duration-300"
+             [style.height.px]="600" 
+             [style.min-height.px]="400"
+             style="display: block; position: relative; overflow: hidden;">
+          
+          @if (!zegoInitialized && !isLoading && !error) {
+            <div class="absolute inset-0 flex items-center justify-center bg-[#121212]">
+              <div class="text-center">
+                <div class="animate-bounce mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-20 h-20 text-[#00ff66] mx-auto">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </div>
+                <p class="text-gray-400 text-lg">Connecting to stream...</p>
+                <div class="mt-4 w-32 h-1 bg-gray-700 rounded-full mx-auto overflow-hidden">
+                  <div class="h-full bg-[#00ff66] rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (zegoInitialized) {
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-black rounded-xl p-4 border border-gray-700">
+          <!-- Stream Info -->
+          <div class="flex items-center gap-6">
+            @if (isStreamLive) {
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                <span class="font-semibold text-red-400">LIVE</span>
+              </div>
+            } @else {
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-gray-500 rounded-full"></div>
+                <span class="font-semibold text-gray-400">OFFLINE</span>
+              </div>
+            }
+            
+            @if (viewerCount > 0) {
+              <div class="flex items-center gap-2 text-gray-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span class="font-medium">{{ viewerCount }} viewers</span>
+              </div>
+            }
+          </div>
+
+          @if (userRole === 'host') {
+            <div class="flex gap-3">
+              <button (click)="retryConnection()"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Refresh
+              </button>
+              <button (click)="endStream()"
+                class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2 font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                </svg>
+                End Stream
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+</div>

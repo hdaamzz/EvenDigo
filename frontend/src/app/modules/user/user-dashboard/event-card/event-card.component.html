@@ -15,11 +15,18 @@
               <span class="text-gray-400">No Image</span>
             </div>
           }
+          
+          @if (getLiveStreamState(event._id).isLive) {
+            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+              <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              LIVE
+            </div>
+          }
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 px-3 flex justify-end items-center">
           <button
-            class="bg-[#2A2A2A]/90 border-none text-white rounded-t-md rounded-b-none flex justify-center items-center gap-1 py-1 px-2"
+            class="bg-[#2A2A2A]/90 border-none text-white rounded-t-md rounded-b-none flex justify-center items-center gap-1 py-1 px-2 hover:bg-[#3A3A3A]/90 transition-colors duration-200"
             (click)="$event.stopPropagation(); toggleEventDetails($index)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -36,10 +43,10 @@
             <div class="flex justify-between items-center mb-4">
               <h3 class="text-lg font-bold text-white">{{ event.eventType }}</h3>
               <button
-                class="group p-1"
+                class="group p-1 hover:bg-gray-700 rounded-full transition-colors duration-200"
                 (click)="toggleEventDetails($index)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-white hover:text-black transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-white hover:text-gray-300 transition-colors duration-200">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -71,21 +78,65 @@
                 </p>
               </div>
 
+              <!-- Live Stream Status -->
+              @if (getLiveStreamState(event._id).isLive) {
+                <div class="bg-red-900/20 border border-red-500 rounded-md p-2">
+                  <div class="text-red-400 text-sm flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    Event is currently live
+                  </div>
+                </div>
+              }
+
               <div class="flex justify-between mt-4 gap-2">
-                <button class="border bg-white border-gray-600 text-black text-sm px-3 py-1 rounded-md">
+                <button 
+                  class="border bg-white border-gray-600 text-black text-sm px-3 py-1 rounded-md hover:bg-gray-100 transition-colors duration-200"
+                  (click)="viewAnalytics(event)"
+                >
                   Analytics
                 </button>
                 
                 @if (activeTab === 'ongoing') {
-                  <button 
-                    class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded-md flex items-center gap-1 transition-colors duration-200"
-                    (click)="goLive(event)"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                    </svg>
-                    Go Live
-                  </button>
+                  <div class="flex gap-2">
+                    <!-- Join Live Stream Button (for audience) -->
+                    @if (getLiveStreamState(event._id).isLive) {
+                      <button 
+                        class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded-md flex items-center gap-1 transition-colors duration-200"
+                        (click)="watchLive(event)"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Watch Live
+                      </button>
+                    }
+                    
+                    <!-- Go Live Button -->
+                    <button 
+                      class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded-md flex items-center gap-1 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      (click)="goLive(event)"
+                      [disabled]="getLiveStreamState(event._id).isStarting"
+                    >
+                      @if (getLiveStreamState(event._id).isStarting) {
+                        <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Starting...
+                      } @else if (getLiveStreamState(event._id).isLive) {
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        Manage Live
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        Go Live
+                      }
+                    </button>
+                  </div>
                 }
               </div>
             </div>

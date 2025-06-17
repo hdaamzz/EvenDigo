@@ -1,0 +1,13 @@
+#streamContainer {
+  display: block !important;
+  visibility: visible !important;
+}
+.stream-container {
+  width: 100%;
+  height: 600px;
+  min-height: 400px;
+  position: relative;
+  background-color: #111827;
+  border-radius: 8px;
+  overflow: hidden;
+}
