@@ -88,7 +88,6 @@ export class AuthService {
     );
   }
 
-  // New method for manual token refresh if needed
   refreshToken(): Observable<any> {
     return this.http.post(`${this.apiUrl}/refresh-token`, {}).pipe(
       catchError((error) => {

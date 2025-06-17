@@ -77,7 +77,7 @@ export interface TypingData {
   providedIn: 'root'
 })
 export class ChatService {
-  private readonly apiUrl = `${environment.apiUrl}user/auth`;
+  private readonly apiUrl = `${environment.apiUrl}user/chats`;
   private currentUserId: string = "";
   private isInitialized = false;
   private destroy$ = new Subject<void>();
