@@ -214,7 +214,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   style.minHeight = '400px';
   style.maxHeight = '600px';
   style.position = 'relative';
-  style.backgroundColor = '#111827';
+  style.backgroundColor = '#000000';
   style.display = 'block';
   style.visibility = 'visible';
   style.overflow = 'hidden';
@@ -271,38 +271,56 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async loadStreamConfig(): Promise<void> {
-    try {
-      console.log(`Loading stream config for ${this.userRole} role...`);
+  try {
+    console.log(`Loading stream config for ${this.userRole} role...`);
+  
+    let response;
+    if (this.userRole === 'host') {
+      response = await this.livestreamService.startLiveStream(this.eventId).toPromise();        
+    } else {
+      // ENHANCED: Better audience flow
+      console.log('Checking stream status first...');
+      const statusResponse = await this.livestreamService.getLiveStreamStatus(this.eventId).toPromise();
+      console.log('Stream status for audience:', statusResponse); 
       
-      let response;
-      if (this.userRole === 'host') {
-        response = await this.livestreamService.startLiveStream(this.eventId).toPromise();        
-      } else {
-        response = await this.livestreamService.joinLiveStream(this.eventId).toPromise();
+      if (!statusResponse?.success) {
+        throw new Error('Unable to get stream status');
       }
-
-      console.log('Stream config response:', response);
-
-      if (response?.success && response.data) {
-        this.streamConfig = {
-          appId: environment.zegoAppId,
-          token: response.data.token,
-          roomId: response.data.roomId,
-          userId: this.generateUserId(),
-          userName: this.generateUserName(),
-          role: this.userRole
-        };
-        console.log('Stream config loaded from API');
-      } else {
-        throw new Error(response?.message || 'Failed to get stream configuration');
+      
+      if (!statusResponse.data?.isLive) {
+        throw new Error('This stream is not currently live. Please wait for the host to start streaming.');
       }
-    } catch (error) {
-      console.error('Failed to load stream configuration:', error);
-      this.error = `Failed to load stream: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      this.isLoading = false;
-      throw error;
+      
+      // Add delay before joining to ensure stream is ready
+      console.log('Stream is live, waiting before joining...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      response = await this.livestreamService.joinLiveStream(this.eventId).toPromise();
     }
+
+    console.log('Stream config response:', response);
+
+    if (response?.success && response.data) {
+      this.streamConfig = {
+        appId: environment.zegoAppId,
+        token: response.data.token,
+        roomId: response.data.roomId,
+        userId: this.generateUserId(),
+        userName: this.generateUserName(),
+        role: this.userRole
+      };
+      console.log('Stream config loaded from API');
+    } else {
+      throw new Error(response?.message || 'Failed to get stream configuration');
+    }
+  } catch (error) {
+    console.error('Failed to load stream configuration:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    this.error = `Failed to load stream: ${errorMsg}`;
+    this.isLoading = false;
+    throw error;
   }
+}
 
   private subscribeToLiveStreamStatus(): void {
   const statusSub = this.livestreamService.liveStreamStatus$.subscribe(status => {
