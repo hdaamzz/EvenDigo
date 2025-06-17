@@ -46,7 +46,6 @@ export class ZegoService {
       script.crossOrigin = 'anonymous';
 
       script.onload = () => {
-        console.log('Zego SDK loaded successfully');
         setTimeout(() => {
           this.sdkLoaded = true;
           resolve();
@@ -54,7 +53,6 @@ export class ZegoService {
       };
 
       script.onerror = (error) => {
-        console.error('Failed to load Zego SDK:', error);
         reject(new Error('Failed to load Zego SDK'));
       };
 
@@ -90,12 +88,10 @@ export class ZegoService {
 
   async initializeZego(config: ZegoConfig, containerElement: HTMLElement): Promise<void> {
     if (this.isInitializing && this.initializationPromise) {
-      console.log('Already initializing, waiting for existing initialization...');
       return this.initializationPromise;
     }
 
     if (this.zg) {
-      console.log('Zego already initialized, cleaning up first...');
       await this.leaveRoom();
     }
 
@@ -113,8 +109,6 @@ export class ZegoService {
 
   private async _initializeZego(config: ZegoConfig, containerElement: HTMLElement): Promise<void> {
   try {
-    console.log('Starting Zego initialization...');
-
     await this.waitForSDK();
 
     if (!window.ZegoUIKitPrebuilt) {
@@ -125,8 +119,6 @@ export class ZegoService {
       await this.requestMediaPermissions();
     }
 
-    console.log('Initializing Zego with config:', { ...config, token: '[REDACTED]' });
-
     const { token, roomId, userId, userName, role } = config;
 
     if (!token || !roomId || !userId) {
@@ -136,7 +128,6 @@ export class ZegoService {
     this.setupContainer(containerElement);
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    console.log('Generating kit token...');
     const kitToken = window.ZegoUIKitPrebuilt.generateKitTokenForTest(
       environment.zegoAppId,
       token,
@@ -145,7 +136,6 @@ export class ZegoService {
       userName || userId
     );
 
-    console.log('Creating ZegoUIKitPrebuilt instance...');
     const kit = window.ZegoUIKitPrebuilt.create(kitToken);
 
     if (!kit) {
@@ -164,25 +154,19 @@ export class ZegoService {
       showUserOfflineMessage: false,
       showUserOnlineMessage: false,
       onJoinRoom: () => {
-        console.log('Successfully joined the room');
       },
       onLeaveRoom: () => {
-        console.log('Left the room');
       },
       onUserJoin: (users: any[]) => {
-        console.log('Users joined:', users);
       },
       onUserLeave: (users: any[]) => {
-        console.log('Users left:', users);
       }
     };
 
-    // Role-specific configuration
     if (role === 'host') {
       zegoConfig.scenario.config = {
         role: window.ZegoUIKitPrebuilt.Host,
       };
-      // Host-specific settings
       zegoConfig.turnOnCameraWhenJoining = true;
       zegoConfig.turnOnMicrophoneWhenJoining = true;
       zegoConfig.showMyCameraToggleButton = true;
@@ -209,16 +193,11 @@ export class ZegoService {
         zegoConfig.enableMicrophone = false;
     }
 
-    console.log('Final Zego config for role:', role, zegoConfig);
-    console.log('Joining room...');
-
     await kit.joinRoom(zegoConfig);
 
     this.zg = kit;
-    console.log('Zego initialized successfully for role:', role);
 
   } catch (error) {
-    console.error('Failed to initialize Zego:', error);
     this.zg = null;
     throw new Error(`Zego initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -231,9 +210,7 @@ export class ZegoService {
         audio: true
       });
       stream.getTracks().forEach(track => track.stop());
-      console.log('Media permissions granted');
     } catch (error) {
-      console.error('Failed to get media permissions:', error);
       throw new Error('Camera and microphone permissions are required for hosting');
     }
   }
@@ -252,24 +229,11 @@ export class ZegoService {
     style.overflow = 'hidden';
 
     containerElement.offsetHeight;
-
-    console.log('Container dimensions after setup:', {
-      width: containerElement.offsetWidth,
-      height: containerElement.offsetHeight,
-      clientWidth: containerElement.clientWidth,
-      clientHeight: containerElement.clientHeight
-    });
-
-    if (containerElement.offsetWidth === 0 || containerElement.offsetHeight === 0) {
-      console.warn('Container has zero dimensions!');
-    }
   }
 
   async leaveRoom(): Promise<void> {
     try {
       if (this.zg) {
-        console.log('Leaving Zego room...');
-
         if (typeof this.zg.destroy === 'function') {
           await this.zg.destroy();
         } else if (typeof this.zg.leaveRoom === 'function') {
@@ -279,10 +243,8 @@ export class ZegoService {
         }
 
         this.zg = null;
-        console.log('Successfully left Zego room');
       }
     } catch (error) {
-      console.error('Error leaving room:', error);
       this.zg = null;
     }
   }
