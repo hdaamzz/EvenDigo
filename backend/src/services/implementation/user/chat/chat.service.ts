@@ -14,7 +14,19 @@ export class ChatService implements IChatService {
       throw new Error('Personal chat requires exactly 2 participants');
     }
     
-    return await this.chatRepository.createChat(participantIds);
+    return await this.chatRepository.createChat(participantIds, 'personal');
+  }
+
+  async createGroupChat(eventId: string, name: string, participantIds: string[]): Promise<IChat> {
+    if (!eventId || !name) {
+      throw new Error('Event ID and name are required for group chat');
+    }
+    
+    return await this.chatRepository.createChat(participantIds, 'group', eventId, name);
+  }
+
+  async addParticipantToGroupChat(chatId: string, userId: string): Promise<IChat> {
+    return await this.chatRepository.addParticipantToGroupChat(chatId, userId);
   }
 
   async getChatById(chatId: string): Promise<IChat> {
@@ -77,7 +89,6 @@ export class ChatService implements IChatService {
       throw new Error('Message content cannot be empty');
     }
     
-    // Validate that user has access to this chat before adding message
     const hasAccess = await this.validateChatAccess(chatId, senderId);
     if (!hasAccess) {
       throw new Error('User does not have access to this chat');
@@ -96,6 +107,14 @@ export class ChatService implements IChatService {
     }
 
     return await this.chatRepository.getChatBetweenUsers(userOneId, userTwoId);
+  }
+
+  async getGroupChatByEventId(eventId: string): Promise<IChat | null> {
+    if (!eventId) {
+      throw new Error('Event ID is required');
+    }
+
+    return await this.chatRepository.getGroupChatByEventId(eventId);
   }
 
   async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
@@ -135,7 +154,6 @@ export class ChatService implements IChatService {
       throw new Error('Message ID, content, and User ID are required');
     }
 
-    // First check if the message exists and belongs to the user
     const existingMessage = await this.chatRepository.getMessageById(messageId);
     if (!existingMessage) {
       throw new Error('Message not found');
@@ -158,7 +176,6 @@ export class ChatService implements IChatService {
       throw new Error('Message ID and User ID are required');
     }
 
-    // First check if the message exists and belongs to the user
     const existingMessage = await this.chatRepository.getMessageById(messageId);
     if (!existingMessage) {
       throw new Error('Message not found');
@@ -182,9 +199,7 @@ export class ChatService implements IChatService {
         return false;
       }
 
-      // Check if user is a participant in the chat
       const isParticipant = chat.participants.some(participant => {
-        // Handle both populated and non-populated participant objects
         const participantId = participant._id ? participant._id.toString() : participant.toString();
         return participantId === userId;
       });

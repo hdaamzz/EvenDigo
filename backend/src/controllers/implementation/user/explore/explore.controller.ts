@@ -86,6 +86,7 @@ export class ExploreController implements IExploreController {
           await this.subscriptionService.handleSubscriptionWebhook(event);
         } else {
           await this.paymentService.processStripeWebhook(event);
+          
         }
       } else {
         if (event.type.startsWith('customer.subscription') || 

@@ -1,7 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { User } from '../../models/userModel';
-import { ChatMessage, ChatUser } from '../user/chat/chat.service';
+import { ChatMessage, ChatUser, GroupChat } from '../user/chat/chat.service';
+
+export interface ChatItem {
+  id: string;
+  name: string;
+  username?: string;
+  lastMessage: string;
+  lastMessageTime: Date;
+  lastSeenTime?: Date;
+  isOnline: boolean;
+  unreadCount: number;
+  profileImg?: string;
+  chatId: string;
+  chatType: 'personal' | 'group';
+  participants?: ChatUser[];
+  eventId?: string;
+  isActive?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -89,6 +106,16 @@ export class ChatHelperService {
     );
   }
 
+  filterChatItems(chats: ChatItem[], searchTerm: string): ChatItem[] {
+    if (!searchTerm.trim()) return chats;
+    const term = searchTerm.toLowerCase();
+    return chats.filter(chat =>
+      chat.name.toLowerCase().includes(term) ||
+      (chat.username && chat.username.toLowerCase().includes(term)) ||
+      chat.lastMessage.toLowerCase().includes(term)
+    );
+  }
+
   createOptimisticMessage(content: string, currentUserId: string): ChatMessage {
     const tempId = 'temp-' + Date.now() + '-' + Math.random();
     return {
@@ -105,7 +132,7 @@ export class ChatHelperService {
   createChatMessage(data: any): ChatMessage {
     return {
       id: data.message.id || data.message._id,
-      chatId:data.message.chatId,
+      chatId: data.message.chatId,
       senderId: data.message.senderId || data.message.sender?._id,
       content: data.message.content,
       timestamp: new Date(data.message.timestamp),
@@ -173,7 +200,6 @@ export class ChatHelperService {
       const isCurrentUserMessage = message.senderId === currentUserId;
       const isChatSelected = selectedChatId === chatId;
       
-      
       const shouldIncrementUnread = !isCurrentUserMessage && !isChatSelected;
       
       updatedUsers[userIndex] = {
@@ -189,6 +215,34 @@ export class ChatHelperService {
     return users;
   }
 
+  updateGroupChatLastMessage(
+    groupChats: GroupChat[], 
+    chatId: string, 
+    message: ChatMessage, 
+    currentUserId: string,
+    selectedChatId?: string
+  ): GroupChat[] {
+    const chatIndex = groupChats.findIndex(chat => chat.id === chatId);
+    if (chatIndex !== -1) {
+      const updatedChats = [...groupChats];
+      const isCurrentUserMessage = message.senderId === currentUserId;
+      const isChatSelected = selectedChatId === chatId;
+      
+      const shouldIncrementUnread = !isCurrentUserMessage && !isChatSelected;
+      
+      updatedChats[chatIndex] = {
+        ...updatedChats[chatIndex],
+        lastMessage: message.content,
+        lastMessageTime: message.createdAt ?? new Date(),
+        unreadCount: shouldIncrementUnread ? 
+          updatedChats[chatIndex].unreadCount + 1 : 
+          updatedChats[chatIndex].unreadCount
+      };
+      return this.sortGroupChatsByLastMessage(updatedChats);
+    }
+    return groupChats;
+  }
+
   clearUnreadCount(users: ChatUser[], chatId: string): ChatUser[] {
     const userIndex = users.findIndex(user => user.chatId === chatId);
     if (userIndex !== -1) {
@@ -200,6 +254,19 @@ export class ChatHelperService {
       return updatedUsers;
     }
     return users;
+  }
+
+  clearGroupChatUnreadCount(groupChats: GroupChat[], chatId: string): GroupChat[] {
+    const chatIndex = groupChats.findIndex(chat => chat.id === chatId);
+    if (chatIndex !== -1) {
+      const updatedChats = [...groupChats];
+      updatedChats[chatIndex] = {
+        ...updatedChats[chatIndex],
+        unreadCount: 0
+      };
+      return updatedChats;
+    }
+    return groupChats;
   }
 
   updateUserStatus(users: ChatUser[], userId: string, isOnline: boolean): ChatUser[] {
@@ -217,6 +284,12 @@ export class ChatHelperService {
 
   sortUsersByLastMessage(users: ChatUser[]): ChatUser[] {
     return users.sort((a, b) =>
+      new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+    );
+  }
+
+  sortGroupChatsByLastMessage(groupChats: GroupChat[]): GroupChat[] {
+    return groupChats.sort((a, b) =>
       new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
     );
   }
@@ -290,5 +363,9 @@ export class ChatHelperService {
 
   trackByMessageId(index: number, message: ChatMessage): string {
     return message.id;
+  }
+
+  trackByChatId(index: number, chat: ChatItem): string {
+    return chat.chatId || chat.id;
   }
 }

@@ -58,6 +58,9 @@ export interface IChat extends Document {
   lastMessageAt?: Date;
   messageCount: number;
   isActive: boolean;
+  chatType: 'personal' | 'group';
+  eventId?: mongoose.Types.ObjectId;
+  name?: string;
 }
 
 const ChatSchema = new Schema<IChat>({
@@ -89,15 +92,34 @@ const ChatSchema = new Schema<IChat>({
   isActive: {
     type: Boolean,
     default: true
+  },
+  chatType: {
+    type: String,
+    enum: ['personal', 'group'],
+    default: 'personal',
+    required: true
+  },
+  eventId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Event',
+    required: function() { return this.chatType === 'group'; }
+  },
+  name: {
+    type: String,
+    required: function() { return this.chatType === 'group'; }
   }
 }, {
   timestamps: true
 });
 
 ChatSchema.pre('save', function(next) {
-  if (this.participants.length !== 2) {
+  if (this.chatType === 'personal' && this.participants.length !== 2) {
     return next(new Error('Personal chat must have exactly 2 participants'));
   }
+  if (this.chatType === 'group' && !this.eventId) {
+    return next(new Error('Group chat must be associated with an event'));
+  }
+  next();
   next();
 });
 

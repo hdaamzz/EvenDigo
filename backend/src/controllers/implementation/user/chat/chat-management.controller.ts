@@ -13,8 +13,6 @@ export class PersonalChatController {
   async createOrGetPersonalChat(req: Request, res: Response): Promise<void> {
     try {
       const { otherUserId } = req.body;
-      console.log(otherUserId);
-      
       const currentUserId = req.user?.id;
       
       if (!currentUserId) {
@@ -53,6 +51,125 @@ export class PersonalChatController {
       ResponseHandler.success(res, chat, 'Personal chat ready', StatusCode.OK);
     } catch (error: any) {
       ResponseHandler.error(res, error, 'Failed to create or get personal chat', StatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async createGroupChat(req: Request, res: Response): Promise<void> {
+    try {
+      const { eventId, name, participantIds } = req.body;
+      const currentUserId = req.user?.id;
+      
+      if (!currentUserId) {
+        return ResponseHandler.error(
+          res, 
+          new Error('User not authenticated'), 
+          'Unauthorized', 
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      if (!eventId || !name) {
+        return ResponseHandler.error(
+          res, 
+          new Error('Missing required fields'), 
+          'Event ID and name are required', 
+          StatusCode.BAD_REQUEST
+        );
+      }
+
+      const participantIdsWithCurrent = participantIds?.length ? [...participantIds, currentUserId] : [currentUserId];
+      
+      let chat = await this.chatService.getGroupChatByEventId(eventId);
+      
+      if (!chat) {
+        chat = await this.chatService.createGroupChat(eventId, name, participantIdsWithCurrent);
+      }
+      
+      ResponseHandler.success(res, chat, 'Group chat ready', StatusCode.OK);
+    } catch (error: any) {
+      ResponseHandler.error(res, error, 'Failed to create or get group chat', StatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async addParticipantToGroupChat(req: Request, res: Response): Promise<void> {
+    try {
+      const { chatId } = req.params;
+      const { userId } = req.body;
+      const currentUserId = req.user?.id;
+      
+      if (!currentUserId) {
+        return ResponseHandler.error(
+          res, 
+          new Error('User not authenticated'), 
+          'Unauthorized', 
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      if (!userId) {
+        return ResponseHandler.error(
+          res, 
+          new Error('Missing userId'), 
+          'User ID is required', 
+          StatusCode.BAD_REQUEST
+        );
+      }
+
+      const hasAccess = await this.chatService.validateChatAccess(chatId, currentUserId);
+      if (!hasAccess) {
+        return ResponseHandler.error(
+          res, 
+          new Error('Access denied'), 
+          'Access denied to this group chat', 
+          StatusCode.FORBIDDEN
+        );
+      }
+
+      const chat = await this.chatService.addParticipantToGroupChat(chatId, userId);
+      ResponseHandler.success(res, chat, 'Participant added to group chat', StatusCode.OK);
+    } catch (error: any) {
+      ResponseHandler.error(res, error, 'Failed to add participant to group chat', StatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getGroupChatByEventId(req: Request, res: Response): Promise<void> {
+    try {
+      const { eventId } = req.params;
+      const currentUserId = req.user?.id;
+      
+      if (!currentUserId) {
+        return ResponseHandler.error(
+          res, 
+          new Error('User not authenticated'), 
+          'Unauthorized', 
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const chat = await this.chatService.getGroupChatByEventId(eventId);
+      
+      if (!chat) {
+        return ResponseHandler.error(
+          res, 
+          new Error('Chat not found'), 
+          'No group chat found for this event', 
+          StatusCode.NOT_FOUND
+        );
+      }
+
+      const hasAccess = await this.chatService.validateChatAccess(chat._id.toString(), currentUserId);
+      if (!hasAccess) {
+        return ResponseHandler.error(
+          res, 
+          new Error('Access denied'), 
+          'Access denied to this group chat', 
+          StatusCode.FORBIDDEN
+        );
+      }
+      
+      ResponseHandler.success(res, chat, 'Group chat retrieved successfully');
+    } catch (error: any) {
+      ResponseHandler.error(res, error, 'Failed to find group chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -104,7 +221,7 @@ export class PersonalChatController {
       ResponseHandler.success(res, { 
         chats, 
         count: chats.length,
-        message: 'Personal chats retrieved successfully'
+        message: 'Chats retrieved successfully'
       });
     } catch (error: any) {
       ResponseHandler.error(res, error, 'Failed to get user chats', StatusCode.INTERNAL_SERVER_ERROR);
@@ -176,9 +293,9 @@ export class PersonalChatController {
       }
 
       await this.chatService.deleteChat(chatId);
-      ResponseHandler.success(res, null, 'Personal chat deleted successfully');
+      ResponseHandler.success(res, null, 'Chat deleted successfully');
     } catch (error: any) {
-      ResponseHandler.error(res, error, 'Failed to delete personal chat', StatusCode.INTERNAL_SERVER_ERROR);
+      ResponseHandler.error(res, error, 'Failed to delete chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
 }

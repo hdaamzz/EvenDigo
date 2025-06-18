@@ -6,17 +6,28 @@ import { IEventService } from '../../../../../src/services/interfaces/user/dashb
 import { inject, injectable } from 'tsyringe';
 import { IBookingRepository } from 'src/repositories/interfaces/IBooking.repository';
 import { IBooking } from 'src/models/interfaces/booking.interface';
+import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
 
 
 @injectable()
 export class EventService implements IEventService {
   constructor(
     @inject("EventRepository") private eventRepository: IEventRepository,
-    @inject("BookingRepository") private bookingRepository : IBookingRepository
+    @inject("BookingRepository") private bookingRepository : IBookingRepository,
+    @inject('ChatService') private chatService: IChatService
   ) {}
 
   async createEvent(eventData: Partial<EventDocument>): Promise<EventDocument> {
-    return this.eventRepository.createEvent(eventData);
+
+    const event = this.eventRepository.createEvent(eventData);
+    const eventId:string =(await event)._id as unknown as string;
+    const creatorId =(await event).user_id as unknown as string
+    await this.chatService.createGroupChat(
+        eventId,
+        (await event).eventTitle || 'Event Group Chat',
+        [creatorId] 
+      );
+    return event
   }
 
   async getEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {

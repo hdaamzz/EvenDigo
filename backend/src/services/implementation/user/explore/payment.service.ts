@@ -9,6 +9,7 @@ import { IBooking } from '../../../../../src/models/interfaces/booking.interface
 import { BadRequestException } from '../../../../../src/error/error-handlers';
 import { IWallet, TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
 import { generateRandomId } from '../../../../../src/utils/helpers';
+import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -18,7 +19,9 @@ export class PaymentService implements IPaymentService {
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingService") private bookingService: IBookingService,
-    @inject("EventRepository") private eventRepository: IEventRepository
+    @inject("EventRepository") private eventRepository: IEventRepository,
+    @inject('ChatService') private chatService: IChatService
+
   ) {
     const stripeKey = process.env.STRIPE_KEY;
     if (!stripeKey) {
@@ -149,6 +152,12 @@ export class PaymentService implements IPaymentService {
       });
 
       await this.eventRepository.updateTicketQuantities(eventId, tickets);
+      const groupChat = await this.chatService.getGroupChatByEventId(eventId);
+      if (groupChat) {
+        await this.chatService.addParticipantToGroupChat(groupChat._id.toString(), userId);
+      } else {
+        console.warn(`No group chat found for event ${eventId}`);
+      }
 
       await this.walletRepository.addTransaction(
         userId,
@@ -205,7 +214,16 @@ export class PaymentService implements IPaymentService {
   private async updateBookingPaymentStatus(sessionId: string, metadata: any): Promise<void> {
     try {
       const booking = await this.bookingRepository.findByStripeSessionId(sessionId);
-      
+
+      const eventId =booking?.eventId as unknown as string
+      const userId =booking?.userId as unknown as string
+
+      const groupChat = await this.chatService.getGroupChatByEventId(eventId);
+      if (groupChat) {
+        await this.chatService.addParticipantToGroupChat(groupChat._id.toString(), userId);
+      } else {
+        console.warn(`No group chat found for event ${eventId}`);
+      }
       if (!booking) {
         console.log("No booking found with session ID:", sessionId);
         throw new Error(`No booking found with session ID: ${sessionId}`);

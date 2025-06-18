@@ -10,7 +10,7 @@ export class SocketService {
   private socket!: Socket;
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
-  
+
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectInterval = 2000;
@@ -44,7 +44,7 @@ export class SocketService {
           reconnectionAttempts: this.maxReconnectAttempts,
           reconnectionDelay: this.reconnectInterval,
           autoConnect: false,
-          secure: environment.production, 
+          secure: environment.production,
           rejectUnauthorized: false,
           path: '/socket.io/',
         });
@@ -68,11 +68,11 @@ export class SocketService {
         this.socket.on('disconnect', (reason) => {
           console.log('Disconnected from socket server:', reason);
           this.connectionStatusSubject.next(false);
-          
+
           if (reason === 'io server disconnect') {
             return;
           }
-          
+
           this.handleReconnection(token);
         });
 
@@ -82,14 +82,14 @@ export class SocketService {
           console.error('Error details:', {
             message: error.message
           });
-          
+
           console.error('Connection attempt details:', {
             url: environment.baseUrl,
             token: token ? `${token.substring(0, 10)}...` : 'No token',
             connected: this.socket?.connected,
             id: this.socket?.id
           });
-          
+
           this.connectionStatusSubject.next(false);
           this.connectionPromise = null;
           reject(error);
@@ -129,7 +129,7 @@ export class SocketService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-      
+
       setTimeout(() => {
         this.connect(token).catch(error => {
           console.error('Reconnection failed:', error);
@@ -156,7 +156,7 @@ export class SocketService {
       console.log('Using token:', token ? 'Token provided' : 'No token');
       console.log('Token length:', token ? token.length : 0);
       console.log('Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
-      
+
       if (token) {
         const parts = token.split('.');
         console.log('Token parts count:', parts.length);
@@ -166,10 +166,10 @@ export class SocketService {
           return;
         }
       }
-      
+
       const testSocket = io(environment.baseUrl, {
         auth: { token },
-        transports: ['polling'], 
+        transports: ['polling'],
         timeout: 10000,
         forceNew: true,
         autoConnect: false
@@ -299,23 +299,43 @@ export class SocketService {
   }
 
   // Person-to-person chat specific methods
-  joinChat(chatId: string): void {
-    this.emitSafe('joinChat', { chatId });
+  joinChat(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
+    this.emitSafe('joinChat', { chatId, chatType });
   }
 
-  sendMessage(chatId: string, content: string): void {
-    this.emitSafe('sendMessage', { chatId, content });
+  sendMessage(chatId: string, content: string, chatType: 'personal' | 'group' = 'personal'): void {
+    this.emitSafe('sendMessage', { chatId, content, chatType });
   }
 
-  markAsRead(chatId: string): void {
-    this.emitSafe('markAsRead', { chatId });
+  markAsRead(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
+    this.emitSafe('markAsRead', { chatId, chatType });
   }
 
-  startTyping(chatId: string): void {
-    this.emitSafe('typing', { chatId });
+  startTyping(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
+    this.emitSafe('typing', { chatId, chatType });
   }
 
-  stopTyping(chatId: string): void {
-    this.emitSafe('stopTyping', { chatId });
+  stopTyping(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
+    this.emitSafe('stopTyping', { chatId, chatType });
+  }
+
+  joinGroupChat(chatId: string): void {
+    this.emitSafe('joinChat', { chatId, chatType: 'group' });
+  }
+
+  sendGroupMessage(chatId: string, content: string): void {
+    this.emitSafe('sendMessage', { chatId, content, chatType: 'group' });
+  }
+
+  startGroupTyping(chatId: string): void {
+    this.emitSafe('typing', { chatId, chatType: 'group' });
+  }
+
+  stopGroupTyping(chatId: string): void {
+    this.emitSafe('stopTyping', { chatId, chatType: 'group' });
+  }
+
+  markGroupAsRead(chatId: string): void {
+    this.emitSafe('markAsRead', { chatId, chatType: 'group' });
   }
 }

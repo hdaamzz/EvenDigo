@@ -1,13 +1,30 @@
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatMessage, ChatService, ChatUser } from '../../../core/services/user/chat/chat.service';
+import { ChatMessage, ChatService, ChatUser, GroupChat } from '../../../core/services/user/chat/chat.service';
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { Subscription } from 'rxjs';
 import { SocketService } from '../../../core/services/user/socket/socket.service';
 import { AuthService } from '../../../core/services/user/auth/auth.service';
 import { User } from '../../../core/models/userModel';
 import { ChatHelperService } from '../../../core/services/utility/chat-helper.service';
+
+export interface ChatItem {
+  id: string;
+  name: string;
+  username?: string;
+  lastMessage: string;
+  lastMessageTime: Date;
+  lastSeenTime?: Date;
+  isOnline: boolean;
+  unreadCount: number;
+  profileImg?: string;
+  chatId: string;
+  chatType: 'personal' | 'group';
+  participants?: ChatUser[];
+  eventId?: string;
+  isActive?: boolean;
+}
 
 @Component({
   selector: 'app-chat',
@@ -20,12 +37,16 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
 
   allUsers: User[] = [];
-  users: ChatUser[] = [];
+  personalChats: ChatUser[] = [];
+  groupChats: GroupChat[] = [];
+  combinedChats: ChatItem[] = [];
   messages: ChatMessage[] = [];
-  selectedUser: ChatUser | null = null;
+  selectedChat: ChatItem | null = null;
+  currentChatType: 'personal' | 'group' = 'personal';
 
   newMessage: string = '';
   searchTerm: string = '';
+  activeChatTab: 'personal' | 'group' = 'personal';
 
   showUserList: boolean = false;
   isMobile = false;
@@ -39,6 +60,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   isInitialized: boolean = false;
 
   error: string = '';
+  totalUnreadCount: number = 0;
 
   private shouldScrollToBottom: boolean = false;
   private currentUserId: string = '';
@@ -58,7 +80,8 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     try {
       await this.initializeChat();
       this.loadAllUsers();
-      this.loadPersonalChats();
+      this.loadChats();
+      this.subscribeToUnreadCount();
     } catch (error) {
       this.handleError('Failed to initialize chat. Please refresh the page.', error);
     }
@@ -88,6 +111,13 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  private subscribeToUnreadCount(): void {
+    const unreadSub = this.chatService.unreadCount$.subscribe(count => {
+      this.totalUnreadCount = count;
+    });
+    this.chatHelper.addSubscription(unreadSub);
+  }
+
   getSidebarClass(): string {
     if (this.isMobile) {
       return this.showMobileSidebar ? 'fixed inset-y-0 left-0 z-50' : 'hidden';
@@ -108,7 +138,12 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  
+  switchChatTab(tab: 'personal' | 'group') {
+    this.activeChatTab = tab;
+    this.searchTerm = '';
+    this.updateCombinedChats();
+  }
+
   private async initializeChat(): Promise<void> {
     this.isConnecting = true;
     this.error = '';
@@ -133,6 +168,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       await this.chatService.initialize(this.socketService);
 
       this.subscribeToSocketEvents();
+      this.subscribeToChats();
 
       this.isInitialized = true;
       this.isConnecting = false;
@@ -141,6 +177,69 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.isLoading = false;
       this.error = this.chatHelper.getErrorMessage(error);
       throw error;
+    }
+  }
+
+  private subscribeToChats(): void {
+    // Subscribe to personal chats
+    const personalChatsSub = this.chatService.chatUsers$.subscribe(personalChats => {
+      this.personalChats = personalChats;
+      this.updateCombinedChats();
+    });
+
+    // Subscribe to group chats
+    const groupChatsSub = this.chatService.groupChats$.subscribe(groupChats => {
+      this.groupChats = groupChats;
+      this.updateCombinedChats();
+    });
+
+    this.chatHelper.addSubscription(personalChatsSub);
+    this.chatHelper.addSubscription(groupChatsSub);
+  }
+
+  private updateCombinedChats(): void {
+    const personalChatItems: ChatItem[] = this.personalChats.map(chat => ({
+      id: chat.id,
+      name: chat.name,
+      username: chat.username,
+      lastMessage: chat.lastMessage,
+      lastMessageTime: chat.lastMessageTime,
+      lastSeenTime: chat.lastSeenTime,
+      isOnline: chat.isOnline,
+      unreadCount: chat.unreadCount,
+      profileImg: chat.profileImg,
+      chatId: chat.chatId,
+      chatType: 'personal' as const
+    }));
+
+    const groupChatItems: ChatItem[] = this.groupChats.map(chat => ({
+      id: chat.id,
+      name: chat.name,
+      lastMessage: chat.lastMessage,
+      lastMessageTime: chat.lastMessageTime,
+      isOnline: true, // Group chats are always "online"
+      unreadCount: chat.unreadCount,
+      chatId: chat.id,
+      chatType: 'group' as const,
+      participants: chat.participants,
+      eventId: chat.eventId,
+      isActive: chat.isActive
+    }));
+
+    if (this.activeChatTab === 'personal') {
+      this.combinedChats = personalChatItems;
+    } else {
+      this.combinedChats = groupChatItems;
+    }
+
+    // Sort by last message time
+    this.combinedChats.sort((a, b) =>
+      new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+    );
+
+    // Auto-select first chat if none is selected
+    if (this.combinedChats.length > 0 && !this.selectedChat) {
+      this.selectChat(this.combinedChats[0]);
     }
   }
 
@@ -161,9 +260,9 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.chatHelper.addSubscription(usersSub);
   }
 
-  loadPersonalChats() {
+  loadChats() {
     if (!this.isInitialized) {
-      console.warn('Chat not initialized, skipping loadPersonalChats');
+      console.warn('Chat not initialized, skipping loadChats');
       return;
     }
 
@@ -173,21 +272,20 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     this.error = '';
 
-    const usersSub = this.chatService.getPersonalChats().subscribe({
-      next: (users) => {
-        this.users = users;
+    // Load both personal and group chats
+    const chatsSub = this.chatService.getUserChats().subscribe({
+      next: ({ personalChats, groupChats }) => {
+        this.personalChats = personalChats;
+        this.groupChats = groupChats;
+        this.updateCombinedChats();
         this.isLoading = false;
-
-        if (this.users.length > 0 && !this.selectedUser) {
-          this.selectUser(this.users[0]);
-        }
       },
       error: (error) => this.handleError('Failed to load chats. Please try again.', error, () => {
         this.isLoading = false;
       })
     });
 
-    this.chatHelper.addSubscription(usersSub);
+    this.chatHelper.addSubscription(chatsSub);
   }
 
   private subscribeToSocketEvents() {
@@ -206,64 +304,104 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
 
       this.socketService.listen<any>('messageSent').subscribe((data) => {
         this.isSendingMessage = false;
-        
+
         if (data.tempId) {
           this.pendingMessages.delete(data.tempId);
           const realMessage = this.chatHelper.createChatMessage(data);
           this.messages = this.chatHelper.updateMessageInList(
-            this.messages.filter(m => m.id !== data.tempId), 
+            this.messages.filter(m => m.id !== data.tempId),
             realMessage,
-            this.selectedUser?.chatId
+            this.selectedChat?.chatId
           );
         }
       }),
 
       this.socketService.listen<any>('userTyping').subscribe(data => {
-        if (this.selectedUser && data.chatId === this.selectedUser.chatId &&
+        if (this.selectedChat && data.chatId === this.selectedChat.chatId &&
           data.userId !== this.currentUserId) {
           this.isTyping = true;
         }
       }),
 
       this.socketService.listen<any>('userStoppedTyping').subscribe(data => {
-        if (this.selectedUser && data.chatId === this.selectedUser.chatId) {
+        if (this.selectedChat && data.chatId === this.selectedChat.chatId) {
           this.isTyping = false;
         }
       }),
 
       this.socketService.listen<any>('userStatus').subscribe(data => {
-        this.users = this.chatHelper.updateUserStatus(this.users, data.userId, data.status === 'online');
+        this.personalChats = this.chatHelper.updateUserStatus(this.personalChats, data.userId, data.status === 'online');
+        this.updateCombinedChats();
       }),
 
       this.socketService.listen<any>('error').subscribe(error => {
         this.handleError(error.message || 'An error occurred', error);
+      }),
+
+      // Group chat specific events
+      this.socketService.listen<any>('groupChatInfo').subscribe(data => {
+        console.log('Group chat info received:', data);
+        this.loadChats();
+      }),
+
+      this.socketService.listen<any>('userJoinedChat').subscribe(data => {
+        console.log('User joined chat:', data);
+        if (data.chatType === 'group') {
+          this.loadChats();
+        }
+      }),
+
+      this.socketService.listen<any>('userLeftChat').subscribe(data => {
+        console.log('User left chat:', data);
+        if (data.chatType === 'group') {
+          this.loadChats();
+        }
       })
     ];
 
     subscriptions.forEach(sub => this.chatHelper.addSubscription(sub));
   }
 
-  private handleIncomingMessage(data: any) {
-    const message = this.chatHelper.createChatMessage(data);
-    
-    if (this.selectedUser?.chatId === data.chatId) {
-      this.messages = this.chatHelper.updateMessageInList(
-        this.messages, 
-        message, 
-        this.selectedUser?.chatId
-      );
-      
-      this.shouldAutoScroll();
-    }
+  handleIncomingMessage(data: any) {
+  const message = this.chatHelper.createChatMessage(data);
 
-    this.users = this.chatHelper.updateUserLastMessage(
-      this.users, 
-      data.chatId, 
+  if (this.selectedChat?.chatId === data.chatId) {
+    this.messages = this.chatHelper.updateMessageInList(
+      this.messages,
+      message,
+      this.selectedChat?.chatId
+    );
+
+    this.shouldAutoScroll();
+
+    // If it's the currently selected chat, mark messages as read immediately
+    if (message.senderId !== this.currentUserId) {
+      this.markMessagesAsRead(data.chatId, data.chatType || 'personal');
+    }
+  }
+
+  // Update the appropriate chat list
+  if (data.chatType === 'group') {
+    this.groupChats = this.chatHelper.updateGroupChatLastMessage(
+      this.groupChats,
+      data.chatId,
       message,
       this.currentUserId,
-      this.selectedUser?.chatId
+      this.selectedChat?.chatId
+    );
+  } else {
+    this.personalChats = this.chatHelper.updateUserLastMessage(
+      this.personalChats,
+      data.chatId,
+      message,
+      this.currentUserId,
+      this.selectedChat?.chatId
     );
   }
+
+  this.updateCombinedChats();
+}
+
 
   private shouldAutoScroll(): void {
     if (!this.messageContainer?.nativeElement) {
@@ -278,37 +416,55 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.shouldScrollToBottom = isNearBottom;
   }
 
-  async selectUser(user: ChatUser) {
-    if (this.selectedUser?.id === user.id) return;
+  async selectChat(chat: ChatItem) {
+    if (this.selectedChat?.id === chat.id && this.selectedChat?.chatType === chat.chatType) return;
 
     if (!this.socketService.isConnected()) {
       this.error = 'Connection lost. Please wait while we reconnect...';
       return;
     }
 
-    this.users = this.chatHelper.clearUnreadCount(this.users, user.chatId || '');
-    
-    this.selectedUser = user;
+    // Clear unread count for the selected chat immediately
+    if (chat.chatType === 'personal') {
+      this.personalChats = this.chatHelper.clearUnreadCount(this.personalChats, chat.chatId || '');
+    } else {
+      this.groupChats = this.chatHelper.clearGroupChatUnreadCount(this.groupChats, chat.chatId || '');
+    }
+
+    // Update the chat object's unread count
+    chat.unreadCount = 0;
+
+    this.selectedChat = chat;
+    this.currentChatType = chat.chatType;
     this.messages = [];
     this.isLoading = true;
     this.error = '';
     this.isTyping = false;
 
+    // Set the chat type in the service
+    this.chatService.setChatType(chat.chatType);
+
     if (this.isMobile) {
       this.showMobileSidebar = false;
     }
 
-    if (user.chatId) {
+    if (chat.chatId) {
       try {
-        await this.socketService.emit('joinChat', { chatId: user.chatId });
-        await this.loadChatMessages(user.chatId);
+        await this.socketService.emit('joinChat', {
+          chatId: chat.chatId,
+          chatType: chat.chatType
+        });
+        await this.loadChatMessages(chat.chatId);
 
-        this.markMessagesAsRead(user.chatId);
+        this.markMessagesAsRead(chat.chatId, chat.chatType);
       } catch (error) {
         this.handleError('Failed to join chat. Please try again.', error);
       }
     }
+
+    this.updateCombinedChats();
   }
+
 
   private async loadChatMessages(chatId: string) {
     const messagesSub = this.chatService.getChatMessages(chatId).subscribe({
@@ -343,8 +499,14 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
         chatUser.chatId = newChat._id;
       }
 
-      this.users = this.chatHelper.updateUserInList(this.users, chatUser);
-      this.selectUser(chatUser);
+      this.personalChats = this.chatHelper.updateUserInList(this.personalChats, chatUser);
+
+      // Switch to personal tab and select the chat
+      this.activeChatTab = 'personal';
+      this.updateCombinedChats();
+
+      const chatItem = this.transformChatUserToChatItem(chatUser);
+      this.selectChat(chatItem);
       this.showUserList = false;
 
       if (this.isMobile) {
@@ -357,9 +519,25 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  private transformChatUserToChatItem(chatUser: ChatUser): ChatItem {
+    return {
+      id: chatUser.id,
+      name: chatUser.name,
+      username: chatUser.username,
+      lastMessage: chatUser.lastMessage,
+      lastMessageTime: chatUser.lastMessageTime,
+      lastSeenTime: chatUser.lastSeenTime,
+      isOnline: chatUser.isOnline,
+      unreadCount: chatUser.unreadCount,
+      profileImg: chatUser.profileImg,
+      chatId: chatUser.chatId,
+      chatType: 'personal'
+    };
+  }
+
   async sendMessage() {
     if (!this.chatHelper.isValidMessage(this.newMessage) ||
-      !this.selectedUser?.chatId ||
+      !this.selectedChat?.chatId ||
       this.isSendingMessage) return;
 
     if (!this.socketService.isConnected()) {
@@ -372,20 +550,39 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.isSendingMessage = true;
 
     try {
-      await this.socketService.emit('stopTyping', { chatId: this.selectedUser.chatId });
+      await this.socketService.emit('stopTyping', {
+        chatId: this.selectedChat.chatId,
+        chatType: this.selectedChat.chatType
+      });
 
       const optimisticMessage = this.chatHelper.createOptimisticMessage(content, this.currentUserId);
       this.pendingMessages.set(optimisticMessage.id, optimisticMessage);
       this.messages = [...this.messages, optimisticMessage];
 
+      // Clear unread count immediately when sending a message
+      if (this.selectedChat.chatType === 'personal') {
+        this.personalChats = this.chatHelper.clearUnreadCount(this.personalChats, this.selectedChat.chatId);
+      } else {
+        this.groupChats = this.chatHelper.clearGroupChatUnreadCount(this.groupChats, this.selectedChat.chatId);
+      }
+
+      // Update the selected chat's unread count to 0
+      if (this.selectedChat) {
+        this.selectedChat.unreadCount = 0;
+      }
+
+      // Update combined chats to reflect the changes
+      this.updateCombinedChats();
+
       this.shouldScrollToBottom = true;
 
-      await this.socketService.emit('sendMessage', {
-        chatId: this.selectedUser.chatId,
-        content: content,
-        senderId: this.currentUserId,
-        tempId: optimisticMessage.id
-      });
+      await this.chatService.sendMessage(
+        this.selectedChat.chatId,
+        content,
+        this.selectedChat.chatType
+      ).toPromise();
+
+      this.isSendingMessage = false;
 
     } catch (error) {
       this.handleError('Failed to send message. Please try again.', error, () => {
@@ -397,12 +594,12 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   async onMessageInput() {
-    if (this.selectedUser?.chatId && this.socketService.isConnected()) {
+    if (this.selectedChat?.chatId && this.socketService.isConnected()) {
       try {
-        await this.socketService.emit('typing', { chatId: this.selectedUser.chatId });
+        this.chatService.startTyping(this.selectedChat.chatId, this.selectedChat.chatType);
         this.chatHelper.startTypingIndicator(async () => {
-          if (this.selectedUser?.chatId) {
-            await this.socketService.emit('stopTyping', { chatId: this.selectedUser.chatId });
+          if (this.selectedChat?.chatId) {
+            this.chatService.stopTyping(this.selectedChat.chatId, this.selectedChat.chatType);
           }
         });
       } catch (error) {
@@ -411,17 +608,28 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  markMessagesAsRead(chatId: string) {
-    this.chatService.markMessagesAsRead(chatId).subscribe({
-      next: () => {
-        console.log('Messages marked as read on server');
-      },
-      error: (error) => console.error('Error marking messages as read:', error)
-    });
-  }
+  markMessagesAsRead(chatId: string, chatType: 'personal' | 'group') {
+  this.chatService.markMessagesAsRead(chatId, chatType).subscribe({
+    next: () => {
+      console.log('Messages marked as read on server');
+      if (chatType === 'personal') {
+        this.personalChats = this.chatHelper.clearUnreadCount(this.personalChats, chatId);
+      } else {
+        this.groupChats = this.chatHelper.clearGroupChatUnreadCount(this.groupChats, chatId);
+      }
+      
+      if (this.selectedChat?.chatId === chatId) {
+        this.selectedChat.unreadCount = 0;
+      }
+      
+      this.updateCombinedChats();
+    },
+    error: (error) => console.error('Error marking messages as read:', error)
+  });
+}
 
-  getFilteredUsers() {
-    return this.chatHelper.filterChatUsers(this.users, this.searchTerm);
+  getFilteredChats() {
+    return this.chatHelper.filterChatItems(this.combinedChats, this.searchTerm);
   }
 
   getFilteredAllUsers() {
@@ -432,8 +640,38 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     return message.senderId === this.currentUserId;
   }
 
-  hasUnreadMessages(user: ChatUser): boolean {
-    return user.unreadCount > 0;
+  hasUnreadMessages(chat: ChatItem): boolean {
+    return chat.unreadCount > 0;
+  }
+
+  getPersonalChatsUnreadCount(): number {
+    return this.personalChats.reduce((sum, chat) => sum + chat.unreadCount, 0);
+  }
+
+  getGroupChatsUnreadCount(): number {
+    return this.groupChats.reduce((sum, chat) => sum + chat.unreadCount, 0);
+  }
+
+  getChatDisplayName(chat: ChatItem): string {
+    if (chat.chatType === 'group') {
+      return chat.name;
+    }
+    return chat.username || chat.name;
+  }
+
+  getChatSubtitle(chat: ChatItem): string {
+    if (chat.chatType === 'group') {
+      const participantCount = chat.participants?.length || 0;
+      return `${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
+    }
+    return chat.isOnline ? 'Online' : 'Offline';
+  }
+
+  getTypingIndicatorText(): string {
+    if (this.selectedChat?.chatType === 'group') {
+      return 'Someone is typing...';
+    }
+    return `${this.selectedChat?.name} is typing...`;
   }
 
   onKeyPress(event: KeyboardEvent) {
@@ -460,10 +698,10 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
         await this.initializeChat();
       }
 
-      this.loadPersonalChats();
+      this.loadChats();
 
-      if (this.selectedUser?.chatId) {
-        await this.selectUser(this.selectedUser);
+      if (this.selectedChat?.chatId) {
+        await this.selectChat(this.selectedChat);
       }
     } catch (error) {
       this.handleError('Failed to refresh. Please try again.', error);
@@ -477,13 +715,14 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     try {
       await this.chatHelper.retryWithBackoff(async () => {
         await this.initializeChat();
-        this.loadPersonalChats();
+        this.loadChats();
       });
     } catch (error) {
       this.handleError('Connection failed. Please check your internet connection and try again.', error);
     }
   }
 
+  // Utility methods
   formatTime = (date: Date) => this.chatHelper.formatTime(date);
   formatLastMessageTime = (date: Date) => this.chatHelper.formatLastMessageTime(date);
   getUserInitials = (name: string) => this.chatHelper.getUserInitials(name);
@@ -491,6 +730,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   adjustTextareaHeight = (event: any) => this.chatHelper.adjustTextareaHeight(event);
   trackByUserId = (index: number, user: User | ChatUser) => this.chatHelper.trackByUserId(index, user);
   trackByMessageId = (index: number, message: ChatMessage) => this.chatHelper.trackByMessageId(index, message);
+  trackByChatId = (index: number, chat: ChatItem) => chat.chatId;
 
   clearError(): void {
     this.error = '';
