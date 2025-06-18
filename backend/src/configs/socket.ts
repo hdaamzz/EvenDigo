@@ -13,7 +13,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
   const io = new SocketIOServer(server, {
     cors: {
       origin: process.env.CLIENT_URL || "http://localhost:4200",
-      methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       credentials: true
     },
     allowEIO3: true,
@@ -29,13 +29,13 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
 
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
-      console.log(' Authentication attempt for socket:', socket.id);
+      console.log('Authentication attempt for socket:', socket.id);
       
       let token = socket.handshake.auth.token || 
                   socket.handshake.headers.authorization?.replace('Bearer ', '') ||
                   socket.request.headers.cookie?.split('accessToken=')[1]?.split(';')[0];
       
-      console.log(' Token received:', token ? 'Yes' : 'No');
+      console.log('Token received:', token ? 'Yes' : 'No');
       
       if (!token) {
         console.log('No authentication token provided');
@@ -45,7 +45,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
       const decoded = tokenService.verifyToken(token) as any;
       socket.userId = decoded.userId;
 
-      console.log(' Authentication successful for user:', socket.userId);
+      console.log('Authentication successful for user:', socket.userId);
       next();
     } catch (error: any) {
       console.error('Authentication failed:', error.message);
@@ -57,7 +57,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
   });
 
   io.on('connection', (socket: AuthenticatedSocket) => {
-    console.log(` User connected: ${socket.id}, UserId: ${socket.userId}`);
+    console.log(`User connected: ${socket.id}, UserId: ${socket.userId}`);
     console.log(`Total connected clients: ${io.engine.clientsCount}`);
 
     if (socket.userId) {
@@ -74,7 +74,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
         message: 'Successfully connected to chat server'
       });
       
-      console.log(` User ${socket.userId} joined personal room`);
+      console.log(`User ${socket.userId} joined personal room`);
     }
 
     socket.on('joinChat', async (data: { chatId: string }) => {
@@ -87,6 +87,12 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
           return;
         }
 
+        const chat = await chatService.getChatById(chatId);
+        if (!chat || !chat.isActive) {
+          socket.emit('error', { message: 'Chat not found or inactive' });
+          return;
+        }
+
         const hasAccess = await chatService.validateChatAccess(chatId, socket.userId);
         if (!hasAccess) {
           console.log(`User ${socket.userId} not authorized for chat ${chatId}`);
@@ -95,17 +101,28 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
         }
 
         socket.join(chatId);
-        console.log(` User ${socket.userId} joined chat ${chatId}`);
+        console.log(`User ${socket.userId} joined ${chat.chatType} chat ${chatId}`);
         
         socket.emit('joinedChat', { 
           chatId,
-          message: 'Successfully joined chat'
+          chatType: chat.chatType,
+          message: `Successfully joined ${chat.chatType} chat`
         });
 
         socket.to(chatId).emit('userJoinedChat', {
           userId: socket.userId,
-          chatId
+          chatId,
+          chatType: chat.chatType
         });
+
+        // For group chats, notify about all participants
+        if (chat.chatType === 'group') {
+          socket.emit('groupChatInfo', {
+            chatId,
+            name: chat.name,
+            participants: chat.participants.map(p => p._id.toString())
+          });
+        }
 
       } catch (error: any) {
         console.error('Error joining chat:', error);
@@ -116,10 +133,11 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
     socket.on('sendMessage', async (data: {
       chatId: string;
       content: string;
+      tempId?: string;
     }) => {
       try {
-        console.log(` Message from ${socket.userId} to chat ${data.chatId}`);
-        const { chatId, content } = data;
+        console.log(`Message from ${socket.userId} to chat ${data.chatId}`);
+        const { chatId, content, tempId } = data;
         
         if (!socket.userId) {
           socket.emit('error', { message: 'User not authenticated' });
@@ -147,10 +165,11 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
         socket.emit('messageSent', {
           chatId,
           messageId: message._id,
+          tempId,
           success: true
         });
 
-        console.log(` Message sent to chat ${chatId}`);
+        console.log(`Message sent to ${chatId}`);
         
       } catch (error: any) {
         console.error('Error sending message:', error);
@@ -169,7 +188,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
 
     socket.on('stopTyping', (data: { chatId: string }) => {
       const { chatId } = data;
-      console.log(` User ${socket.userId} stopped typing in chat ${chatId}`);
+      console.log(`User ${socket.userId} stopped typing in chat ${chatId}`);
       socket.to(chatId).emit('userStoppedTyping', {
         userId: socket.userId,
         chatId
@@ -179,7 +198,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
     socket.on('markAsRead', async (data: { chatId: string }) => {
       try {
         const { chatId } = data;
-        console.log(` User ${socket.userId} marking messages as read in chat ${chatId}`);
+        console.log(`User ${socket.userId} marking messages as read in chat ${chatId}`);
         
         if (!socket.userId) {
           socket.emit('error', { message: 'User not authenticated' });
@@ -194,7 +213,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
           timestamp: new Date()
         });
 
-        console.log(` Messages marked as read in chat ${chatId}`);
+        console.log(`Messages marked as read in chat ${chatId}`);
         
       } catch (error: any) {
         console.error('Error marking messages as read:', error);
@@ -226,6 +245,6 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
     console.error('Socket.IO Server Error:', error);
   });
 
-  console.log('Socket.IO server configured successfully for person-to-person chat');
+  console.log('Socket.IO server configured successfully for chat');
   return io;
 }

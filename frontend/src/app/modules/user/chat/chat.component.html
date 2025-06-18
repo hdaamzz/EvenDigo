@@ -1,386 +1,527 @@
 <app-user-nav></app-user-nav>
-    
-    <!-- Main Chat Container -->
-    <div class="flex h-screen bg-[#121212] text-white pt-16 sm:pt-20">
-        
-        <!-- Mobile Overlay -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
-             [style.display]="(selectedUser && isMobile && showMobileSidebar) ? 'block' : 'none'"
-             (click)="closeMobileChat()"></div>
 
-        <!-- Sidebar -->
-        <div class="w-full lg:w-80 bg-[#1a1a1a] border-r border-gray-800 flex flex-col chat-transition"
-             [class]="getSidebarClass()">
-            
-            <!-- Sidebar Header -->
-            <div class="p-3 sm:p-4 border-b border-gray-800 pt-16 sm:pt-20 lg:pt-4">
-                <!-- Mobile Header -->
-                <div class="flex items-center justify-between mb-4 lg:hidden">
-                    <h2 class="text-lg font-semibold text-white">Chats</h2>
-                    <button (click)="closeMobileChat()" 
-                            class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors">
-                        <i class="pi pi-times text-lg"></i>
-                    </button>
+<div class="flex h-screen bg-[#121212] text-white pt-16 sm:pt-20">
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+        [style.display]="(selectedChat && isMobile && showMobileSidebar) ? 'block' : 'none'"
+        (click)="closeMobileChat()"></div>
+
+    <div class="w-full lg:w-80 bg-[#1a1a1a] border-r border-gray-800 flex flex-col chat-transition"
+        [class]="getSidebarClass()">
+
+        <div class="p-3 sm:p-4 border-b border-gray-800 pt-16 sm:pt-20 lg:pt-4">
+            <div class="flex items-center justify-between mb-4 lg:hidden">
+                <h2 class="text-lg font-semibold text-white">Chats</h2>
+                <button (click)="closeMobileChat()"
+                    class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors">
+                    <i class="pi pi-times text-lg"></i>
+                </button>
+            </div>
+
+            <div class="relative mb-3 sm:mb-4">
+                <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Search chats..."
+                    class="w-full pl-9 pr-4 py-2 sm:py-2.5 text-sm bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent" />
+            </div>
+
+            <div class="flex mb-3 sm:mb-4 bg-[#121212] rounded-lg p-1">
+                <button (click)="switchChatTab('personal')" [class]="'flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 flex items-center justify-center gap-2 ' + 
+                                (activeChatTab === 'personal' ? 'tab-active' : 'tab-inactive')">
+                    <i class="pi pi-user text-sm"></i>
+                    <span class="hidden sm:inline">Personal</span>
+                    @if (getPersonalChatsUnreadCount() > 0) {
+                    <span class="badge">{{ getPersonalChatsUnreadCount() }}</span>
+                    }
+                </button>
+                <button (click)="switchChatTab('group')" [class]="'flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 flex items-center justify-center gap-2 ' + 
+                                (activeChatTab === 'group' ? 'tab-active' : 'tab-inactive')">
+                    <i class="pi pi-users text-sm"></i>
+                    <span class="hidden sm:inline">Groups</span>
+                    @if (getGroupChatsUnreadCount() > 0) {
+                    <span class="badge">{{ getGroupChatsUnreadCount() }}</span>
+                    }
+                </button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button (click)="toggleUserList()"
+                    class="flex-1 px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2">
+                    <i class="pi pi-users text-sm"></i>
+                    <span class="hidden sm:inline">{{ showUserList ? 'Hide Users' : 'Start New Chat' }}</span>
+                    <span class="sm:hidden">{{ showUserList ? 'Hide' : 'New Chat' }}</span>
+                </button>
+
+                <button (click)="refreshChats()" [disabled]="isLoading"
+                    class="flex-1 sm:flex-none px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i [class]="'pi text-sm ' + (isLoading ? 'pi-spinner pi-spin' : 'pi-refresh')"></i>
+                    <span class="hidden sm:inline">{{ isLoading ? 'Loading...' : 'Refresh' }}</span>
+                </button>
+            </div>
+        </div>
+
+        @if (showUserList) {
+        <div class="p-3 sm:p-4 border-b border-gray-800">
+            <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Start a New Chat</h3>
+
+            @if (isLoadingUsers) {
+            <div class="flex items-center justify-center py-8">
+                <div class="text-center text-gray-400">
+                    <i class="pi pi-spinner pi-spin text-xl mb-2"></i>
+                    <p class="text-sm">Loading users...</p>
+                </div>
+            </div>
+            }
+
+            @if (!isLoadingUsers && allUsers.length === 0) {
+            <div class="text-center text-gray-400 py-8">
+                <i class="pi pi-users text-2xl mb-2"></i>
+                <p class="text-sm">No users found</p>
+            </div>
+            }
+
+            @if (!isLoadingUsers && allUsers.length > 0) {
+            <div class="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
+                @for (user of getFilteredAllUsers(); track trackByUserId($index, user)) {
+                <div (click)="startChatWithUser(user)"
+                    class="p-2 sm:p-3 cursor-pointer hover:bg-[#121212] rounded-lg transition-colors duration-200 flex items-center space-x-3 hover-lift">
+                    <div class="relative flex-shrink-0">
+                        @if (user.profileImg) {
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden">
+                            <img [src]="user.profileImg" alt="Profile Image" class="w-full h-full object-cover">
+                        </div>
+                        } @else {
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff66] rounded-full flex items-center justify-center">
+                            <span class="text-xs sm:text-sm font-semibold text-white">{{ getUserInitials(user.name)
+                                }}</span>
+                        </div>
+                        }
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">{{ user.name }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ user.email }}</p>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+
+        @if (error) {
+        <div class="p-3 sm:p-4 bg-red-900/50 border-b border-red-800">
+            <div class="flex items-center justify-between">
+                <p class="text-red-300 text-xs sm:text-sm">{{ error }}</p>
+                <button (click)="clearError()" class="text-red-300 hover:text-red-100 p-1">
+                    <i class="pi pi-times text-xs"></i>
+                </button>
+            </div>
+
+            @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not
+            authenticated')) {
+            <div class="mt-2 flex flex-col sm:flex-row gap-2">
+                <button (click)="retryConnection()"
+                    class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
+                    Retry Connection
+                </button>
+                <button (click)="refreshChats()"
+                    class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
+                    Refresh Chats
+                </button>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- Loading States -->
+        @if (isLoading && combinedChats.length === 0 && !isInitialized) {
+        <div class="flex-1 flex items-center justify-center p-4">
+            <div class="text-center text-gray-400">
+                <i class="pi pi-spinner pi-spin text-xl sm:text-2xl mb-2"></i>
+                <p class="text-base sm:text-lg">Initializing Chat...</p>
+                <p class="text-xs sm:text-sm text-gray-500">Connecting to server</p>
+            </div>
+        </div>
+        }
+
+        @if (isLoading && combinedChats.length === 0 && isInitialized) {
+        <div class="flex-1 flex items-center justify-center p-4">
+            <div class="text-center text-gray-400">
+                <i class="pi pi-spinner pi-spin text-xl sm:text-2xl mb-2"></i>
+                <p class="text-sm sm:text-base">Loading chats...</p>
+            </div>
+        </div>
+        }
+
+        @if (!isLoading || combinedChats.length > 0) {
+        <div class="flex-1 overflow-y-auto">
+            @if (getFilteredChats().length === 0 && !isLoading) {
+            <div class="flex-1 flex items-center justify-center p-4">
+                <div class="text-center text-gray-400">
+                    <i class="pi pi-comments text-3xl sm:text-4xl mb-2"></i>
+                    <p class="text-sm">{{ searchTerm ? 'No chats found' : 'No chats available' }}</p>
+                    <p class="text-xs mt-1">{{ searchTerm ? 'Try a different search term' : 'Start a conversation!' }}
+                    </p>
+                </div>
+            </div>
+            }
+
+            @for (chat of getFilteredChats(); track trackByChatId($index, chat)) {
+            <div (click)="selectChat(chat)"
+                [class]="'p-3 sm:p-4 border-b border-gray-800 cursor-pointer hover:bg-[#121212] transition-colors duration-200 fadeInUp hover-lift ' + 
+                                          (selectedChat?.chatId === chat.chatId ? 'bg-[#121212] border-l-2 border-l-[#00ff66]' : '')">
+                <div class="flex items-center space-x-3">
+                    <div class="relative flex-shrink-0">
+                        @if (chat.chatType === 'group') {
+                        <div
+                            class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#00ff66] to-[#00cc4d] rounded-full flex items-center justify-center">
+                            <i class="pi pi-users text-sm sm:text-base text-white"></i>
+                        </div>
+                        } @else {
+                        @if (chat.profileImg) {
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden">
+                            <img [src]="chat.profileImg" alt="Profile Image" class="w-full h-full object-cover">
+                        </div>
+                        } @else {
+                        <div
+                            class="w-10 h-10 sm:w-12 sm:h-12 bg-[#00ff66] rounded-full flex items-center justify-center">
+                            <span class="text-sm sm:text-base font-semibold text-white">{{ getUserInitials(chat.name)
+                                }}</span>
+                        </div>
+                        }
+                        @if (chat.isOnline) {
+                        <div
+                            class="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full">
+                        </div>
+                        }
+                        }
+                    </div>
+
+                    <!-- Chat Info -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-2 flex-1 min-w-0">
+                                <h3
+                                    [class]="'text-sm sm:text-base font-semibold truncate ' + (hasUnreadMessages(chat) ? 'text-white' : 'text-gray-300')">
+                                    {{ getChatDisplayName(chat) }}
+                                </h3>
+                                @if (chat.chatType === 'group') {
+                                <i class="pi pi-users text-xs text-gray-400 flex-shrink-0"></i>
+                                }
+                            </div>
+                            <span class="text-xs text-gray-400 flex-shrink-0 ml-2">
+                                {{ formatLastMessageTime(chat.lastMessageTime) }}
+                            </span>
+                        </div>
+
+                        <!-- Subtitle -->
+                        <p class="text-xs text-gray-500 mb-1">{{ getChatSubtitle(chat) }}</p>
+
+                        <!-- Last Message -->
+                        <div class="flex justify-between items-center">
+                            <p
+                                [class]="'text-xs sm:text-sm truncate ' + (hasUnreadMessages(chat) ? 'text-gray-300 font-medium' : 'text-gray-400')">
+                                {{ chat.lastMessage || 'No messages yet' }}
+                            </p>
+                            @if (hasUnreadMessages(chat)) {
+                            <span
+                                class="ml-2 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-[#00ff66] text-black text-xs rounded-full min-w-[18px] sm:min-w-[20px] text-center font-medium flex-shrink-0">
+                                {{ getUnreadCountText(chat.unreadCount) }}
+                            </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex flex-col w-full lg:w-auto chat-area-mobile" [class.hidden]="isMobile && !selectedChat"
+        [style.display]="isMobile && showMobileSidebar ? 'none' : 'flex'">
+
+        <!-- Chat Header -->
+        @if (selectedChat) {
+        <div class="p-3 sm:p-4 bg-[#1a1a1a] border-b border-gray-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <button
+                    class="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors"
+                    (click)="showMobileSidebar = true">
+                    <i class="pi pi-arrow-left text-lg"></i>
+                </button>
+
+                <!-- Chat Avatar -->
+                <div class="relative flex-shrink-0">
+                    @if (selectedChat.chatType === 'group') {
+                    <!-- Group Chat Avatar -->
+                    <div
+                        class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#00ff66] to-[#00cc4d] rounded-full flex items-center justify-center">
+                        <i class="pi pi-users text-sm text-white"></i>
+                    </div>
+                    } @else {
+                    <!-- Personal Chat Avatar -->
+                    @if (selectedChat.profileImg) {
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden">
+                        <img [src]="selectedChat.profileImg" alt="Profile Image" class="w-full h-full object-cover">
+                    </div>
+                    } @else {
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff66] rounded-full flex items-center justify-center">
+                        <span class="text-sm sm:text-base font-semibold text-white">{{
+                            getUserInitials(selectedChat.name) }}</span>
+                    </div>
+                    }
+                    <!-- Online Status (only for personal chats) -->
+                    @if (selectedChat.isOnline) {
+                    <div
+                        class="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full">
+                    </div>
+                    }
+                    }
                 </div>
 
-                <!-- Search Input -->
-                <div class="relative mb-3 sm:mb-4">
-                    <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" 
-                           [(ngModel)]="searchTerm" 
-                           placeholder="Search chats..."
-                           class="w-full pl-9 pr-4 py-2 sm:py-2.5 text-sm bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent" />
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <button (click)="toggleUserList()"
-                            class="flex-1 px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2">
-                        <i class="pi pi-users text-sm"></i>
-                        <span class="hidden sm:inline">{{ showUserList ? 'Hide Users' : 'Start New Chat' }}</span>
-                        <span class="sm:hidden">{{ showUserList ? 'Hide' : 'New Chat' }}</span>
-                    </button>
-
-                    <button (click)="refreshChats()" 
-                            [disabled]="isLoading"
-                            class="flex-1 sm:flex-none px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i [class]="'pi text-sm ' + (isLoading ? 'pi-spinner pi-spin' : 'pi-refresh')"></i>
-                        <span class="hidden sm:inline">{{ isLoading ? 'Loading...' : 'Refresh' }}</span>
-                    </button>
+                <!-- Chat Info -->
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-sm sm:text-base font-semibold text-white truncate">{{
+                            getChatDisplayName(selectedChat) }}</h2>
+                        @if (selectedChat.chatType === 'group') {
+                        <i class="pi pi-users text-xs text-gray-400"></i>
+                        }
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-400 truncate">
+                        @if (selectedChat.chatType === 'group') {
+                        {{ getChatSubtitle(selectedChat) }}
+                        @if (!selectedChat.isActive) {
+                        <span class="text-yellow-400"> • Inactive</span>
+                        }
+                        } @else {
+                        {{ selectedChat.isOnline ? 'Active now' : 'Last seen ' +
+                        formatLastMessageTime(selectedChat.lastSeenTime || selectedChat.lastMessageTime) }}
+                        }
+                    </p>
                 </div>
             </div>
 
-            <!-- User List Section -->
-            @if (showUserList) {
-                <div class="p-3 sm:p-4 border-b border-gray-800">
-                    <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Start a New Chat</h3>
-                    
-                    @if (isLoadingUsers) {
-                        <div class="flex items-center justify-center py-8">
-                            <div class="text-center text-gray-400">
-                                <i class="pi pi-spinner pi-spin text-xl mb-2"></i>
-                                <p class="text-sm">Loading users...</p>
-                            </div>
-                        </div>
-                    }
-                    
-                    @if (!isLoadingUsers && allUsers.length === 0) {
-                        <div class="text-center text-gray-400 py-8">
-                            <i class="pi pi-users text-2xl mb-2"></i>
-                            <p class="text-sm">No users found</p>
-                        </div>
-                    }
-                    
-                    @if (!isLoadingUsers && allUsers.length > 0) {
-                        <div class="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
-                            @for (user of getFilteredAllUsers(); track trackByUserId($index, user)) {
-                                <div (click)="startChatWithUser(user)"
-                                     class="p-2 sm:p-3 cursor-pointer hover:bg-[#121212] rounded-lg transition-colors duration-200 flex items-center space-x-3 hover-lift">
-                                    <div class="relative flex-shrink-0">
-                                        @if (user.profileImg) {
-                                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden">
-                                                <img [src]="user.profileImg" alt="Profile Image" class="w-full h-full object-cover">
-                                            </div>
-                                        } @else {
-                                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff66] rounded-full flex items-center justify-center">
-                                                <span class="text-xs sm:text-sm font-semibold text-white">{{ getUserInitials(user.name) }}</span>
-                                            </div>
-                                        }
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-white truncate">{{ user.name }}</p>
-                                        <p class="text-xs text-gray-400 truncate">{{ user.email }}</p>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
+            <div class="hidden sm:flex items-center space-x-2">
+                <button class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors">
+                    <i class="pi pi-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+        }
+
+        <!-- Messages Area -->
+        @if (selectedChat) {
+        <div #messageContainer
+            class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[#121212] message-container"
+            style="scroll-behavior: smooth;">
+
+            @if (isLoading) {
+            <div class="flex justify-center py-8">
+                <div class="text-center text-gray-400">
+                    <i class="pi pi-spinner pi-spin text-lg mb-2"></i>
+                    <p class="text-sm">Loading messages...</p>
                 </div>
+            </div>
             }
 
-            <!-- Error Section -->
-            @if (error) {
-                <div class="p-3 sm:p-4 bg-red-900/50 border-b border-red-800">
-                    <div class="flex items-center justify-between">
-                        <p class="text-red-300 text-xs sm:text-sm">{{ error }}</p>
-                        <button (click)="clearError()" class="text-red-300 hover:text-red-100 p-1">
-                            <i class="pi pi-times text-xs"></i>
-                        </button>
-                    </div>
-                    
-                    @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not authenticated')) {
-                        <div class="mt-2 flex flex-col sm:flex-row gap-2">
-                            <button (click)="retryConnection()" 
-                                    class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
-                                Retry Connection
-                            </button>
-                            <button (click)="refreshChats()" 
-                                    class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
-                                Refresh Chats
-                            </button>
-                        </div>
-                    }
+            @if (messages.length === 0 && !isLoading) {
+            <div class="flex-1 flex items-center justify-center py-8">
+                <div class="text-center text-gray-400">
+                    <i class="pi pi-comment text-3xl sm:text-4xl mb-2"></i>
+                    <p class="text-sm">No messages yet</p>
+                    <p class="text-xs mt-1">Start the conversation!</p>
                 </div>
+            </div>
             }
 
-            <!-- Loading State -->
-            @if (isLoading && users.length === 0 && !isInitialized) {
-                <div class="flex-1 flex items-center justify-center p-4">
-                    <div class="text-center text-gray-400">
-                        <i class="pi pi-spinner pi-spin text-xl sm:text-2xl mb-2"></i>
-                        <p class="text-base sm:text-lg">Initializing Chat...</p>
-                        <p class="text-xs sm:text-sm text-gray-500">Connecting to server</p>
+            @for (message of messages; track trackByMessageId($index, message)) {
+            <div [class]="'flex ' + (isCurrentUserMessage(message) ? 'justify-end' : 'justify-start')">
+                <div [class]="'max-w-[280px] sm:max-w-xs lg:max-w-md px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow-sm fadeInUp ' + 
+                                 (isCurrentUserMessage(message)
+                                   ? 'bg-[#00ff66] text-black rounded-tr-sm' 
+                                   : 'bg-[#1a1a1a] text-white rounded-tl-sm')">
+
+                    @if (selectedChat.chatType === 'group' && !isCurrentUserMessage(message)) {
+                    <p class="text-xs text-gray-300 mb-1 font-medium">{{ message.senderId }}</p>
+                    }
+
+                    <p class="text-sm whitespace-pre-wrap break-words">{{ message.content }}</p>
+
+                    <div [class]="'flex items-center justify-between mt-1 text-xs opacity-70 ' + 
+                                     (isCurrentUserMessage(message) ? 'text-black' : 'text-gray-300')">
+                        <span>{{ formatTime(message.timestamp) }}</span>
+
+                        @if (isCurrentUserMessage(message)) {
+                        <div class="flex items-center ml-2">
+                            <i
+                                [class]="'pi text-xs ' + (message.isRead ? 'pi-check-circle text-blue-400' : 'pi-check text-gray-400')"></i>
+                        </div>
+                        }
                     </div>
                 </div>
+            </div>
             }
 
-            @if (isLoading && users.length === 0 && isInitialized) {
-                <div class="flex-1 flex items-center justify-center p-4">
-                    <div class="text-center text-gray-400">
-                        <i class="pi pi-spinner pi-spin text-xl sm:text-2xl mb-2"></i>
-                        <p class="text-sm sm:text-base">Loading chats...</p>
+            <!-- Typing Indicator -->
+            @if (isTyping) {
+            <div class="flex justify-start">
+                <div class="bg-[#1a1a1a] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg rounded-tl-sm">
+                    <div class="flex space-x-1 items-center">
+                        <div class="w-2 h-2 bg-[#00ff66] rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-[#00ff66] rounded-full animate-bounce" style="animation-delay: 0.1s">
+                        </div>
+                        <div class="w-2 h-2 bg-[#00ff66] rounded-full animate-bounce" style="animation-delay: 0.2s">
+                        </div>
+                        <span class="text-xs text-gray-400 ml-2">{{ getTypingIndicatorText() }}</span>
                     </div>
                 </div>
-            }
-
-            <!-- Chat List -->
-            @if (!isLoading || users.length > 0) {
-                <div class="flex-1 overflow-y-auto">
-                    @if (getFilteredUsers().length === 0 && !isLoading) {
-                        <div class="flex-1 flex items-center justify-center p-4">
-                            <div class="text-center text-gray-400">
-                                <i class="pi pi-comments text-3xl sm:text-4xl mb-2"></i>
-                                <p class="text-sm">{{ searchTerm ? 'No chats found' : 'No chats available' }}</p>
-                                <p class="text-xs mt-1">{{ searchTerm ? 'Try a different search term' : 'Start a conversation!' }}</p>
-                            </div>
-                        </div>
-                    }
-                    
-                    @for (user of getFilteredUsers(); track trackByUserId($index, user)) {
-                        <div (click)="selectUser(user)" 
-                             [class]="'p-3 sm:p-4 border-b border-gray-800 cursor-pointer hover:bg-[#121212] transition-colors duration-200 fadeInUp hover-lift ' + 
-                                      (selectedUser?.id === user.id ? 'bg-[#121212] border-l-2 border-l-[#00ff66]' : '')">
-                            <div class="flex items-center space-x-3">
-                                <div class="relative flex-shrink-0">
-                                    @if (user.profileImg) {
-                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden">
-                                            <img [src]="user.profileImg" alt="Profile Image" class="w-full h-full object-cover">
-                                        </div>
-                                    } @else {
-                                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#00ff66] rounded-full flex items-center justify-center">
-                                            <span class="text-sm sm:text-base font-semibold text-white">{{ getUserInitials(user.name) }}</span>
-                                        </div>
-                                    }
-                                    @if (user.isOnline) {
-                                        <div class="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full"></div>
-                                    }
-                                </div>
-
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex justify-between items-start">
-                                        <h3 [class]="'text-sm sm:text-base font-semibold truncate ' + (hasUnreadMessages(user) ? 'text-white' : 'text-gray-300')">
-                                            {{ user.name }}
-                                        </h3>
-                                        <span class="text-xs text-gray-400 flex-shrink-0 ml-2">
-                                            {{ formatLastMessageTime(user.lastMessageTime) }}
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <p [class]="'text-xs sm:text-sm truncate ' + (hasUnreadMessages(user) ? 'text-gray-300 font-medium' : 'text-gray-400')">
-                                            {{ user.lastMessage }}
-                                        </p>
-                                        @if (hasUnreadMessages(user)) {
-                                            <span class="ml-2 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-[#00ff66] text-black text-xs rounded-full min-w-[18px] sm:min-w-[20px] text-center font-medium flex-shrink-0">
-                                                {{ getUnreadCountText(user.unreadCount) }}
-                                            </span>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
+            </div>
             }
         </div>
+        }
 
-        <!-- Chat Area -->
-        <div class="flex-1 flex flex-col w-full lg:w-auto chat-area-mobile"
-             [class.hidden]="isMobile && !selectedUser"
-             [style.display]="isMobile && showMobileSidebar ? 'none' : 'flex'">
-            <!-- Chat Header -->
-            @if (selectedUser) {
-                <div class="p-3 sm:p-4 bg-[#1a1a1a] border-b border-gray-800 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <!-- Mobile Back Button -->
-                        <button class="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors"
-                                (click)="showMobileSidebar = true">
-                            <i class="pi pi-arrow-left text-lg"></i>
-                        </button>
-
-                        <!-- User Info -->
-                        <div class="relative flex-shrink-0">
-                            @if (selectedUser.profileImg) {
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden">
-                                    <img [src]="selectedUser.profileImg" alt="Profile Image" class="w-full h-full object-cover">
-                                </div>
-                            } @else {
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff66] rounded-full flex items-center justify-center">
-                                    <span class="text-sm sm:text-base font-semibold text-white">{{ getUserInitials(selectedUser.name) }}</span>
-                                </div>
-                            }
-                            @if (selectedUser.isOnline) {
-                                <div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full"></div>
-                            }
-                        </div>
-                        <div class="min-w-0">
-                            <h2 class="text-sm sm:text-base font-semibold text-white truncate">{{ selectedUser.name }}</h2>
-                            <p class="text-xs sm:text-sm text-gray-400 truncate">
-                                {{ selectedUser.isOnline ? 'Active now' : 'Last seen ' + formatLastMessageTime(selectedUser.lastSeenTime || selectedUser.lastMessageTime) }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Desktop Menu Button (optional) -->
-                    <div class="hidden sm:flex items-center space-x-2">
-                        <button class="p-2 text-gray-400 hover:text-white hover:bg-[#121212] rounded-lg transition-colors">
-                            <i class="pi pi-ellipsis-v"></i>
-                        </button>
-                    </div>
+        <!-- Message Input -->
+        @if (selectedChat) {
+        <div class="p-3 sm:p-4 bg-[#1a1a1a] border-t border-gray-800">
+            @if (isConnecting) {
+            <div class="mb-2 p-2 bg-yellow-900/50 border border-yellow-800 rounded-lg">
+                <div class="flex items-center justify-center text-yellow-300">
+                    <i class="pi pi-spinner pi-spin text-xs mr-2"></i>
+                    <p class="text-xs">Connecting...</p>
                 </div>
+            </div>
             }
 
-            <!-- Messages Container -->
-            @if (selectedUser) {
-                <div class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[#121212] message-container">
-                    @if (isLoading) {
-                        <div class="flex justify-center py-8">
-                            <div class="text-center text-gray-400">
-                                <i class="pi pi-spinner pi-spin text-lg mb-2"></i>
-                                <p class="text-sm">Loading messages...</p>
-                            </div>
-                        </div>
-                    }
+            <div class="flex items-end space-x-2 sm:space-x-3">
+                <div class="flex-1 relative">
+                    <textarea [(ngModel)]="newMessage" (keypress)="onKeyPress($event)"
+                        (input)="onMessageInput(); adjustTextareaHeight($event)" placeholder="Type your message..."
+                        rows="1" maxlength="1000" [disabled]="isSendingMessage || isConnecting"
+                        class="w-full px-3 py-2 sm:px-4 sm:py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent resize-none max-h-24 sm:max-h-32 min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"></textarea>
 
-                    @if (messages.length === 0 && !isLoading) {
-                        <div class="flex-1 flex items-center justify-center py-8">
-                            <div class="text-center text-gray-400">
-                                <i class="pi pi-comment text-3xl sm:text-4xl mb-2"></i>
-                                <p class="text-sm">No messages yet</p>
-                                <p class="text-xs mt-1">Start the conversation!</p>
-                            </div>
-                        </div>
-                    }
-
-                    @for (message of messages; track trackByMessageId($index, message)) {
-                        <div [class]="'flex ' + (isCurrentUserMessage(message) ? 'justify-end' : 'justify-start')">
-                            <div [class]="'max-w-[280px] sm:max-w-xs lg:max-w-md px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow-sm fadeInUp ' + 
-                                         (isCurrentUserMessage(message)
-                                           ? 'bg-[#00ff66] text-black rounded-tr-sm' 
-                                           : 'bg-[#1a1a1a] text-white rounded-tl-sm')">
-                                <p class="text-sm whitespace-pre-wrap break-words">{{ message.content }}</p>
-
-                                <div [class]="'flex items-center justify-between mt-1 text-xs opacity-70 ' + 
-                                             (isCurrentUserMessage(message) ? 'text-black' : 'text-gray-300')">
-                                    <span>{{ formatTime(message.timestamp) }}</span>
-
-                                    @if (isCurrentUserMessage(message)) {
-                                        <div class="flex items-center ml-2">
-                                            <i [class]="'pi text-xs ' + (message.isRead ? 'pi-check-circle text-blue-400' : 'pi-check text-gray-400')"></i>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-
-                    <!-- Typing Indicator -->
-                    @if (isTyping) {
-                        <div class="flex justify-start">
-                            <div class="bg-[#1a1a1a] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg rounded-tl-sm">
-                                <div class="flex space-x-1 items-center">
-                                    <div class="w-2 h-2 bg-[#00ff66] rounded-full animate-bounce"></div>
-                                    <div class="w-2 h-2 bg-[#00ff66] rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                    <div class="w-2 h-2 bg-[#00ff66] rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                                    <span class="text-xs text-gray-400 ml-2">typing...</span>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-
-            <!-- Message Input -->
-            @if (selectedUser) {
-                <div class="p-3 sm:p-4 bg-[#1a1a1a] border-t border-gray-800">
-                    <!-- Connection Status -->
-                    @if (isConnecting) {
-                        <div class="mb-2 p-2 bg-yellow-900/50 border border-yellow-800 rounded-lg">
-                            <div class="flex items-center justify-center text-yellow-300">
-                                <i class="pi pi-spinner pi-spin text-xs mr-2"></i>
-                                <p class="text-xs">Connecting...</p>
-                            </div>
-                        </div>
-                    }
-
-                    <div class="flex items-end space-x-2 sm:space-x-3">
-                        <div class="flex-1 relative">
-                            <textarea [(ngModel)]="newMessage" 
-                                      (keypress)="onKeyPress($event)"
-                                      (input)="onMessageInput(); adjustTextareaHeight($event)" 
-                                      placeholder="Type your message..." 
-                                      rows="1"
-                                      maxlength="1000"
-                                      [disabled]="isSendingMessage || isConnecting"
-                                      class="w-full px-3 py-2 sm:px-4 sm:py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent resize-none max-h-24 sm:max-h-32 min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"></textarea>
-
-                            @if (newMessage.length > 800) {
-                                <div class="absolute -top-6 right-2 text-xs text-gray-400">
-                                    {{ newMessage.length }}/1000
-                                </div>
-                            }
-                        </div>
-
-                        <button (click)="sendMessage()" 
-                                [disabled]="!newMessage.trim() || isSendingMessage || isConnecting || !socketService.isConnected()"
-                                [title]="!socketService.isConnected() ? 'Not connected' : (isSendingMessage ? 'Sending...' : 'Send message')"
-                                class="p-2 sm:p-2.5 rounded-lg transition-colors flex-shrink-0 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center"
-                                [class]="(!newMessage.trim() || isSendingMessage || isConnecting || !socketService.isConnected()) 
-                                  ? 'bg-gray-600 cursor-not-allowed' 
-                                  : 'bg-[#00ff66] hover:bg-[#00e055] active:bg-[#00cc4d]'">
-                            @if (isSendingMessage) {
-                                <i class="pi pi-spinner pi-spin text-sm sm:text-lg text-black"></i>
-                            } @else {
-                                <i class="pi pi-send text-sm sm:text-lg text-black"></i>
-                            }
-                        </button>
+                    @if (newMessage.length > 800) {
+                    <div class="absolute -top-6 right-2 text-xs text-gray-400">
+                        {{ newMessage.length }}/1000
                     </div>
-
-                    @if (!socketService.isConnected() && !isConnecting) {
-                        <div class="mt-2 text-xs text-red-400 flex items-center gap-1">
-                            <i class="pi pi-exclamation-triangle"></i>
-                            <span>Not connected. Messages cannot be sent.</span>
-                        </div>
                     }
                 </div>
+
+                <button (click)="sendMessage()"
+                    [disabled]="!newMessage.trim() || isSendingMessage || isConnecting || !socketService.isConnected()"
+                    [title]="!socketService.isConnected() ? 'Not connected' : (isSendingMessage ? 'Sending...' : 'Send message')"
+                    class="p-2 sm:p-2.5 rounded-lg transition-colors flex-shrink-0 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center"
+                    [class]="(!newMessage.trim() || isSendingMessage || isConnecting || !socketService.isConnected()) ? 
+                            'bg-gray-600 text-gray-400 cursor-not-allowed' : 
+                            'bg-[#00ff66] text-black hover:bg-[#00e055] hover:shadow-lg'">
+                    <i [class]="'pi text-sm ' + (isSendingMessage ? 'pi-spinner pi-spin' : 'pi-send')"></i>
+                </button>
+            </div>
+
+            <!-- Connection Status -->
+            @if (!socketService.isConnected() && isInitialized) {
+            <div class="mt-2 p-2 bg-red-900/50 border border-red-800 rounded-lg">
+                <div class="flex items-center justify-center text-red-300">
+                    <i class="pi pi-exclamation-triangle text-xs mr-2"></i>
+                    <p class="text-xs">Connection lost. Messages cannot be sent.</p>
+                </div>
+            </div>
             }
 
-            <!-- Welcome Screen -->
-            @if (!selectedUser) {
-                <div class="flex-1 flex items-center justify-center bg-[#121212] p-4">
-                    <div class="text-center text-gray-400 max-w-md">
-                        <i class="pi pi-comments text-4xl sm:text-6xl mb-4 text-[#00ff66]"></i>
-                        <h3 class="text-lg sm:text-xl font-semibold mb-2 text-white">Welcome to Chat</h3>
-                        <p class="text-gray-400 mb-4 text-sm sm:text-base">Select a chat to start messaging</p>
-                        <p class="text-xs sm:text-sm text-gray-500">Choose from your existing conversations or start a new one</p>
-                        
-                        <!-- Mobile: Show sidebar button -->
-                        <button class="mt-4 lg:hidden px-4 py-2 bg-[#00ff66] text-black rounded-lg hover:bg-[#00e055] transition-colors"
-                                (click)="showMobileSidebar = true">
-                            <i class="pi pi-comments mr-2"></i>
-                            View Chats
-                        </button>
-                    </div>
-                </div>
+            <!-- Character count warning -->
+            @if (newMessage.length > 800) {
+            <div class="mt-1 text-xs text-center"
+                [class]="newMessage.length > 950 ? 'text-red-400' : 'text-yellow-400'">
+                {{ 1000 - newMessage.length }} characters remaining
+            </div>
             }
+        </div>
+        }
+
+        <!-- No Chat Selected State -->
+        @if (!selectedChat) {
+        <div class="flex-1 flex items-center justify-center bg-[#121212] p-4">
+            <div class="text-center text-gray-400 max-w-md">
+                <div class="mb-6">
+                    <i class="pi pi-comments text-5xl sm:text-6xl text-gray-600 mb-4"></i>
+                    <h2 class="text-xl sm:text-2xl font-semibold text-gray-300 mb-2">Welcome to Chat</h2>
+                    <p class="text-sm sm:text-base text-gray-400 mb-4">
+                        Select a conversation from the sidebar to start chatting, or create a new conversation.
+                    </p>
+                </div>
+
+                <!-- Action buttons for no chat selected -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button (click)="toggleUserList(); showMobileSidebar = true"
+                        class="px-4 py-2 bg-[#00ff66] text-black rounded-lg hover:bg-[#00e055] transition-colors flex items-center justify-center gap-2">
+                        <i class="pi pi-users text-sm"></i>
+                        <span>Start New Chat</span>
+                    </button>
+
+                    @if (combinedChats.length > 0) {
+                    <button (click)="showMobileSidebar = true"
+                        class="px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-gray-300 rounded-lg hover:bg-[#121212] hover:text-white transition-colors flex items-center justify-center gap-2">
+                        <i class="pi pi-list text-sm"></i>
+                        <span>View Chats</span>
+                    </button>
+                    }
+                </div>
+
+                <!-- Quick stats -->
+                @if (totalUnreadCount > 0) {
+                <div class="mt-6 p-3 bg-[#1a1a1a] border border-gray-700 rounded-lg">
+                    <p class="text-sm text-gray-300">
+                        <i class="pi pi-bell text-[#00ff66] mr-2"></i>
+                        You have {{ totalUnreadCount }} unread message{{ totalUnreadCount === 1 ? '' : 's' }}
+                    </p>
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+<!-- Mobile Chat Overlay -->
+@if (isMobile && selectedChat && !showMobileSidebar) {
+<div class="fixed bottom-4 left-4 z-50 lg:hidden">
+    <button (click)="showMobileSidebar = true"
+        class="p-3 bg-[#00ff66] text-black rounded-full shadow-lg hover:bg-[#00e055] transition-colors flex items-center justify-center">
+        <i class="pi pi-comments text-lg"></i>
+        @if (totalUnreadCount > 0) {
+        <span
+            class="absolute -top-1 -right-1 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full min-w-[18px] text-center">
+            {{ getUnreadCountText(totalUnreadCount) }}
+        </span>
+        }
+    </button>
+</div>
+}
+
+<!-- Loading Overlay -->
+@if (isLoading && !isInitialized) {
+<div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-[#1a1a1a] p-6 rounded-lg text-center max-w-sm mx-4">
+        <i class="pi pi-spinner pi-spin text-2xl text-[#00ff66] mb-4"></i>
+        <h3 class="text-lg font-semibold text-white mb-2">Initializing Chat</h3>
+        <p class="text-sm text-gray-400">Setting up your chat experience...</p>
+    </div>
+</div>
+}
+
+<!-- Error Toast (for temporary errors) -->
+@if (error && !error.includes('Connection') && !error.includes('Failed to initialize')) {
+<div class="fixed top-20 right-4 z-50 max-w-sm">
+    <div class="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg shadow-lg animate-fadeInUp">
+        <div class="flex items-start justify-between">
+            <div class="flex">
+                <i class="pi pi-exclamation-triangle text-red-300 mr-2 mt-0.5"></i>
+                <p class="text-sm">{{ error }}</p>
+            </div>
+            <button (click)="clearError()" class="text-red-300 hover:text-red-100 ml-2">
+                <i class="pi pi-times text-sm"></i>
+            </button>
         </div>
     </div>
+</div>
+}

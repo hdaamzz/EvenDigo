@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, of, Subject } from 'rxjs';
-import { map, catchError, tap, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of, Subject, combineLatest } from 'rxjs';
+import { map, catchError, tap, takeUntil, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { SocketService } from '../socket/socket.service';
@@ -16,13 +16,14 @@ export interface ChatUser {
   lastSeenTime?: Date;
   isOnline: boolean;
   unreadCount: number;
-  profileImg?:string;
+  profileImg?: string;
   chatId: string;
 }
 
 export interface ChatMessage {
   id: string;
-  senderId: string;
+  chatId?: string;
+  senderId: string | User;
   content: string;
   timestamp: Date;
   isRead: boolean;
@@ -40,6 +41,7 @@ export interface ApiChat {
   isActive: boolean;
   messageCount: number;
   lastMessageAt?: string;
+  chatType?: 'personal' | 'group';
 }
 
 export interface ApiMessage {
@@ -54,6 +56,7 @@ export interface ApiMessage {
 export interface SocketEventData {
   chatId: string;
   message: ChatMessage;
+  chatType?: 'personal' | 'group';
 }
 
 export interface UserStatusData {
@@ -66,18 +69,38 @@ export interface MessagesReadData {
   chatId: string;
   userId: string;
   timestamp: Date;
+  chatType?: 'personal' | 'group';
 }
 
 export interface TypingData {
   userId: string;
   chatId: string;
+  chatType?: 'personal' | 'group';
+}
+
+export interface GroupChat {
+  id: string;
+  name: string;
+  eventId: string;
+  participants: ChatUser[];
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+  isActive: boolean;
+  chatType: 'group';
+}
+
+export interface ApiGroupChat extends ApiChat {
+  name: string;
+  eventId: string;
+  chatType: 'group';
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  private readonly apiUrl = `${environment.apiUrl}user/auth`;
+  private readonly apiUrl = `${environment.apiUrl}user/chats`;
   private currentUserId: string = "";
   private isInitialized = false;
   private destroy$ = new Subject<void>();
@@ -90,14 +113,20 @@ export class ChatService {
   private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
   public messages$ = this.messagesSubject.asObservable();
 
+  private groupChatsSubject = new BehaviorSubject<GroupChat[]>([]);
+  public groupChats$ = this.groupChatsSubject.asObservable();
+
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
 
-  private isTypingSubject = new BehaviorSubject<boolean>(false);
+  private isTypingSubject = new BehaviorSubject<{ [chatId: string]: boolean }>({});
   public isTyping$ = this.isTypingSubject.asObservable();
 
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
+
+  private currentChatTypeSubject = new BehaviorSubject<'personal' | 'group'>('personal');
+  public currentChatType$ = this.currentChatTypeSubject.asObservable();
 
   private errorSubject = new BehaviorSubject<string>('');
   public error$ = this.errorSubject.asObservable();
@@ -107,6 +136,7 @@ export class ChatService {
     private authService: AuthService
   ) {
     this.fetchCurrentUser();
+    this.setupUnreadCountCalculation();
   }
 
   async initialize(socketService: SocketService): Promise<void> {
@@ -123,7 +153,10 @@ export class ChatService {
       this.setupSocketListeners();
       this.isInitialized = true;
 
-      await this.refreshPersonalChats();
+      await Promise.all([
+        this.refreshPersonalChats(),
+        this.refreshGroupChats()
+      ]);
 
     } catch (error) {
       this.handleError('Failed to initialize chat service', error);
@@ -152,6 +185,17 @@ export class ChatService {
       });
   }
 
+  private setupUnreadCountCalculation(): void {
+    combineLatest([this.chatUsers$, this.groupChats$])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([personalChats, groupChats]) => {
+        const personalUnread = personalChats.reduce((sum, chat) => sum + chat.unreadCount, 0);
+        const groupUnread = groupChats.reduce((sum, chat) => sum + chat.unreadCount, 0);
+        const totalUnread = personalUnread + groupUnread;
+        this.unreadCountSubject.next(totalUnread);
+      });
+  }
+
   private setupSocketListeners(): void {
     if (!this.socketService) return;
 
@@ -161,7 +205,7 @@ export class ChatService {
         this.connectionStatusSubject.next(connected);
         if (connected) {
           this.clearError();
-          this.refreshPersonalChats();
+          this.refreshAllChats();
         }
       });
 
@@ -188,10 +232,41 @@ export class ChatService {
     this.socketService.listenSafe<any>('error')
       .pipe(takeUntil(this.destroy$))
       .subscribe(error => this.handleError('Socket error', error));
+
+    this.setupGroupChatListeners();
+  }
+
+  private setupGroupChatListeners(): void {
+    if (!this.socketService) return;
+
+    this.socketService.listenSafe<any>('groupChatInfo')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        console.log('Group chat info received:', data);
+        this.refreshGroupChats();
+      });
+
+    this.socketService.listenSafe<any>('userJoinedChat')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        console.log('User joined chat:', data);
+        if (data.chatType === 'group') {
+          this.refreshGroupChats();
+        }
+      });
+
+    this.socketService.listenSafe<any>('userLeftChat')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        console.log('User left chat:', data);
+        if (data.chatType === 'group') {
+          this.refreshGroupChats();
+        }
+      });
   }
 
   private handleNewMessage(data: SocketEventData): void {
-    const { chatId, message } = data;
+    const { chatId, message, chatType } = data;
 
     const currentMessages = this.messagesSubject.getValue();
     const messageExists = currentMessages.some(msg => msg.id === message.id);
@@ -203,17 +278,18 @@ export class ChatService {
       this.messagesSubject.next(updatedMessages);
     }
 
-    this.refreshPersonalChats();
-
-    if (message.senderId !== this.currentUserId) {
-      this.calculateUnreadCount();
+    if (chatType === 'group') {
+      this.refreshGroupChats();
+    } else {
+      this.refreshPersonalChats();
     }
+
   }
 
   private handleUserStatusUpdate(data: UserStatusData): void {
     const { userId, status, lastSeen } = data;
-    const currentUsers = this.chatUsersSubject.getValue();
 
+    const currentUsers = this.chatUsersSubject.getValue();
     const updatedUsers = currentUsers.map(user => {
       if (user.id === userId) {
         return {
@@ -224,12 +300,27 @@ export class ChatService {
       }
       return user;
     });
-
     this.chatUsersSubject.next(updatedUsers);
+
+    const currentGroupChats = this.groupChatsSubject.getValue();
+    const updatedGroupChats = currentGroupChats.map(groupChat => ({
+      ...groupChat,
+      participants: groupChat.participants.map(participant => {
+        if (participant.id === userId) {
+          return {
+            ...participant,
+            isOnline: status === 'online',
+            lastSeenTime: lastSeen
+          };
+        }
+        return participant;
+      })
+    }));
+    this.groupChatsSubject.next(updatedGroupChats);
   }
 
   private handleUserTyping(data: TypingData): void {
-    const { userId, chatId } = data;
+    const { userId, chatId, chatType } = data;
 
     if (userId === this.currentUserId) return;
 
@@ -242,7 +333,7 @@ export class ChatService {
   }
 
   private handleUserStoppedTyping(data: TypingData): void {
-    const { userId, chatId } = data;
+    const { userId, chatId, chatType } = data;
 
     if (userId === this.currentUserId) return;
 
@@ -254,35 +345,105 @@ export class ChatService {
   }
 
   private handleMessagesRead(data: MessagesReadData): void {
+    const { chatId, userId, timestamp, chatType } = data;
+
     const currentMessages = this.messagesSubject.getValue();
     const updatedMessages = currentMessages.map(msg => {
-      if (msg.senderId === this.currentUserId) {
+      if (msg.chatId === chatId && msg.senderId === this.currentUserId) {
         return { ...msg, isRead: true };
       }
       return msg;
     });
     this.messagesSubject.next(updatedMessages);
+
+    if (chatType === 'group') {
+      this.refreshGroupChats();
+    } else {
+      this.refreshPersonalChats();
+    }
   }
 
   private updateTypingStatus(chatId: string): void {
     const typingSet = this.typingUsers.get(chatId);
     const isTyping = typingSet ? typingSet.size > 0 : false;
-    this.isTypingSubject.next(isTyping);
+
+    const currentTypingStatus = this.isTypingSubject.getValue();
+    this.isTypingSubject.next({
+      ...currentTypingStatus,
+      [chatId]: isTyping
+    });
+  }
+
+  getUserChats(): Observable<{ personalChats: ChatUser[], groupChats: GroupChat[] }> {
+    return this.http.get<any>(`${this.apiUrl}`).pipe(
+      map(response => {
+        const chats = response.data?.chats || response.data || [];
+
+        const personalChats = chats
+          .filter((chat: any) => !chat.chatType || chat.chatType === 'personal')
+          .map((chat: any) => this.transformChatToUser(chat));
+
+        const groupChats = chats
+          .filter((chat: any) => chat.chatType === 'group')
+          .map((chat: any) => this.transformGroupChat(chat));
+
+        this.chatUsersSubject.next(personalChats);
+        this.groupChatsSubject.next(groupChats);
+
+        return { personalChats, groupChats };
+      }),
+      catchError(error => {
+        this.handleError('Failed to fetch user chats', error);
+        return of({ personalChats: [], groupChats: [] });
+      })
+    );
   }
 
   getPersonalChats(): Observable<ChatUser[]> {
     return this.http.get<any>(`${this.apiUrl}`).pipe(
       map(response => {
         const chats = response.data?.chats || response.data || [];
-        const chatUsers = this.transformChatsToUsers(chats);
-        this.chatUsersSubject.next(chatUsers);
-        return chatUsers;
+        const personalChats = chats
+          .filter((chat: any) => !chat.chatType || chat.chatType === 'personal')
+          .map((chat: any) => this.transformChatToUser(chat));
+        this.chatUsersSubject.next(personalChats);
+        return personalChats;
       }),
       catchError(error => {
         this.handleError('Failed to fetch personal chats', error);
         return of([]);
       })
     );
+  }
+
+  private transformChatToUser(chat: ApiChat): ChatUser {
+    const otherParticipant = chat.participants.find(p => p._id !== this.currentUserId);
+
+    const name = otherParticipant ?
+      (otherParticipant.username || otherParticipant.email || 'Unknown User') :
+      'Unknown User';
+
+    const lastMessage = chat.lastMessage?.content || 'No messages yet';
+    const lastMessageTime = chat.lastMessage?.timestamp ?
+      new Date(chat.lastMessage.timestamp) :
+      new Date(chat.updatedAt);
+
+    const unreadCount = this.calculateUnreadCountForChat(chat);
+
+    return {
+      id: otherParticipant?._id || 'unknown',
+      name,
+      lastMessage,
+      lastMessageTime,
+      isOnline: otherParticipant?.isOnline || false,
+      unreadCount,
+      chatId: chat._id,
+      profileImg: otherParticipant?.profileImg
+    };
+  }
+
+  private calculateUnreadCountForChat(chat: ApiChat): number {
+    return chat.messageCount || 0; 
   }
 
   createOrGetPersonalChat(otherUserId: string): Observable<ApiChat> {
@@ -311,25 +472,107 @@ export class ChatService {
     );
   }
 
-  getChatById(chatId: string): Observable<ApiChat> {
-    return this.http.get<any>(`${this.apiUrl}/${chatId}`).pipe(
-      map(response => response.data),
+  getGroupChats(): Observable<GroupChat[]> {
+    return this.http.get<any>(`${this.apiUrl}`).pipe(
+      map(response => {
+        const chats = response.data?.chats || response.data || [];
+        const groupChats = chats.filter((chat: any) => chat.chatType === 'group');
+        const transformedGroupChats = this.transformGroupChats(groupChats);
+        this.groupChatsSubject.next(transformedGroupChats);
+        return transformedGroupChats;
+      }),
       catchError(error => {
-        this.handleError('Failed to get chat by ID', error);
+        this.handleError('Failed to fetch group chats', error);
+        return of([]);
+      })
+    );
+  }
+
+  createGroupChat(eventId: string, name: string, participantIds?: string[]): Observable<ApiGroupChat> {
+    return this.http.post<any>(`${this.apiUrl}/group`, {
+      eventId,
+      name,
+      participantIds: participantIds || []
+    }).pipe(
+      map(response => response.data),
+      tap(() => this.refreshGroupChats()),
+      catchError(error => {
+        this.handleError('Failed to create group chat', error);
         throw error;
       })
     );
   }
 
-  deleteChat(chatId: string): Observable<void> {
-    return this.http.delete<any>(`${this.apiUrl}/${chatId}`).pipe(
-      map(() => void 0),
-      tap(() => this.refreshPersonalChats()),
+  getGroupChatByEventId(eventId: string): Observable<ApiGroupChat | null> {
+    return this.http.get<any>(`${this.apiUrl}/group/event/${eventId}`).pipe(
+      map(response => response.data),
       catchError(error => {
-        this.handleError('Failed to delete chat', error);
+        if (error.status === 404) {
+          return of(null);
+        }
+        this.handleError('Failed to get group chat by event ID', error);
         throw error;
       })
     );
+  }
+
+  createOrGetGroupChat(eventId: string, name: string, participantIds?: string[]): Observable<ApiGroupChat> {
+    return this.getGroupChatByEventId(eventId).pipe(
+      switchMap(existingChat => {
+        if (existingChat) {
+          return of(existingChat);
+        }
+        return this.createGroupChat(eventId, name, participantIds);
+      })
+    );
+  }
+
+  addParticipantToGroupChat(chatId: string, userId: string): Observable<ApiGroupChat> {
+    return this.http.post<any>(`${this.apiUrl}/group/${chatId}/participants`, {
+      userId
+    }).pipe(
+      map(response => response.data),
+      tap(() => this.refreshGroupChats()),
+      catchError(error => {
+        this.handleError('Failed to add participant to group chat', error);
+        throw error;
+      })
+    );
+  }
+
+  private transformGroupChat(apiChat: ApiGroupChat): GroupChat {
+    const lastMessage = apiChat.lastMessage?.content || 'No messages yet';
+    const lastMessageTime = apiChat.lastMessage?.timestamp
+      ? new Date(apiChat.lastMessage.timestamp)
+      : new Date(apiChat.updatedAt);
+
+    return {
+      id: apiChat._id,
+      name: apiChat.name,
+      eventId: apiChat.eventId,
+      participants: apiChat.participants.map(p => ({
+        id: p._id,
+        name: p.username || p.email,
+        username: p.username,
+        lastMessage: '',
+        lastMessageTime: new Date(),
+        isOnline: p.isOnline || false,
+        unreadCount: 0,
+        profileImg: p.profileImg,
+        chatId: apiChat._id
+      })),
+      lastMessage,
+      lastMessageTime,
+      unreadCount: this.calculateUnreadCountForChat(apiChat),
+      isActive: apiChat.isActive,
+      chatType: 'group'
+    };
+  }
+
+  private transformGroupChats(apiChats: ApiGroupChat[]): GroupChat[] {
+    return apiChats
+      .map(chat => this.transformGroupChat(chat))
+      .sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
   }
 
   getChatMessages(chatId: string, limit: number = 50, skip: number = 0): Observable<ChatMessage[]> {
@@ -350,25 +593,7 @@ export class ChatService {
     );
   }
 
-  getChatMessagesWithPagination(chatId: string, page: number = 1, limit: number = 50): Observable<any> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
-
-    return this.http.get<any>(`${this.apiUrl}/${chatId}/messages/paginated`, { params }).pipe(
-      map(response => ({
-        messages: this.transformApiMessages(response.data?.messages || []),
-        pagination: response.data?.pagination
-      })),
-      catchError(error => {
-        this.handleError('Failed to fetch paginated messages', error);
-        return of({ messages: [], pagination: null });
-      })
-    );
-  }
-
-
-  sendMessage(chatId: string, content: string): Observable<ChatMessage> {
+  sendMessage(chatId: string, content: string, chatType: 'personal' | 'group' = 'personal'): Observable<ChatMessage> {
     return new Observable<ChatMessage>(subscriber => {
       if (!content.trim()) {
         subscriber.error(new Error('Message content cannot be empty'));
@@ -382,33 +607,36 @@ export class ChatService {
         timestamp: new Date(),
         isRead: false,
         type: 'text',
-        messageType: 'text'
+        messageType: 'text',
+        chatId
       };
 
-      // Add optimistic message
       const currentMessages = this.messagesSubject.getValue();
       this.messagesSubject.next([...currentMessages, tempMessage]);
 
       if (this.checkSocketConnection()) {
-        // Send via socket
         this.socketService!.emit('sendMessage', {
           chatId,
           content: content.trim(),
           senderId: this.currentUserId,
-          tempId: tempMessage.id
+          tempId: tempMessage.id,
+          chatType
         });
 
         subscriber.next(tempMessage);
         subscriber.complete();
       } else {
-        // Fallback to HTTP
-        this.sendMessageHttp(chatId, content.trim(), tempMessage).subscribe(subscriber);
+        this.sendMessageHttp(chatId, content.trim(), chatType, tempMessage).subscribe(subscriber);
       }
     });
   }
 
-  private sendMessageHttp(chatId: string, content: string, tempMessage?: ChatMessage): Observable<ChatMessage> {
-    return this.http.post<any>(`${this.apiUrl}/${chatId}/messages`, {
+  private sendMessageHttp(chatId: string, content: string, chatType: 'personal' | 'group', tempMessage?: ChatMessage): Observable<ChatMessage> {
+    const endpoint = chatType === 'group'
+      ? `${this.apiUrl}/group/${chatId}/messages`
+      : `${this.apiUrl}/${chatId}/messages`;
+
+    return this.http.post<any>(endpoint, {
       content,
       messageType: 'text'
     }).pipe(
@@ -434,16 +662,24 @@ export class ChatService {
     );
   }
 
-
-  markMessagesAsRead(chatId: string): Observable<void> {
+  markMessagesAsRead(chatId: string, chatType: 'personal' | 'group' = 'personal'): Observable<void> {
     if (this.checkSocketConnection()) {
-      this.socketService!.markAsRead(chatId);
+      this.socketService!.markAsRead(chatId, chatType);
     }
 
+    const endpoint = chatType === 'group'
+      ? `${this.apiUrl}/group/${chatId}/read`
+      : `${this.apiUrl}/${chatId}/read`;
 
-    return this.http.patch<any>(`${this.apiUrl}/${chatId}/read`, {}).pipe(
+    return this.http.patch<any>(endpoint, {}).pipe(
       map(() => void 0),
-      tap(() => this.calculateUnreadCount()),
+      tap(() => {
+        if (chatType === 'group') {
+          this.refreshGroupChats();
+        } else {
+          this.refreshPersonalChats();
+        }
+      }),
       catchError(error => {
         this.handleError('Failed to mark messages as read', error);
         return of(void 0);
@@ -451,101 +687,27 @@ export class ChatService {
     );
   }
 
-
-  getUnreadMessageCount(): Observable<number> {
-    return this.chatUsers$.pipe(
-      map(users => {
-        const totalUnread = users.reduce((sum, user) => sum + user.unreadCount, 0);
-        this.unreadCountSubject.next(totalUnread);
-        return totalUnread;
-      })
-    );
-  }
-
-
-  getMessageById(messageId: string): Observable<ChatMessage> {
-    return this.http.get<any>(`${this.apiUrl}/messages/${messageId}`).pipe(
-      map(response => this.transformApiMessages([response.data])[0]),
-      catchError(error => {
-        this.handleError('Failed to get message by ID', error);
-        throw error;
-      })
-    );
-  }
-
-  updateMessage(messageId: string, content: string): Observable<ChatMessage> {
-    return this.http.put<any>(`${this.apiUrl}/messages/${messageId}`, {
-      content
-    }).pipe(
-      map(response => this.transformApiMessages([response.data])[0]),
-      catchError(error => {
-        this.handleError('Failed to update message', error);
-        throw error;
-      })
-    );
-  }
-
-  deleteMessage(messageId: string): Observable<void> {
-    return this.http.delete<any>(`${this.apiUrl}/messages/${messageId}`).pipe(
-      map(() => void 0),
-      catchError(error => {
-        this.handleError('Failed to delete message', error);
-        throw error;
-      })
-    );
-  }
-
-
-
-
-  joinChat(chatId: string): void {
+  joinChat(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
     if (this.checkSocketConnection()) {
-      this.socketService!.joinChat(chatId);
+      this.socketService!.joinChat(chatId, chatType);
     }
   }
 
-  startTyping(chatId: string): void {
+  startTyping(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
     if (this.checkSocketConnection()) {
-      this.socketService!.startTyping(chatId);
+      this.socketService!.startTyping(chatId, chatType);
     }
   }
-  stopTyping(chatId: string): void {
+
+  stopTyping(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
     if (this.checkSocketConnection()) {
-      this.socketService!.stopTyping(chatId);
+      this.socketService!.stopTyping(chatId, chatType);
     }
   }
 
   getTypingStatus(chatId: string): boolean {
-    const typingSet = this.typingUsers.get(chatId);
-    return typingSet ? typingSet.size > 0 : false;
-  }
-
-  private transformChatsToUsers(chats: ApiChat[]): ChatUser[] {
-    return chats.map(chat => {
-      const otherParticipant = chat.participants.find(p => p._id !== this.currentUserId);
-
-      const name = otherParticipant ?
-        (otherParticipant.username || otherParticipant.email || 'Unknown User') :
-        'Unknown User';
-
-      const lastMessage = chat.lastMessage?.content || 'No messages yet';
-      const lastMessageTime = chat.lastMessage?.timestamp ?
-        new Date(chat.lastMessage.timestamp) :
-        new Date(chat.updatedAt);
-
-      const unreadCount = 0;
-
-      return {
-        id: otherParticipant?._id || 'unknown',
-        name,
-        lastMessage,
-        lastMessageTime,
-        isOnline: otherParticipant?.isOnline || false,
-        unreadCount,
-        chatId: chat._id,
-        profileImg: otherParticipant?.profileImg
-      };
-    }).sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
+    const currentTypingStatus = this.isTypingSubject.getValue();
+    return currentTypingStatus[chatId] || false;
   }
 
   private transformApiMessages(apiMessages: ApiMessage[]): ChatMessage[] {
@@ -562,15 +724,29 @@ export class ChatService {
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }
 
-  private calculateUnreadCount(): void {
-    const currentUsers = this.chatUsersSubject.getValue();
-    const totalUnread = currentUsers.reduce((sum, user) => sum + user.unreadCount, 0);
-    this.unreadCountSubject.next(totalUnread);
+  setChatType(chatType: 'personal' | 'group'): void {
+    this.currentChatTypeSubject.next(chatType);
+  }
+
+  getCurrentChatType(): 'personal' | 'group' {
+    return this.currentChatTypeSubject.getValue();
+  }
+
+  private refreshAllChats(): void {
+    this.getUserChats().subscribe({
+      error: (error) => this.handleError('Failed to refresh all chats', error)
+    });
   }
 
   private refreshPersonalChats(): void {
     this.getPersonalChats().subscribe({
       error: (error) => this.handleError('Failed to refresh personal chats', error)
+    });
+  }
+
+  private refreshGroupChats(): void {
+    this.getGroupChats().subscribe({
+      error: (error) => this.handleError('Failed to refresh group chats', error)
     });
   }
 
@@ -599,13 +775,32 @@ export class ChatService {
     return this.isInitialized;
   }
 
-  getAllUsers(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}admin/users/all-users`).pipe(
-      map(response => {
-        console.log(response);
+  getChatById(chatId: string): Observable<ApiChat> {
+    return this.http.get<any>(`${this.apiUrl}/${chatId}`).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.handleError('Failed to get chat by ID', error);
+        throw error;
+      })
+    );
+  }
 
+  deleteChat(chatId: string): Observable<void> {
+    return this.http.delete<any>(`${this.apiUrl}/${chatId}`).pipe(
+      map(() => void 0),
+      tap(() => this.refreshPersonalChats()),
+      catchError(error => {
+        this.handleError('Failed to delete chat', error);
+        throw error;
+      })
+    );
+  }
+
+  getAllUsers(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}admin/users/all-users`).pipe(
+      map(response => {
         if (!response) {
-          throw new Error(response.message || 'Failed to fetch users');
+          throw new Error(response?.message || 'Failed to fetch users');
         }
         return response.map((user: any) => ({
           id: user._id,
