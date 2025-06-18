@@ -1,16 +1,13 @@
 <app-user-nav></app-user-nav>
 
 <div class="flex h-screen bg-[#121212] text-white pt-16 sm:pt-20">
-    <!-- Overlay for mobile -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
         [style.display]="(selectedChat && isMobile && showMobileSidebar) ? 'block' : 'none'"
         (click)="closeMobileChat()"></div>
 
-    <!-- Sidebar -->
     <div class="w-full lg:w-80 bg-[#1a1a1a] border-r border-gray-800 flex flex-col chat-transition"
         [class]="getSidebarClass()">
 
-        <!-- Header -->
         <div class="p-3 sm:p-4 border-b border-gray-800 pt-16 sm:pt-20 lg:pt-4">
             <div class="flex items-center justify-between mb-4 lg:hidden">
                 <h2 class="text-lg font-semibold text-white">Chats</h2>
@@ -20,14 +17,12 @@
                 </button>
             </div>
 
-            <!-- Search -->
             <div class="relative mb-3 sm:mb-4">
                 <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                 <input type="text" [(ngModel)]="searchTerm" placeholder="Search chats..."
                     class="w-full pl-9 pr-4 py-2 sm:py-2.5 text-sm bg-[#121212] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00ff66] focus:border-transparent" />
             </div>
 
-            <!-- Chat Type Tabs -->
             <div class="flex mb-3 sm:mb-4 bg-[#121212] rounded-lg p-1">
                 <button (click)="switchChatTab('personal')" [class]="'flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 flex items-center justify-center gap-2 ' + 
                                 (activeChatTab === 'personal' ? 'tab-active' : 'tab-inactive')">
@@ -47,7 +42,6 @@
                 </button>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-2">
                 <button (click)="toggleUserList()"
                     class="flex-1 px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2">
@@ -64,7 +58,6 @@
             </div>
         </div>
 
-        <!-- User List -->
         @if (showUserList) {
         <div class="p-3 sm:p-4 border-b border-gray-800">
             <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Start a New Chat</h3>
@@ -113,7 +106,6 @@
         </div>
         }
 
-        <!-- Error Display -->
         @if (error) {
         <div class="p-3 sm:p-4 bg-red-900/50 border-b border-red-800">
             <div class="flex items-center justify-between">
@@ -123,7 +115,8 @@
                 </button>
             </div>
 
-            @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not authenticated')) {
+            @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not
+            authenticated')) {
             <div class="mt-2 flex flex-col sm:flex-row gap-2">
                 <button (click)="retryConnection()"
                     class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
@@ -158,7 +151,6 @@
         </div>
         }
 
-        <!-- Chat List -->
         @if (!isLoading || combinedChats.length > 0) {
         <div class="flex-1 overflow-y-auto">
             @if (getFilteredChats().length === 0 && !isLoading) {
@@ -177,16 +169,13 @@
                 [class]="'p-3 sm:p-4 border-b border-gray-800 cursor-pointer hover:bg-[#121212] transition-colors duration-200 fadeInUp hover-lift ' + 
                                           (selectedChat?.chatId === chat.chatId ? 'bg-[#121212] border-l-2 border-l-[#00ff66]' : '')">
                 <div class="flex items-center space-x-3">
-                    <!-- Chat Avatar -->
                     <div class="relative flex-shrink-0">
                         @if (chat.chatType === 'group') {
-                        <!-- Group Chat Avatar -->
                         <div
                             class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#00ff66] to-[#00cc4d] rounded-full flex items-center justify-center">
                             <i class="pi pi-users text-sm sm:text-base text-white"></i>
                         </div>
                         } @else {
-                        <!-- Personal Chat Avatar -->
                         @if (chat.profileImg) {
                         <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden">
                             <img [src]="chat.profileImg" alt="Profile Image" class="w-full h-full object-cover">
@@ -198,7 +187,6 @@
                                 }}</span>
                         </div>
                         }
-                        <!-- Online Status (only for personal chats) -->
                         @if (chat.isOnline) {
                         <div
                             class="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full">
@@ -229,15 +217,15 @@
 
                         <!-- Last Message -->
                         <div class="flex justify-between items-center">
-                            <!-- <p
+                            <p
                                 [class]="'text-xs sm:text-sm truncate ' + (hasUnreadMessages(chat) ? 'text-gray-300 font-medium' : 'text-gray-400')">
                                 {{ chat.lastMessage || 'No messages yet' }}
-                            </p> -->
+                            </p>
                             @if (hasUnreadMessages(chat)) {
-                            <!-- <span
+                            <span
                                 class="ml-2 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-[#00ff66] text-black text-xs rounded-full min-w-[18px] sm:min-w-[20px] text-center font-medium flex-shrink-0">
                                 {{ getUnreadCountText(chat.unreadCount) }}
-                            </span> -->
+                            </span>
                             }
                         </div>
                     </div>

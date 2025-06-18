@@ -41,7 +41,7 @@ export interface ApiChat {
   isActive: boolean;
   messageCount: number;
   lastMessageAt?: string;
-  chatType?: 'personal' | 'group'; 
+  chatType?: 'personal' | 'group';
 }
 
 export interface ApiMessage {
@@ -107,7 +107,6 @@ export class ChatService {
   private typingUsers = new Map<string, Set<string>>();
   private socketService?: SocketService;
 
-  // Separate subjects for personal and group chats
   private chatUsersSubject = new BehaviorSubject<ChatUser[]>([]);
   public chatUsers$ = this.chatUsersSubject.asObservable();
 
@@ -117,11 +116,10 @@ export class ChatService {
   private groupChatsSubject = new BehaviorSubject<GroupChat[]>([]);
   public groupChats$ = this.groupChatsSubject.asObservable();
 
-  // Combined unread count from both personal and group chats
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
 
-  private isTypingSubject = new BehaviorSubject<{[chatId: string]: boolean}>({});
+  private isTypingSubject = new BehaviorSubject<{ [chatId: string]: boolean }>({});
   public isTyping$ = this.isTypingSubject.asObservable();
 
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
@@ -155,7 +153,6 @@ export class ChatService {
       this.setupSocketListeners();
       this.isInitialized = true;
 
-      // Load both personal and group chats
       await Promise.all([
         this.refreshPersonalChats(),
         this.refreshGroupChats()
@@ -189,7 +186,6 @@ export class ChatService {
   }
 
   private setupUnreadCountCalculation(): void {
-    // Combine personal and group chat unread counts
     combineLatest([this.chatUsers$, this.groupChats$])
       .pipe(takeUntil(this.destroy$))
       .subscribe(([personalChats, groupChats]) => {
@@ -237,7 +233,6 @@ export class ChatService {
       .pipe(takeUntil(this.destroy$))
       .subscribe(error => this.handleError('Socket error', error));
 
-    // Group chat specific listeners
     this.setupGroupChatListeners();
   }
 
@@ -283,20 +278,17 @@ export class ChatService {
       this.messagesSubject.next(updatedMessages);
     }
 
-    // Refresh appropriate chat type
     if (chatType === 'group') {
       this.refreshGroupChats();
     } else {
       this.refreshPersonalChats();
     }
 
-    // Auto-calculate unread count will be handled by the combined observable
   }
 
   private handleUserStatusUpdate(data: UserStatusData): void {
     const { userId, status, lastSeen } = data;
-    
-    // Update personal chats
+
     const currentUsers = this.chatUsersSubject.getValue();
     const updatedUsers = currentUsers.map(user => {
       if (user.id === userId) {
@@ -310,7 +302,6 @@ export class ChatService {
     });
     this.chatUsersSubject.next(updatedUsers);
 
-    // Update group chats
     const currentGroupChats = this.groupChatsSubject.getValue();
     const updatedGroupChats = currentGroupChats.map(groupChat => ({
       ...groupChat,
@@ -355,7 +346,7 @@ export class ChatService {
 
   private handleMessagesRead(data: MessagesReadData): void {
     const { chatId, userId, timestamp, chatType } = data;
-    
+
     const currentMessages = this.messagesSubject.getValue();
     const updatedMessages = currentMessages.map(msg => {
       if (msg.chatId === chatId && msg.senderId === this.currentUserId) {
@@ -365,7 +356,6 @@ export class ChatService {
     });
     this.messagesSubject.next(updatedMessages);
 
-    // Refresh appropriate chat type to update unread counts
     if (chatType === 'group') {
       this.refreshGroupChats();
     } else {
@@ -376,7 +366,7 @@ export class ChatService {
   private updateTypingStatus(chatId: string): void {
     const typingSet = this.typingUsers.get(chatId);
     const isTyping = typingSet ? typingSet.size > 0 : false;
-    
+
     const currentTypingStatus = this.isTypingSubject.getValue();
     this.isTypingSubject.next({
       ...currentTypingStatus,
@@ -384,23 +374,22 @@ export class ChatService {
     });
   }
 
-  // Unified method to get all chats
   getUserChats(): Observable<{ personalChats: ChatUser[], groupChats: GroupChat[] }> {
     return this.http.get<any>(`${this.apiUrl}`).pipe(
       map(response => {
         const chats = response.data?.chats || response.data || [];
-        
+
         const personalChats = chats
           .filter((chat: any) => !chat.chatType || chat.chatType === 'personal')
           .map((chat: any) => this.transformChatToUser(chat));
-        
+
         const groupChats = chats
           .filter((chat: any) => chat.chatType === 'group')
           .map((chat: any) => this.transformGroupChat(chat));
-        
+
         this.chatUsersSubject.next(personalChats);
         this.groupChatsSubject.next(groupChats);
-        
+
         return { personalChats, groupChats };
       }),
       catchError(error => {
@@ -410,7 +399,6 @@ export class ChatService {
     );
   }
 
-  // Personal chat methods
   getPersonalChats(): Observable<ChatUser[]> {
     return this.http.get<any>(`${this.apiUrl}`).pipe(
       map(response => {
@@ -440,7 +428,6 @@ export class ChatService {
       new Date(chat.lastMessage.timestamp) :
       new Date(chat.updatedAt);
 
-    // Calculate unread count properly based on your backend implementation
     const unreadCount = this.calculateUnreadCountForChat(chat);
 
     return {
@@ -456,9 +443,7 @@ export class ChatService {
   }
 
   private calculateUnreadCountForChat(chat: ApiChat): number {
-    // This should be implemented based on your backend's unread count logic
-    // For now, returning 0 - you should implement this based on your backend response
-    return chat.messageCount || 0; // Adjust this based on your actual backend response
+    return chat.messageCount || 0; 
   }
 
   createOrGetPersonalChat(otherUserId: string): Observable<ApiChat> {
@@ -487,7 +472,6 @@ export class ChatService {
     );
   }
 
-  // Group chat methods
   getGroupChats(): Observable<GroupChat[]> {
     return this.http.get<any>(`${this.apiUrl}`).pipe(
       map(response => {
@@ -558,7 +542,7 @@ export class ChatService {
 
   private transformGroupChat(apiChat: ApiGroupChat): GroupChat {
     const lastMessage = apiChat.lastMessage?.content || 'No messages yet';
-    const lastMessageTime = apiChat.lastMessage?.timestamp 
+    const lastMessageTime = apiChat.lastMessage?.timestamp
       ? new Date(apiChat.lastMessage.timestamp)
       : new Date(apiChat.updatedAt);
 
@@ -591,7 +575,6 @@ export class ChatService {
       .sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
   }
 
-  // Message methods
   getChatMessages(chatId: string, limit: number = 50, skip: number = 0): Observable<ChatMessage[]> {
     const params = new HttpParams()
       .set('limit', limit.toString())
@@ -649,7 +632,7 @@ export class ChatService {
   }
 
   private sendMessageHttp(chatId: string, content: string, chatType: 'personal' | 'group', tempMessage?: ChatMessage): Observable<ChatMessage> {
-    const endpoint = chatType === 'group' 
+    const endpoint = chatType === 'group'
       ? `${this.apiUrl}/group/${chatId}/messages`
       : `${this.apiUrl}/${chatId}/messages`;
 
@@ -684,7 +667,7 @@ export class ChatService {
       this.socketService!.markAsRead(chatId, chatType);
     }
 
-    const endpoint = chatType === 'group' 
+    const endpoint = chatType === 'group'
       ? `${this.apiUrl}/group/${chatId}/read`
       : `${this.apiUrl}/${chatId}/read`;
 
@@ -704,7 +687,6 @@ export class ChatService {
     );
   }
 
-  // Chat interaction methods
   joinChat(chatId: string, chatType: 'personal' | 'group' = 'personal'): void {
     if (this.checkSocketConnection()) {
       this.socketService!.joinChat(chatId, chatType);
@@ -728,7 +710,6 @@ export class ChatService {
     return currentTypingStatus[chatId] || false;
   }
 
-  // Utility methods
   private transformApiMessages(apiMessages: ApiMessage[]): ChatMessage[] {
     return apiMessages
       .map(msg => ({
@@ -782,7 +763,6 @@ export class ChatService {
     this.errorSubject.next('');
   }
 
-  // Getters and setters
   getCurrentUserId(): string {
     return this.currentUserId;
   }
@@ -795,7 +775,6 @@ export class ChatService {
     return this.isInitialized;
   }
 
-  // Additional utility methods
   getChatById(chatId: string): Observable<ApiChat> {
     return this.http.get<any>(`${this.apiUrl}/${chatId}`).pipe(
       map(response => response.data),

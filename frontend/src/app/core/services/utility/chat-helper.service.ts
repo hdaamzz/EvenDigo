@@ -163,9 +163,9 @@ export class ChatHelperService {
 
     const existingIndex = messages.findIndex(msg =>
       msg.id === newMessage.id ||
-      (msg.id.toString().startsWith('temp-') && 
-       msg.content === newMessage.content && 
-       Math.abs(new Date(msg.timestamp).getTime() - new Date(newMessage.timestamp).getTime()) < 5000)
+      (msg.id.toString().startsWith('temp-') &&
+        msg.content === newMessage.content &&
+        Math.abs(new Date(msg.timestamp).getTime() - new Date(newMessage.timestamp).getTime()) < 5000)
     );
 
     if (existingIndex !== -1) {
@@ -188,9 +188,9 @@ export class ChatHelperService {
   }
 
   updateUserLastMessage(
-    users: ChatUser[], 
-    chatId: string, 
-    message: ChatMessage, 
+    users: ChatUser[],
+    chatId: string,
+    message: ChatMessage,
     currentUserId: string,
     selectedChatId?: string
   ): ChatUser[] {
@@ -199,15 +199,15 @@ export class ChatHelperService {
       const updatedUsers = [...users];
       const isCurrentUserMessage = message.senderId === currentUserId;
       const isChatSelected = selectedChatId === chatId;
-      
+
       const shouldIncrementUnread = !isCurrentUserMessage && !isChatSelected;
-      
+
       updatedUsers[userIndex] = {
         ...updatedUsers[userIndex],
         lastMessage: message.content,
         lastMessageTime: message.createdAt ?? new Date(),
-        unreadCount: shouldIncrementUnread ? 
-          updatedUsers[userIndex].unreadCount + 1 : 
+        unreadCount: shouldIncrementUnread ?
+          updatedUsers[userIndex].unreadCount + 1 :
           updatedUsers[userIndex].unreadCount
       };
       return this.sortUsersByLastMessage(updatedUsers);
@@ -216,9 +216,9 @@ export class ChatHelperService {
   }
 
   updateGroupChatLastMessage(
-    groupChats: GroupChat[], 
-    chatId: string, 
-    message: ChatMessage, 
+    groupChats: GroupChat[],
+    chatId: string,
+    message: ChatMessage,
     currentUserId: string,
     selectedChatId?: string
   ): GroupChat[] {
@@ -227,15 +227,15 @@ export class ChatHelperService {
       const updatedChats = [...groupChats];
       const isCurrentUserMessage = message.senderId === currentUserId;
       const isChatSelected = selectedChatId === chatId;
-      
+
       const shouldIncrementUnread = !isCurrentUserMessage && !isChatSelected;
-      
+
       updatedChats[chatIndex] = {
         ...updatedChats[chatIndex],
         lastMessage: message.content,
         lastMessageTime: message.createdAt ?? new Date(),
-        unreadCount: shouldIncrementUnread ? 
-          updatedChats[chatIndex].unreadCount + 1 : 
+        unreadCount: shouldIncrementUnread ?
+          updatedChats[chatIndex].unreadCount + 1 :
           updatedChats[chatIndex].unreadCount
       };
       return this.sortGroupChatsByLastMessage(updatedChats);
