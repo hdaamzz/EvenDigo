@@ -3,7 +3,11 @@ import { IFinanceController } from '../../../../../src/controllers/interfaces/Ad
 import { IFinanceService } from '../../../../../src/services/interfaces/IRevenue.service';
 import StatusCode from '../../../../../src/types/statuscode';
 import { inject, injectable } from 'tsyringe';
-
+import { 
+  RevenueStatsDto, 
+  PaginatedRevenueTransactionsDto, 
+  PaginatedRefundTransactionsDto 
+} from '../../../../../src/dto/admin/finance/Finance.dto';
 
 @injectable()
 export class FinanceController implements IFinanceController {
@@ -20,7 +24,8 @@ export class FinanceController implements IFinanceController {
       const response = await this.financeService.getRevenueTransactions(page, limit, search);
 
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const dto = new PaginatedRevenueTransactionsDto(response.data);
+        res.status(StatusCode.OK).json(dto);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -40,7 +45,8 @@ export class FinanceController implements IFinanceController {
       const response = await this.financeService.getRevenueStats();
 
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const dto = new RevenueStatsDto(response.data);
+        res.status(StatusCode.OK).json(dto);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -83,7 +89,8 @@ export class FinanceController implements IFinanceController {
       );
 
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const dto = new PaginatedRevenueTransactionsDto(response.data);
+        res.status(StatusCode.OK).json(dto);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -98,7 +105,6 @@ export class FinanceController implements IFinanceController {
     }
   }
 
-
   async getRefundTransactions(req: Request, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -106,8 +112,10 @@ export class FinanceController implements IFinanceController {
       const search = req.query.search as string || '';
 
       const response = await this.financeService.getRefundTransactions(page, limit, search);
+      
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const dto = new PaginatedRefundTransactionsDto(response.data);
+        res.status(StatusCode.OK).json(dto);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -122,13 +130,11 @@ export class FinanceController implements IFinanceController {
     }
   }
 
-  
-  
   async getRefundsByDateRange(req: Request, res: Response): Promise<void> {
     try {
       const startDate = new Date(req.query.startDate as string);
       const endDate = new Date(req.query.endDate as string);
-  
+
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -136,13 +142,13 @@ export class FinanceController implements IFinanceController {
         });
         return;
       }
-  
+
       endDate.setHours(23, 59, 59, 999);
-  
+
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const search = req.query.search as string || '';
-  
+
       const response = await this.financeService.getRefundsByDateRange(
         startDate,
         endDate,
@@ -150,9 +156,10 @@ export class FinanceController implements IFinanceController {
         limit,
         search
       );
-  
+
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const dto = new PaginatedRefundTransactionsDto(response.data);
+        res.status(StatusCode.OK).json(dto);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -187,9 +194,10 @@ export class FinanceController implements IFinanceController {
         page,
         limit
       );
-  
+
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const dto = new PaginatedRevenueTransactionsDto(response.data);
+        res.status(StatusCode.OK).json(dto);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
