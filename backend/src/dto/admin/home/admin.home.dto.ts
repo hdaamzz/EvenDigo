@@ -192,7 +192,7 @@ export class UpcomingEventDto {
     ticketsSold: number;
     image: string;
   }) {
-    this._id = data.id; // Keeping _id as requested
+    this._id = data.id;
     this.title = data.title;
     this.date = data.date;
     this.location = data.location;
