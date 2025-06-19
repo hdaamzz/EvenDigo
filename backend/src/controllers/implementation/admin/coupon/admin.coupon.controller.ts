@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import { ICouponAdminController } from '../../../../../src/controllers/interfaces/Admin/Coupon/ICoupon.admin.controller';
 import { ICouponAdminService } from '../../../../../src/services/interfaces/ICoupon.admin.service';
 import StatusCode from '../../../../../src/types/statuscode';
-import { inject, injectable,  } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
+import { CouponMapper } from '../../../../../src/dto/admin/coupon/coupon.mapper';
+import { CreateCouponDTO, UpdateCouponDTO } from '../../../../../src/dto/admin/coupon/coupon.dto';
 
 
 @injectable()
-export class CouponController implements ICouponAdminController{
+export class CouponController implements ICouponAdminController {
 
     constructor(
         @inject("CouponService") private couponService: ICouponAdminService,
@@ -15,9 +17,13 @@ export class CouponController implements ICouponAdminController{
     async fetchAllCoupons(_req: Request, res: Response): Promise<void> {
         try {
             const coupons = await this.couponService.getAllCoupons();
-            res.status(StatusCode.OK).json({ success: true, data: coupons });
+            const couponDTOs = CouponMapper.toCouponListResponseDTOArray(coupons);
+            res.status(StatusCode.OK).json({ success: true, data: couponDTOs });
         } catch (error) {
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 
@@ -27,9 +33,11 @@ export class CouponController implements ICouponAdminController{
             const limit = parseInt(req.query.limit as string) || 10;
             
             const result = await this.couponService.getAllCouponsWithPagination(page, limit);
+            const couponDTOs = CouponMapper.toCouponListResponseDTOArray(result.coupons);
+            
             res.status(StatusCode.OK).json({ 
                 success: true, 
-                data: result.coupons,
+                data: couponDTOs,
                 pagination: {
                     totalCount: result.totalCount,
                     totalPages: Math.ceil(result.totalCount / limit),
@@ -38,28 +46,48 @@ export class CouponController implements ICouponAdminController{
                 }
             });
         } catch (error) {
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 
     async createCoupon(req: Request, res: Response): Promise<void> {
         try {
-            const couponData = req.body;
+            const couponData: CreateCouponDTO = req.body;
             const newCoupon = await this.couponService.createCoupon(couponData);
-            res.status(StatusCode.CREATED).json({ success: true, data: newCoupon });
+            const couponDTO = CouponMapper.toCouponResponseDTO(newCoupon);
+            res.status(StatusCode.CREATED).json({ success: true, data: couponDTO });
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.BAD_REQUEST).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 
     async updateCoupon(req: Request, res: Response): Promise<void> {
         try {
             const couponId = req.params.couponId;
-            const updateData = req.body;
+            const updateData: UpdateCouponDTO = req.body;
             const updatedCoupon = await this.couponService.updateCoupon(couponId, updateData);
-            res.status(StatusCode.OK).json({ success: true, data: updatedCoupon });
+            
+            if (!updatedCoupon) {
+                res.status(StatusCode.NOT_FOUND).json({ 
+                    success: false, 
+                    message: 'Coupon not found' 
+                });
+                return;
+            }
+            
+            const couponDTO = CouponMapper.toCouponResponseDTO(updatedCoupon);
+            res.status(StatusCode.OK).json({ success: true, data: couponDTO });
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.BAD_REQUEST).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 
@@ -67,9 +95,22 @@ export class CouponController implements ICouponAdminController{
         try {
             const couponId = req.params.couponId;
             const updatedCoupon = await this.couponService.activateCoupon(couponId);
-            res.status(StatusCode.OK).json({ success: true, data: updatedCoupon });
+            
+            if (!updatedCoupon) {
+                res.status(StatusCode.NOT_FOUND).json({ 
+                    success: false, 
+                    message: 'Coupon not found' 
+                });
+                return;
+            }
+            
+            const couponDTO = CouponMapper.toCouponResponseDTO(updatedCoupon);
+            res.status(StatusCode.OK).json({ success: true, data: couponDTO });
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.BAD_REQUEST).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 
@@ -77,9 +118,22 @@ export class CouponController implements ICouponAdminController{
         try {
             const couponId = req.params.couponId;
             const updatedCoupon = await this.couponService.deactivateCoupon(couponId);
-            res.status(StatusCode.OK).json({ success: true, data: updatedCoupon });
+            
+            if (!updatedCoupon) {
+                res.status(StatusCode.NOT_FOUND).json({ 
+                    success: false, 
+                    message: 'Coupon not found' 
+                });
+                return;
+            }
+            
+            const couponDTO = CouponMapper.toCouponResponseDTO(updatedCoupon);
+            res.status(StatusCode.OK).json({ success: true, data: couponDTO });
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.BAD_REQUEST).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 
@@ -89,7 +143,10 @@ export class CouponController implements ICouponAdminController{
             await this.couponService.deleteCoupon(couponId);
             res.status(StatusCode.NO_CONTENT).send(); 
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            res.status(StatusCode.BAD_REQUEST).json({ 
+                success: false, 
+                message: (error as Error).message 
+            });
         }
     }
 }
