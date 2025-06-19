@@ -145,3 +145,43 @@ export function generateRandomId(): string {
   }
   return result;
 }
+
+export const uploadToCloudinarySecure = async (filePath: string, folder: string = 'events') => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: folder,
+      type: 'authenticated', 
+      access_mode: 'authenticated', 
+      secure: true,
+      resource_type: 'auto'
+    });
+    fs.unlinkSync(filePath); 
+    return result;
+  } catch (error) {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    throw error;
+  }
+};
+
+export const generateSecureImageUrl = (publicId: string, expirationHours: number = 24) => {
+  return cloudinary.url(publicId, {
+    secure: true,
+    sign_url: true,
+    type: 'authenticated',
+    expires_at: Math.floor(Date.now() / 1000) + (60 * 60 * expirationHours)
+  });
+};
+
+export const generateThumbnailUrl = (publicId: string, width: number = 300, height: number = 300) => {
+  return cloudinary.url(publicId, {
+    secure: true,
+    sign_url: true,
+    type: 'authenticated',
+    transformation: [
+      { width, height, crop: 'fill', quality: 'auto' }
+    ],
+    expires_at: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours
+  });
+};

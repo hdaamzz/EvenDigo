@@ -50,7 +50,7 @@
               class="absolute -inset-0.5 rounded-full opacity-75 group-hover:opacity-100 blur group-hover:blur-md transition duration-500">
             </div>
             <div class="relative">
-              <img [src]="imageError ? defaultImageUrl : (user.profileImg || defaultImageUrl)" alt="Profile picture"
+              <img [src]="imageError ? defaultImageUrl : (user.profileImgPublicId | secureImage: defaultImageUrl) | async" alt="Profile picture"
                 class="h-36 w-36 rounded-full object-cover border-2 border-[#00ff66]" />
 
               <button (click)="openFileSelector()"
@@ -59,6 +59,11 @@
               </button>
               <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
             </div>
+            <button *ngIf="imageError && user.profileImgPublicId" 
+                    (click)="refreshImageUrl()"
+                    class="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600">
+              <i class="fas fa-refresh"></i>
+            </button>
           </div>
 
           <div class="mt-4 text-center">

@@ -9,7 +9,7 @@ import { BadRequestException, NotFoundException } from '../../../../../src/error
 import { CloudinaryUploadResult } from '../../../../../src/models/interfaces/profile.interface';
 import cloudinary from '../../../../../src/configs/cloudinary';
 import { IUserAchievementRepository } from '../../../../../src/repositories/interfaces/IBadge.repository';
-import { hashPassword, reHash } from '../../../../../src/utils/helpers';
+import { generateSecureImageUrl, hashPassword, reHash } from '../../../../../src/utils/helpers';
 
 
 @injectable()
@@ -27,6 +27,9 @@ export class ProfileUserService implements IProfileUserService {
       if (!user) {
         throw new NotFoundException("User not found");
       }
+      if (user.profileImg) {
+      user.profileImg = generateSecureImageUrl(user.profileImgPublicId || user.profileImg);
+    }
 
       return {
         success: true,

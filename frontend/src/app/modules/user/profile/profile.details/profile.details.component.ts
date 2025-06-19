@@ -10,15 +10,16 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { alphabetsValidator, changePasswordMatchValidator, mobileNumberValidator, repeateCharacterValidator, spacesValidator } from '../../../../validators/formValidators';
 import { CloudinaryService } from '../../../../core/services/utility/cloudinary.service';
 import { UserProfileService } from '../../../../core/services/user/profile/user.profile.service';
-import { catchError, of, tap, Subscription } from 'rxjs';
+import { catchError, of, tap, Subscription, BehaviorSubject } from 'rxjs';
 import { passwordValidator } from '../../../../validators/formValidators';
+import { SecureImagePipe } from '../../../../core/pipes/secure-image.pipe';
 
 
 
 @Component({
   selector: 'app-profile-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Dialog, ButtonModule, InputTextModule, AutoCompleteModule, DatePickerModule],
+  imports: [CommonModule, ReactiveFormsModule, Dialog, ButtonModule, InputTextModule, AutoCompleteModule, DatePickerModule,SecureImagePipe],
   templateUrl: './profile.details.component.html',
   styleUrl: './profile.details.component.css',
   encapsulation: ViewEncapsulation.None
@@ -31,6 +32,8 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
   isLoading = false;
   imageError = false;
   defaultImageUrl = 'https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318747/user.icon_slz5l0.png';
+  profileImageUrl$ = new BehaviorSubject<string>(this.defaultImageUrl);
+  isImageLoading = false;
   maxDate: Date = new Date();
   achievements: any[]=[]
   eventOrganized:Number=0;
@@ -167,23 +170,35 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
   }
 
   loadUserProfile(): void {
-    const sub = this.userProfileService.userDetails().subscribe({
-      next: (userData) => {
-        this.user = userData.data;
-        if (this.user.dateOfBirth) {
-          this.user.dateOfBirth = new Date(this.user.dateOfBirth);
-        }
-        this.initializeForm();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading user profile:', error);
-        Notiflix.Notify.failure('Failed to load profile data');
-        this.isLoading = false;
+  const sub = this.userProfileService.userDetails().subscribe({
+    next: (userData) => {
+      this.user = userData.data;
+      if (this.user.dateOfBirth) {
+        this.user.dateOfBirth = new Date(this.user.dateOfBirth);
       }
-    });
-    this.subscriptions.push(sub);
-  }
+      
+      if (this.user.profileImgPublicId) {
+        this.cloudinaryService.getSecureImageUrl(
+          this.user.profileImgPublicId, 
+          this.user.profileImg || this.defaultImageUrl
+        ).subscribe(url => {
+          this.profileImageUrl$.next(url);
+        });
+      } else if (this.user.profileImg) {
+        this.profileImageUrl$.next(this.user.profileImg);
+      }
+      
+      this.initializeForm();
+      this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Error loading user profile:', error);
+      Notiflix.Notify.failure('Failed to load profile data');
+      this.isLoading = false;
+    }
+  });
+  this.subscriptions.push(sub);
+}
   
   fetchEventCount() {
     const sub = this.userProfileService.getUserEvents().pipe(
@@ -325,34 +340,37 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
   }
 
   onFileSelected(event: Event): void {
-    const element = event.target as HTMLInputElement;
-    const file: File | null = element.files?.[0] || null;
+  const element = event.target as HTMLInputElement;
+  const file: File | null = element.files?.[0] || null;
 
-    if (file) {
-      this.isLoading = true;
-      
-      const sub = this.cloudinaryService.uploadProfileImage(file).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.user.profileImg = response.imageUrl;
-            Notiflix.Notify.success('Profile picture updated successfully');
-          } else {
-            Notiflix.Notify.failure(response.message || 'Unknown error occurred');
-            this.imageError = true;
-          }
-          this.ngOnInit();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error updating profile image:', error);
-          Notiflix.Notify.failure(error.message || 'Failed to update profile picture');
-          this.isLoading = false;
+  if (file) {
+    this.isImageLoading = true;
+    
+    const sub = this.cloudinaryService.uploadProfileImage(file).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.user.profileImg = response.imageUrl;
+          this.user.profileImgPublicId = response.publicId;
+          
+          this.profileImageUrl$.next(response.imageUrl as unknown as string);
+          
+          Notiflix.Notify.success('Profile picture updated successfully');
+        } else {
+          Notiflix.Notify.failure(response.message || 'Unknown error occurred');
           this.imageError = true;
         }
-      });
-      this.subscriptions.push(sub);
-    }
+        this.isImageLoading = false;
+      },
+      error: (error) => {
+        console.error('Error updating profile image:', error);
+        Notiflix.Notify.failure(error.message || 'Failed to update profile picture');
+        this.isImageLoading = false;
+        this.imageError = true;
+      }
+    });
+    this.subscriptions.push(sub);
   }
+}
 
   getVerificationStatusClass(): string {
     switch (this.verificationData.status) {
@@ -392,4 +410,22 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
   hasPasswordError(controlName: string, errorName: string): boolean {
     return this.changePasswordForm.controls[controlName].hasError(errorName);
   }
+
+  refreshImageUrl(): void {
+  if (this.user.profileImgPublicId) {
+    this.isImageLoading = true;
+    
+    const sub = this.cloudinaryService.refreshImageUrl(this.user.profileImgPublicId).subscribe({
+      next: (response) => {
+        this.profileImageUrl$.next(response.imageUrl);
+        this.isImageLoading = false;
+      },
+      error: (error) => {
+        console.error('Error refreshing image URL:', error);
+        this.isImageLoading = false;
+      }
+    });
+    this.subscriptions.push(sub);
+  }
+}
 }

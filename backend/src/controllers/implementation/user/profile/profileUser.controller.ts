@@ -4,7 +4,7 @@ import { IUserAchievementService } from '../../../../services/interfaces/IAchiev
 import { inject, injectable } from 'tsyringe';
 import { IProfileUserController } from '../../../../controllers/interfaces/User/Profile/IProfileUser.controller';
 import { ResponseHandler } from '../../../../utils/response-handler';
-import { uploadToCloudinary } from '../../../../utils/helpers';
+import { generateSecureImageUrl, uploadToCloudinarySecure } from '../../../../utils/helpers';
 import { IProfileUserService } from '../../../../../src/services/interfaces/user/profile/IProfileUser.service';
 
 @injectable()
@@ -98,30 +98,32 @@ export class ProfileUserController implements IProfileUserController {
   }
 
   async uploadProfileImage(req: FileRequest, res: Response): Promise<void> {
-    try {
-      if (!req.file) {
-        return ResponseHandler.error(res, null, "No file uploaded", 400);
-      }
-      
-      if (!req.user?._id) {
-        return ResponseHandler.error(res, null, "User not authenticated", 401);
-      }
-  
-      const result = await uploadToCloudinary(req.file.path);
-      
-      await this.profileUserService.updateUserDetails(req.user._id, {
-        profileImg: result.secure_url,
-        profileImgPublicId: result.public_id
-      });
-  
-      ResponseHandler.success(res, {
-        imageUrl: result.secure_url,
-        publicId: result.public_id
-      }, "Image uploaded successfully");
-    } catch (error) {
-      ResponseHandler.error(res, error, "Failed to upload profile image");
+  try {
+    if (!req.file) {
+      return ResponseHandler.error(res, null, "No file uploaded", 400);
     }
+    
+    if (!req.user?._id) {
+      return ResponseHandler.error(res, null, "User not authenticated", 401);
+    }
+
+    const result = await uploadToCloudinarySecure(req.file.path, 'profiles');
+    
+    await this.profileUserService.updateUserDetails(req.user._id, {
+      profileImg: result.public_id,
+      profileImgPublicId: result.public_id
+    });
+
+    const secureUrl = generateSecureImageUrl(result.public_id, 24);
+
+    ResponseHandler.success(res, {
+      imageUrl: secureUrl,
+      publicId: result.public_id
+    }, "Image uploaded successfully");
+  } catch (error) {
+    ResponseHandler.error(res, error, "Failed to upload profile image");
   }
+}
 
   async fetchUserBadges(req: Request, res: Response): Promise<void> {
     try {
