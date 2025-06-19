@@ -3,6 +3,10 @@ import { IAchievementAdminController } from '../../../../../src/controllers/inte
 import { IAchievementAdminService } from '../../../../../src/services/interfaces/IAchievements.admin';
 import StatusCode from '../../../../../src/types/statuscode';
 import { inject, injectable } from 'tsyringe';
+import { AchievementResponseDto } from '../../../../../src/dto/admin/achievements/achievement-response.dto';
+import { AchievementListResponseDto } from '../../../../../src/dto/admin/achievements/achievement-list-response.dto';
+import { UpdateAchievementDto } from '../../../../../src/dto/admin/achievements/update-achievement.dto';
+import { CreateAchievementDto } from '../../../../../src/dto/admin/achievements/create-achievement.dto';
 
 
 @injectable()
@@ -14,7 +18,10 @@ export class AchievementController implements IAchievementAdminController {
     async fetchAllAchievements(_req: Request, res: Response): Promise<void> {
         try {
             const achievements = await this.achievementService.getAllAchievements();
-            res.status(StatusCode.OK).json({ success: true, data: achievements });
+            const response = AchievementResponseDto.success(achievements);
+            console.log(response);
+            
+            res.status(StatusCode.OK).json(response);
         } catch (error) {
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message });
         }
@@ -26,16 +33,8 @@ export class AchievementController implements IAchievementAdminController {
             const limit = parseInt(req.query.limit as string) || 10;
             
             const result = await this.achievementService.getAllAchievementsWithPagination(page, limit);
-            res.status(StatusCode.OK).json({ 
-                success: true, 
-                data: result.achievements,
-                pagination: {
-                    totalCount: result.totalCount,
-                    totalPages: Math.ceil(result.totalCount / limit),
-                    currentPage: page,
-                    hasMore: result.hasMore
-                }
-            });
+            const response = AchievementListResponseDto.fromServiceResult(result, page, limit);
+            res.status(StatusCode.OK).json(response);
         } catch (error) {
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message });
         }
@@ -45,30 +44,38 @@ export class AchievementController implements IAchievementAdminController {
         try {
             const achievementId = req.params.acheivementId;
             const achievement = await this.achievementService.getAchievementById(achievementId);
-            res.status(StatusCode.OK).json({ success: true, data: achievement });
+            const response = AchievementResponseDto.success(achievement);
+            res.status(StatusCode.OK).json(response);
         } catch (error) {
-            res.status(StatusCode.NOT_FOUND).json({ success: false, message: (error as Error).message });
+            const response = AchievementResponseDto.error((error as Error).message);
+            res.status(StatusCode.NOT_FOUND).json(response);
         }
     }
 
     async createAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementData = req.body;
+            const createDto = CreateAchievementDto.fromRequest(req.body);
+            const achievementData = createDto.toEntity();
             const newAchievement = await this.achievementService.createAchievement(achievementData);
-            res.status(StatusCode.CREATED).json({ success: true, data: newAchievement });
+            const response = AchievementResponseDto.success(newAchievement);
+            res.status(StatusCode.CREATED).json(response);
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            const response = AchievementResponseDto.error((error as Error).message);
+            res.status(StatusCode.BAD_REQUEST).json(response);
         }
     }
 
     async updateAchievement(req: Request, res: Response): Promise<void> {
         try {
             const achievementId = req.params.acheivementId;
-            const updateData = req.body;
+            const updateDto = UpdateAchievementDto.fromRequest(req.body);
+            const updateData = updateDto.toEntity();
             const updatedAchievement = await this.achievementService.updateAchievement(achievementId, updateData);
-            res.status(StatusCode.OK).json({ success: true, data: updatedAchievement });
+            const response = AchievementResponseDto.success(updatedAchievement);
+            res.status(StatusCode.OK).json(response);
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            const response = AchievementResponseDto.error((error as Error).message);
+            res.status(StatusCode.BAD_REQUEST).json(response);
         }
     }
 
@@ -76,9 +83,11 @@ export class AchievementController implements IAchievementAdminController {
         try {
             const achievementId = req.params.acheivementId;
             const updatedAchievement = await this.achievementService.activateAchievement(achievementId);
-            res.status(StatusCode.OK).json({ success: true, data: updatedAchievement });
+            const response = AchievementResponseDto.success(updatedAchievement);
+            res.status(StatusCode.OK).json(response);
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            const response = AchievementResponseDto.error((error as Error).message);
+            res.status(StatusCode.BAD_REQUEST).json(response);
         }
     }
 
@@ -86,9 +95,11 @@ export class AchievementController implements IAchievementAdminController {
         try {
             const achievementId = req.params.acheivementId;
             const updatedAchievement = await this.achievementService.deactivateAchievement(achievementId);
-            res.status(StatusCode.OK).json({ success: true, data: updatedAchievement });
+            const response = AchievementResponseDto.success(updatedAchievement);
+            res.status(StatusCode.OK).json(response);
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            const response = AchievementResponseDto.error((error as Error).message);
+            res.status(StatusCode.BAD_REQUEST).json(response);
         }
     }
 
@@ -98,7 +109,8 @@ export class AchievementController implements IAchievementAdminController {
             await this.achievementService.deleteAchievement(achievementId);
             res.status(StatusCode.NO_CONTENT).send();
         } catch (error) {
-            res.status(StatusCode.BAD_REQUEST).json({ success: false, message: (error as Error).message });
+            const response = AchievementResponseDto.error((error as Error).message);
+            res.status(StatusCode.BAD_REQUEST).json(response);
         }
     }
 }
