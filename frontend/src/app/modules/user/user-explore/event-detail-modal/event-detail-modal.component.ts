@@ -193,7 +193,6 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
     }
   }
   onChatWithOrganizer(organizerId: string) {
-  // Navigate to chat or open chat modal
   this._router.navigate(['/chat', organizerId]);
-}
+  }
 }

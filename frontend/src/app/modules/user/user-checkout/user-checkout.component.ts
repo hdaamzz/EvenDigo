@@ -45,7 +45,6 @@ interface Coupon {
 export class UserCheckoutComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
   
-  // Public properties used in template
   public event!: IEvent;
   public wallet!: IWallet;
   public ticketData!: TicketData;
@@ -60,7 +59,6 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
   public couponLoading = false;
   public proceedLoading = false;
 
-  // Private properties
   private _stripe: Stripe | null = null;
 
   constructor(

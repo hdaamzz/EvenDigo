@@ -151,4 +151,5 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
       queryParams: { role: 'audience',eventId:event._id }
     });
   }
+  
 }
