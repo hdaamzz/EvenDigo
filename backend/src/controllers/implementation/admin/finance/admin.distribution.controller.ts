@@ -3,7 +3,12 @@ import { inject, injectable } from 'tsyringe';
 import { IRevenueDistributionService } from '../../../../../src/services/interfaces/IDistribution.service';
 import { IRevenueDistributionController } from 'src/controllers/interfaces/Admin/Finance/IDistribution.controller';
 import StatusCode from '../../../../../src/types/statuscode';
-
+import { 
+  RevenueDistributionDto, 
+  RevenueStatsDto, 
+  PaginatedRevenueDistributionDto,
+  ManualDistributionResponseDto 
+} from '../../../../../src/dto/admin/finance/RevenueDistribution.dto';
 
 @injectable()
 export class RevenueDistributionController implements IRevenueDistributionController {
@@ -16,10 +21,11 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.processFinishedEvents();
 
       if (result.success) {
+        const responseData = new ManualDistributionResponseDto(result.data!);
         res.status(StatusCode.OK).json({
           success: true,
           message: `Processed ${result.data?.processed} events for revenue distribution`,
-          data: result.data
+          data: responseData
         });
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
@@ -41,9 +47,10 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.getDistributionByEventId(eventId);
 
       if (result.success) {
+        const responseData = result.data ? new RevenueDistributionDto(result.data) : null;
         res.status(StatusCode.OK).json({
           success: true,
-          data: result.data
+          data: responseData
         });
       } else {
         res.status(StatusCode.NOT_FOUND).json({
@@ -64,9 +71,10 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.getAllCompletedDistributions();
 
       if (result.success) {
+        const responseData = RevenueDistributionDto.fromArray(result.data!);
         res.status(StatusCode.OK).json({
           success: true,
-          data: result.data
+          data: responseData
         });
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
@@ -88,10 +96,11 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const result = await this.revenueDistributionService.distributeEventRevenue(eventId);
 
       if (result.success) {
+        const responseData = result.data ? new RevenueDistributionDto(result.data) : null;
         res.status(StatusCode.OK).json({
           success: true,
           message: "Event revenue distributed successfully",
-          data: result.data
+          data: responseData
         });
       } else {
         res.status(StatusCode.BAD_REQUEST).json({
@@ -106,6 +115,7 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       });
     }
   }
+
   async getDistributedRevenue(req: Request, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -114,7 +124,8 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getDistributedRevenue(page, limit);
 
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const responseData = new PaginatedRevenueDistributionDto(response.data);
+        res.status(StatusCode.OK).json(responseData);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -136,7 +147,8 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getRecentDistributedRevenue(limit);
 
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const responseData = RevenueDistributionDto.fromArray(response.data!);
+        res.status(StatusCode.OK).json(responseData);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -158,7 +170,8 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getRevenueByEventId(eventId);
 
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const responseData = response.data ? new RevenueDistributionDto(response.data) : null;
+        res.status(StatusCode.OK).json(responseData);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -188,6 +201,7 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       const response = await this.revenueDistributionService.getEventsByIds(ids);
 
       if (response.success) {
+        // Since this returns events, not revenue distributions, we keep the original response
         res.status(StatusCode.OK).json(response.data);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
@@ -202,12 +216,14 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       });
     }
   }
+
   async getRevenueStats(_req: Request, res: Response): Promise<void> {
     try {
       const response = await this.revenueDistributionService.getRevenueStats();
   
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const responseData = new RevenueStatsDto(response.data);
+        res.status(StatusCode.OK).json(responseData);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -247,7 +263,8 @@ export class RevenueDistributionController implements IRevenueDistributionContro
       );
   
       if (response.success) {
-        res.status(StatusCode.OK).json(response.data);
+        const responseData = new PaginatedRevenueDistributionDto(response.data);
+        res.status(StatusCode.OK).json(responseData);
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,

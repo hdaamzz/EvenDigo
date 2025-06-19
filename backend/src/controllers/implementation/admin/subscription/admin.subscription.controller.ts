@@ -1,9 +1,14 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
-
 import StatusCode from '../../../../../src/types/statuscode';
 import { IAdminSubscriptionController } from '../../../interfaces/Admin/Subscription/IAdminSubscription.controller';
 import { IAdminSubscriptionService } from '../../../../../src/services/interfaces/IAdminSubscription.service';
+import { 
+  AdminSubscriptionDto, 
+  AdminSubscriptionStatsDto, 
+  AdminPaginatedSubscriptionsDto,
+  AdminFilterOptionsDto 
+} from '../../../../dto/admin/subscription/AdminSubscriptionDto';
 
 @injectable()
 export class AdminSubscriptionController implements IAdminSubscriptionController {
@@ -12,55 +17,57 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   ) {}
 
   getAllSubscriptions = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const activeOnly = req.query.activeOnly === 'true';
-    
-    const filters: any = {};
-    
-    if (activeOnly) {
-      filters.activeOnly = true;
-    }
-    
-    if (req.query.planType && req.query.planType !== 'all') {
-      filters.planType = req.query.planType;
-    }
-    
-    if (req.query.search) {
-      filters.searchTerm = req.query.search;
-    }
-    
-    if (req.query.startDate) {
-      filters.startDate = new Date(req.query.startDate as string);
-    }
-    
-    if (req.query.endDate) {
-      filters.endDate = new Date(req.query.endDate as string);
-    }
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const activeOnly = req.query.activeOnly === 'true';
+      
+      const filters: any = {};
+      
+      if (activeOnly) {
+        filters.activeOnly = true;
+      }
+      
+      if (req.query.planType && req.query.planType !== 'all') {
+        filters.planType = req.query.planType;
+      }
+      
+      if (req.query.search) {
+        filters.searchTerm = req.query.search;
+      }
+      
+      if (req.query.startDate) {
+        filters.startDate = new Date(req.query.startDate as string);
+      }
+      
+      if (req.query.endDate) {
+        filters.endDate = new Date(req.query.endDate as string);
+      }
 
-    const result = await this.adminSubscriptionService.getAllSubscriptions(page, limit, filters);
+      const result = await this.adminSubscriptionService.getAllSubscriptions(page, limit, filters);
+      const dto = AdminPaginatedSubscriptionsDto.fromPaginatedData(result);
 
-    res.status(StatusCode.OK).json({
-      success: true,
-      data: result
-    });
-  } catch (error) {
-    console.error('Error fetching subscriptions:', error);
-    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      error: (error as Error).message || 'Failed to fetch subscriptions'
-    });
-  }
-};
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: dto
+      });
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: (error as Error).message || 'Failed to fetch subscriptions'
+      });
+    }
+  };
 
   getSubscriptionStats = async (_req: Request, res: Response): Promise<void> => {
     try {
       const stats = await this.adminSubscriptionService.getSubscriptionStats();
+      const dto = AdminSubscriptionStatsDto.fromStats(stats);
 
       res.status(StatusCode.OK).json({
         success: true,
-        data: stats
+        data: dto
       });
     } catch (error) {
       console.error('Error fetching subscription stats:', error);
@@ -93,9 +100,11 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
         return;
       }
 
+      const dto = AdminSubscriptionDto.fromSubscription(subscription);
+
       res.status(StatusCode.OK).json({
         success: true,
-        data: subscription
+        data: dto
       });
     } catch (error) {
       console.error('Error fetching subscription details:', error);
@@ -119,10 +128,11 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       }
 
       const subscriptions = await this.adminSubscriptionService.getUserSubscriptions(userId);
+      const dto = AdminSubscriptionDto.fromSubscriptions(subscriptions);
 
       res.status(StatusCode.OK).json({
         success: true,
-        data: subscriptions
+        data: dto
       });
     } catch (error) {
       console.error('Error fetching user subscriptions:', error);
@@ -163,9 +173,11 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
         return;
       }
 
+      const dto = AdminSubscriptionDto.fromSubscription(updatedSubscription);
+
       res.status(StatusCode.OK).json({
         success: true,
-        data: updatedSubscription,
+        data: dto,
         message: `Subscription ${isActive ? 'activated' : 'deactivated'} successfully`
       });
     } catch (error) {
@@ -215,10 +227,11 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   getFilterOptions = async (_req: Request, res: Response): Promise<void> => {
     try {
       const filterOptions = await this.adminSubscriptionService.getFilterOptions();
+      const dto = AdminFilterOptionsDto.fromFilterOptions(filterOptions);
 
       res.status(StatusCode.OK).json({
         success: true,
-        data: filterOptions
+        data: dto
       });
     } catch (error) {
       console.error('Error fetching filter options:', error);

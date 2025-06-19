@@ -1,9 +1,17 @@
-// src/controllers/implementation/admin/home/admin.home.controller.ts
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { IHomeController } from '../../../../../src/controllers/interfaces/Admin/Home/IHome.controller';
 import { IDashboardService } from '../../../../../src/services/interfaces/admin/IDashboard.admin.service';
 import StatusCode from '../../../../../src/types/statuscode';
+import {
+  DashboardStatsDto,
+  RevenueChartDto,
+  UserRegistrationChartDto,
+  RecentTransactionDto,
+  SubscriptionPlanDto,
+  RecentActivityDto,
+  UpcomingEventDto
+} from '../../../../../src/dto/admin/home/admin.home.dto';
 
 @injectable()
 export class AdminHomeController implements IHomeController {
@@ -11,7 +19,9 @@ export class AdminHomeController implements IHomeController {
 
   async getDashboardStats(_req: Request, res: Response): Promise<void> {
     try {
-      const stats = await this.dashboardService.getDashboardStats();
+      const statsData = await this.dashboardService.getDashboardStats();
+      const stats = new DashboardStatsDto(statsData);
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: stats,
@@ -30,7 +40,9 @@ export class AdminHomeController implements IHomeController {
   async getRevenueChart(req: Request, res: Response): Promise<void> {
     try {
       const period = req.query.period as string || 'monthly';
-      const chartData = await this.dashboardService.getRevenueChart(period);
+      const chartDataRaw = await this.dashboardService.getRevenueChart(period);
+      const chartData = new RevenueChartDto(chartDataRaw);
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: chartData,
@@ -49,7 +61,9 @@ export class AdminHomeController implements IHomeController {
   async getRecentTransactions(req: Request, res: Response): Promise<void> {
     try {
       const limit = Number(req.query.limit) || 5;
-      const transactions = await this.dashboardService.getRecentTransactions(limit);
+      const transactionsData = await this.dashboardService.getRecentTransactions(limit);
+      const transactions = transactionsData.map(transaction => new RecentTransactionDto(transaction));
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: transactions,
@@ -67,7 +81,9 @@ export class AdminHomeController implements IHomeController {
 
   async getSubscriptionPlans(_req: Request, res: Response): Promise<void> {
     try {
-      const subscriptions = await this.dashboardService.getSubscriptionPlans();
+      const subscriptionsData = await this.dashboardService.getSubscriptionPlans();
+      const subscriptions = subscriptionsData.map(subscription => new SubscriptionPlanDto(subscription));
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: subscriptions,
@@ -86,7 +102,9 @@ export class AdminHomeController implements IHomeController {
   async getRecentActivities(req: Request, res: Response): Promise<void> {
     try {
       const limit = Number(req.query.limit) || 5;
-      const activities = await this.dashboardService.getRecentActivities(limit);
+      const activitiesData = await this.dashboardService.getRecentActivities(limit);
+      const activities = activitiesData.map(activity => new RecentActivityDto(activity));
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: activities,
@@ -105,7 +123,19 @@ export class AdminHomeController implements IHomeController {
   async getUpcomingEvents(req: Request, res: Response): Promise<void> {
     try {
       const limit = Number(req.query.limit) || 3;
-      const upcomingEvents = await this.dashboardService.getUpcomingEvents(limit);
+      const upcomingEventsData = await this.dashboardService.getUpcomingEvents(limit);
+      const upcomingEvents = (await Promise.all(upcomingEventsData)).map(event => 
+        new UpcomingEventDto({
+          id: event.id,
+          title: event.title,
+          date: event.date,
+          location: event.location,
+          organizer: event.organizer,
+          ticketsSold: event.ticketsSold,
+          image: event.image
+        })
+      );
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: upcomingEvents,
@@ -124,7 +154,9 @@ export class AdminHomeController implements IHomeController {
   async getUserRegistrationStats(req: Request, res: Response): Promise<void> {
     try {
       const period = req.query.period as string || 'monthly';
-      const chartData = await this.dashboardService.getUserRegistrationStats(period);
+      const chartDataRaw = await this.dashboardService.getUserRegistrationStats(period);
+      const chartData = new UserRegistrationChartDto(chartDataRaw);
+      
       res.status(StatusCode.OK).json({
         success: true,
         data: chartData,
