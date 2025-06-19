@@ -4,19 +4,21 @@ import { IEventsAdminService } from '../../../../../src/services/interfaces/IEve
 import StatusCode from '../../../../../src/types/statuscode';
 import { IEventsAdminController } from '../../../../../src/controllers/interfaces/Admin/Event/IEvents.admin.controller';
 import { ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
+import { AdminEventDTO, AdminEventListDTO } from '../../../../../src/dto/admin/event/event.dto';
 
 @injectable()
-export class AdminEventsController implements IEventsAdminController{
+export class AdminEventsController implements IEventsAdminController {
     
     constructor(
         @inject("AdminEventsService") private adminEventsService: IEventsAdminService,
     ) {}
+
     async fetchAllEvents(req: Request, res: Response): Promise<void> {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 9;
         
-        const response: ServiceResponse<EventDocument[]> = await this.adminEventsService.fetchAllEvents(page, limit);
+        const response: ServiceResponse<AdminEventListDTO[]> = await this.adminEventsService.fetchAllEvents(page, limit);
+        
         if (response.success) {
             res.status(StatusCode.OK).json(response.data);
         } else {
@@ -37,7 +39,7 @@ export class AdminEventsController implements IEventsAdminController{
                 return;
             }
             
-            const response = await this.adminEventsService.updateEventStatus(eventId, status);
+            const response: ServiceResponse<AdminEventDTO> = await this.adminEventsService.updateEventStatus(eventId, status);
             
             if (response.success) {
                 res.status(StatusCode.OK).json(response);
