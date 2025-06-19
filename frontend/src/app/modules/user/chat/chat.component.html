@@ -28,17 +28,17 @@
                                 (activeChatTab === 'personal' ? 'tab-active' : 'tab-inactive')">
                     <i class="pi pi-user text-sm"></i>
                     <span class="hidden sm:inline">Personal</span>
-                    @if (getPersonalChatsUnreadCount() > 0) {
+                    <!-- @if (getPersonalChatsUnreadCount() > 0) {
                     <span class="badge">{{ getPersonalChatsUnreadCount() }}</span>
-                    }
+                    } -->
                 </button>
                 <button (click)="switchChatTab('group')" [class]="'flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 flex items-center justify-center gap-2 ' + 
                                 (activeChatTab === 'group' ? 'tab-active' : 'tab-inactive')">
                     <i class="pi pi-users text-sm"></i>
                     <span class="hidden sm:inline">Groups</span>
-                    @if (getGroupChatsUnreadCount() > 0) {
+                    <!-- @if (getGroupChatsUnreadCount() > 0) {
                     <span class="badge">{{ getGroupChatsUnreadCount() }}</span>
-                    }
+                    } -->
                 </button>
             </div>
 
@@ -115,8 +115,7 @@
                 </button>
             </div>
 
-            @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not
-            authenticated')) {
+            @if (error.includes('Connection') || error.includes('Failed to initialize') || error.includes('not authenticated')) {
             <div class="mt-2 flex flex-col sm:flex-row gap-2">
                 <button (click)="retryConnection()"
                     class="text-xs text-red-200 hover:text-white px-2 py-1 bg-red-800 rounded">
@@ -216,7 +215,7 @@
                         <p class="text-xs text-gray-500 mb-1">{{ getChatSubtitle(chat) }}</p>
 
                         <!-- Last Message -->
-                        <div class="flex justify-between items-center">
+                        <!-- <div class="flex justify-between items-center">
                             <p
                                 [class]="'text-xs sm:text-sm truncate ' + (hasUnreadMessages(chat) ? 'text-gray-300 font-medium' : 'text-gray-400')">
                                 {{ chat.lastMessage || 'No messages yet' }}
@@ -227,7 +226,7 @@
                                 {{ getUnreadCountText(chat.unreadCount) }}
                             </span>
                             }
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

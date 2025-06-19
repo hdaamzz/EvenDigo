@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, firstValueFrom, of, Subject, takeUntil, tap } from 'rxjs';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import Notiflix from 'notiflix';
@@ -20,6 +20,7 @@ interface TicketData {
   eventId: string;
   tickets: { [type: string]: number };
   totalAmount: number;
+  eventTitle: string;
 }
 
 interface Coupon {
@@ -65,6 +66,7 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
     private _router: Router,
     private _dashboardService: UserDashboardService,
     private _exploreService: UserExploreService,
+    private _route: ActivatedRoute,
     private _couponService: AdminCouponService,
     private _walletService: WalletService
   ) {
@@ -190,15 +192,34 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
   }
 
   private _initTicketData(): void {
-    const ticketState = history?.state?.ticketData;
-    
-    if (!ticketState || !ticketState.eventId) {
+    try {
+      const queryParams = this._route.snapshot.queryParams;
+      
+      if (!queryParams['eventId'] || !queryParams['tickets']) {
+        console.error('Missing required query parameters');
+        this._router.navigate(['/']);
+        return;
+      }
+
+      this.ticketData = {
+        eventId: queryParams['eventId'],
+        tickets: JSON.parse(queryParams['tickets']),
+        totalAmount: parseFloat(queryParams['totalAmount']) || 0,
+        eventTitle: queryParams['eventTitle'] || ''
+      };
+
+      if (!this.ticketData.eventId || !this.ticketData.tickets) {
+        console.error('Invalid ticket data from query params');
+        this._router.navigate(['/']);
+        return;
+      }
+
+      this._showEventDetails(this.ticketData.eventId);
+    } catch (error) {
+      console.error('Error parsing query parameters:', error);
+      Notiflix.Notify.failure('Invalid ticket data. Please select tickets again.');
       this._router.navigate(['/']);
-      return;
     }
-  
-    this.ticketData = ticketState;
-    this._showEventDetails(this.ticketData.eventId);
   }
 
   private _showEventDetails(eventId: string): void {
