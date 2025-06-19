@@ -1,4 +1,3 @@
-// DTO for Revenue Statistics
 export class RevenueStatsDto {
   totalRevenue: string;
   totalRevenueChange: number;
@@ -17,7 +16,6 @@ export class RevenueStatsDto {
   }
 }
 
-// DTO for Ticket information in bookings
 export class TicketDto {
   type: string;
   price: number;
@@ -40,7 +38,6 @@ export class TicketDto {
   }
 }
 
-// DTO for User information in bookings
 export class BookingUserDto {
   _id: string;
   name: string;
@@ -53,7 +50,6 @@ export class BookingUserDto {
   }
 }
 
-// DTO for Event information in bookings
 export class BookingEventDto {
   _id: string;
   eventTitle: string;
@@ -66,7 +62,6 @@ export class BookingEventDto {
   }
 }
 
-// DTO for Revenue Transaction
 export class RevenueTransactionDto {
   _id: string;
   bookingId: string;
@@ -99,7 +94,6 @@ export class RevenueTransactionDto {
   }
 }
 
-// DTO for Refund Transaction
 export class RefundTransactionDto {
   transactionId: string;
   date: Date;
@@ -122,7 +116,6 @@ export class RefundTransactionDto {
   }
 }
 
-// DTO for Paginated Revenue Transactions Response
 export class PaginatedRevenueTransactionsDto {
   data: RevenueTransactionDto[];
   totalItems: number;
@@ -137,7 +130,6 @@ export class PaginatedRevenueTransactionsDto {
   }
 }
 
-// DTO for Paginated Refund Transactions Response
 export class PaginatedRefundTransactionsDto {
   data: RefundTransactionDto[];
   totalItems: number;

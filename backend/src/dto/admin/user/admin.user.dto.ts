@@ -42,7 +42,7 @@ export class AdminUserResponseDto {
 
 export class AdminVerificationResponseDto {
   _id: string;
-  user_id: any; // This will contain populated user data
+  user_id: any; 
   status: 'Approved' | 'Rejected' | 'Pending';
   note?: string;
   createdAt: Date;

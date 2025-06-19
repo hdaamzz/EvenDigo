@@ -8,6 +8,7 @@ import { IPaymentService } from '../../../../../src/services/interfaces/user/exp
 import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
 import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
 import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { EventDto } from '../../../../../src/dto/user/explore/explore.dto';
 
 @injectable()
 export class ExploreController implements IExploreController {
@@ -22,7 +23,10 @@ export class ExploreController implements IExploreController {
     try {
       const userId: string = req.user._id;
       const events = await this.exploreService.getEvents(userId);
-      ResponseHandler.success(res, events);
+      const eventsDto = events.map(event => new EventDto(event));
+
+      
+      ResponseHandler.success(res, eventsDto);
     } catch (error) {
       ResponseHandler.error(res, error, 'Failed to fetch events');
     }
@@ -101,7 +105,6 @@ export class ExploreController implements IExploreController {
       throw new Error(`Error routing webhook event: ${(error as Error).message}`);
     }
   }
-
   getBookingDetails = async (req: Request, res: Response): Promise<void> => {
     try {
       const sessionId: string = req.query.id as string;

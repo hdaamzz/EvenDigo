@@ -34,7 +34,6 @@ export interface SubscriptionPlanResponseDto {
   updatedAt: Date;
 }
 
-// DTO Mapper class
 export class SubscriptionPlanMapper {
   static toResponseDto(plan: any): SubscriptionPlanResponseDto {
     return {

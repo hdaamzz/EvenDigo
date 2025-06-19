@@ -8,7 +8,6 @@ interface UserDTO {
   _id: string;
   username?: string;
   email?: string;
-  // Add other user fields as needed
 }
 
 export interface AdminEventDTO {
