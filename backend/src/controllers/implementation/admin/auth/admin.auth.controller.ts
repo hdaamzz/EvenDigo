@@ -4,6 +4,7 @@ import { inject, injectable } from 'tsyringe';
 import { IAuthAdminController } from '../../../../../src/controllers/interfaces/Admin/Auth/IAuth.admin.controller';
 import { IAuthAdminService } from '../../../../../src/services/interfaces/IAuth.admin.service';
 import StatusCode from '../../../../../src/types/statuscode';
+import { CookieUtils } from '../../../../../src/utils/cookie.utils';
 
 @injectable()
 export class AdminAuthController implements IAuthAdminController {
@@ -14,6 +15,7 @@ export class AdminAuthController implements IAuthAdminController {
   async verifyAdmin(req: Request, res: Response): Promise<void> {
     try {
       const loginData: ILogin = req.body;
+      
       if (!loginData.email || !loginData.password) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -23,23 +25,15 @@ export class AdminAuthController implements IAuthAdminController {
       }
 
       const result = await this.adminAuthService.login(loginData);
+      
       if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
         res.status(StatusCode.UNAUTHORIZED).json(result);
         return;
       }
 
-      res.cookie('accessToken', result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000, 
-      });
-
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
+      CookieUtils.setAuthCookies(res, {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       });
 
       res.status(StatusCode.OK).json({
@@ -50,7 +44,7 @@ export class AdminAuthController implements IAuthAdminController {
           email: result.user.email,
           name: result.user.name,
           role: result.user.role,
-          token:result.accessToken
+          token: result.accessToken,
         },
       });
     } catch (error) {
