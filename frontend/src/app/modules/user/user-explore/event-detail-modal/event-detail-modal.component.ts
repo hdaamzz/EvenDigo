@@ -29,7 +29,7 @@ import { UserDashboardService } from '../../../../core/services/user/dashboard/u
 export class EventDetailModalComponent implements OnInit, OnDestroy {
   @Input() id!: string;
   @Output() close = new EventEmitter<void>();
-  @Output() chat = new EventEmitter<string>(); // Emit organizer ID for chat
+  @Output() chat = new EventEmitter<string>(); 
   @ViewChild('modalRef') modalRef!: ElementRef;
 
   eventData!: IEvent;
@@ -132,22 +132,29 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
     return ticket.quantity - (this.ticketCounts[ticketType] || 0);
   }
 
-  proceedToCheckout(): void {
-    if (this.totalTickets === 0) {
-      Notiflix.Notify.warning('Please select at least one ticket to proceed.');
-      return;
-    }
-
-    const ticketFormData = {
-      tickets: this.ticketCounts,
-      totalAmount: this.calculateTotal(),
-      eventId: this.id,
-      eventTitle: this.eventData.eventTitle,
-    };
-
-    this._router.navigate(['/checkout'], { state: { ticketData: ticketFormData } });
-    this.handleClose();
+proceedToCheckout(): void {
+  if (this.totalTickets === 0) {
+    Notiflix.Notify.warning('Please select at least one ticket to proceed.');
+    return;
   }
+
+  const ticketFormData = {
+    tickets: this.ticketCounts,
+    totalAmount: this.calculateTotal(),
+    eventId: this.id,
+    eventTitle: this.eventData.eventTitle,
+  };
+
+  const queryParams = {
+    eventId: ticketFormData.eventId,
+    eventTitle: ticketFormData.eventTitle,
+    totalAmount: ticketFormData.totalAmount.toString(),
+    tickets: JSON.stringify(ticketFormData.tickets) 
+  };
+
+  this._router.navigate(['/checkout'], { queryParams });
+  this.handleClose();
+}
 
   private _fetchEventDetails(id: string): void {
     this.isLoading = true;
