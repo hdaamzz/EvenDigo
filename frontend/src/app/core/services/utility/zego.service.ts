@@ -1,19 +1,12 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { ZegoConfig } from '../../interfaces/user/zego';
 declare global {
   interface Window {
     ZegoUIKitPrebuilt: any;
   }
 }
 
-export interface ZegoConfig {
-  appId: number;
-  token: string;
-  roomId: string;
-  userId: string;
-  userName: string;
-  role: 'host' | 'audience';
-}
 
 @Injectable({
   providedIn: 'root'

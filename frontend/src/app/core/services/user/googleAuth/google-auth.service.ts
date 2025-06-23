@@ -7,9 +7,6 @@ import { AuthActions } from '../../../store/auth/auth.actions';
 import { from, map, mergeMap, Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
-
-
-
 @Injectable({
   providedIn: 'root'
 })

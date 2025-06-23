@@ -7,10 +7,8 @@ import { AuthState } from '../../../core/models/userModel';
 import { Store } from '@ngrx/store';
 import { selectUser } from '../../../core/store/auth/auth.selectors';
 import { UserProfileService } from '../../../core/services/user/profile/user.profile.service';
+import { AppState } from '../../../core/interfaces/user/profile';
 
-interface AppState {
-  auth: AuthState;
-}
 
 @Component({
   selector: 'app-profile',
@@ -22,7 +20,6 @@ interface AppState {
 export class ProfileComponent implements OnInit, OnDestroy {
   @ViewChild('sidebarRef') private _sidebarRef!: ElementRef;
   
-  // Observables with $ suffix
   private readonly _destroy$ = new Subject<void>();
   public user$: Observable<any> | undefined;
   

@@ -20,8 +20,6 @@ export class AdminAchievementService {
       
     );
   }
-
-
   getAchievementById(achievementId: string): Observable<{ success: boolean; data: IAchievement }> {
     return this._http.get<{ success: boolean; data: IAchievement }>(
       `${this.apiUrl}/${achievementId}`,

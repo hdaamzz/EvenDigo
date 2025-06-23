@@ -3,30 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReusableTableComponent, TableColumn } from '../../../../shared/reusable-table/reusable-table.component';
 import { Observable, Subject, catchError, of, takeUntil, tap } from 'rxjs';
-import { FinanceService, RevenueStats, Transaction } from '../../../../core/services/admin/finance/finance.service';
+import { FinanceService } from '../../../../core/services/admin/finance/finance.service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DropdownModule } from 'primeng/dropdown';
 import { Filter, StatCard } from '../../../../core/models/admin/finance.interfaces';
 import { AdminUsersService } from '../../../../core/services/admin/users/admin.users.service';
 import { User } from '../../../../core/models/userModel';
 import Notiflix from 'notiflix';
+import { DateRangeOption, FilterOption } from '../../../../core/types/admin.finance';
+import { RevenueStats, Transaction } from '../../../../core/interfaces/admin/finance.revenue';
 
-enum DateRangeOption {
-  TODAY = 'Today',
-  THIS_WEEK = 'This Week',
-  THIS_MONTH = 'This Month',
-  CUSTOM_RANGE = 'Custom Range'
-}
 
-enum FilterOption {
-  DATE_RANGE = 'Date Range',
-  USER = 'User'
-}
-
-/**
- * Component for managing financial bookings and transactions
- * Displays revenue statistics and transaction history with filtering capabilities
- */
 @Component({
   selector: 'app-finance-booking',
   imports: [CommonModule, FormsModule, ReusableTableComponent, DatePickerModule, DropdownModule],
@@ -34,7 +21,6 @@ enum FilterOption {
   styleUrl: './finance-booking.component.css'
 })
 export class FinanceBookingComponent implements OnInit, OnDestroy {
-  // Public properties for template binding
   statCards: StatCard[] = this._getInitialStatCards();
   tableColumns: TableColumn[] = this._getTableColumns();
   transactions: Transaction[] = [];
@@ -44,7 +30,6 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
   searchTerm = '';
   loading = false;
   
-  // Date range filter options
   dateRangeOptions = Object.values(DateRangeOption);
   selectedDateRange: string = DateRangeOption.THIS_MONTH;
   customStartDate = '';

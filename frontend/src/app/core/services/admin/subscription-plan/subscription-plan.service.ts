@@ -6,18 +6,8 @@ import { catchError, delay, tap } from 'rxjs/operators';
 import Notiflix from 'notiflix';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../models/admin/subscription.interface';
+import { SubscriptionPlan } from '../../../interfaces/admin/subscriptionPlan';
 
-export interface SubscriptionPlan {
-  _id: string;
-  type: string;
-  price: number;
-  description: string;
-  features: string[];
-  isPopular?: boolean;
-  discountPercentage?: number;
-  billingCycle?: 'monthly' | 'annually';
-  active?: boolean;
-}
 
 @Injectable({
   providedIn: 'root'

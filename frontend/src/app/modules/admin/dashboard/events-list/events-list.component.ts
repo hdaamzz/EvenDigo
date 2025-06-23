@@ -11,10 +11,6 @@ import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.com
 import { AdminEventsService } from '../../../../core/services/admin/events/admin.events.service';
 import { IEvent } from '../../../../core/models/event.interface';
 
-/**
- * Component that displays a list of events with infinite scrolling functionality
- * and provides options to view details, analysis, and toggle event status.
- */
 @Component({
   selector: 'app-events-list',
   imports: [CommonModule, TruncatePipe, MenuModule, ButtonModule, DialogModule, AdminCardComponent],

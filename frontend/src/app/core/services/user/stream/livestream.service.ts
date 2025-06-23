@@ -2,24 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { LiveStreamResponse, LiveStreamStatus } from '../../../interfaces/user/stream';
 
 
-export interface LiveStreamResponse {
-  success: boolean;
-  message?: string;
-  data?: {
-    token: string;
-    roomId: string;
-    streamKey?: string;
-    rtmpUrl?: string;
-  };
-}
 
-export interface LiveStreamStatus {
-  isLive: boolean;
-  viewerCount: number;
-  startTime?: Date;
-}
 
 @Injectable({
   providedIn: 'root'

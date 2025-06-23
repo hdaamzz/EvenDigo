@@ -15,26 +15,8 @@ import { UserExploreService } from '../../../core/services/user/explore/user.exp
 import { AdminCouponService } from '../../../core/services/admin/coupon/admin-coupon.service';
 import { WalletService } from '../../../core/services/user/wallet/wallet.service';
 import { environment } from '../../../environments/environment';
+import { Coupon, TicketData } from '../../../core/interfaces/user/checkout';
 
-interface TicketData {
-  eventId: string;
-  tickets: { [type: string]: number };
-  totalAmount: number;
-  eventTitle: string;
-}
-
-interface Coupon {
-  _id: string;
-  code: string;
-  description: string;
-  discount: number;
-  discountType: 'percentage' | 'fixed';
-  minAmount: number;
-  maxUses: number | 'Unlimited';
-  usageCount: number;
-  expiryDate: Date | null;
-  status: 'active' | 'inactive';
-}
 
 @Component({
   selector: 'app-user-checkout',

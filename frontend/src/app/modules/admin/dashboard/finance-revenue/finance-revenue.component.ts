@@ -5,26 +5,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { TableColumn, ReusableTableComponent, PageEvent } from '../../../../shared/reusable-table/reusable-table.component';
 import { FinanceService } from '../../../../core/services/admin/finance/finance.service';
-
-interface RevenueData {
-  _id: string;
-  event: string;
-  eventName?: string;
-  admin_percentage: number;
-  total_revenue: number;
-  total_participants: number;
-  admin_amount: number;
-  organizer_amount: number;
-  is_distributed: boolean;
-  distributed_at: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface DateRange {
-  startDate: Date;
-  endDate: Date;
-}
+import { DateRange, RevenueData } from '../../../../core/interfaces/admin/finance.revenue';
 
 @Component({
   selector: 'app-finance-revenue',
@@ -276,8 +257,7 @@ export class FinanceRevenueComponent implements OnInit, OnDestroy {
   private _loadRevenueData(): void {
     this.isLoading = true;
     
-    // Load all data at once for client-side pagination
-    this._financeService.getDistributedRevenue(1, 1000) // Get all records
+    this._financeService.getDistributedRevenue(1, 1000) 
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (response: any) => {

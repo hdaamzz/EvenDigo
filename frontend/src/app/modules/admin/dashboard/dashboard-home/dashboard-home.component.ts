@@ -12,10 +12,10 @@ import {
   Subscription,
   Activity,
   UpcomingEvent,
-  DashboardService,
   ApiResponse,
   NewCounts,
-} from '../../../../core/services/admin/dashboard/dashboard.service';
+} from '../../../../core/interfaces/admin/dashboard';
+import { DashboardService } from '../../../../core/services/admin/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -46,7 +46,6 @@ export class DashboardHomeComponent implements OnInit {
   errors: { [key: string]: string } = {};
   selectedPeriod: string = 'monthly';
 
-  // PrimeNG chart options
   revenueChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,

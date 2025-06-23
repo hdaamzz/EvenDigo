@@ -1,24 +1,11 @@
 import { Injectable } from '@angular/core';
-import { catchError, delay, Observable, of, throwError } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { User, VerificationRequestResponse } from '../../../models/userModel';
 import { UpdateProfileResponse } from '../../../models/profile.interfaces';
-import { AllEventResponse, EventResponse, IEvent } from '../../../models/event.interface';
+import { AllEventResponse, EventResponse } from '../../../models/event.interface';
 import { AllBookingResponse } from '../../../models/booking.interface';
-interface Transaction {
-  date: string;
-  eventDetails: string;
-  transactionId: string;
-  amount: number;
-  balance: number;
-}
-
-interface WalletDetails {
-  balance: number;
-  transactions: Transaction[];
-}
-
 
 @Injectable({
   providedIn: 'root'

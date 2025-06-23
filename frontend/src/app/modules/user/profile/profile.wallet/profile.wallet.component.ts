@@ -5,23 +5,9 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Subject, takeUntil } from 'rxjs';
 
 import { WalletService } from '../../../../core/services/user/wallet/wallet.service';
+import { Transaction, TransactionTypeStyle } from '../../../../core/interfaces/user/wallet';
 
-interface Transaction {
-  date: Date;
-  eventName: string;
-  eventId: string;
-  transactionId: string;
-  amount: number;
-  type: 'credit' | 'debit' | 'refund' | 'withdrawal';
-  balance: number;
-  status?: 'pending' | 'completed' | 'failed';
-  description?: string;
-  metadata?: any;
-}
 
-interface TransactionTypeStyle {
-  [key: string]: string;
-}
 
 @Component({
   selector: 'app-profile-wallet',

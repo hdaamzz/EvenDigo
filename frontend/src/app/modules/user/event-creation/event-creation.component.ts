@@ -12,12 +12,7 @@ import { dateRangeValidator, futureDateValidator } from '../../../validators/for
 import { IEvent } from '../../../core/models/event.interface';
 import { UserDashboardService } from '../../../core/services/user/dashboard/user.dashboard.service';
 import { cities } from '../../../helpers/helpers';
-
-interface TicketItem {
-  type: string;
-  price: number;
-  quantity: number;
-}
+import { TicketItem } from '../../../core/interfaces/user/event';
 
 @Component({
   selector: 'app-event-creation',

@@ -11,10 +11,7 @@ import { IEvent } from '../../../models/event.interface';
 })
 export class AdminEventsService {
   private readonly _apiUrl = `${environment.apiUrl}admin/events`;
-
-  
   constructor(private _http: HttpClient) { }
-
 
   getEvents(page = 1, limit = 9): Observable<EventsApiResponse> {
     const params = new HttpParams()

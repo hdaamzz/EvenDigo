@@ -4,8 +4,8 @@ import { catchError, delay, Observable, of, tap } from 'rxjs';
 import { ILogin, IRegister, User } from '../../../models/userModel';
 import { environment } from '../../../../environments/environment';
 import { CommonResponse } from '../../../models/user.auth.interface';
-import { SubscriptionPlan } from '../../admin/subscription-plan/subscription-plan.service';
-import { ApiResponse } from '../subscription/premium.service';
+import { SubscriptionPlan } from '../../../interfaces/admin/subscriptionPlan';
+import { ApiResponse } from '../../../interfaces/user/premium';
 
 @Injectable({
   providedIn: 'root'

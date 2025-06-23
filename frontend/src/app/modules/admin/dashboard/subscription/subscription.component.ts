@@ -8,10 +8,7 @@ import { SubscriptionService } from '../../../../core/services/admin/subscriptio
 import { Subscription } from '../../../../core/models/admin/subscription.interface';
 import { SubscriptionDetailsDialogComponent } from './subscription-details-dialog/subscription-details-dialog.component';
 
-/**
- * Component for managing user subscriptions
- * Displays subscription data in a table with filtering and pagination
- */
+
 @Component({
   selector: 'app-subscription',
   standalone: true,
@@ -56,11 +53,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   totalItems = 0;
   statusFilter = 'all';
   planTypeFilter = 'all';
-  
-  /**
-   * @param _subscriptionService Service for subscription-related API calls
-   * @param _dialog Material dialog service for displaying subscription details
-   */
+
   constructor(
     private readonly _subscriptionService: SubscriptionService,
     private readonly _dialog: MatDialog
@@ -81,19 +74,16 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   loadAllSubscriptions(): void {
     this.loading = true;
     
-    // Use getSubscriptions instead of getActiveSubscriptions to get all subscriptions
-    this._subscriptionService.getSubscriptions(1, 1000) // Get a large number to fetch all
+    this._subscriptionService.getSubscriptions(1, 1000) 
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (data) => {
           this.subscriptions = data.data?.subscriptions ?? [];
           
-          // Format dates
           this.subscriptions = this.subscriptions.map(sub => ({
             ...sub,
             startDate: this._formatDate(sub.startDate),
             endDate: this._formatDate(sub.endDate),
-            // Ensure status matches isActive state
             status: sub.isActive ? 'active' : 'inactive'
           }));
           
@@ -154,7 +144,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.subscriptions];
     
-    // Apply status filter
     if (this.statusFilter !== 'all') {
       if (this.statusFilter === 'active') {
         filtered = filtered.filter(sub => sub.isActive === true);
@@ -163,12 +152,10 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Apply plan type filter
     if (this.planTypeFilter !== 'all') {
       filtered = filtered.filter(sub => sub.type === this.planTypeFilter);
     }
 
-    // Apply search filter
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(sub => 
@@ -180,7 +167,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     
     this.filteredSubscriptions = filtered;
     this.totalItems = filtered.length;
-    this.currentPage = 1; // Reset to first page when filters change
+    this.currentPage = 1; 
     this._updatePagination();
   }
 
@@ -238,17 +225,14 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         if (result?.updated) {
-          // Format dates for the updated subscription
           result.subscription.startDate = this._formatDate(result.subscription.startDate);
           result.subscription.endDate = this._formatDate(result.subscription.endDate);
           
-          // Update in main subscriptions array
           const index = this.subscriptions.findIndex(s => s.id === result.subscription.id);
           if (index !== -1) {
             this.subscriptions[index] = result.subscription;
           }
 
-          // Update in filtered subscriptions array
           const filteredIndex = this.filteredSubscriptions.findIndex(s => s.id === result.subscription.id);
           if (filteredIndex !== -1) {
             this.filteredSubscriptions[filteredIndex] = result.subscription;

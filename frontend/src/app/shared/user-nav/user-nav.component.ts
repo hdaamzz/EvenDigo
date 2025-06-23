@@ -9,17 +9,8 @@ import { selectUser, selectIsAuthenticated } from '../../core/store/auth/auth.se
 import { AuthActions } from '../../core/store/auth/auth.actions';
 import { AuthState, User } from '../../core/models/userModel';
 import { GoogleAuthService } from '../../core/services/user/googleAuth/google-auth.service';
+import { AppState } from '../../core/interfaces/user/profile';
 
-/**
- * Application state interface for strong typing
- */
-interface AppState {
-  auth: AuthState;
-}
-
-/**
- * Navigation component for user-facing pages with authentication features
- */
 @Component({
   selector: 'app-user-nav',
   standalone: true,
@@ -28,7 +19,6 @@ interface AppState {
   styleUrl: './user-nav.component.css'
 })
 export class UserNavComponent implements OnInit, OnDestroy {
-  // Auth state observables
   user$: Observable<User | null>;
   isAuthenticated$: Observable<boolean>;
   
@@ -63,7 +53,6 @@ export class UserNavComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Keep subscription open for user state changes
     this.user$
       .pipe(takeUntil(this._destroy$))
       .subscribe();

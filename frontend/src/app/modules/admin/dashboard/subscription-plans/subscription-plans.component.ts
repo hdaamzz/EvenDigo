@@ -18,13 +18,10 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import Notiflix from 'notiflix';
 import { Subject, takeUntil } from 'rxjs';
 
-import { SubscriptionPlan, SubscriptionPlanService } from '../../../../core/services/admin/subscription-plan/subscription-plan.service';
+import { SubscriptionPlanService } from '../../../../core/services/admin/subscription-plan/subscription-plan.service';
+import { PlanFeature, SubscriptionPlan } from '../../../../core/interfaces/admin/subscriptionPlan';
 
-interface PlanFeature {
-  id: string;
-  name: string;
-  selected: boolean;
-}
+
 
 @Component({
   selector: 'app-subscription-plans',

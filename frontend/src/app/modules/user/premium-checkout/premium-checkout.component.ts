@@ -13,8 +13,8 @@ import { WalletService } from '../../../core/services/user/wallet/wallet.service
 import { IWallet } from '../../../core/models/wallet.interface';
 import { PremiumService } from '../../../core/services/user/subscription/premium.service';
 import { SubscriptionPlan } from '../../../core/models/subscription.interface';
+import { PaymentMethod } from '../../../core/interfaces/user/premium';
 
-type PaymentMethod = 'wallet' | 'card';
 
 @Component({
   selector: 'app-premium-checkout',

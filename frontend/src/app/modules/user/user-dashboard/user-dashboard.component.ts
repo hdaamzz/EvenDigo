@@ -16,10 +16,7 @@ import { selectUser } from '../../../core/store/auth/auth.selectors';
 import { EventCreationComponent } from '../event-creation/event-creation.component';
 import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 import { EventCardComponent } from "./event-card/event-card.component";
-
-interface AppState {
-  auth: AuthState;
-}
+import { AppState } from '../../../core/interfaces/user/profile';
 
 @Component({
   selector: 'app-user-dashboard',

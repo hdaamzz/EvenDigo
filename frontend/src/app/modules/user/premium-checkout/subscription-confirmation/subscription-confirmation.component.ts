@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Subscription as AngularSubscription } from 'rxjs';
 import { takeUntil, Subject } from 'rxjs';
 import { Subscription } from '../../../../core/models/admin/subscription.interface';
 import { ActivatedRoute, Router } from '@angular/router';

@@ -35,13 +35,11 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   isMobile = window.innerWidth < 768;
   createDialogVisible = false;
   
-  // Pagination variables
   currentPage = 1;
   pageSize = 9; 
   hasMoreCoupons = true;
   allLoaded = false;
   
-  // Subject for managing subscriptions
   private destroy$ = new Subject<void>();
   
   @ViewChild('couponsContainer') couponsContainer: ElementRef | undefined;  
@@ -68,14 +66,10 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   
   ngOnDestroy(): void {
-    // Complete the subject to unsubscribe from all subscriptions
     this.destroy$.next();
     this.destroy$.complete();
   }
   
-  /**
-   * Initialize the coupon form with validators
-   */
   private initForm(): void {
     this.couponForm! = this.fb.group({
       couponCode: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20), alphabetsValidator()]],
@@ -88,9 +82,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     }, { validators: this.customValidators() });
   }
   
-  /**
-   * Setup window resize event listener
-   */
   private setupResizeListener(): void {
     fromEvent(window, 'resize')
       .pipe(
@@ -101,10 +92,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isMobile = window.innerWidth < 768;
       });
   }
-  
-  /**
-   * Setup scroll event listener for infinite scrolling
-   */
+
   private setupScrollListener(): void {
     fromEvent(window, 'scroll')
       .pipe(
@@ -119,9 +107,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
   
-  /**
-   * Check if scrolled to bottom of page for infinite loading
-   */
   private isScrolledToBottom(): boolean {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
     const windowHeight = window.innerHeight;
@@ -130,9 +115,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     return (scrollPosition + windowHeight) > (documentHeight * 0.8);
   }
 
-  /**
-   * Load coupons with optional reset parameter
-   */
   loadCoupons(reset: boolean = false): void {
     if (reset) {
       this.resetPagination();
@@ -157,9 +139,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
   
-  /**
-   * Reset pagination parameters
-   */
   private resetPagination(): void {
     this.currentPage = 1;
     this.couponsList = [];
@@ -167,9 +146,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.allLoaded = false;
   }
   
-  /**
-   * Map API response data to component model
-   */
   private mapCouponsData(data: any[]): any[] {
     return data.map(coupon => ({
       _id: coupon._id,
@@ -184,19 +160,13 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       status: coupon.isActive ? 'active' : 'inactive'
     }));
   }
-  
-  /**
-   * Process coupons response data
-   */
   private processCouponsResponse(newCoupons: any[], reset: boolean, hasMore: boolean): void {
     this.couponsList = reset ? newCoupons : [...this.couponsList, ...newCoupons];
     this.hasMoreCoupons = hasMore;
     this.allLoaded = !hasMore;
   }
   
-  /**
-   * Load more coupons when scrolling
-   */
+
   loadMoreCoupons(): void {
     if (this.loading || !this.hasMoreCoupons) return;
     
@@ -204,25 +174,17 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadCoupons();
   }
 
-  /**
-   * Show coupon details in dialog
-   */
   showCouponDetails(couponId: string): void {
     this.selectedCoupon = this.couponsList.find(coupon => coupon._id === couponId);
     this.couponDialogVisible = true;
   }
 
-  /**
-   * Hide coupon dialogs
-   */
   hideCouponDialog(): void {
     this.couponDialogVisible = false;
     this.createDialogVisible = false;
   }
 
-  /**
-   * Open dialog for adding new coupon
-   */
+
   addNewCoupon(): void {
     this.selectedCoupon = {};
     this.couponForm!.reset();
@@ -232,9 +194,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.createDialogVisible = true;
   }
 
-  /**
-   * Save coupon - create new or update existing
-   */
   saveCoupon(): void {
     if (this.validateForm()) {
       const couponData = this.prepareCouponData();
@@ -247,9 +206,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   
-  /**
-   * Validate form before submission
-   */
+
   private validateForm(): boolean {
     if (this.couponForm!.invalid) {
       this.couponForm!.markAllAsTouched();
@@ -264,9 +221,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     return true;
   }
   
-  /**
-   * Prepare coupon data from form
-   */
   private prepareCouponData(): ICoupon {
     return {
       couponCode: (this.couponForm!.value.couponCode || '').toUpperCase(),
@@ -279,9 +233,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
   
-  /**
-   * Update existing coupon
-   */
   private updateExistingCoupon(couponId: string, couponData: ICoupon): void {
     this.couponService.updateCoupon(couponId, couponData)
       .pipe(takeUntil(this.destroy$))
@@ -298,9 +249,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
   
-  /**
-   * Create new coupon
-   */
   private createNewCoupon(couponData: ICoupon): void {
     this.couponService.createCoupon(couponData)
       .pipe(takeUntil(this.destroy$))
@@ -317,9 +265,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Edit existing coupon
-   */
   editCoupon(couponId: string): void {
     this.selectedCoupon = this.couponsList.find(coupon => coupon._id === couponId);
     this.couponForm!.patchValue({
@@ -334,9 +279,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.createDialogVisible = true;
   }
 
-  /**
-   * Activate a coupon
-   */
+
   activateCoupon(couponId: string): void {
     this.couponService.activateCoupon(couponId)
       .pipe(takeUntil(this.destroy$))
@@ -355,9 +298,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Deactivate a coupon
-   */
   deactivateCoupon(couponId: string): void {
     this.couponService.deactivateCoupon(couponId)
       .pipe(takeUntil(this.destroy$))
@@ -376,9 +316,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Delete a coupon with confirmation
-   */
   deleteCoupon(couponId: string): void {
     Notiflix.Confirm.show(
       'Confirm Deletion', 
@@ -412,9 +349,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  /**
-   * Custom validators for the coupon form
-   */
   customValidators(): ValidatorFn {
     return (formGroup: AbstractControl): ValidationErrors | null => {
       const discountType = formGroup.get('discountType')?.value;
@@ -436,18 +370,13 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  /**
-   * Get CSS classes for coupon status badge
-   */
+
   getCouponStatusBadge(coupon: any): { text: string, classes: string } {
     return coupon.status === 'active' 
       ? { text: 'Active', classes: 'bg-green-100 text-green-600' }
       : { text: 'Inactive', classes: 'bg-red-100 text-red-600' };
   }
 
-  /**
-   * Get menu items for coupon actions
-   */
   getCouponMenuItems(coupon: any): MenuItem[] {
     return [
       {

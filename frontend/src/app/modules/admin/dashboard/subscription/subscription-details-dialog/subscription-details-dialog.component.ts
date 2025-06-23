@@ -9,9 +9,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Subscription } from '../../../../../core/models/admin/subscription.interface';
 import { SubscriptionService } from '../../../../../core/services/admin/subscription/subscription.service';
 
-/**
- * Dialog component for viewing and editing subscription details
- */
+
 @Component({
   selector: 'app-subscription-details-dialog',
   standalone: true,
@@ -26,12 +24,7 @@ export class SubscriptionDetailsDialogComponent implements OnDestroy {
   private readonly _destroy$ = new Subject<void>();
   startDateFormatted = '';
   endDateFormatted = '';
-  
-  /**
-   * @param _dialogRef Reference to the dialog
-   * @param _data Data passed to the dialog
-   * @param _subscriptionService Service for subscription operations
-   */
+
   constructor(
     private readonly _dialogRef: MatDialogRef<SubscriptionDetailsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) private readonly _data: { subscription: Subscription },
@@ -41,15 +34,12 @@ export class SubscriptionDetailsDialogComponent implements OnDestroy {
     this._initFormattedDates();
   }
 
-  /** Clean up subscriptions when component is destroyed */
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
   }
   
-  /**
-   * Initialize formatted dates from subscription data
-   */
+
   private _initFormattedDates(): void {
     if (this.subscription.startDate) {
       const startDate = new Date(this.subscription.startDate);

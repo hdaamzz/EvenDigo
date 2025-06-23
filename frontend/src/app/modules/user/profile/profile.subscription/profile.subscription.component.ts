@@ -2,13 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject, catchError, delay, finalize, of, takeUntil } from 'rxjs';
-
 import { 
-  PremiumService, 
-  SubscriptionResponse, 
-  SubscriptionType 
+  PremiumService
 } from '../../../../core/services/user/subscription/premium.service';
-import { SubscriptionPlan } from '../../../../core/services/admin/subscription-plan/subscription-plan.service';
+import { SubscriptionResponse, SubscriptionType } from '../../../../core/interfaces/user/premium';
 
 @Component({
   selector: 'app-profile-subscription',

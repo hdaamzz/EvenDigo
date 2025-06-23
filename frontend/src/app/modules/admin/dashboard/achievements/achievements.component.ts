@@ -16,10 +16,7 @@ import { positiveNumberValidator, thresholdRangeValidator, titleValidator } from
 import { MenuItem } from 'primeng/api';
 import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.component";
 
-/**
- * Component for managing achievements in the admin dashboard
- * Handles CRUD operations, filtering, and infinite scrolling
- */
+
 @Component({
   selector: 'app-achievements',
   standalone: true,
@@ -40,7 +37,6 @@ import { AdminCardComponent } from "../../../../shared/admin-card/admin-card.com
   styleUrl: './achievements.component.css'
 })
 export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
-  // Public properties
   achievementsList: IAchievement[] = [];
   filteredAchievementsList: IAchievement[] = [];
   loading = false;
@@ -57,20 +53,17 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
   isMobile = window.innerWidth < 768;
   createDialogVisible = false;
   
-  // Pagination properties
   currentPage = 1;
   pageSize = 9; 
   hasMoreAchievements = true;
   allLoaded = false;
   
-  // Observable cleanup
   private readonly _destroy$ = new Subject<void>();
   
   @ViewChild('achievementsContainer') achievementsContainer?: ElementRef;  
   achievementForm: FormGroup;
   filterForm: FormGroup;
   
-  // Static data
   readonly categoryOptions = [
     { label: 'All Categories', value: null },
     { label: 'Event', value: 'event' },
@@ -128,13 +121,9 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   
-  /**
-   * Initializes component, loads initial data and sets up subscriptions
-   */
   ngOnInit(): void {
     this.loadAchievements(true);
     
-    // Handle screen resize for responsive design
     fromEvent(window, 'resize')
       .pipe(
         takeUntil(this._destroy$),
@@ -144,7 +133,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isMobile = window.innerWidth < 768;
       });
 
-    // Set up filter form subscription
     this.filterForm.valueChanges
       .pipe(
         takeUntil(this._destroy$),
@@ -155,9 +143,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
   
-  /**
-   * Sets up infinite scroll after view is initialized
-   */
   ngAfterViewInit(): void {
     fromEvent(window, 'scroll')
       .pipe(
@@ -172,18 +157,11 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
   
-  /**
-   * Cleanup subscriptions on component destruction
-   */
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
   }
   
-  /**
-   * Determines if user has scrolled to bottom of page for infinite loading
-   * @returns True if scrolled to bottom threshold
-   */
   private _isScrolledToBottom(): boolean {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
     const windowHeight = window.innerHeight;
@@ -192,10 +170,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     return (scrollPosition + windowHeight) > (documentHeight * 0.8);
   }
 
-  /**
-   * Loads achievements with pagination
-   * @param reset Whether to reset pagination and filters
-   */
   loadAchievements(reset: boolean = false): void {
     if (reset) {
       this.currentPage = 1;
@@ -243,9 +217,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Applies filters from the filter form to the achievements list
-   */
   applyFilters(): void {
     const filters = this.filterForm.value;
     
@@ -258,9 +229,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  /**
-   * Resets all filters to their default values
-   */
   resetFilters(): void {
     this.filterForm.reset({
       category: null,
@@ -270,19 +238,12 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.applyFilters();
   }
 
-  /**
-   * Gets the display label for a criteria value
-   * @param value The criteria value
-   * @returns The human-readable label
-   */
   getCriteriaLabel(value: string): string {
     const criteria = this.criteriaOptions.find(option => option.value === value);
     return criteria ? criteria.label : value;
   }
   
-  /**
-   * Loads the next page of achievements
-   */
+
   loadMoreAchievements(): void {
     if (this.loading || !this.hasMoreAchievements) return;
     
@@ -290,10 +251,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadAchievements();
   }
 
-  /**
-   * Shows details dialog for a specific achievement
-   * @param achievementId ID of the achievement to show
-   */
   showAchievementDetails(achievementId: string): void {
     this.selectedAchievement = this.achievementsList.find(achievement => achievement._id === achievementId) || {
       title: '',
@@ -307,16 +264,10 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.achievementDialogVisible = true;
   }
 
-  /**
-   * Closes the achievement details dialog
-   */
   hideAchievementDialog(): void {
     this.achievementDialogVisible = false;
   }
 
-  /**
-   * Opens dialog to create a new achievement
-   */
   addNewAchievement(): void {
     this.selectedAchievement = {
       title: '',
@@ -334,9 +285,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.createDialogVisible = true;
   }
 
-  /**
-   * Saves a new achievement or updates an existing one
-   */
   saveAchievement(): void {
     if (this.achievementForm.invalid) {
       this.achievementForm.markAllAsTouched();
@@ -366,11 +314,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  /**
-   * Updates an existing achievement
-   * @param achievementId ID of the achievement to update
-   * @param achievementData Updated achievement data
-   */
   private _updateExistingAchievement(achievementId: string, achievementData: IAchievement): void {
     this._achievementService.updateAchievement(achievementId, achievementData)
       .pipe(takeUntil(this._destroy$))
@@ -388,10 +331,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Creates a new achievement
-   * @param achievementData Achievement data to create
-   */
   private _createNewAchievement(achievementData: IAchievement): void {
     this._achievementService.createAchievement(achievementData)
       .pipe(takeUntil(this._destroy$))
@@ -408,10 +347,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Opens the edit dialog for an achievement
-   * @param achievementId ID of the achievement to edit
-   */
   editAchievement(achievementId: string): void {
     this.selectedAchievement = this.achievementsList.find(achievement => achievement._id === achievementId) || {
       title: '',
@@ -434,10 +369,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.createDialogVisible = true;
   }
 
-  /**
-   * Activates an achievement
-   * @param achievementId ID of the achievement to activate
-   */
   activateAchievement(achievementId: string): void {
     this._achievementService.activateAchievement(achievementId)
       .pipe(takeUntil(this._destroy$))
@@ -457,10 +388,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Deactivates an achievement
-   * @param achievementId ID of the achievement to deactivate
-   */
   deactivateAchievement(achievementId: string): void {
     this._achievementService.deactivateAchievement(achievementId)
       .pipe(takeUntil(this._destroy$))
@@ -480,10 +407,7 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Deletes an achievement after confirmation
-   * @param achievementId ID of the achievement to delete
-   */
+
   deleteAchievement(achievementId: string): void {
     Notiflix.Confirm.show(
       'Confirm Deletion', 
@@ -506,7 +430,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
           });
       },
       () => {
-        // Deletion cancelled, no action needed
       },
       {
         width: '320px',
@@ -518,41 +441,21 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  /**
-   * Gets the display label for a category value
-   * @param value The category value
-   * @returns The human-readable label
-   */
   getCategoryLabel(value: string): string {
     const category = this.categoryOptions.find(option => option.value === value);
     return category ? category.label : value;
   }
 
-  /**
-   * Gets the CSS class for an icon
-   * @param iconValue The icon value
-   * @returns The CSS class for the icon
-   */
   getIconClass(iconValue: string): string {
     return iconValue || 'fas fa-award'; 
   }
 
-  /**
-   * Gets the status badge information for an achievement
-   * @param achievement The achievement to get status for
-   * @returns Object with text and CSS classes
-   */
   getAchievementStatusBadge(achievement: IAchievement): { text: string, classes: string } {
     return achievement.isActive 
       ? { text: 'Active', classes: 'bg-green-100 text-green-600' } 
       : { text: 'Inactive', classes: 'bg-red-100 text-red-600' };
   }
   
-  /**
-   * Gets the menu items for an achievement's action menu
-   * @param achievement The achievement to create menu for
-   * @returns Array of menu items
-   */
   getAchievementMenuItems(achievement: IAchievement): MenuItem[] {
     return [
       {

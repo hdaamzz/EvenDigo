@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { UserFooterComponent } from "../../../shared/user-footer/user-footer.component";
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { Router } from '@angular/router';
-import { SubscriptionPlan } from '../../../core/services/admin/subscription-plan/subscription-plan.service';
 import { Subject, takeUntil } from 'rxjs';
 import Notiflix from 'notiflix';
 import { AuthService } from '../../../core/services/user/auth/auth.service';
+import { SubscriptionPlan } from '../../../core/interfaces/admin/subscriptionPlan';
 
 @Component({
   selector: 'app-home',

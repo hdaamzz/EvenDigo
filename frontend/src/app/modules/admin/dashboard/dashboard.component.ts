@@ -13,10 +13,7 @@ import { SubscriptionComponent } from './subscription/subscription.component';
 import { FinanceRefundComponent } from './finance-refund/finance-refund.component';
 import { FinanceBookingComponent } from './finance-booking/finance-booking.component';
 import { SubscriptionPlansComponent } from './subscription-plans/subscription-plans.component';
-
-type ViewType = 'dashboard' | 'users' | 'events' | 'coupons' | 'achievements' | 'finance' | 'subscription';
-type FinanceSectionType = 'revenue' | 'refunds' | 'bookings' | null;
-type SubscriptionSectionType = 'management' | 'plans' | null;
+import { FinanceSectionType, SubscriptionSectionType, ViewType } from '../../../core/interfaces/admin/dashboard';
 
 @Component({
   selector: 'app-dashboard',

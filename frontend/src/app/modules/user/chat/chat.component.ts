@@ -1,29 +1,13 @@
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatMessage, ChatService, ChatUser, GroupChat } from '../../../core/services/user/chat/chat.service';
+import { ChatService } from '../../../core/services/user/chat/chat.service';
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { SocketService } from '../../../core/services/user/socket/socket.service';
 import { AuthService } from '../../../core/services/user/auth/auth.service';
 import { User } from '../../../core/models/userModel';
 import { ChatHelperService } from '../../../core/services/utility/chat-helper.service';
-
-export interface ChatItem {
-  id: string;
-  name: string;
-  username?: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  lastSeenTime?: Date;
-  isOnline: boolean;
-  unreadCount: number;
-  profileImg?: string;
-  chatId: string;
-  chatType: 'personal' | 'group';
-  participants?: ChatUser[];
-  eventId?: string;
-  isActive?: boolean;
-}
+import { ChatItem, ChatMessage, ChatUser, GroupChat } from '../../../core/interfaces/user/chat';
 
 @Component({
   selector: 'app-chat',

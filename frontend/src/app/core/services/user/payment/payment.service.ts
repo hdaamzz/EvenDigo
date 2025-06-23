@@ -10,8 +10,6 @@ import { BookingResponse } from '../../../models/booking.interface';
 export class PaymentService {
   private readonly apiUrl = `${environment.apiUrl}user/explore`;
 
-  
-
   constructor(private http:HttpClient) { }
 
   getBooking(id:string):Observable<BookingResponse>{

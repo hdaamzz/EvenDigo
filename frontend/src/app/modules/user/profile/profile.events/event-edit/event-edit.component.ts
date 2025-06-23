@@ -13,12 +13,8 @@ import { dateRangeValidator, futureDateValidator } from '../../../../../validato
 import { UserNavComponent } from '../../../../../shared/user-nav/user-nav.component';
 import Notiflix from 'notiflix';
 import { catchError, finalize, of, Subject, takeUntil, tap } from 'rxjs';
+import { TicketItem } from '../../../../../core/interfaces/user/event';
 
-interface TicketItem {
-  type: string;
-  price: number;
-  quantity: number;
-}
 
 @Component({
   selector: 'app-event-edit',

@@ -1,24 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { User } from '../../models/userModel';
-import { ChatMessage, ChatUser, GroupChat } from '../user/chat/chat.service';
+import { ChatItem, ChatMessage, ChatUser, GroupChat } from '../../interfaces/user/chat';
 
-export interface ChatItem {
-  id: string;
-  name: string;
-  username?: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  lastSeenTime?: Date;
-  isOnline: boolean;
-  unreadCount: number;
-  profileImg?: string;
-  chatId: string;
-  chatType: 'personal' | 'group';
-  participants?: ChatUser[];
-  eventId?: string;
-  isActive?: boolean;
-}
 
 @Injectable({
   providedIn: 'root'
