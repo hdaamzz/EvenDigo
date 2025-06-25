@@ -3,6 +3,7 @@ import { UserModel } from '../../src/models/UserModel';
 import { ITokenService } from '../../src/services/interfaces/user/auth/ITokenService';
 import StatusCode from '../../src/types/statuscode';
 import { container } from '../../src/configs/container';
+import { cookieConfig } from '../../src/configs/cookie.config';
 
 declare global {
   namespace Express {
@@ -39,8 +40,17 @@ export const authMiddleware = async (
   try {
     const tokenService = container.resolve<ITokenService>('TokenService');
     const accessToken = req.cookies.accessToken;
+    const refreshToken = req.cookies.refreshToken;
     
-    // First, try to authenticate with access token
+    if (!accessToken && !refreshToken) {
+      res.status(StatusCode.UNAUTHORIZED).json({ 
+        success: false, 
+        message: 'Authentication required',
+        code: 'NO_TOKENS'
+      });
+      return;
+    }
+    
     if (accessToken) {
       try {
         const decoded = tokenService.verifyToken(accessToken);
@@ -49,7 +59,8 @@ export const authMiddleware = async (
         if (!user || user.status === 'blocked') {
           res.status(StatusCode.UNAUTHORIZED).json({ 
             success: false, 
-            error: 'User not found or blocked' 
+            message: 'User not found or blocked',
+            code: 'USER_INVALID'
           });
           return;
         }
@@ -57,64 +68,132 @@ export const authMiddleware = async (
         req.user = user;
         return next();
         
-      } catch (tokenError) {
-        console.log('Access token verification failed from miidleware :', tokenError);
+      } catch (tokenError: any) {
+        console.log('Access token expired or invalid, attempting refresh...');
+        
+        if (refreshToken) {
+          try {
+            const refreshResult = await refreshAccessToken(refreshToken, tokenService, res);
+            
+            if (refreshResult.success && refreshResult.user) {
+              req.user = refreshResult.user;
+              return next();
+            } else {
+              clearAuthCookies(res);
+              res.status(StatusCode.UNAUTHORIZED).json({ 
+                success: false, 
+                message: 'Session expired. Please login again.',
+                code: 'SESSION_EXPIRED'
+              });
+              return;
+            }
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError);
+            clearAuthCookies(res);
+            res.status(StatusCode.UNAUTHORIZED).json({ 
+              success: false, 
+              message: 'Session expired. Please login again.',
+              code: 'REFRESH_FAILED'
+            });
+            return;
+          }
+        } else {
+          res.status(StatusCode.UNAUTHORIZED).json({ 
+            success: false, 
+            message: 'Session expired. Please login again.',
+            code: 'NO_REFRESH_TOKEN'
+          });
+          return;
+        }
       }
     }
     
-    const refreshToken = req.cookies.refreshToken;
-    
-    if (!refreshToken) {
-       res.status(StatusCode.UNAUTHORIZED).json({ 
-        success: false, 
-        error: 'Authentication required' 
-      });
-      return;
-    }
-    
-    try {
-      const decodedRefresh = tokenService.verifyRefreshToken(refreshToken);
-      const user = await UserModel.findById(decodedRefresh.userId).select('-password');
-      
-      if (!user || user.status === 'blocked') {
-         res.status(StatusCode.UNAUTHORIZED).json({ 
+    if (refreshToken) {
+      try {
+        const refreshResult = await refreshAccessToken(refreshToken, tokenService, res);
+        
+        if (refreshResult.success && refreshResult.user) {
+          req.user = refreshResult.user;
+          return next();
+        } else {
+          clearAuthCookies(res);
+          res.status(StatusCode.UNAUTHORIZED).json({ 
+            success: false, 
+            message: 'Session expired. Please login again.',
+            code: 'SESSION_EXPIRED'
+          });
+          return;
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        clearAuthCookies(res);
+        res.status(StatusCode.UNAUTHORIZED).json({ 
           success: false, 
-          error: 'User not found or blocked' 
+          message: 'Session expired. Please login again.',
+          code: 'REFRESH_FAILED'
         });
-        return
+        return;
       }
-      
-      const newAccessToken = tokenService.generateToken(user);
-      
-      const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
-        maxAge: 24 * 60 * 60 * 1000,
-        ...(process.env.NODE_ENV === 'production' && {
-          domain: process.env.CLIENT_DOMAIN || undefined
-        })
-      };
-      
-      res.cookie('accessToken', newAccessToken, cookieOptions);
-      
-      req.user = user;
-      next();
-      
-    } catch (refreshError) {
-      console.error('Refresh token verification failed:', refreshError);
-       res.status(StatusCode.UNAUTHORIZED).json({ 
-        success: false, 
-        error: 'Invalid refresh token' 
-      });
-      return
     }
+    
+    res.status(StatusCode.UNAUTHORIZED).json({ 
+      success: false, 
+      message: 'Authentication required',
+      code: 'AUTH_REQUIRED'
+    });
     
   } catch (error) {
     console.error('Auth middleware error:', error);
     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
       success: false, 
-      error: 'Authentication failed' 
+      message: 'Authentication failed',
+      code: 'INTERNAL_ERROR'
     });
   }
 };
+
+async function refreshAccessToken(
+  refreshToken: string, 
+  tokenService: ITokenService, 
+  res: Response
+): Promise<{ success: boolean; user?: any; message?: string }> {
+  try {
+    const decodedRefresh = tokenService.verifyRefreshToken(refreshToken);
+    const user = await UserModel.findById(decodedRefresh.userId).select('-password');
+    
+    if (!user || user.status === 'blocked') {
+      return { 
+        success: false, 
+        message: 'User not found or blocked' 
+      };
+    }
+    
+    const newAccessToken = tokenService.generateToken(user);
+    
+    const newRefreshToken = tokenService.generateRefreshToken(user);
+    
+    const cookieOptions = cookieConfig.getTokenCookieOptions();
+    res.cookie('accessToken', newAccessToken, cookieOptions.accessToken);
+    res.cookie('refreshToken', newRefreshToken, cookieOptions.refreshToken);
+    
+    console.log('Token refreshed successfully for user:', user.email);
+    
+    return { 
+      success: true, 
+      user: user 
+    };
+    
+  } catch (error) {
+    console.error('Refresh token verification failed:', error);
+    return { 
+      success: false, 
+      message: 'Invalid refresh token' 
+    };
+  }
+}
+
+function clearAuthCookies(res: Response): void {
+  const clearOptions = cookieConfig.getClearCookieOptions();
+  res.clearCookie('accessToken', clearOptions);
+  res.clearCookie('refreshToken', clearOptions);
+}

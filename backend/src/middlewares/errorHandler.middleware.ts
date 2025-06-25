@@ -1,4 +1,3 @@
-// middlewares/errorHandler.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import StatusCode from '../types/statuscode';
 
@@ -48,14 +47,12 @@ export const errorHandler = (
     });
   }
 
-  // Programming or other unknown error
   return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
     success: false,
     message: 'Something went wrong!',
   });
 };
 
-// Async error wrapper
 export const asyncHandler = (fn: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);

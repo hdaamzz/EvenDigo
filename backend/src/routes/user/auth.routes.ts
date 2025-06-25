@@ -10,22 +10,18 @@ const authController = container.resolve(AuthController);
 const subscriptionPlanController = container.resolve(SubscriptionPlanController);
 const authRouter = Router();
 
-// Public routes with rate limiting and validation
 authRouter.post('/send-otp', 
   otpRateLimit, 
-
   (req, res) => authController.sendOTP(req, res)
 );
 
 authRouter.post('/verify-otp', 
   otpRateLimit, 
-
   (req, res) => authController.verifyOTP(req, res)
 );
 
 authRouter.post('/sign-in', 
   authRateLimit, 
-  
   (req, res) => authController.verifyUser(req, res)
 );
 
@@ -36,7 +32,6 @@ authRouter.post('/forgot-password',
 
 authRouter.post('/reset-password', 
   authRateLimit, 
-  
   (req, res) => authController.resetPassword(req, res)
 );
 
@@ -46,9 +41,11 @@ authRouter.post('/firebase-signin',
   (req, res) => authController.firebaseSignIn(req, res)
 );
 
-authRouter.post('/refresh-token', (req, res) => authController.refreshToken(req, res));
+// Remove the manual refresh token endpoint
+// authRouter.post('/refresh-token', (req, res) => authController.refreshToken(req, res));
 
-authRouter.get('/status',authMiddleware,(req, res) => authController.isAuthenticated(req, res));
+// Protected routes - these will automatically handle token refresh via middleware
+authRouter.get('/status', authMiddleware, (req, res) => authController.isAuthenticated(req, res));
 authRouter.get('/logout', (req, res) => authController.logout(req, res));
 authRouter.get('/plans', (req, res) => subscriptionPlanController.getAll(req, res));
 

@@ -82,7 +82,7 @@ export class AuthController implements IAuthController {
       }
 
       const result = await this.authService.login(loginData);
-      console.log(result);
+      console.log('Login result:', result);
 
       if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
         res.status(StatusCode.UNAUTHORIZED).json({
@@ -169,22 +169,16 @@ export class AuthController implements IAuthController {
       if (!req.user) {
         res.status(StatusCode.UNAUTHORIZED).json({
           isAuthenticated: false,
-          message: 'User not authenticated from isAuthenticated',
+          message: 'User not authenticated',
         });
         return;
       }
 
-      const currentUser = await this.authService.findUserByEmail(req.user.email);
+      // Since the middleware already verified the user and refreshed tokens if needed,
+      // we can directly return the user info
+      const currentUser = req.user;
       const token = req.cookies.accessToken;
       
-      if (!currentUser) {
-        res.status(StatusCode.UNAUTHORIZED).json({
-          isAuthenticated: false,
-          message: 'User not found',
-        });
-        return;
-      }
-
       res.status(StatusCode.OK).json({
         isAuthenticated: true,
         user: {
@@ -249,51 +243,8 @@ export class AuthController implements IAuthController {
     }
   }
 
-  async refreshToken(req: Request, res: Response): Promise<void> {
-    try {
-      const refreshToken = req.cookies.refreshToken;
-
-      if (!refreshToken) {
-        res.status(StatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: 'No refresh token provided',
-        });
-        return;
-      }
-
-      const result = await this.authService.refreshToken(refreshToken);
-
-      if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
-        res.status(StatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: result.message || 'Invalid refresh token',
-        });
-        return;
-      }
-
-      const cookieOptions = cookieConfig.getTokenCookieOptions();
-
-      res.cookie('accessToken', result.accessToken, cookieOptions.accessToken);
-      res.cookie('refreshToken', result.refreshToken, cookieOptions.refreshToken);
-
-      res.status(StatusCode.OK).json({
-        success: true,
-        message: 'Token refreshed successfully',
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          name: result.user.name,
-          role: result.user.role,
-        },
-      });
-    } catch (error) {
-      console.error('Refresh token error:', error);
-      res.status(StatusCode.UNAUTHORIZED).json({
-        success: false,
-        message: 'Invalid refresh token',
-      });
-    }
-  }
+  // Remove the manual refresh token endpoint as it's now handled by middleware
+  // async refreshToken(req: Request, res: Response): Promise<void> { ... }
 
   logout(_req: Request, res: Response): void {
     try {

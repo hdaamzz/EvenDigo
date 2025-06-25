@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, delay, Observable, of, tap } from 'rxjs';
+import { catchError, delay, Observable, of } from 'rxjs';
 import { ILogin, IRegister, User } from '../../../models/userModel';
 import { environment } from '../../../../environments/environment';
 import { CommonResponse } from '../../../models/user.auth.interface';
@@ -13,7 +13,6 @@ import { ApiResponse } from '../../../interfaces/user/premium';
 export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}user/auth`;
 
-  
   constructor(private http: HttpClient) { }
 
   userRegister(userData: IRegister): Observable<CommonResponse> {
@@ -50,6 +49,7 @@ export class AuthService {
       `${this.apiUrl}/status`
     ).pipe(
       catchError((error) => {
+        console.error('Auth status check error:', error);
         return of({ 
           isAuthenticated: false, 
           user: undefined, 
@@ -68,15 +68,30 @@ export class AuthService {
       profileImg: profileImg || '',
     };
 
-    return this.http.post(`${this.apiUrl}/firebase-signin`, payload);
+    return this.http.post(`${this.apiUrl}/firebase-signin`, payload).pipe(
+      catchError((error) => {
+        console.error('Firebase login error:', error);
+        return of({ success: false, message: 'Firebase authentication failed' });
+      })
+    );
   }
 
   forgotPassword(formData: {email:string}): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.apiUrl}/forgot-password`, formData)
+    return this.http.post<CommonResponse>(`${this.apiUrl}/forgot-password`, formData).pipe(
+      catchError((error) => {
+        console.error('Forgot password error:', error);
+        return of({ success: false, message: 'Failed to send reset email' });
+      })
+    );
   }
 
   resetPassword(resetData: {email:string,newPassword:string,token:string}): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.apiUrl}/reset-password`, resetData);
+    return this.http.post<CommonResponse>(`${this.apiUrl}/reset-password`, resetData).pipe(
+      catchError((error) => {
+        console.error('Reset password error:', error);
+        return of({ success: false, message: 'Password reset failed' });
+      })
+    );
   }
 
   logout(): Observable<CommonResponse> {
@@ -86,23 +101,13 @@ export class AuthService {
         return of({ success: false, message: 'Logout failed. Please try again.' });
       })
     );
-  }
-
-  refreshToken(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/refresh-token`, {}).pipe(
-      catchError((error) => {
-        console.error('Token refresh error:', error);
-        return of({ success: false, message: 'Token refresh failed' });
-      })
-    );
-  }
-
+  }   
   getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
     return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.apiUrl}/plans`).pipe(
       delay(700),
       catchError(error => {
         console.error('Get plans error:', error);
-        return of({ success: false, message: 'fetch subscription plans' });
+        return of({ success: false, message: 'Failed to fetch subscription plans' });
       })
     );
   }

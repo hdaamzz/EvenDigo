@@ -6,7 +6,6 @@ import StatusCode from '../../src/types/statuscode';
 
 export const userRole = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
   try {
-    // Get token from header
     const token = req.cookies.session;
     
     if (!token) {
@@ -15,11 +14,9 @@ export const userRole = async (req: Request, res: Response, next: NextFunction):
       return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'No authentication token, access denied' });
     }
     
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
     
-    // Find user by id
     const user = await UserModel.findById(decoded.userId).select('-password');
         
     if (!user) {
@@ -39,7 +36,6 @@ export const userRole = async (req: Request, res: Response, next: NextFunction):
     }
   
     
-    // Add user to request
     req.user = user;
     next();
   } catch (error) {
@@ -51,18 +47,15 @@ export const userRole = async (req: Request, res: Response, next: NextFunction):
 
 export const adminRole = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
     try {
-      // Get token from header
       const token = req.cookies.session;
       
       if (!token) {
         return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'No authentication token, access denied' });
       }
       
-      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
   
       
-      // Find user by id
       const user = await UserModel.findById(decoded.userId).select('-password');    
       if (!user) {
         return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user not found' });
@@ -75,7 +68,6 @@ export const adminRole = async (req: Request, res: Response, next: NextFunction)
         }
     
       
-      // Add user to request
       req.user = user;
       next();
     } catch (error) {

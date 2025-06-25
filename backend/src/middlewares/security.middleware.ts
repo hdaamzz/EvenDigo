@@ -1,9 +1,7 @@
-// middlewares/security.middleware.ts
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 
-// Rate limiting for auth routes
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 5, 

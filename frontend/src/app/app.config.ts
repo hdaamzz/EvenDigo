@@ -9,7 +9,6 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { AuthEffects } from './core/store/auth/auth.effects';
 import { provideRouterStore, routerReducer } from '@ngrx/router-store';
-// import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { environment } from './environments/environment';

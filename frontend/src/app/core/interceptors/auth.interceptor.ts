@@ -1,52 +1,49 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { catchError, switchMap, throwError, of } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AuthActions } from '../store/auth/auth.actions';
-import { environment } from '../../environments/environment';
 
 export const tokenRefreshInterceptor: HttpInterceptorFn = (req, next) => {
-  const http = inject(HttpClient);
   const router = inject(Router);
   const store = inject(Store);
 
+  // Always include credentials (cookies) with requests
   const modifiedRequest = req.clone({
     withCredentials: true
   });
 
   return next(modifiedRequest).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Handle 401 errors for protected routes
       if (error.status === 401 && !isAuthEndpoint(req.url)) {
-        return http.post(`${environment.baseUrl}user/auth/refresh-token`, {}, { 
-          withCredentials: true 
-        }).pipe(
-          switchMap((response: any) => {
-            if (response.success) {
-              return next(modifiedRequest);
-            } else {
-              store.dispatch(AuthActions.logout());
-              router.navigate(['/login']);
-              return throwError(() => error);
-            }
-          }),
-          catchError((refreshError) => {
-            store.dispatch(AuthActions.logout());
-            
-            const currentUrl = router.url;
-            if (!currentUrl.includes('/login') && 
-                !currentUrl.includes('/register') && 
-                !currentUrl.includes('/reset-password') &&
-                !currentUrl.includes('/admin/login')) {
-              router.navigate(['/login']);
-            }
-            
-            return throwError(() => error);
-          })
-        );
+        const errorBody = error.error;
+        
+        // Check the error code to determine the appropriate action
+        if (errorBody?.code === 'SESSION_EXPIRED' || 
+            errorBody?.code === 'REFRESH_FAILED' || 
+            errorBody?.code === 'NO_REFRESH_TOKEN') {
+          
+          // Session is completely expired, redirect to login
+          store.dispatch(AuthActions.logout());
+          
+          const currentUrl = router.url;
+          if (!currentUrl.includes('/login') && 
+              !currentUrl.includes('/register') && 
+              !currentUrl.includes('/reset-password') &&
+              !currentUrl.includes('/admin/login')) {
+            router.navigate(['/login'], { 
+              queryParams: { returnUrl: currentUrl } 
+            });
+          }
+        }
+        
+        // For other 401 errors, let the component handle them
+        return throwError(() => error);
       }
 
+      // For non-401 errors or auth endpoints, pass through
       return throwError(() => error);
     })
   );
@@ -55,7 +52,6 @@ export const tokenRefreshInterceptor: HttpInterceptorFn = (req, next) => {
 function isAuthEndpoint(url: string): boolean {
   const authEndpoints = [
     '/auth/sign-in',
-    '/auth/refresh-token',
     '/auth/logout',
     '/auth/status',
     '/auth/send-otp',
