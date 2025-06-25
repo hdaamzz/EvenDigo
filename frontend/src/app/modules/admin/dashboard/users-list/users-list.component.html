@@ -28,120 +28,198 @@
 
       <!-- Customer List Cards -->
       @if (!showVerificationPage) {
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @if (loading) {
-        <div class="col-span-full text-center py-4">Loading...</div>
-        } @else if (usersList.length === 0) {
-        <div class="col-span-full text-center py-4">No users found</div>
-        } @else {
-        @for (user of usersList; track user._id) {
-        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
-          <div class="flex items-center mb-3">
-            @if (user.profileImg && user.profileImg[8]=='r') {
-            <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" [src]="user.profileImg"
-              alt="">
-
-            }@else {
-            <div
-              [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.name) + ' flex items-center justify-center text-white mr-3'">
-              {{ user.name.charAt(0).toUpperCase() }}
-            </div>
+        <!-- Search Card for Users List -->
+        <app-admin-card 
+          [showSearch]="true"
+          [searchValue]="usersSearchTerm"
+          searchPlaceholder="Search customers by name, email, phone, or status..."
+          [showMenu]="false"
+          (searchChange)="onUsersSearchChange($event)"
+          (searchClear)="onUsersSearchClear()"
+          class="mb-4">
+          
+          <div card-body>
+            @if (usersSearchTerm && filteredUsersList.length === 0) {
+              <div class="text-center py-2 text-gray-500">
+                <i class="pi pi-search text-2xl mb-2"></i>
+                <p>No customers found matching "{{ usersSearchTerm }}"</p>
+              </div>
+            } @else if (usersSearchTerm) {
+              <div class="text-sm text-gray-600">
+                <i class="pi pi-info-circle mr-1"></i>
+                Found {{ filteredUsersList.length }} customer(s) matching your search
+              </div>
             }
-
-            <div>
-              <h3 class="font-medium text-gray-800">{{ user.name }}</h3>
-              <p class="text-sm text-gray-500">{{ user.email }}</p>
-            </div>
           </div>
+        </app-admin-card>
 
-          <div class="grid grid-cols-2 gap-2 mb-3">
-            <div class="text-sm">
-              <span class="text-gray-500">Phone:</span>
-              <span class="ml-1 text-gray-700">{{ user.phone || 'N/A' }}</span>
-            </div>
-            <div class="text-sm">
-              <span class="text-gray-500">Gender:</span>
-              <span class="ml-1 text-gray-700">{{ user.gender || 'N/A' }}</span>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center">
-            <div>
-              @switch (user.status) {
-              @case ('active') {
-              <span class="status bg-green-100 text-green-600 px-2 py-1 rounded-3xl text-xs">Active</span>
-              }
-              @case ('deactive') {
-              <span class="status bg-yellow-100 text-yellow-600 px-2 py-1 rounded-3xl text-xs">Deactive</span>
-              }
-              @default {
-              <span class="status bg-red-100 text-red-600 px-2 py-1 rounded-3xl text-xs">Blocked</span>
-              }
-              }
-            </div>
-            <p-button class="action-btn text-white rounded transition-all"
-              (click)="showDialog(user._id, isMobile ? 'bottom' : 'right')" label="Details" severity="success"
-              styleClass="p-button-sm">
-            </p-button>
-          </div>
-        </div>
-        }
-        }
-      </div>
-      } @else {
-      <!-- Verification Requests Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @if (loading) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @if (loading) {
           <div class="col-span-full text-center py-4">Loading...</div>
-        } @else if (usersList.length === 0) {
+          } @else if (filteredUsersList.length === 0 && !usersSearchTerm) {
           <div class="col-span-full text-center py-4">No users found</div>
-        } @else {
-          @for (user of verificationList; track user._id) {
-            <app-admin-card
-              [statusBadge]="getUserStatusBadge(user.user_id)" 
-              [menuItems]="getMenuItems(user._id)"
-              (cardClick)="showDialog(user.user_id._id, isMobile ? 'bottom' : 'right')">
-              
-              <!-- Card Header Content -->
-              <div card-header class="flex items-center">
-                @if (user.user_id.profileImg && user.user_id.profileImg[8]=='r') {
-                  <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" 
-                      [src]="user.user_id.profileImg" alt="">
-                } @else {
-                  <div [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.user_id.name) + ' flex items-center justify-center text-white mr-3'">
-                    {{ user.user_id.name.charAt(0).toUpperCase() }}
-                  </div>
+          } @else if (filteredUsersList.length === 0 && usersSearchTerm) {
+          <div class="col-span-full text-center py-4">
+            <i class="pi pi-search text-4xl text-gray-400 mb-3"></i>
+            <p class="text-gray-600 mb-2">No customers found matching "{{ usersSearchTerm }}"</p>
+            <button 
+              class="text-blue-500 hover:text-blue-700 text-sm"
+              (click)="onUsersSearchClear()">
+              Clear search
+            </button>
+          </div>
+          } @else {
+          @for (user of filteredUsersList; track user._id) {
+          <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
+            <div class="flex items-center mb-3">
+              @if (user.profileImg && user.profileImg[8]=='r') {
+              <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" [src]="user.profileImg"
+                alt="">
+
+              }@else {
+              <div
+                [class]="'w-12 h-12 rounded-full ' + getInitialColor(user.name) + ' flex items-center justify-center text-white mr-3'">
+                {{ user.name.charAt(0).toUpperCase() }}
+              </div>
+              }
+
+              <div>
+                <h3 class="font-medium text-gray-800">{{ user.name }}</h3>
+                <p class="text-sm text-gray-500">{{ user.email }}</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <div class="text-sm">
+                <span class="text-gray-500">Phone:</span>
+                <span class="ml-1 text-gray-700">{{ user.phone || 'N/A' }}</span>
+              </div>
+              <div class="text-sm">
+                <span class="text-gray-500">Gender:</span>
+                <span class="ml-1 text-gray-700">{{ user.gender || 'N/A' }}</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <div>
+                @switch (user.status) {
+                @case ('active') {
+                <span class="status bg-green-100 text-green-600 px-2 py-1 rounded-3xl text-xs">Active</span>
                 }
-      
-                <div>
-                  <h3 class="font-medium text-gray-800">{{ user.user_id.name }}</h3>
-                  <p class="text-sm text-gray-500">{{ user.user_id.email }}</p>
-                </div>
+                @case ('deactive') {
+                <span class="status bg-yellow-100 text-yellow-600 px-2 py-1 rounded-3xl text-xs">Deactive</span>
+                }
+                @default {
+                <span class="status bg-red-100 text-red-600 px-2 py-1 rounded-3xl text-xs">Blocked</span>
+                }
+                }
               </div>
-              
-              <!-- Card Body Content -->
-              <div card-body class="grid grid-cols-2 gap-2">
-                <div class="text-sm">
-                  <span class="text-gray-500">Phone:</span>
-                  <span class="ml-1 text-gray-700">{{ user.user_id.phone || 'N/A' }}</span>
-                </div>
-                <div class="text-sm">
-                  <span class="text-gray-500">Gender:</span>
-                  <span class="ml-1 text-gray-700">{{ user.user_id.gender || 'N/A' }}</span>
-                </div>
-              </div>
-              
-              <!-- Card Actions -->
-              <div card-actions>
-                <p-button class="action-btn text-white rounded transition-all"
-                  (click)="showDialog(user.user_id._id, isMobile ? 'bottom' : 'right')" 
-                  label="Details" severity="success" styleClass="p-button-sm">
-                </p-button>
-              </div>
-            </app-admin-card>
+              <p-button class="action-btn text-white rounded transition-all"
+                (click)="showDialog(user._id, isMobile ? 'bottom' : 'right')" label="Details" severity="success"
+                styleClass="p-button-sm">
+              </p-button>
+            </div>
+          </div>
           }
-        }
-      </div>
+          }
+        </div>
+      } @else {
+        <!-- Search Card for Verification Requests -->
+        <app-admin-card 
+          [showSearch]="true"
+          [searchValue]="verificationSearchTerm"
+          searchPlaceholder="Search verification requests by name, email, phone, or status..."
+          [showMenu]="false"
+          (searchChange)="onVerificationSearchChange($event)"
+          (searchClear)="onVerificationSearchClear()"
+          class="mb-4">
+          
+          <div card-header>
+            <div class="flex items-center">
+              <i class="pi pi-shield text-green-500 mr-2"></i>
+              <h3 class="text-lg font-semibold text-gray-800">Search Verification Requests</h3>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Find verification requests by name, email, phone number, or status</p>
+          </div>
+          
+          <div card-body>
+            @if (verificationSearchTerm && filteredVerificationList.length === 0) {
+              <div class="text-center py-2 text-gray-500">
+                <i class="pi pi-search text-2xl mb-2"></i>
+                <p>No verification requests found matching "{{ verificationSearchTerm }}"</p>
+              </div>
+            } @else if (verificationSearchTerm) {
+              <div class="text-sm text-gray-600">
+                <i class="pi pi-info-circle mr-1"></i>
+                Found {{ filteredVerificationList.length }} request(s) matching your search
+              </div>
+            }
+          </div>
+        </app-admin-card>
+
+        <!-- Verification Requests Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @if (verificationLoading) {
+            <div class="col-span-full text-center py-4">Loading...</div>
+          } @else if (filteredVerificationList.length === 0 && !verificationSearchTerm) {
+            <div class="col-span-full text-center py-4">No verification requests found</div>
+          } @else if (filteredVerificationList.length === 0 && verificationSearchTerm) {
+            <div class="col-span-full text-center py-4">
+              <i class="pi pi-search text-4xl text-gray-400 mb-3"></i>
+              <p class="text-gray-600 mb-2">No verification requests found matching "{{ verificationSearchTerm }}"</p>
+              <button 
+                class="text-blue-500 hover:text-blue-700 text-sm"
+                (click)="onVerificationSearchClear()">
+                Clear search
+              </button>
+            </div>
+          } @else {
+            @for (verification of filteredVerificationList; track verification._id) {
+              <app-admin-card
+                [statusBadge]="getUserStatusBadge(verification.user_id)" 
+                [menuItems]="getMenuItems(verification)"
+                (cardClick)="showDialog(verification.user_id._id, isMobile ? 'bottom' : 'right')">
+                
+                <!-- Card Header Content -->
+                <div card-header class="flex items-center">
+                  @if (verification.user_id.profileImg && verification.user_id.profileImg[8]=='r') {
+                    <img class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-3" 
+                        [src]="verification.user_id.profileImg" alt="">
+                  } @else {
+                    <div [class]="'w-12 h-12 rounded-full ' + getInitialColor(verification.user_id.name) + ' flex items-center justify-center text-white mr-3'">
+                      {{ verification.user_id.name.charAt(0).toUpperCase() }}
+                    </div>
+                  }
+        
+                  <div>
+                    <h3 class="font-medium text-gray-800">{{ verification.user_id.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ verification.user_id.email }}</p>
+                  </div>
+                </div>
+                
+                <!-- Card Body Content -->
+                <div card-body class="grid grid-cols-2 gap-2">
+                  <div class="text-sm">
+                    <span class="text-gray-500">Phone:</span>
+                    <span class="ml-1 text-gray-700">{{ verification.user_id.phone || 'N/A' }}</span>
+                  </div>
+                  <div class="text-sm">
+                    <span class="text-gray-500">Gender:</span>
+                    <span class="ml-1 text-gray-700">{{ verification.user_id.gender || 'N/A' }}</span>
+                  </div>
+                </div>
+                
+                <!-- Card Actions -->
+                <div card-actions>
+                  <p-button class="action-btn text-white rounded transition-all"
+                    (click)="showDialog(verification.user_id._id, isMobile ? 'bottom' : 'right')" 
+                    label="Details" severity="success" styleClass="p-button-sm">
+                  </p-button>
+                </div>
+              </app-admin-card>
+            }
+          }
+        </div>
       }
 
       <!-- User Details Dialog -->

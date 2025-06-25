@@ -14,6 +14,21 @@
         <p-button (click)="addNewCoupon()" label="Add New Coupon"><i class="fas fa-plus-circle mr-2"></i></p-button>
       </div>
 
+      <div class="mb-4">
+        <div class="relative max-w-md">
+          <input type="text" [(ngModel)]="searchTerm"
+            placeholder="Search coupons by code, description, type, or status..."
+            (input)="onSearchChange($event)"
+            class="w-full pr-10 pl-4 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+          <button *ngIf="searchTerm" type="button" (click)="onSearchClear()"
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+            <i class="pi pi-times text-sm"></i>
+          </button>
+          <i *ngIf="!searchTerm"
+            class="pi pi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+        </div>
+      </div>
+
       <!-- Coupon Form Dialog -->
       <p-dialog [header]="selectedCoupon._id ? 'Edit Coupon' : 'Add New Coupon'" [(visible)]="createDialogVisible"
         [modal]="true" [style]="{ width: isMobile ? '100%' : '30rem' }" [position]="isMobile ? 'bottom' : 'right'">
@@ -154,10 +169,17 @@
       <div #couponsContainer class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @if (loading && couponsList.length === 0) {
         <div class="col-span-full text-center py-4">Loading...</div>
+        } @else if (filteredCoupons.length === 0 && !loading && searchTerm) {
+        <div class="col-span-full text-center py-8">
+          <i class="pi pi-search text-4xl text-gray-300 mb-3"></i>
+          <p class="text-gray-500">No coupons found matching "{{ searchTerm }}"</p>
+          <p-button label="Clear Search" severity="secondary" size="small" (click)="onSearchClear()"
+            class="mt-2"></p-button>
+        </div>
         } @else if (couponsList.length === 0 && !loading) {
         <div class="col-span-full text-center py-4">No coupons found</div>
         } @else {
-        @for (coupon of couponsList; track coupon._id) {
+        @for (coupon of filteredCoupons; track coupon._id) {
         <app-admin-card [statusBadge]="getCouponStatusBadge(coupon)" [menuItems]="getCouponMenuItems(coupon)"
           (cardClick)="showCouponDetails(coupon._id)">
           <!-- Card Header Content -->
@@ -194,7 +216,6 @@
             </div>
           </div>
 
-
           <div card-actions>
             <p-button label="Details" severity="success" styleClass="p-button-sm"
               (click)="showCouponDetails(coupon._id)"></p-button>
@@ -203,16 +224,14 @@
         }
         }
       </div>
-
       <!-- Loading Spinner for infinite scroll -->
-      @if (loading && couponsList.length > 0) {
+      @if (loading && couponsList.length > 0 && !searchTerm) {
       <div class="flex justify-center py-4">
         <div class="loader"></div>
       </div>
       }
-
       <!-- End of results message -->
-      @if (allLoaded && couponsList.length > 0) {
+      @if (allLoaded && couponsList.length > 0 && !searchTerm) {
       <div class="text-center text-gray-500 py-4">
         No more coupons to load
       </div>

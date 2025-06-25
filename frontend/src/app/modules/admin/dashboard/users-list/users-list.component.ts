@@ -21,13 +21,20 @@ import { AdminUsersService } from '../../../../core/services/admin/users/admin.u
 export class UsersListComponent implements OnInit, OnDestroy {
   
   usersList: User[] = [];
+  filteredUsersList: User[] = [];
   verificationList: any[] = [];
+  filteredVerificationList: any[] = [];
   showVerificationPage = false;
   loading = true;
   verificationLoading = true;
   visible = false;
   position = 'right';
   isMobile = false;
+  
+  // Search properties
+  usersSearchTerm = '';
+  verificationSearchTerm = '';
+  
   selectedUser: User = {
     _id: '',
     name: '',
@@ -61,6 +68,56 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 
+  // Search methods
+  onUsersSearchChange(searchValue: string): void {
+    this.usersSearchTerm = searchValue;
+    this._filterUsers();
+  }
+
+  onUsersSearchClear(): void {
+    this.usersSearchTerm = '';
+    this.filteredUsersList = [...this.usersList];
+  }
+
+  onVerificationSearchChange(searchValue: string): void {
+    this.verificationSearchTerm = searchValue;
+    this._filterVerificationUsers();
+  }
+
+  onVerificationSearchClear(): void {
+    this.verificationSearchTerm = '';
+    this.filteredVerificationList = [...this.verificationList];
+  }
+
+  private _filterUsers(): void {
+    if (!this.usersSearchTerm) {
+      this.filteredUsersList = [...this.usersList];
+      return;
+    }
+
+    const searchTerm = this.usersSearchTerm.toLowerCase();
+    this.filteredUsersList = this.usersList.filter(user => 
+      user.name.toLowerCase().includes(searchTerm) ||
+      user.email.toLowerCase().includes(searchTerm) ||
+      (user.phone && user.phone.includes(searchTerm)) ||
+      (user.status && user.status.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  private _filterVerificationUsers(): void {
+    if (!this.verificationSearchTerm) {
+      this.filteredVerificationList = [...this.verificationList];
+      return;
+    }
+
+    const searchTerm = this.verificationSearchTerm.toLowerCase();
+    this.filteredVerificationList = this.verificationList.filter(verification => 
+      verification.user_id.name.toLowerCase().includes(searchTerm) ||
+      verification.user_id.email.toLowerCase().includes(searchTerm) ||
+      (verification.user_id.phone && verification.user_id.phone.includes(searchTerm)) ||
+      (verification.status && verification.status.toLowerCase().includes(searchTerm))
+    );
+  }
   
   showDialog(id: string, position: string): void {
     this._usersService.userDetails(id)
@@ -230,6 +287,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         if (response?.success) {
           this.usersList = response.data;
+          this.filteredUsersList = [...this.usersList];
         } else if (response) {
           console.error('Failed to fetch users:', response.message);
           Notiflix.Notify.failure(response.message);
@@ -252,6 +310,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         if (response?.success) {
           this.verificationList = response.data;
+          this.filteredVerificationList = [...this.verificationList];
         } else if (response) {
           console.error('Failed to fetch verification users:', response.message);
           Notiflix.Notify.failure(response.message);

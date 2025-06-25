@@ -1,32 +1,43 @@
 <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 card transition-all hover:shadow-md">
-    <div class="card-header mb-3">
-      <ng-content select="[card-header]"></ng-content>
+  <div class="search-section mb-3" *ngIf="showSearch">
+    <div class="relative">
+      <input type="text" [(ngModel)]="searchValue" [placeholder]="searchPlaceholder"
+        (input)="onSearchChange($event)"
+        class="w-full pr-10 pl-4 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+      <button *ngIf="searchValue" type="button" (click)="onClearSearch()"
+        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+        <i class="pi pi-times text-sm"></i>
+      </button>
+      <i *ngIf="!searchValue"
+        class="pi pi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
     </div>
-  
-    <div class="card-body mb-3">
-      <ng-content select="[card-body]"></ng-content>
+  </div>
+
+  <div class="card-header mb-3">
+    <ng-content select="[card-header]"></ng-content>
+  </div>
+
+  <div class="card-body mb-3">
+    <ng-content select="[card-body]"></ng-content>
+  </div>
+
+  <!-- Card Footer -->
+  <div class="flex justify-between items-center">
+    <div *ngIf="statusBadge">
+      <span [class]="'status px-2 py-1 rounded-3xl text-xs ' + statusBadge.classes">
+        {{ statusBadge.text }}
+      </span>
     </div>
-  
-    <div class="flex justify-between items-center">
-      <div *ngIf="statusBadge">
-        <span [class]="'status px-2 py-1 rounded-3xl text-xs ' + statusBadge.classes">
-          {{ statusBadge.text }}
-        </span>
-      </div>
-  
-      <div class="flex items-center space-x-2">
-        <ng-content select="[card-actions]"></ng-content>
-        
-        <div class="relative" *ngIf="showMenu && menuItems.length > 0">
-          <p-menu #menu [popup]="true" [model]="menuItems" [appendTo]="'body'"></p-menu>
-          <button 
-            pButton 
-            type="button" 
-            icon="pi pi-ellipsis-v" 
-            class="p-button-text p-button-rounded p-button-sm"
-            (click)="toggleMenu($event, menu)">
-          </button>
-        </div>
+
+    <div class="flex items-center space-x-2">
+      <ng-content select="[card-actions]"></ng-content>
+
+      <div class="relative" *ngIf="showMenu && menuItems.length > 0">
+        <p-menu #menu [popup]="true" [model]="menuItems" [appendTo]="'body'"></p-menu>
+        <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-text p-button-rounded p-button-sm"
+          (click)="toggleMenu($event, menu)">
+        </button>
       </div>
     </div>
   </div>
+</div>

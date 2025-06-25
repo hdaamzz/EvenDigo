@@ -34,15 +34,17 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedCoupon: any = {};
   isMobile = window.innerWidth < 768;
   createDialogVisible = false;
-  
+  searchTerm = '';
+  filteredCoupons: any[] = [];
+  originalCoupons: any[] = [];
   currentPage = 1;
-  pageSize = 9; 
+  pageSize = 9;
   hasMoreCoupons = true;
   allLoaded = false;
-  
+
   private destroy$ = new Subject<void>();
-  
-  @ViewChild('couponsContainer') couponsContainer: ElementRef | undefined;  
+
+  @ViewChild('couponsContainer') couponsContainer: ElementRef | undefined;
   couponForm!: FormGroup;
   discountTypes = [
     { label: 'Percentage', value: 'percentage' },
@@ -55,21 +57,21 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     this.initForm();
   }
-  
+
   ngOnInit(): void {
     this.loadCoupons(true);
     this.setupResizeListener();
   }
-  
+
   ngAfterViewInit(): void {
     this.setupScrollListener();
   }
-  
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
   private initForm(): void {
     this.couponForm! = this.fb.group({
       couponCode: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20), alphabetsValidator()]],
@@ -81,7 +83,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       description: ['', [Validators.maxLength(500)]]
     }, { validators: this.customValidators() });
   }
-  
+
   private setupResizeListener(): void {
     fromEvent(window, 'resize')
       .pipe(
@@ -106,12 +108,12 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
   }
-  
+
   private isScrolledToBottom(): boolean {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
-    
+
     return (scrollPosition + windowHeight) > (documentHeight * 0.8);
   }
 
@@ -119,9 +121,9 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (reset) {
       this.resetPagination();
     }
-    
+
     if (this.loading || this.allLoaded) return;
-    
+
     this.loading = true;
     this.couponService.getCouponsWithPagination(this.currentPage, this.pageSize)
       .pipe(
@@ -135,17 +137,21 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         },
         error: (err) => {
           console.error('Error loading coupons:', err);
+          Notiflix.Notify.failure('Failed to load coupons');
         }
       });
   }
-  
+
+
   private resetPagination(): void {
     this.currentPage = 1;
     this.couponsList = [];
+    this.originalCoupons = [];
+    this.filteredCoupons = [];
     this.hasMoreCoupons = true;
     this.allLoaded = false;
   }
-  
+
   private mapCouponsData(data: any[]): any[] {
     return data.map(coupon => ({
       _id: coupon._id,
@@ -161,15 +167,28 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     }));
   }
   private processCouponsResponse(newCoupons: any[], reset: boolean, hasMore: boolean): void {
-    this.couponsList = reset ? newCoupons : [...this.couponsList, ...newCoupons];
+    if (reset) {
+      this.couponsList = newCoupons;
+      this.originalCoupons = [...newCoupons];
+    } else {
+      this.couponsList = [...this.couponsList, ...newCoupons];
+      this.originalCoupons = [...this.couponsList];
+    }
+
     this.hasMoreCoupons = hasMore;
     this.allLoaded = !hasMore;
+
+    if (this.searchTerm.trim()) {
+      this.applySearchFilter();
+    } else {
+      this.filteredCoupons = [...this.originalCoupons];
+    }
   }
-  
+
 
   loadMoreCoupons(): void {
     if (this.loading || !this.hasMoreCoupons) return;
-    
+
     this.currentPage++;
     this.loadCoupons();
   }
@@ -197,7 +216,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   saveCoupon(): void {
     if (this.validateForm()) {
       const couponData = this.prepareCouponData();
-      
+
       if (this.selectedCoupon._id) {
         this.updateExistingCoupon(this.selectedCoupon._id, couponData);
       } else {
@@ -205,22 +224,22 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
-  
+
 
   private validateForm(): boolean {
     if (this.couponForm!.invalid) {
       this.couponForm!.markAllAsTouched();
-      
+
       const firstInvalidControl = document.querySelector('.ng-invalid');
       if (firstInvalidControl) {
         firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      
+
       return false;
     }
     return true;
   }
-  
+
   private prepareCouponData(): ICoupon {
     return {
       couponCode: (this.couponForm!.value.couponCode || '').toUpperCase(),
@@ -232,13 +251,13 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       description: this.couponForm!.value.description || '',
     };
   }
-  
+
   private updateExistingCoupon(couponId: string, couponData: ICoupon): void {
     this.couponService.updateCoupon(couponId, couponData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.loadCoupons(true); 
+          this.loadCoupons(true);
           Notiflix.Notify.success('Coupon Updated Successfully');
           this.hideCouponDialog();
         },
@@ -248,7 +267,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
   }
-  
+
   private createNewCoupon(couponData: ICoupon): void {
     this.couponService.createCoupon(couponData)
       .pipe(takeUntil(this.destroy$))
@@ -286,9 +305,13 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: () => {
           const coupon = this.couponsList.find(c => c._id === couponId);
-          if (coupon) {
-            coupon.status = 'active';
-          }
+          const originalCoupon = this.originalCoupons.find(c => c._id === couponId);
+          const filteredCoupon = this.filteredCoupons.find(c => c._id === couponId);
+
+          if (coupon) coupon.status = 'active';
+          if (originalCoupon) originalCoupon.status = 'active';
+          if (filteredCoupon) filteredCoupon.status = 'active';
+
           Notiflix.Notify.success('Coupon activated successfully');
         },
         error: (err) => {
@@ -304,9 +327,13 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: () => {
           const coupon = this.couponsList.find(c => c._id === couponId);
-          if (coupon) {
-            coupon.status = 'inactive';
-          }
+          const originalCoupon = this.originalCoupons.find(c => c._id === couponId);
+          const filteredCoupon = this.filteredCoupons.find(c => c._id === couponId);
+
+          if (coupon) coupon.status = 'inactive';
+          if (originalCoupon) originalCoupon.status = 'inactive';
+          if (filteredCoupon) filteredCoupon.status = 'inactive';
+
           Notiflix.Notify.success('Coupon deactivated successfully');
         },
         error: (err) => {
@@ -318,16 +345,19 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   deleteCoupon(couponId: string): void {
     Notiflix.Confirm.show(
-      'Confirm Deletion', 
+      'Confirm Deletion',
       'Are you sure you want to delete this coupon?',
-      'Yes', 
-      'No', 
+      'Yes',
+      'No',
       () => {
         this.couponService.deleteCoupon(couponId)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: () => {
               this.couponsList = this.couponsList.filter(coupon => coupon._id !== couponId);
+              this.originalCoupons = this.originalCoupons.filter(coupon => coupon._id !== couponId);
+              this.filteredCoupons = this.filteredCoupons.filter(coupon => coupon._id !== couponId);
+
               Notiflix.Notify.success('Coupon deleted successfully');
             },
             error: (err) => {
@@ -355,24 +385,24 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
       const discount = formGroup.get('discount')?.value;
       const minAmount = formGroup.get('minAmount')?.value;
       const errors: ValidationErrors = {};
-      
+
       if (discountType === 'percentage' && discount > 80) {
         formGroup.get('discount')?.setErrors({ maxPercentage: true });
         errors['maxPercentage'] = true;
       }
-      
+
       if (discountType === 'fixed_amount' && minAmount > 0 && discount > minAmount) {
         formGroup.get('discount')?.setErrors({ exceedsMinAmount: true });
         errors['exceedsMinAmount'] = true;
       }
-  
+
       return Object.keys(errors).length > 0 ? errors : null;
     };
   }
 
 
   getCouponStatusBadge(coupon: any): { text: string, classes: string } {
-    return coupon.status === 'active' 
+    return coupon.status === 'active'
       ? { text: 'Active', classes: 'bg-green-100 text-green-600' }
       : { text: 'Inactive', classes: 'bg-red-100 text-red-600' };
   }
@@ -400,5 +430,30 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         command: () => this.deleteCoupon(coupon._id)
       }
     ];
+  }
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm = target.value.toLowerCase();
+    this.applySearchFilter();
+  }
+
+  onSearchClear(): void {
+    this.searchTerm = '';
+    this.filteredCoupons = [...this.originalCoupons];
+  }
+
+  private applySearchFilter(): void {
+    if (!this.searchTerm.trim()) { 
+      this.filteredCoupons = [...this.originalCoupons];
+      return;
+    }
+
+    const searchTermLower = this.searchTerm.toLowerCase();
+    this.filteredCoupons = this.originalCoupons.filter(coupon =>
+      coupon.code.toLowerCase().includes(searchTermLower) ||
+      (coupon.description && coupon.description.toLowerCase().includes(searchTermLower)) ||
+      coupon.discountType.toLowerCase().includes(searchTermLower) ||
+      coupon.status.toLowerCase().includes(searchTermLower)
+    );
   }
 }
