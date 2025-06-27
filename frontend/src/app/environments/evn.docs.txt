@@ -1,0 +1,30 @@
+Environment Configuration Documentation
+API Configuration
+
+apiUrl - Backend API endpoint URL for data requests
+baseUrl - Base URL for the frontend application
+production - Boolean flag indicating production environment (true/false)
+
+Payment Integration
+
+stripePublishKey - Stripe publishable key for client-side payment processing
+
+Video Communication
+
+zegoAppId - ZEGO Cloud application ID for video call functionality
+
+Firebase Configuration
+
+firebase.apiKey - Firebase project API key
+firebase.authDomain - Firebase authentication domain
+firebase.projectId - Firebase project identifier
+firebase.storageBucket - Firebase storage bucket name
+firebase.messagingSenderId - Firebase Cloud Messaging sender ID
+firebase.appId - Firebase application ID
+
+Usage Notes
+
+All Firebase configuration values are obtained from Firebase Console
+Stripe publishable key is safe to expose on client-side (starts with 'pk_')
+ZEGO App ID should match the backend ZEGO_APP_ID for proper integration
+Set production to true for production builds, false for development
