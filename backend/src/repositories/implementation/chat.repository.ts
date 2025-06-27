@@ -269,4 +269,21 @@ export class ChatRepository implements IChatRepository {
   async deleteMessage(messageId: string): Promise<void> {
     await MessageModel.findByIdAndDelete(messageId);
   }
+  async deleteGroupChatByEventId(eventId: string): Promise<void> {
+    const eventObjectId = new Types.ObjectId(eventId);
+
+    const result = await ChatModel.updateOne(
+      { 
+        eventId: eventObjectId,
+        chatType: 'group',
+        isActive: true 
+      },
+      { $set: { isActive: false } }
+    );
+
+    if (result.matchedCount === 0) {
+      throw new Error('Group chat not found for this event');
+    }
+  }
+
 }

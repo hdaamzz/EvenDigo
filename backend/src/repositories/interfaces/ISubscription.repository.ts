@@ -26,4 +26,7 @@ export interface ISubscriptionRepository {
   findAllSubscriptions(): Promise<ISubscription[]>;
   findAllActiveSubscriptions(): Promise<ISubscription[]>;
   deleteSubscription(subscriptionId: string): Promise<boolean>;
+  deleteAllPendingSubscriptions(): Promise<{ deletedCount: number; success: boolean }>
+  deleteAllCancelledSubscriptions(): Promise<{ deletedCount: number; success: boolean }>
+  updateExpiredSubscriptions(): Promise<{ modifiedCount: number; success: boolean }>
 }

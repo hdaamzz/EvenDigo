@@ -9,23 +9,19 @@ export const tokenRefreshInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const store = inject(Store);
 
-  // Always include credentials (cookies) with requests
   const modifiedRequest = req.clone({
     withCredentials: true
   });
 
   return next(modifiedRequest).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Handle 401 errors for protected routes
       if (error.status === 401 && !isAuthEndpoint(req.url)) {
         const errorBody = error.error;
         
-        // Check the error code to determine the appropriate action
         if (errorBody?.code === 'SESSION_EXPIRED' || 
             errorBody?.code === 'REFRESH_FAILED' || 
             errorBody?.code === 'NO_REFRESH_TOKEN') {
           
-          // Session is completely expired, redirect to login
           store.dispatch(AuthActions.logout());
           
           const currentUrl = router.url;
@@ -39,11 +35,9 @@ export const tokenRefreshInterceptor: HttpInterceptorFn = (req, next) => {
           }
         }
         
-        // For other 401 errors, let the component handle them
         return throwError(() => error);
       }
 
-      // For non-401 errors or auth endpoints, pass through
       return throwError(() => error);
     })
   );

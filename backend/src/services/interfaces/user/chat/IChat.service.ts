@@ -24,5 +24,6 @@ export interface IChatService {
   getMessageById(messageId: string): Promise<IMessage | null>;
   updateMessage(messageId: string, content: string, userId: string): Promise<IMessage>;
   deleteMessage(messageId: string, userId: string): Promise<void>;
+  deleteGroupChatByEventId(eventId: string): Promise<void>
   validateChatAccess(chatId: string, userId: string): Promise<boolean>;
 }

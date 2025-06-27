@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 export class SubscriptionRepository implements ISubscriptionRepository {
   constructor(
     @inject("SubscriptionModel") private subscriptionModel: Model<ISubscription>
-  ) {}
+  ) { }
 
   async createSubscription(subscriptionData: Partial<ISubscription>): Promise<ISubscription> {
     try {
@@ -22,7 +22,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
   async findSubscriptionById(subscriptionId: string): Promise<ISubscription | null> {
     try {
       console.log(subscriptionId);
-      
+
       return await this.subscriptionModel.findOne({ subscriptionId }).exec();
     } catch (error) {
       throw new Error(`Failed to find subscription: ${(error as Error).message}`);
@@ -39,10 +39,10 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findActiveSubscriptionByUserId(userId: Schema.Types.ObjectId | string): Promise<ISubscription | null> {
     try {
-      return await this.subscriptionModel.findOne({ 
-        userId, 
+      return await this.subscriptionModel.findOne({
+        userId,
         isActive: true,
-        endDate: { $gt: new Date() } 
+        endDate: { $gt: new Date() }
       }).exec();
     } catch (error) {
       throw new Error(`Failed to find active subscription: ${(error as Error).message}`);
@@ -66,7 +66,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       const now = new Date();
       return await this.subscriptionModel.findOneAndUpdate(
         { subscriptionId },
-        { 
+        {
           status: SubscriptionStatus.CANCELLED,
           isActive: false,
           cancelledAt: now
@@ -106,9 +106,9 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       if (!mongoose.Types.ObjectId.isValid(id) && !id.includes('ObjectId')) {
         return null;
       }
-      
+
       let objectId: mongoose.Types.ObjectId;
-      
+
       if (id.includes('ObjectId')) {
         const match = id.match(/ObjectId\(['"]?([0-9a-fA-F]{24})['"]?\)/);
         if (!match || !match[1]) {
@@ -118,7 +118,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       } else {
         objectId = new mongoose.Types.ObjectId(id);
       }
-      
+
       return await this.subscriptionModel.findById(objectId).exec();
     } catch (error) {
       throw new Error(`Failed to find subscription by ObjectId: ${(error as Error).message}`);
@@ -155,9 +155,9 @@ export class SubscriptionRepository implements ISubscriptionRepository {
     }
   }
 
-    async findAllActiveSubscriptions(): Promise<ISubscription[]> {
+  async findAllActiveSubscriptions(): Promise<ISubscription[]> {
     try {
-      return await this.subscriptionModel.find({status:'active'})
+      return await this.subscriptionModel.find({ status: 'active' })
         .sort({ createdAt: -1 })
         .exec();
     } catch (error) {
@@ -172,5 +172,58 @@ export class SubscriptionRepository implements ISubscriptionRepository {
     } catch (error) {
       throw new Error(`Failed to delete subscription: ${(error as Error).message}`);
     }
+  }
+  async deleteAllPendingSubscriptions(): Promise<{ deletedCount: number; success: boolean }> {
+    try {
+      const result = await this.subscriptionModel.deleteMany({
+        status: SubscriptionStatus.PENDING
+      }).exec();
+
+      return {
+        deletedCount: result.deletedCount || 0,
+        success: true
+      };
+    } catch (error) {
+      throw new Error(`Failed to delete pending subscriptions: ${(error as Error).message}`);
+    }
+  }
+  async deleteAllCancelledSubscriptions(): Promise<{ deletedCount: number; success: boolean }> {
+    try {
+      const result = await this.subscriptionModel.deleteMany({
+        status: SubscriptionStatus.CANCELLED
+      }).exec();
+
+      return {
+        deletedCount: result.deletedCount || 0,
+        success: true
+      };
+    } catch (error) {
+      throw new Error(`Failed to delete pending subscriptions: ${(error as Error).message}`);
+    }
+  }
+  async updateExpiredSubscriptions(): Promise<{ modifiedCount: number; success: boolean }> {
+  try {
+    const now = new Date();
+    const result = await this.subscriptionModel.updateMany(
+      {
+        endDate: { $lt: now },
+        status: { $in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING] },
+        isActive: true
+      },
+      {
+        $set: {
+          status: SubscriptionStatus.EXPIRED,
+          isActive: false
+        }
+      }
+    ).exec();
+    
+    return {
+      modifiedCount: result.modifiedCount || 0,
+      success: true
+    };
+  } catch (error) {
+    throw new Error(`Failed to update expired subscriptions: ${(error as Error).message}`);
+  }
   }
 }

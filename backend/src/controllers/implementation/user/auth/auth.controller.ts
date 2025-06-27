@@ -7,7 +7,7 @@ import { IAuthController } from '../../../../../src/controllers/interfaces/User/
 import { IAuthService } from '../../../../../src/services/interfaces/IAuth.service';
 import { cookieConfig } from '../../../../../src/configs/cookie.config';
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: IUser;
 }
 

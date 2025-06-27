@@ -81,4 +81,9 @@ export interface IChatRepository {
   deleteMessage(
     messageId: string
   ): Promise<void>;
+
+  deleteGroupChatByEventId(
+    eventId: string
+  ): Promise<void>;
+  
 }

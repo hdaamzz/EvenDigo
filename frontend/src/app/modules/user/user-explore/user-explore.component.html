@@ -1,184 +1,249 @@
 <app-user-nav></app-user-nav>
-<div class="relative mt-4 sm:mt-8 md:mt-10 mx-4 sm:mx-8 md:mx-11 w-50 pt-20">
-  
-    <input type="text"
-           class="w-full pl-10 pr-4 py-2 border-2 border-gray-500 rounded-md text-xs font-serif placeholder-gray-500 focus:outline-none focus:border-[#00ff66] transition-colors duration-300"
-           placeholder="Search events">
-    
-  </div>
-  <div
-    class="bg-[#1E1E1E] p-3 sm:p-4 md:p-6 mx-2 sm:mx-6 md:mx-10 my-4 sm:my-8 md:my-10 min-h-screen h-max rounded-xl sm:rounded-2xl">
-    <!-- Sort Options - Responsive Filter Bar (hidden on mobile) -->
-    <div class="hidden sm:flex justify-end mb-4 sm:mb-6 overflow-x-auto pb-2">
-      <div
-        class="bg-[#121212] rounded-md flex flex-wrap sm:flex-nowrap items-center overflow-hidden px-2 py-1 sm:px-3 sm:py-2 whitespace-nowrap">
-        <button
-          class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Newest</button>
-        <span class="text-gray-500 mx-1">|</span>
-        <button
-          class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Oldest</button>
-        <span class="text-gray-500 mx-1">|</span>
-        <button
-          class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Private</button>
-        <span class="text-gray-500 mx-1">|</span>
-        <button
-          class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Public</button>
-        <span class="text-gray-500 mx-1">|</span>
-        <button
-          class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-md transition-all duration-300 ease-in-out hover:bg-gray-300 hover:text-black">Custom
-          Date</button>
-      </div>
-    </div>
 
-    <!-- Alternative Mobile Filter Bar (appears on smallest screens) -->
-    <div class="sm:hidden mb-4">
-      <select class="w-full bg-[#121212] text-white text-xs rounded-md p-2 border border-gray-700">
-        <option>Newest</option>
-        <option>Oldest</option>
-        <option>Private</option>
-        <option>Public</option>
-        <option>Custom Date</option>
-      </select>
-    </div>
-
-    <!-- Main container -->
-    <div class="w-full mx-auto pt-2 sm:pt-4 bg-[#1E1E1E]">
-      <div class="max-w-xs md:max-w-7xl m-auto my-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
-          @for (event of eventList; track event._id) {
-          <!-- Desktop Card -->
-          <div
-            class="hidden md:block w-full bg-[#121212] rounded-xl  overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group relative">
-            <div class="relative pb-[166.6%]">
-              <div class="absolute inset-0 overflow-hidden">
-                <img [src]="event.mainBanner" alt="Event Banner"
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                @if (event.ageRestriction) {
-                <div class="absolute top-3 right-3 bg-red-600 text-white text-xs px-2 py-1 rounded-full">18+</div>
-                }
-                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
-                  <h3 class="font-sans text-lg font-bold text-white truncate">{{event.eventTitle}}</h3>
-                </div>
-              </div>
-              <div
-                class="absolute inset-0 bg-black/80 flex flex-col justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
-                <div>
-                  <h3 class="font-sans text-lg font-bold text-white">{{event.eventTitle}}</h3>
-                  <h5 class="font-sans text-xs font-light text-white">{{event.eventDescription | truncate:100}}</h5>
-                  <div class="flex items-center mt-3 text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p class="font-sans text-xs">{{event.startDate | date:'MMM d, y'}} at {{event.startTime |
-                      date:'shortTime'}}</p>
-                  </div>
-                  <div class="flex items-center mt-2 text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p class="font-sans text-xs truncate">{{event.venueName}}, {{event.city}}</p>
-                  </div>
-                  @if (event.tickets && event.tickets.length > 0) {
-                  <div class="flex items-center mt-2 text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
-                    <p class="font-sans text-xs">From ₹{{getLowestTicketPrice(event)}}</p>
-                  </div>
-                  }
-                </div>
-                <div class="flex justify-between mt-4">
-                  <button
-                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-xs flex items-center transition-colors duration-300"
-                    (click)="showEventDetails(event._id)">
-                    View Details
-                  </button>
-                  <div class="flex space-x-2">
-                    <button
-                      class="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full transition-colors duration-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </button>
-                    <button
-                      class="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full transition-colors duration-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
+<!-- Main Container -->
+<div class="min-h-screen bg-[#000000] text-white pt-20">
+  <!-- Header Section -->
+  <div class="bg-[#121212] border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <!-- Title and Search -->
+        <div class="flex-1">
+          <div class="relative max-w-lg">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
+            <input 
+              type="text" 
+              [(ngModel)]="searchQuery"
+              (input)="onSearch()"
+              placeholder="Search events, venues, or cities..."
+              class="w-full pl-10 pr-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] transition-colors duration-300"
+            >
           </div>
+        </div>
 
-          <!-- Mobile Card -->
-          <div class="md:hidden w-full bg-[#121212] rounded-xl overflow-hidden shadow-xl mb-3">
-            <!-- Card header with image and age restriction -->
-            <div class="relative w-full h-36">
-              <img [src]="event.mainBanner" alt="Event image" class="w-full h-full object-cover">
-              @if (event.ageRestriction) {
-              <div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">18+</div>
-              }
-              <!-- Gradient overlay for better text readability -->
-              <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent"></div>
-              <!-- Event title on the image -->
-              <h3 class="absolute bottom-2 left-3 right-3 font-sans text-sm font-bold text-white line-clamp-1">
-                {{event.eventTitle}}</h3>
-            </div>
-
-            <!-- Card body with event details -->
-            <div class="p-3 flex flex-col gap-2">
-              <!-- Date and time -->
-              <div class="flex items-center text-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p class="font-sans text-xs">{{event.startDate | date:'EEE, MMM d'}} · {{event.startTime | date:'h:mm
-                  a'}}</p>
-              </div>
-
-              <!-- Location -->
-              <div class="flex items-center text-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
-                <p class="font-sans text-xs">{{event.city}}</p>
-              </div>
-
-              <!-- Action button -->
-              <button
-                class="mt-1 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium w-full transition-all duration-300 active:scale-95"
-                (click)="showEventDetails(event._id)">
-                View Details
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <!-- Event Type Filter -->
+          <div class="relative" (clickOutside)="closeEventTypeDropdown()">
+            <button 
+              (click)="toggleEventTypeDropdown()"
+              class="flex items-center justify-between w-full sm:w-48 px-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white hover:border-[#00ff66] transition-colors duration-200">
+              <span class="text-sm">{{ selectedEventType || 'All Event Types' }}</span>
+              <svg class="w-4 h-4 ml-2 transition-transform duration-200" [class.rotate-180]="isEventTypeDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Event Type Dropdown -->
+            <div *ngIf="isEventTypeDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-[#121212] border border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+              <button 
+                (click)="selectEventType('')"
+                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700">
+                All Event Types
+              </button>
+              <button 
+                *ngFor="let eventType of eventTypes"
+                (click)="selectEventType(eventType.value)"
+                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700 last:border-b-0">
+                {{ eventType.label }}
               </button>
             </div>
           </div>
-          }
 
+          <!-- Sort Filter -->
+          <div class="relative" (clickOutside)="closeSortDropdown()">
+            <button 
+              (click)="toggleSortDropdown()"
+              class="flex items-center justify-between w-full sm:w-40 px-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white hover:border-[#00ff66] transition-colors duration-200">
+              <span class="text-sm">{{ selectedSort }}</span>
+              <svg class="w-4 h-4 ml-2 transition-transform duration-200" [class.rotate-180]="isSortDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Sort Dropdown -->
+            <div *ngIf="isSortDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-[#121212] border border-gray-700 rounded-lg shadow-xl z-50">
+              <button 
+                *ngFor="let sort of sortOptions"
+                (click)="selectSort(sort.value, sort.label)"
+                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700 last:border-b-0">
+                {{ sort.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Visibility Filter -->
+          <div class="relative" (clickOutside)="closeVisibilityDropdown()">
+            <button 
+              (click)="toggleVisibilityDropdown()"
+              class="flex items-center justify-between w-full sm:w-36 px-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white hover:border-[#00ff66] transition-colors duration-200">
+              <span class="text-sm">{{ selectedVisibility }}</span>
+              <svg class="w-4 h-4 ml-2 transition-transform duration-200" [class.rotate-180]="isVisibilityDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Visibility Dropdown -->
+            <div *ngIf="isVisibilityDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-[#121212] border border-gray-700 rounded-lg shadow-xl z-50">
+              <button 
+                (click)="selectVisibility('All', 'All')"
+                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700">
+                All
+              </button>
+              <button 
+                (click)="selectVisibility('public', 'Public')"
+                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700">
+                Public
+              </button>
+              <button 
+                (click)="selectVisibility('private', 'Private')"
+                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200">
+                Private
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filters -->
+      <div *ngIf="hasActiveFilters()" class="flex flex-wrap gap-2 mt-4">
+        <span class="text-sm text-gray-400 mr-2">Active filters:</span>
+        <span *ngIf="selectedEventType" class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-[#00ff66] text-black">
+          {{ selectedEventType }}
+          <button (click)="clearEventTypeFilter()" class="ml-2 hover:text-gray-600">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </span>
+        <span *ngIf="selectedVisibility !== 'All'" class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-[#00ff66] text-black">
+          {{ selectedVisibility }}
+          <button (click)="clearVisibilityFilter()" class="ml-2 hover:text-gray-600">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </span>
+        <button (click)="clearAllFilters()" class="text-xs text-gray-400 hover:text-[#00ff66] underline">
+          Clear all
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Events Grid -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00ff66]"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredEvents.length === 0" class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <h3 class="text-lg font-medium text-gray-300 mb-2">No events found</h3>
+      <p class="text-gray-400">Try adjusting your filters or search terms</p>
+    </div>
+
+    <!-- Events Grid -->
+    <div *ngIf="!isLoading && filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div *ngFor="let event of filteredEvents; trackBy: trackByEventId" 
+           class="bg-[#121212] rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-gray-800 hover:border-[#00ff66] transition-all duration-300 group">
+        
+        <!-- Event Image -->
+        <div class="relative aspect-w-16 aspect-h-9 overflow-hidden">
+          <img 
+            [src]="event.mainBanner" 
+            [alt]="event.eventTitle"
+            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            (error)="onImageError($event)"
+          >
+          
+          <!-- Age Restriction Badge -->
+          <div *ngIf="event.ageRestriction" 
+               class="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+            18+
+          </div>
+          
+          <!-- Event Type Badge -->
+          <div class="absolute top-3 left-3 bg-[#00ff66] text-black text-xs font-bold px-2 py-1 rounded-full">
+            {{ event.eventType }}
+          </div>
+        </div>
+
+        <!-- Event Details -->
+        <div class="p-4 space-y-3">
+          <!-- Title -->
+          <h3 class="font-semibold text-lg text-white line-clamp-2 group-hover:text-[#00ff66] transition-colors duration-200">
+            {{ event.eventTitle }}
+          </h3>
+
+          <!-- Description -->
+          <p class="text-gray-400 text-sm line-clamp-2">
+            {{ event.eventDescription | truncate:80 }}
+          </p>
+
+          <!-- Date and Time -->
+          <div class="flex items-center text-gray-300 text-sm">
+            <svg class="w-4 h-4 mr-2 text-[#00ff66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{{ event.startDate | date:'MMM d, y' }} • {{ event.startTime | date:'shortTime' }}</span>
+          </div>
+
+          <!-- Location -->
+          <div class="flex items-center text-gray-300 text-sm">
+            <svg class="w-4 h-4 mr-2 text-[#00ff66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="truncate">{{ event.venueName }}, {{ event.city }}</span>
+          </div>
+
+          <!-- Price -->
+          <div *ngIf="event.tickets && event.tickets.length > 0" class="flex items-center text-gray-300 text-sm">
+            <svg class="w-4 h-4 mr-2 text-[#00ff66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+            </svg>
+            <span>From ₹{{ getLowestTicketPrice(event) }}</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-between pt-2">
+            <button 
+              (click)="showEventDetails(event._id)"
+              class="flex-1 bg-[#00ff66] hover:bg-green-400 text-black font-medium px-4 py-2 rounded-lg transition-colors duration-200 mr-2">
+              View Details
+            </button>
+            
+            <div class="flex space-x-2">
+              <button class="p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </button>
+              <button class="p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Event Detail Modal (shown conditionally) -->
-    @if (isModalOpen) {
-    <app-event-detail-modal [id]="selectedEventId!" (close)="closeModal()" (chat)="onChatWithOrganizer($event)">
-    </app-event-detail-modal>
-    }
   </div>
+</div>
+
+<!-- Event Detail Modal -->
+<app-event-detail-modal 
+  *ngIf="isModalOpen" 
+  [id]="selectedEventId!" 
+  (close)="closeModal()" 
+  (chat)="onChatWithOrganizer($event)">
+</app-event-detail-modal>

@@ -140,6 +140,18 @@ export class ChatService implements IChatService {
 
     await this.chatRepository.deleteChat(chatId);
   }
+  async deleteGroupChatByEventId(eventId: string): Promise<void> {
+    if (!eventId) {
+      throw new Error('Event ID is required');
+    }
+
+    const groupChat = await this.chatRepository.getGroupChatByEventId(eventId);
+    if (!groupChat) {
+      throw new Error('Group chat not found for this event');
+    }
+
+    await this.chatRepository.deleteGroupChatByEventId(eventId);
+  }
 
   async getMessageById(messageId: string): Promise<IMessage | null> {
     if (!messageId) {

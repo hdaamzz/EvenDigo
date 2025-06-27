@@ -13,7 +13,7 @@ export const cities = [
     { label: 'Lucknow', value: 'Lucknow' },
     { label: 'Kanpur', value: 'Kanpur' },
     { label: 'Nagpur', value: 'Nagpur' },
-    { label: 'Indore', value: 'Indore' },
+    { label: 'Indore', value: 'Indore' },-
     { label: 'Bhopal', value: 'Bhopal' },
     { label: 'Visakhapatnam', value: 'Visakhapatnam' },
     { label: 'Patna', value: 'Patna' },

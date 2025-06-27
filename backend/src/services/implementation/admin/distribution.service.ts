@@ -8,37 +8,73 @@ import { IWalletRepository } from '../../../../src/repositories/interfaces/IWall
 import { IRevenueDistributionService } from '../../../../src/services/interfaces/IDistribution.service';
 import { inject, injectable } from 'tsyringe';
 import { IEventRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
+import { IChatService } from '../../../../src/services/interfaces/user/chat/IChat.service';
+import { ISubscriptionQueryService } from '../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
 
 
 @injectable()
 export class RevenueDistributionService implements IRevenueDistributionService {
 
-  private ADMIN_PERCENTAGE = 10; 
+  private ADMIN_PERCENTAGE = 10;
 
   constructor(
     @inject("RevenueDistributionRepository") private revenueDistributionRepository: IRevenueDistributionRepository,
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
-    @inject("EventRepository") private eventRepository: IEventRepository
+    @inject("EventRepository") private eventRepository: IEventRepository,
+    @inject("ChatService") private chatService: IChatService,
+    @inject("AdminSubscriptionService") private subscriptionService: ISubscriptionQueryService
 
   ) { }
 
-  async processFinishedEvents(): Promise<ServiceResponse<{ processed: number }>> {
+  async processFinishedEvents(): Promise<ServiceResponse<{ processed: number; subscriptionsProcessed: { deleted: number; cancelled: number; expired: number } }>> {
     try {
       const finishedEvents = await this.revenueDistributionRepository.findFinishedEventsForDistribution();
-      
-      let processedCount = 0;
-      for (const event of finishedEvents) {
-        const result = await this.distributeEventRevenue(event._id as Schema.Types.ObjectId);
-        if (result.success) {
-          processedCount++;
-        }
+
+      if (finishedEvents.length === 0) {
+        return {
+          success: true,
+          message: 'No finished events to process',
+          data: { processed: 0, subscriptionsProcessed: { deleted: 0, cancelled: 0, expired: 0 } }
+        };
       }
+
+      // Process subscription cleanup once (outside the loop)
+      const [deletedPending, deletedCancelled, expiredUpdated] = await Promise.all([
+        this.subscriptionService.deleteAllPendingSubscriptions(),
+        this.subscriptionService.deleteAllCancelledSubscriptions(),
+        this.subscriptionService.updateExpiredSubscriptions()
+      ]);
+
+      let processedCount = 0;
+      const eventProcessingPromises = finishedEvents.map(async (event) => {
+        try {
+          const [revenueResult] = await Promise.all([
+            this.distributeEventRevenue(event._id as Schema.Types.ObjectId),
+            this.chatService.deleteGroupChatByEventId(event._id as string)
+          ]);
+
+          return revenueResult.success;
+        } catch (error) {
+          console.error(`Failed to process event ${event._id}:`, error);
+          return false;
+        }
+      });
+
+      const results = await Promise.all(eventProcessingPromises);
+      processedCount = results.filter(success => success).length;
 
       return {
         success: true,
-        message: `Successfully processed ${processedCount} events for revenue distribution`,
-        data: { processed: processedCount }
+        message: `Successfully processed ${processedCount}/${finishedEvents.length} events. Subscriptions: ${deletedPending.deletedCount} pending deleted, ${deletedCancelled.deletedCount} cancelled deleted, ${expiredUpdated.modifiedCount} expired updated`,
+        data: {
+          processed: processedCount,
+          subscriptionsProcessed: {
+            deleted: deletedPending.deletedCount,
+            cancelled: deletedCancelled.deletedCount,
+            expired: expiredUpdated.modifiedCount
+          }
+        }
       };
     } catch (error) {
       return {
@@ -59,7 +95,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
       }
 
       const bookings = await this.bookingRepository.findBookingsByEventId(eventId, { paymentStatus: "Completed" });
-      
+
       if (!bookings || bookings.length === 0) {
         return {
           success: false,
@@ -71,15 +107,18 @@ export class RevenueDistributionService implements IRevenueDistributionService {
       let totalParticipants = 0;
 
       bookings.forEach(booking => {
-        totalRevenue += booking.totalAmount;
+
         booking.tickets.forEach(ticket => {
-          totalParticipants += ticket.quantity;
+          if (ticket.status !== 'Cancelled') {
+            totalRevenue += ticket.totalPrice;
+            totalParticipants += ticket.quantity;
+          }
         });
       });
 
       // Calculate revenue split
-      const adminAmount = (totalRevenue * this.ADMIN_PERCENTAGE) / 100;
-      const organizerAmount = totalRevenue - adminAmount;
+      const adminAmount = ((totalRevenue + 40) * this.ADMIN_PERCENTAGE) / 100;
+      const organizerAmount = (totalRevenue + 40) - adminAmount;
 
       // Get event details for organizer ID
       const eventWithOrganizer = await this.eventRepository.findEventById(eventId);
@@ -89,7 +128,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
 
       // Create or update revenue distribution record
       let distribution: IRevenueDistribution;
-      
+
       if (existingDistribution) {
         const updatedDistribution = await this.revenueDistributionRepository.updateDistribution(eventId, {
           admin_percentage: { $numberDecimal: this.ADMIN_PERCENTAGE.toString() } as any,
@@ -100,11 +139,11 @@ export class RevenueDistributionService implements IRevenueDistributionService {
           distributed_at: new Date(),
           is_distributed: false
         });
-        
+
         if (!updatedDistribution) {
           throw new Error("Failed to update revenue distribution record");
         }
-        
+
         distribution = updatedDistribution;
       } else {
         distribution = await this.revenueDistributionRepository.createDistribution({
@@ -122,7 +161,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
       const eventName = eventWithOrganizer.eventTitle;
 
       const wallet = await this.walletRepository.findWalletById(organizerId);
-      
+
       if (!wallet) {
         await this.walletRepository.createWallet({
           userId: organizerId as any,
@@ -166,7 +205,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   async getDistributionByEventId(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>> {
     try {
       const distribution = await this.revenueDistributionRepository.findDistributionByEventId(eventId);
-      
+
       return {
         success: true,
         message: distribution ? "Distribution found" : "No distribution found for this event",
@@ -183,7 +222,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   async getAllCompletedDistributions(): Promise<ServiceResponse<IRevenueDistribution[]>> {
     try {
       const distributions = await this.revenueDistributionRepository.findCompletedDistributions();
-      
+
       return {
         success: true,
         message: "Successfully fetched all completed distributions",
@@ -200,7 +239,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   async getDistributedRevenue(page: number, limit: number): Promise<ServiceResponse<any>> {
     try {
       const result = await this.revenueDistributionRepository.findDistributedRevenueWithPagination(page, limit);
-      
+
       return {
         success: true,
         message: "Revenue distribution data fetched successfully",
@@ -217,7 +256,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   async getRecentDistributedRevenue(limit: number): Promise<ServiceResponse<IRevenueDistribution[]>> {
     try {
       const result = await this.revenueDistributionRepository.findRecentDistributedRevenue(limit);
-      
+
       return {
         success: true,
         message: "Recent revenue distribution data fetched successfully",
@@ -234,7 +273,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   async getRevenueByEventId(eventId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IRevenueDistribution | null>> {
     try {
       const result = await this.revenueDistributionRepository.findRevenueByEventId(eventId);
-      
+
       return {
         success: true,
         message: "Revenue for event fetched successfully",
@@ -251,7 +290,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   async getEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<ServiceResponse<any>> {
     try {
       const events = await this.eventRepository.findEventsByIds(eventIds);
-      
+
       return {
         success: true,
         message: "Events fetched successfully",
@@ -268,25 +307,25 @@ export class RevenueDistributionService implements IRevenueDistributionService {
     try {
       const totalRevenue = await this.revenueDistributionRepository.findTotalRevenue();
       const previousMonthTotalRevenue = await this.revenueDistributionRepository.findTotalRevenueForPreviousMonth();
-  
+
       const todayRevenue = await this.revenueDistributionRepository.findTodayRevenue();
       const yesterdayRevenue = await this.revenueDistributionRepository.findYesterdayRevenue();
-  
+
       const currentMonthRevenue = await this.revenueDistributionRepository.findCurrentMonthRevenue();
       const previousMonthRevenue = await this.revenueDistributionRepository.findPreviousMonthRevenue();
-  
+
       const totalRevenueChange = previousMonthTotalRevenue > 0
         ? ((totalRevenue - previousMonthTotalRevenue) / previousMonthTotalRevenue) * 100
         : 0;
-  
+
       const todayRevenueChange = yesterdayRevenue > 0
         ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100
         : 0;
-  
+
       const monthlyRevenueChange = previousMonthRevenue > 0
         ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100
         : 0;
-  
+
       const stats = {
         totalRevenue: totalRevenue.toFixed(2),
         totalRevenueChange: Number(totalRevenueChange.toFixed(1)),
@@ -295,7 +334,7 @@ export class RevenueDistributionService implements IRevenueDistributionService {
         monthlyRevenue: currentMonthRevenue.toFixed(2),
         monthlyRevenueChange: Number(monthlyRevenueChange.toFixed(1))
       };
-  
+
       return {
         success: true,
         message: "Revenue statistics fetched successfully",
@@ -310,21 +349,21 @@ export class RevenueDistributionService implements IRevenueDistributionService {
   }
 
   async getRevenueByDateRange(
-    startDate: string, 
-    endDate: string, 
-    page: number = 1, 
+    startDate: string,
+    endDate: string,
+    page: number = 1,
     limit: number = 10,
     isDistributed: boolean = true
   ): Promise<ServiceResponse<any>> {
     try {
       const result = await this.revenueDistributionRepository.findRevenueByDateRange(
-        startDate, 
-        endDate, 
-        page, 
+        startDate,
+        endDate,
+        page,
         limit,
         isDistributed
       );
-      
+
       return {
         success: true,
         message: "Revenue distribution data fetched successfully",

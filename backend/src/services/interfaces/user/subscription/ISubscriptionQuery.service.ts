@@ -16,5 +16,7 @@ export interface ISubscriptionQueryService {
   handleSubscriptionWebhook(event: Stripe.Event): Promise<void>;
   addRefundToWallet(userId: string, amount: number, subscription: ISubscription): Promise<void>;
   calculateRefundAmount(subscription: ISubscription): number;
-
+  deleteAllPendingSubscriptions(): Promise<{ deletedCount: number; success: boolean; message: string }>
+  deleteAllCancelledSubscriptions(): Promise<{ deletedCount: number; success: boolean; message: string }> 
+  updateExpiredSubscriptions(): Promise<{ modifiedCount: number; success: boolean; message: string }> 
 }
