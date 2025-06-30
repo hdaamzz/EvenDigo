@@ -7,11 +7,11 @@ import { IVerification } from "../../../src/models/interfaces/profile.interface"
 @injectable()
 export class VerificationRepository implements IVerificationRepository{
 
-  async findAllVerificationUsers(): Promise<IVerification[]> {
-    return VerificationModel.find({})
-      .sort({ createdAt: -1 })
-      .populate('user_id');
-  }
+async findAllVerificationUsers(): Promise<IVerification[]> {
+  return VerificationModel.find({})
+    .sort({ createdAt: -1 })
+    .populate('user_id', '-password -firebaseUid'); 
+}
   
 
   

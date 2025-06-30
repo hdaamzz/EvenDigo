@@ -1,6 +1,10 @@
 import express from 'express';
 import authRouter from './user/auth.routes';
 import { authMiddleware } from '../../src/middlewares/auth.middleware';
+import { 
+  requireAdminRole, 
+  requireUserRole, 
+} from '../../src/middlewares/rolebased.middleware';
 import { securityHeaders, sanitizeInput } from '../middlewares/security.middleware';
 import profileRouter from './user/profile.routes';
 import dashboardRouter from './user/dashboard.routes';
@@ -21,6 +25,7 @@ import livestreamRoutes from './user/livestream.routes';
 
 const router = express.Router();
 
+// Apply security middleware to all routes
 router.use(securityHeaders);
 router.use(express.json({ limit: '10mb' }));
 router.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -28,26 +33,6 @@ router.use(sanitizeInput);
 
 router.use('/user/auth', authRouter);
 router.use('/admin/auth', adminAuthRouter);
-
-router.use(authMiddleware);
-
-router.use('/user/profile', profileRouter);
-router.use('/user/dashboard', dashboardRouter);
-router.use('/user/explore', exploreRoutes);
-router.use('/user/subscription', subscriptionRoutes);
-router.use('/user/chats', chatRoutes);
-router.use('/user/livestream', livestreamRoutes); 
-
-// Admin routes
-router.use('/admin/coupon', couponRouter);
-router.use('/admin/events', adminEventsRouter);
-router.use('/admin/users', adminUsersRouter);
-router.use('/admin/achievements', achievementRouter);
-router.use('/admin/finance', financeRouter);
-router.use('/admin/dist', distributionRouter);
-router.use('/admin/subscriptions', adminSubscriptionRoutes);
-router.use('/admin/subscription-plans', subscriptionPlanRouter);
-router.use('/admin/dashboard', adminDashboardRouter);
 
 router.get('/health', (_req, res) => {
   res.status(200).json({
@@ -57,5 +42,25 @@ router.get('/health', (_req, res) => {
   });
 });
 
+router.use(authMiddleware);
+
+// User-only routes
+router.use('/user/profile', requireUserRole, profileRouter);
+router.use('/user/dashboard', requireUserRole, dashboardRouter);
+router.use('/user/explore', requireUserRole, exploreRoutes);
+router.use('/user/subscription', requireUserRole, subscriptionRoutes);
+router.use('/user/chats', requireUserRole, chatRoutes);
+router.use('/user/livestream', requireUserRole, livestreamRoutes);
+
+// Admin-only routes
+router.use('/admin/coupon', requireAdminRole, couponRouter);
+router.use('/admin/events', requireAdminRole, adminEventsRouter);
+router.use('/admin/users', requireAdminRole, adminUsersRouter);
+router.use('/admin/achievements', requireAdminRole, achievementRouter);
+router.use('/admin/finance', requireAdminRole, financeRouter);
+router.use('/admin/dist', requireAdminRole, distributionRouter);
+router.use('/admin/subscriptions', requireAdminRole, adminSubscriptionRoutes);
+router.use('/admin/subscription-plans', requireAdminRole, subscriptionPlanRouter);
+router.use('/admin/dashboard', requireAdminRole, adminDashboardRouter);
 
 export default router;

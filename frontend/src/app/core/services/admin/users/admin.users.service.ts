@@ -10,7 +10,7 @@ import { ApiResponse } from '../../../models/admin/admin.interface';
   providedIn: 'root'
 })
 export class AdminUsersService {
-  private readonly _apiUrl = `${environment.apiUrl}/admin/users`;
+  private readonly _apiUrl = `${environment.apiUrl}admin/users`;
 
   constructor(private _http: HttpClient) {}
 
