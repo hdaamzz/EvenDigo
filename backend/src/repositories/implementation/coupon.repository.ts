@@ -1,54 +1,115 @@
 import { CouponModel } from '../../../src/models/CouponModel';
 import { ICoupon } from '../../models/interfaces/coupon.interface';
-import { Schema } from 'mongoose';
+import { BaseRepository } from '../BaseRepository';
 import { ICouponRepository } from '../interfaces/ICoupon.repository';
 import { injectable } from 'tsyringe';
 
 @injectable()
-export class CouponRepository implements ICouponRepository{
+export class CouponRepository extends BaseRepository<ICoupon> implements ICouponRepository {
+    constructor() {
+        super(CouponModel);
+    }
+
+    async findByCode(couponCode: string): Promise<ICoupon | null> {
+        return this.findOne({ couponCode });
+    }
+
+    async findActiveCoupons(): Promise<ICoupon[]> {
+        const currentDate = new Date();
+        return this.findMany({
+            isActive: true,
+            validFrom: { $lte: currentDate },
+            validUntil: { $gte: currentDate }
+        });
+    }
+
+    async findExpiredCoupons(): Promise<ICoupon[]> {
+        const currentDate = new Date();
+        return this.findMany({
+            validUntil: { $lt: currentDate }
+        });
+    }
+
+    async findByDiscountType(discountType: string): Promise<ICoupon[]> {
+        return this.findMany({ discountType });
+    }
+
+    async findByUsageLimit(usageLimit: number): Promise<ICoupon[]> {
+        return this.findMany({ usageLimit: { $lte: usageLimit } });
+    }
+
+    async findCouponsInDateRange(startDate: Date, endDate: Date): Promise<ICoupon[]> {
+        return this.findMany({
+            $or: [
+                {
+                    validFrom: { $gte: startDate, $lte: endDate }
+                },
+                {
+                    validUntil: { $gte: startDate, $lte: endDate }
+                },
+                {
+                    validFrom: { $lte: startDate },
+                    validUntil: { $gte: endDate }
+                }
+            ]
+        });
+    }
+
+    async findActiveCouponsPaginated(page: number = 1, limit: number = 10): Promise<{
+        items: ICoupon[];
+        totalCount: number;
+        hasMore: boolean;
+        currentPage: number;
+        totalPages: number;
+    }> {
+        const currentDate = new Date();
+        const filter = {
+            isActive: true,
+            validFrom: { $lte: currentDate },
+            validUntil: { $gte: currentDate }
+        };
+        
+        return this.findWithPagination(filter, page, limit);
+    }
+
+    async findAll(): Promise<ICoupon[]> {
+        return super.findAll();
+    }
+
     async findAllCoupons(): Promise<ICoupon[]> {
-        return CouponModel.find({}).sort({ createdAt: -1 }).exec();
+        return this.findAll();
     }
 
-    async findAllCouponsPagination(page: number = 1, limit: number = 10): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}> {
-        const skip = (page - 1) * limit;
-        
-        const [coupons, totalCount] = await Promise.all([
-            CouponModel.find({})
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .exec(),
-            CouponModel.countDocuments({})
-        ]);
-        
-        const hasMore = totalCount > (skip + coupons.length);
-        
-        return { coupons, totalCount, hasMore };
+    async findAllCouponsPagination(page?: number, limit?: number): Promise<{
+        coupons: ICoupon[];
+        totalCount: number;
+        hasMore: boolean;
+    }> {
+        const result = await this.findAllPaginated(page, limit);
+        return {
+            coupons: result.items,
+            totalCount: result.totalCount,
+            hasMore: result.hasMore
+        };
     }
 
-    async findCouponById(couponId: Schema.Types.ObjectId | string): Promise<ICoupon | null> {
-        return CouponModel.findById(couponId).exec();
+    async findCouponById(couponId: string): Promise<ICoupon | null> {
+        return this.findById(couponId);
     }
 
     async findCouponByCode(couponCode: string): Promise<ICoupon | null> {
-        return CouponModel.findOne({ couponCode }).exec();
+        return this.findByCode(couponCode);
     }
 
     async createCoupon(couponData: Partial<ICoupon>): Promise<ICoupon> {
-        const coupon = new CouponModel(couponData);
-        return coupon.save();
+        return this.create(couponData);
     }
 
-    async updateCoupon(couponId: Schema.Types.ObjectId | string, updateData: Partial<ICoupon>): Promise<ICoupon | null> {
-        return CouponModel.findByIdAndUpdate(
-            couponId,
-            { $set: updateData },
-            { new: true }
-        ).exec();
+    async updateCoupon(couponId: string, updateData: Partial<ICoupon>): Promise<ICoupon | null> {
+        return this.update(couponId, updateData);
     }
 
-    async deleteCoupon(couponId: Schema.Types.ObjectId | string): Promise<void> {
-        await CouponModel.findByIdAndDelete(couponId).exec();
+    async deleteCoupon(couponId: string): Promise<void> {
+        return this.delete(couponId);
     }
 }
