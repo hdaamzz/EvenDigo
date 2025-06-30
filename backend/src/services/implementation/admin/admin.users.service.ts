@@ -19,7 +19,7 @@ export class AdminUsersService implements IUsersAdminService {
     
     async fetchAllUsers(): Promise<ServiceResponse<IUser[]>> {
     try {
-      const users = await this.userRepository.findAllUsers();
+      const users = await this.userRepository.findAll();
       
       return {
         success: true,
@@ -53,7 +53,7 @@ export class AdminUsersService implements IUsersAdminService {
 
   async fetchUserById(userId: string): Promise<ServiceResponse<IUser>> {
     try {
-      const user = await this.userRepository.findUserById(userId);
+      const user = await this.userRepository.findById(userId);
       
       if (!user) {
         return {

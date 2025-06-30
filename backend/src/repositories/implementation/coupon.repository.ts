@@ -16,7 +16,7 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
 
     async findActiveCoupons(): Promise<ICoupon[]> {
         const currentDate = new Date();
-        return this.findMany({
+        return this.findAll({
             isActive: true,
             validFrom: { $lte: currentDate },
             validUntil: { $gte: currentDate }
@@ -25,21 +25,21 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
 
     async findExpiredCoupons(): Promise<ICoupon[]> {
         const currentDate = new Date();
-        return this.findMany({
+        return this.findAll({
             validUntil: { $lt: currentDate }
         });
     }
 
     async findByDiscountType(discountType: string): Promise<ICoupon[]> {
-        return this.findMany({ discountType });
+        return this.findAll({ discountType });
     }
 
     async findByUsageLimit(usageLimit: number): Promise<ICoupon[]> {
-        return this.findMany({ usageLimit: { $lte: usageLimit } });
+        return this.findAll({ usageLimit: { $lte: usageLimit } });
     }
 
     async findCouponsInDateRange(startDate: Date, endDate: Date): Promise<ICoupon[]> {
-        return this.findMany({
+        return this.findAll({
             $or: [
                 {
                     validFrom: { $gte: startDate, $lte: endDate }
@@ -69,27 +69,32 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
             validUntil: { $gte: currentDate }
         };
         
-        return this.findWithPagination(filter, page, limit);
-    }
-
-    async findAll(): Promise<ICoupon[]> {
-        return super.findAll();
+        const result = await this.findWithPagination(filter, { page, limit });
+        
+        return {
+            items: result.data,
+            totalCount: result.total,
+            hasMore: result.hasNext,
+            currentPage: result.page,
+            totalPages: result.pages
+        };
     }
 
     async findAllCoupons(): Promise<ICoupon[]> {
         return this.findAll();
     }
 
-    async findAllCouponsPagination(page?: number, limit?: number): Promise<{
+    async findAllCouponsPagination(page: number = 1, limit: number = 10): Promise<{
         coupons: ICoupon[];
         totalCount: number;
         hasMore: boolean;
     }> {
-        const result = await this.findAllPaginated(page, limit);
+        const result = await this.findWithPagination({}, { page, limit });
+        
         return {
-            coupons: result.items,
-            totalCount: result.totalCount,
-            hasMore: result.hasMore
+            coupons: result.data,
+            totalCount: result.total,
+            hasMore: result.hasNext
         };
     }
 
@@ -106,10 +111,10 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
     }
 
     async updateCoupon(couponId: string, updateData: Partial<ICoupon>): Promise<ICoupon | null> {
-        return this.update(couponId, updateData);
+        return this.updateById(couponId, updateData);
     }
 
-    async deleteCoupon(couponId: string): Promise<void> {
-        return this.delete(couponId);
+    async deleteCoupon(couponId: string): Promise<boolean> {
+        return this.deleteById(couponId);
     }
 }

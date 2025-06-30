@@ -28,7 +28,7 @@ export class FirebaseAuthService implements IFirebaseAuthService {
   ): Promise<{
     success: boolean;
     message: string;
-    user?: IUser;
+    user?: Partial<IUser>;
     accessToken?: string;
     refreshToken?: string;
   }> {
@@ -57,7 +57,7 @@ export class FirebaseAuthService implements IFirebaseAuthService {
           updatedAt: new Date(),
         };
 
-        user = await this.userRepository.createUser(newUser as IUser);
+        user = await this.userRepository.create(newUser as IUser);
         
         if (!user) {
           throw new Error('Failed to create user');
@@ -79,7 +79,7 @@ export class FirebaseAuthService implements IFirebaseAuthService {
           lastLogin: new Date(),
           updatedAt: new Date(),
         };
-        user = await this.userRepository.updateUser(user._id, updateData);
+        user = await this.userRepository.updateById(user._id, updateData);
         
         if (!user) {
           throw new Error('Failed to update user');

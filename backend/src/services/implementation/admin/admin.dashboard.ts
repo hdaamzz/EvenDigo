@@ -21,8 +21,8 @@ export class DashboardService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const totalUsers = (await this.userRepository.findAllUsers()).length;
-      const users = await this.userRepository.findAllUsers();
+      const totalUsers = (await this.userRepository.findAll()).length;
+      const users = await this.userRepository.findAll();
       const newUsers = users.filter(
         (user) => user.createdAt && new Date(user.createdAt) >= thirtyDaysAgo
       ).length;
@@ -210,7 +210,7 @@ export class DashboardService {
 
   async getRecentActivities(limit: number): Promise<any[]> {
     try {
-      const users = await this.userRepository.findAllUsers();
+      const users = await this.userRepository.findAll();
       const events = await this.eventRepository.findAllEvents();
       const subscriptions = await this.subscriptionRepository.findAllSubscriptions();
 
@@ -294,7 +294,7 @@ export class DashboardService {
       const currentDate = new Date();
       let labels: string[] = [];
       let data: number[] = [];
-      const users = await this.userRepository.findAllUsers();
+      const users = await this.userRepository.findAll();
 
       if (period === 'monthly') {
         for (let i = 11; i >= 0; i--) {

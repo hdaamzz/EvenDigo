@@ -120,7 +120,7 @@ export function otpPattern(): ValidatorFn {
       const currentDate = new Date();
       currentDate.setHours(0, 0, 0, 0);
       inputDate.setHours(0, 0, 0, 0);
-      return inputDate >= currentDate ? null : { pastDate: true };
+      return inputDate > currentDate ? null : { pastDate: true };
     };
   }
 

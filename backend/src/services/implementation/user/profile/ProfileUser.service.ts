@@ -22,7 +22,7 @@ export class ProfileUserService implements IProfileUserService {
 
   async fetchUserById(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IUser>> {
     try {
-      const user = await this.userRepository.findUserById(userId);
+      const user = await this.userRepository.findById(userId);
 
       if (!user) {
         throw new NotFoundException("User not found");
@@ -49,7 +49,7 @@ export class ProfileUserService implements IProfileUserService {
 
   async updateUserDetails(userId: Schema.Types.ObjectId | string, data: Partial<IUser>): Promise<ServiceResponse<IUser>> {
     try {
-      const user = await this.userRepository.updateUser(userId, data);
+      const user = await this.userRepository.updateById(userId, data);
 
       if (!user) {
         throw new NotFoundException("User not found");
@@ -177,7 +177,7 @@ export class ProfileUserService implements IProfileUserService {
     newPassword: string
   ): Promise<ServiceResponse<null>> {
     try {
-      const user = await this.userRepository.findUserById(userId);
+      const user = await this.userRepository.findById(userId);
       
       if (!user) {
         throw new NotFoundException("User not found");
@@ -196,7 +196,7 @@ export class ProfileUserService implements IProfileUserService {
       
       const hashedPassword = await hashPassword(newPassword);
       
-      await this.userRepository.updateUser(userId, { password: hashedPassword });
+      await this.userRepository.updateById(userId, { password: hashedPassword });
       
       return {
         success: true,

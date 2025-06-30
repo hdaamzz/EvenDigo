@@ -136,7 +136,7 @@ export class BookingService implements IBookingService {
         throw new NotFoundException('Event not found');
       }
       
-      const user: IUser | null = await this.userRepository.findUserById(booking.userId);
+      const user: IUser | null = await this.userRepository.findById(booking.userId);
       
       if (!user) {
         throw new NotFoundException('User not found');

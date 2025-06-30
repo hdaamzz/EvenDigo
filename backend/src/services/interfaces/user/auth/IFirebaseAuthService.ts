@@ -5,7 +5,7 @@ export interface IFirebaseAuthService {
   authenticateWithFirebase(idToken: string, name: string, profileImg?: string): Promise<{
     success: boolean;
     message: string;
-    user?: IUser;
+    user?: Partial<IUser>;
     token?: string;
   }>;
 }
