@@ -3,17 +3,20 @@ import { inject, injectable } from 'tsyringe';
 import { ISubscriptionRepository } from '../interfaces/ISubscription.repository';
 import { ISubscription, SubscriptionStatus } from '../../models/SubscriptionModal';
 import mongoose from 'mongoose';
+import { BaseRepository } from '../BaseRepository';
 
 @injectable()
-export class SubscriptionRepository implements ISubscriptionRepository {
+export class SubscriptionRepository extends BaseRepository<ISubscription> implements ISubscriptionRepository {
+  
   constructor(
-    @inject("SubscriptionModel") private subscriptionModel: Model<ISubscription>
-  ) { }
+    @inject("SubscriptionModel") subscriptionModel: Model<ISubscription>
+  ) {
+    super(subscriptionModel);
+  }
 
   async createSubscription(subscriptionData: Partial<ISubscription>): Promise<ISubscription> {
     try {
-      const subscription = new this.subscriptionModel(subscriptionData);
-      return await subscription.save();
+      return await this.create(subscriptionData);
     } catch (error) {
       throw new Error(`Failed to create subscription: ${(error as Error).message}`);
     }
@@ -22,8 +25,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
   async findSubscriptionById(subscriptionId: string): Promise<ISubscription | null> {
     try {
       console.log(subscriptionId);
-
-      return await this.subscriptionModel.findOne({ subscriptionId }).exec();
+      return await this.findOne({ subscriptionId });
     } catch (error) {
       throw new Error(`Failed to find subscription: ${(error as Error).message}`);
     }
@@ -31,7 +33,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findSubscriptionByStripeSessionId(sessionId: string): Promise<ISubscription | null> {
     try {
-      return await this.subscriptionModel.findOne({ stripeSessionId: sessionId }).exec();
+      return await this.findOne({ stripeSessionId: sessionId });
     } catch (error) {
       throw new Error(`Failed to find subscription by Stripe session ID: ${(error as Error).message}`);
     }
@@ -39,11 +41,11 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findActiveSubscriptionByUserId(userId: Schema.Types.ObjectId | string): Promise<ISubscription | null> {
     try {
-      return await this.subscriptionModel.findOne({
+      return await this.findOne({
         userId,
         isActive: true,
         endDate: { $gt: new Date() }
-      }).exec();
+      });
     } catch (error) {
       throw new Error(`Failed to find active subscription: ${(error as Error).message}`);
     }
@@ -51,11 +53,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async updateSubscriptionStatus(subscriptionId: string, status: SubscriptionStatus): Promise<ISubscription | null> {
     try {
-      return await this.subscriptionModel.findOneAndUpdate(
-        { subscriptionId },
-        { status },
-        { new: true }
-      ).exec();
+      return await this.updateOne({ subscriptionId }, { status });
     } catch (error) {
       throw new Error(`Failed to update subscription status: ${(error as Error).message}`);
     }
@@ -64,15 +62,14 @@ export class SubscriptionRepository implements ISubscriptionRepository {
   async cancelSubscription(subscriptionId: string): Promise<ISubscription | null> {
     try {
       const now = new Date();
-      return await this.subscriptionModel.findOneAndUpdate(
+      return await this.updateOne(
         { subscriptionId },
         {
           status: SubscriptionStatus.CANCELLED,
           isActive: false,
           cancelledAt: now
-        },
-        { new: true }
-      ).exec();
+        }
+      );
     } catch (error) {
       throw new Error(`Failed to cancel subscription: ${(error as Error).message}`);
     }
@@ -80,9 +77,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findAllSubscriptionsByUserId(userId: Schema.Types.ObjectId | string): Promise<ISubscription[]> {
     try {
-      return await this.subscriptionModel.find({ userId })
-        .sort({ createdAt: -1 })
-        .exec();
+      return await this.findWithSort({ userId }, { createdAt: -1 });
     } catch (error) {
       throw new Error(`Failed to find user subscriptions: ${(error as Error).message}`);
     }
@@ -90,16 +85,11 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async updateSubscription(subscriptionId: string, updateData: Partial<ISubscription>): Promise<ISubscription | null> {
     try {
-      return await this.subscriptionModel.findOneAndUpdate(
-        { subscriptionId },
-        updateData,
-        { new: true }
-      ).exec();
+      return await this.updateOne({ subscriptionId }, updateData);
     } catch (error) {
       throw new Error(`Failed to update subscription: ${(error as Error).message}`);
     }
   }
-
 
   async findSubscriptionByObjectId(id: string): Promise<ISubscription | null> {
     try {
@@ -119,7 +109,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
         objectId = new mongoose.Types.ObjectId(id);
       }
 
-      return await this.subscriptionModel.findById(objectId).exec();
+      return await this.findById(objectId as unknown as string);
     } catch (error) {
       throw new Error(`Failed to find subscription by ObjectId: ${(error as Error).message}`);
     }
@@ -127,7 +117,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async countSubscriptions(query: any): Promise<number> {
     try {
-      return await this.subscriptionModel.countDocuments(query).exec();
+      return await this.count(query);
     } catch (error) {
       throw new Error(`Failed to count subscriptions: ${(error as Error).message}`);
     }
@@ -135,11 +125,13 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findSubscriptionsWithPagination(query: any, skip: number, limit: number): Promise<ISubscription[]> {
     try {
-      return await this.subscriptionModel.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .exec();
+      const page = Math.floor(skip / limit) + 1;
+      const result = await this.findWithPagination(query, {
+        page,
+        limit,
+        sort: { createdAt: -1 }
+      });
+      return result.data;
     } catch (error) {
       throw new Error(`Failed to find subscriptions with pagination: ${(error as Error).message}`);
     }
@@ -147,9 +139,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findAllSubscriptions(): Promise<ISubscription[]> {
     try {
-      return await this.subscriptionModel.find()
-        .sort({ createdAt: -1 })
-        .exec();
+      return await this.findWithSort({}, { createdAt: -1 });
     } catch (error) {
       throw new Error(`Failed to find all subscriptions: ${(error as Error).message}`);
     }
@@ -157,73 +147,56 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   async findAllActiveSubscriptions(): Promise<ISubscription[]> {
     try {
-      return await this.subscriptionModel.find({ status: 'active' })
-        .sort({ createdAt: -1 })
-        .exec();
+      return await this.findWithSort({ status: 'active' }, { createdAt: -1 });
     } catch (error) {
-      throw new Error(`Failed to find all subscriptions: ${(error as Error).message}`);
+      throw new Error(`Failed to find all active subscriptions: ${(error as Error).message}`);
     }
   }
 
   async deleteSubscription(subscriptionId: string): Promise<boolean> {
     try {
-      const result = await this.subscriptionModel.deleteOne({ subscriptionId }).exec();
-      return result.deletedCount > 0;
+      return await this.deleteOne({ subscriptionId });
     } catch (error) {
       throw new Error(`Failed to delete subscription: ${(error as Error).message}`);
     }
   }
+
   async deleteAllPendingSubscriptions(): Promise<{ deletedCount: number; success: boolean }> {
     try {
-      const result = await this.subscriptionModel.deleteMany({
+      return await this.deleteMany({
         status: SubscriptionStatus.PENDING
-      }).exec();
-
-      return {
-        deletedCount: result.deletedCount || 0,
-        success: true
-      };
+      });
     } catch (error) {
       throw new Error(`Failed to delete pending subscriptions: ${(error as Error).message}`);
     }
   }
+
   async deleteAllCancelledSubscriptions(): Promise<{ deletedCount: number; success: boolean }> {
     try {
-      const result = await this.subscriptionModel.deleteMany({
+      return await this.deleteMany({
         status: SubscriptionStatus.CANCELLED
-      }).exec();
-
-      return {
-        deletedCount: result.deletedCount || 0,
-        success: true
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to delete pending subscriptions: ${(error as Error).message}`);
+      throw new Error(`Failed to delete cancelled subscriptions: ${(error as Error).message}`);
     }
   }
+
   async updateExpiredSubscriptions(): Promise<{ modifiedCount: number; success: boolean }> {
-  try {
-    const now = new Date();
-    const result = await this.subscriptionModel.updateMany(
-      {
-        endDate: { $lt: now },
-        status: { $in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING] },
-        isActive: true
-      },
-      {
-        $set: {
+    try {
+      const now = new Date();
+      return await this.updateMany(
+        {
+          endDate: { $lt: now },
+          status: { $in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING] },
+          isActive: true
+        },
+        {
           status: SubscriptionStatus.EXPIRED,
           isActive: false
         }
-      }
-    ).exec();
-    
-    return {
-      modifiedCount: result.modifiedCount || 0,
-      success: true
-    };
-  } catch (error) {
-    throw new Error(`Failed to update expired subscriptions: ${(error as Error).message}`);
-  }
+      );
+    } catch (error) {
+      throw new Error(`Failed to update expired subscriptions: ${(error as Error).message}`);
+    }
   }
 }
