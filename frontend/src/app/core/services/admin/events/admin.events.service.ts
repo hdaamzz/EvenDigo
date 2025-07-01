@@ -13,28 +13,44 @@ export class AdminEventsService {
   private readonly _apiUrl = `${environment.apiUrl}admin/events`;
   constructor(private _http: HttpClient) { }
 
-  getEvents(page = 1, limit = 9): Observable<EventsApiResponse> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+  getEvents(page = 1, limit = 9, searchTerm = '', filter = 'all'): Observable<EventsApiResponse> {
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('limit', limit.toString());
 
-    return this._http.get<IEvent[]>(`${this._apiUrl}`, {
-      params
-    }).pipe(
-      map(events => ({
-        success: true as const,
-        data: events
-      })),
-      catchError(this._handleError)
-    );
+  // Add search parameter if provided
+  if (searchTerm.trim()) {
+    params = params.set('search', searchTerm.trim());
   }
-  
+
+  // Add filter parameter if not 'all'
+  if (filter !== 'all') {
+    params = params.set('filter', filter);
+  }
+
+  return this._http.get<{
+    events: IEvent[];
+    total: number;
+    currentPage: number;
+    totalPages: number;
+  }>(`${this._apiUrl}`, { params }).pipe(
+    map(response => ({
+      success: true as const,
+      data: response.events,
+      total: response.total,
+      currentPage: response.currentPage,
+      totalPages: response.totalPages
+    })),
+    catchError(this._handleError)
+  );
+}
+
 
   updateEventStatus(eventId: string, status: boolean): Observable<EventsApiResponse> {
     return this._http.patch<any>(
-      `${this._apiUrl}/${eventId}/status`, 
+      `${this._apiUrl}/${eventId}/status`,
       { status },
-      
+
     ).pipe(
       map(response => response),
       catchError(this._handleError)
@@ -45,7 +61,7 @@ export class AdminEventsService {
   private _handleError(error: HttpErrorResponse): Observable<EventsApiResponse> {
     const errorMessage = error.error?.message || 'An error occurred while processing your request';
     console.error('API Error:', error);
-    
+
     return throwError(() => ({
       success: false as const,
       message: errorMessage

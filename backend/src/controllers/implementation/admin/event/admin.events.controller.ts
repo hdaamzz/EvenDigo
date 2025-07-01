@@ -14,17 +14,24 @@ export class AdminEventsController implements IEventsAdminController {
     ) {}
 
     async fetchAllEvents(req: Request, res: Response): Promise<void> {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 9;
-        
-        const response: ServiceResponse<AdminEventListDTO[]> = await this.adminEventsService.fetchAllEvents(page, limit);
-        
-        if (response.success) {
-            res.status(StatusCode.OK).json(response.data);
-        } else {
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
-        }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 9;
+    const search = req.query.search as string || '';
+    const filter = req.query.filter as string || 'all';
+    
+    const response: ServiceResponse<{
+        events: AdminEventListDTO[];
+        total: number;
+        currentPage: number;
+        totalPages: number;
+    }> = await this.adminEventsService.fetchAllEvents(page, limit, search, filter);
+    
+    if (response.success) {
+        res.status(StatusCode.OK).json(response.data);
+    } else {
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
     }
+}
 
     async updateEventStatus(req: Request, res: Response): Promise<void> {
         try {

@@ -25,6 +25,7 @@ export interface IAdminLoginResponse {
   export interface EventSuccessResponse {
     success: true; 
     data: IEvent[];
+    total?: number;
   }
   
  export interface ErrorResponse {
@@ -44,5 +45,12 @@ export interface IAdminLoginResponse {
   PERCENTAGE = 'percentage',
   FIXED_AMOUNT = 'fixed_amount'
 }
- export type EventsApiResponse = EventSuccessResponse | ErrorResponse;
+ export interface EventsApiResponse {
+  success: boolean;
+  data: IEvent[];
+  total?: number;
+  currentPage?: number;
+  totalPages?: number;
+  message?: string;
+}
 
