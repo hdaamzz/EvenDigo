@@ -1,10 +1,10 @@
-import { IAchievement } from "../../../../../src/models/interfaces/achievements.interface";
-import { IUserAchievementRepository } from "../../../../../src/repositories/interfaces/IBadge.repository";
-import { IEventRepository } from "../../../../../src/repositories/interfaces/IEvent.repository";
-import { IUserRepository } from "../../../../../src/repositories/interfaces/IUser.repository";
-import { IUserAchievementService } from "../../../../../src/services/interfaces/IAchievement";
+import { IAchievement } from "../../../../models/interfaces/achievements.interface";
+import { IUserAchievementRepository } from "../../../../repositories/interfaces/IBadge.repository";
+import { IEventRepository } from "../../../../repositories/interfaces/IEvent.repository";
+import { IUserRepository } from "../../../../repositories/interfaces/IUser.repository";
+import { IUserAchievementService } from "../../../../services/interfaces/IAchievement";
 import { inject, injectable } from "tsyringe";
-import { IBookingRepository } from "../../../../../src/repositories/interfaces/IBooking.repository";
+import { IBookingRepository } from "../../../../repositories/interfaces/IBooking.repository";
 
 @injectable()
 export class UserAchievementService implements IUserAchievementService {

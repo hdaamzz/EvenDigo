@@ -1,4 +1,4 @@
-import { IChatRepository } from "src/repositories/interfaces/IChat.repository";
+import { IChatRepository } from "../../../../repositories/interfaces/IChat.repository";
 import { IChat, IMessage } from "../../../../models/ChatModel";
 import { IChatService } from "../../../interfaces/user/chat/IChat.service";
 import { inject, injectable } from "tsyringe";

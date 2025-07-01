@@ -1,4 +1,4 @@
-import { EventDocument } from "src/models/interfaces/event.interface";
+import { EventDocument } from "../../../models/interfaces/event.interface";
 import { AdminEventDTO, AdminEventListDTO } from "./event.dto";
 import { ObjectId } from "mongoose";
 

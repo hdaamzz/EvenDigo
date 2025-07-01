@@ -1,15 +1,15 @@
 import { Schema } from 'mongoose';
-import { ServiceResponse } from '../../../../src/models/interfaces/auth.interface';
-import { IRevenueDistribution } from '../../../../src/models/interfaces/distribution.interface';
-import { TransactionType } from '../../../../src/models/interfaces/wallet.interface';
-import { IBookingRepository } from '../../../../src/repositories/implementation/booking.repository';
-import { IRevenueDistributionRepository } from '../../../../src/repositories/interfaces/IRevenue.repository';
-import { IWalletRepository } from '../../../../src/repositories/interfaces/IWallet.repository';
-import { IRevenueDistributionService } from '../../../../src/services/interfaces/IDistribution.service';
+import { ServiceResponse } from '../../../models/interfaces/auth.interface';
+import { IRevenueDistribution } from '../../../models/interfaces/distribution.interface';
+import { TransactionType } from '../../../models/interfaces/wallet.interface';
+import { IBookingRepository } from '../../../repositories/implementation/booking.repository';
+import { IRevenueDistributionRepository } from '../../../repositories/interfaces/IRevenue.repository';
+import { IWalletRepository } from '../../../repositories/interfaces/IWallet.repository';
+import { IRevenueDistributionService } from '../../../services/interfaces/IDistribution.service';
 import { inject, injectable } from 'tsyringe';
-import { IEventRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
-import { IChatService } from '../../../../src/services/interfaces/user/chat/IChat.service';
-import { ISubscriptionQueryService } from '../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { IEventRepository } from '../../../repositories/interfaces/IEvent.repository';
+import { IChatService } from '../../../services/interfaces/user/chat/IChat.service';
+import { ISubscriptionQueryService } from '../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
 
 
 @injectable()

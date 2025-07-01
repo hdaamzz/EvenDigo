@@ -1,14 +1,14 @@
 import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
 import { MongoError } from 'mongodb';
-import { IUserAuthService } from '../../../../../src/services/interfaces/user/auth/IUserAuthService';
-import { IUserRepository } from '../../../../../src/repositories/interfaces/IUser.repository';
-import { IPasswordService } from '../../../../../src/services/interfaces/user/auth/IPasswordService';
-import { ITokenService } from '../../../../../src/services/interfaces/user/auth/ITokenService';
-import { IEmailService } from '../../../../../src/services/interfaces/user/auth/IEmailService';
-import { IOTPService } from '../../../../../src/services/interfaces/user/auth/IOTPService';
-import { IAuthResponse, ILogin, IUser, ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { ConflictException, InternalServerErrorException, NotFoundException } from '../../../../../src/error/error-handlers';
+import { IUserAuthService } from '../../../../services/interfaces/user/auth/IUserAuthService';
+import { IUserRepository } from '../../../../repositories/interfaces/IUser.repository';
+import { IPasswordService } from '../../../../services/interfaces/user/auth/IPasswordService';
+import { ITokenService } from '../../../../services/interfaces/user/auth/ITokenService';
+import { IEmailService } from '../../../../services/interfaces/user/auth/IEmailService';
+import { IOTPService } from '../../../../services/interfaces/user/auth/IOTPService';
+import { IAuthResponse, ILogin, IUser, ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { ConflictException, InternalServerErrorException, NotFoundException } from '../../../../error/error-handlers';
 
 @injectable()
 export class UserAuthService implements IUserAuthService {

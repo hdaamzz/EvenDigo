@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { ServiceResponse } from '../../models/interfaces/auth.interface';
-import { IRevenueDistribution } from '../../../src/models/interfaces/distribution.interface';
+import { IRevenueDistribution } from '../../models/interfaces/distribution.interface';
 
 export interface IRevenueDistributionService {
   processFinishedEvents(): Promise<ServiceResponse<{ processed: number }>>;

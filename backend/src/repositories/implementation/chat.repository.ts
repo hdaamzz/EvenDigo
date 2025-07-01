@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { injectable } from "tsyringe";
 import { IChatRepository } from "../interfaces/IChat.repository";
-import { ChatModel, MessageModel, IChat, IMessage } from "../../../src/models/ChatModel";
+import { ChatModel, MessageModel, IChat, IMessage } from "../../models/ChatModel";
 
 @injectable()
 export class ChatRepository implements IChatRepository {

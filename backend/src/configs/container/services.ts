@@ -1,43 +1,43 @@
 import { container } from "tsyringe";
 
 // -- User Services --
-import { AuthService } from "../../../src/services/implementation/user/auth/Auth.service";
-import { OTPService } from "../../../src/services/implementation/user/auth/OTPService";
-import { PasswordService } from "../../../src/services/implementation/user/auth/PasswordService";
-import { EmailService } from "../../../src/services/implementation/user/auth/EmailService";
-import { FirebaseAuthService } from "../../../src/services/implementation/user/auth/FirebaseAuthService";
-import { TokenService } from "../../../src/services/implementation/user/auth/TokenService";
+import { AuthService } from "../../services/implementation/user/auth/Auth.service";
+import { OTPService } from "../../services/implementation/user/auth/OTPService";
+import { PasswordService } from "../../services/implementation/user/auth/PasswordService";
+import { EmailService } from "../../services/implementation/user/auth/EmailService";
+import { FirebaseAuthService } from "../../services/implementation/user/auth/FirebaseAuthService";
+import { TokenService } from "../../services/implementation/user/auth/TokenService";
 import { ExploreService } from "../../services/implementation/user/explore/explore.service";
-import { SubscriptionQueryService } from "../../../src/services/implementation/user/subscription/SubscriptionQueryService";
-import { WalletSubscriptionService } from "../../../src/services/implementation/user/subscription/WalletSubscriptionService";
-import { CheckoutService } from "../../../src/services/implementation/user/subscription/CheckoutService";
-import { EventService } from "../../../src/services/implementation/user/dashboard/event.service";
-import { FileService } from "../../../src/services/implementation/user/dashboard/file.service";
-import { EventMapper } from "../../../src/services/implementation/user/dashboard/eventMapper.service";
-import { PaymentService } from "../../../src/services/implementation/user/explore/payment.service";
-import { BookingService } from "../../../src/services/implementation/user/explore/booking.service";
-import { UserAchievementService } from "../../../src/services/implementation/user/achievements/achivements.service";
-import { ProfileUserService } from "../../../src/services/implementation/user/profile/ProfileUser.service";
-import { ProfileBookingService } from "../../../src/services/implementation/user/profile/ProfileBooking.service";
-import { ProfileWalletService } from "../../../src/services/implementation/user/profile/ProfileWallet.service";
-import { ProfileEventService } from "../../../src/services/implementation/user/profile/ProfileEvent.service";
-import { UserAuthService } from "../../../src/services/implementation/user/auth/UserAuthService";
-import { StripeProvider } from "../../../src/utils/stripeProvider";
-import { ChatService } from "../../../src/services/implementation/user/chat/chat.service";
+import { SubscriptionQueryService } from "../../services/implementation/user/subscription/SubscriptionQueryService";
+import { WalletSubscriptionService } from "../../services/implementation/user/subscription/WalletSubscriptionService";
+import { CheckoutService } from "../../services/implementation/user/subscription/CheckoutService";
+import { EventService } from "../../services/implementation/user/dashboard/event.service";
+import { FileService } from "../../services/implementation/user/dashboard/file.service";
+import { EventMapper } from "../../services/implementation/user/dashboard/eventMapper.service";
+import { PaymentService } from "../../services/implementation/user/explore/payment.service";
+import { BookingService } from "../../services/implementation/user/explore/booking.service";
+import { UserAchievementService } from "../../services/implementation/user/achievements/achivements.service";
+import { ProfileUserService } from "../../services/implementation/user/profile/ProfileUser.service";
+import { ProfileBookingService } from "../../services/implementation/user/profile/ProfileBooking.service";
+import { ProfileWalletService } from "../../services/implementation/user/profile/ProfileWallet.service";
+import { ProfileEventService } from "../../services/implementation/user/profile/ProfileEvent.service";
+import { UserAuthService } from "../../services/implementation/user/auth/UserAuthService";
+import { StripeProvider } from "../../utils/stripeProvider";
+import { ChatService } from "../../services/implementation/user/chat/chat.service";
 
 // -- Admin Services --
-import { AdminAuthService } from "../../../src/services/implementation/admin/admin.auth.service";
-import { CouponService } from "../../../src/services/implementation/admin/admin.coupon.service";
-import { AdminEventsService } from "../../../src/services/implementation/admin/admin.events.service";
-import { AdminUsersService } from "../../../src/services/implementation/admin/admin.users.service";
-import { AchievementService } from "../../../src/services/implementation/admin/admin.achievements";
-import { FinanceService } from "../../../src/services/implementation/admin/admin.revenue.service";
-import { RevenueDistributionService } from "../../../src/services/implementation/admin/distribution.service";
-import { RevenueDistributionCronService } from "../../../src/services/implementation/cronjob/revenue.distribution";
-import { AdminSubscriptionService } from "../../../src/services/implementation/admin/admin.subscription.service";
-import { SubscriptionPlanService } from "../../../src/services/implementation/admin/SubscriptionPlan.service";
-import { DashboardService } from "../../../src/services/implementation/admin/admin.dashboard";
-import { LiveStreamService } from "../../../src/services/implementation/user/live-stream/LiveStreamService";
+import { AdminAuthService } from "../../services/implementation/admin/admin.auth.service";
+import { CouponService } from "../../services/implementation/admin/admin.coupon.service";
+import { AdminEventsService } from "../../services/implementation/admin/admin.events.service";
+import { AdminUsersService } from "../../services/implementation/admin/admin.users.service";
+import { AchievementService } from "../../services/implementation/admin/admin.achievements";
+import { FinanceService } from "../../services/implementation/admin/admin.revenue.service";
+import { RevenueDistributionService } from "../../services/implementation/admin/distribution.service";
+import { RevenueDistributionCronService } from "../../services/implementation/cronjob/revenue.distribution";
+import { AdminSubscriptionService } from "../../services/implementation/admin/admin.subscription.service";
+import { SubscriptionPlanService } from "../../services/implementation/admin/SubscriptionPlan.service";
+import { DashboardService } from "../../services/implementation/admin/admin.dashboard";
+import { LiveStreamService } from "../../services/implementation/user/live-stream/LiveStreamService";
 
 export function registerServices() {
   // User services

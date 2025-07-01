@@ -3,7 +3,7 @@ import { EventDocument } from '../../models/interfaces/event.interface';
 import { EventModel } from '../../models/EventModel';
 import { IEventRepository } from '../interfaces/IEvent.repository';
 import { injectable } from 'tsyringe';
-import { BadRequestException } from '../../../src/error/error-handlers';
+import { BadRequestException } from '../../error/error-handlers';
 import { BaseRepository } from '../BaseRepository';
 
 @injectable()

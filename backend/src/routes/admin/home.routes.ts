@@ -1,7 +1,7 @@
 // src/routes/admin.dashboard.router.ts
 import { Router } from 'express';
 import { container } from 'tsyringe';
-import { AdminHomeController } from '../../../src/controllers/implementation/admin/home/admin.home.controller';
+import { AdminHomeController } from '../../controllers/implementation/admin/home/admin.home.controller';
 
 const dashboardController = container.resolve(AdminHomeController);
 const adminDashboardRouter = Router();

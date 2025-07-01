@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
 
 export interface IProfileEventService {
   getUserEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;

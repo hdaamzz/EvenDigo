@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
-import StatusCode from '../../../../../src/types/statuscode';
+import StatusCode from '../../../../types/statuscode';
 import { IAdminSubscriptionController } from '../../../interfaces/Admin/Subscription/IAdminSubscription.controller';
-import { IAdminSubscriptionService } from '../../../../../src/services/interfaces/IAdminSubscription.service';
+import { IAdminSubscriptionService } from '../../../../services/interfaces/IAdminSubscription.service';
 import { 
   AdminSubscriptionDto, 
   AdminSubscriptionStatsDto, 

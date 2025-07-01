@@ -1,10 +1,10 @@
 import express from 'express';
 import authRouter from './user/auth.routes';
-import { authMiddleware } from '../../src/middlewares/auth.middleware';
+import { authMiddleware } from '../middlewares/auth.middleware';
 import { 
   requireAdminRole, 
   requireUserRole, 
-} from '../../src/middlewares/rolebased.middleware';
+} from '../middlewares/rolebased.middleware';
 import { securityHeaders, sanitizeInput } from '../middlewares/security.middleware';
 import profileRouter from './user/profile.routes';
 import dashboardRouter from './user/dashboard.routes';

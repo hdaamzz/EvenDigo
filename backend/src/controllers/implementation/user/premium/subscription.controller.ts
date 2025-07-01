@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { ISubscriptionController } from '../../../interfaces/User/Premium/ISubscription.controller';
-import { ICheckoutService } from '../../../../../src/services/interfaces/user/subscription/ICheckout.service';
-import { IWalletSubscriptionService } from '../../../../../src/services/interfaces/user/subscription/IWalletSubscription.service';
-import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
-import { BadRequestException } from '../../../../../src/error/error-handlers';
-import { ResponseHandler } from '../../../../../src/utils/response-handler';
-import StatusCode from '../../../../../src/types/statuscode';
-import { IAdminSubscriptionService } from '../../../../../src/services/interfaces/IAdminSubscription.service';
+import { ICheckoutService } from '../../../../services/interfaces/user/subscription/ICheckout.service';
+import { IWalletSubscriptionService } from '../../../../services/interfaces/user/subscription/IWalletSubscription.service';
+import { ISubscriptionQueryService } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { BadRequestException } from '../../../../error/error-handlers';
+import { ResponseHandler } from '../../../../utils/response-handler';
+import StatusCode from '../../../../types/statuscode';
+import { IAdminSubscriptionService } from '../../../../services/interfaces/IAdminSubscription.service';
 
 
 @injectable()

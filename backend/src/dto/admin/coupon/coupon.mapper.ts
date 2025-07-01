@@ -1,4 +1,4 @@
-import { ICoupon } from '../../../../src/models/interfaces/coupon.interface';
+import { ICoupon } from '../../../models/interfaces/coupon.interface';
 import { CouponResponseDTO, CouponListResponseDTO } from './coupon.dto';
 
 export class CouponMapper {

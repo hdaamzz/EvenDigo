@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { SubscriptionPlanController } from '../../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller';
+import { SubscriptionPlanController } from '../../controllers/implementation/admin/subscription/admin.subscriptionPlan.controller';
 import { container } from 'tsyringe';
 
 

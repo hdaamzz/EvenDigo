@@ -1,7 +1,7 @@
 import express from 'express';
 import { container } from '../../configs/container/index';
-import { PersonalMessageController } from '../../../src/controllers/implementation/user/chat/message.controller';
-import { PersonalChatController } from '../../../src/controllers/implementation/user/chat/chat-management.controller';
+import { PersonalMessageController } from '../../controllers/implementation/user/chat/message.controller';
+import { PersonalChatController } from '../../controllers/implementation/user/chat/chat-management.controller';
 
 const chatRoutes = express.Router();
 

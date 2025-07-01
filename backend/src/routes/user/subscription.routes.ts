@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { SubscriptionController } from '../../../src/controllers/implementation/user/premium/subscription.controller';
+import { SubscriptionController } from '../../controllers/implementation/user/premium/subscription.controller';
 import { container } from 'tsyringe';
-import { SubscriptionPlanController } from '../../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller';
+import { SubscriptionPlanController } from '../../controllers/implementation/admin/subscription/admin.subscriptionPlan.controller';
 
 
 const router = Router();

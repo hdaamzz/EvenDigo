@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { IFinanceController } from '../../../../../src/controllers/interfaces/Admin/Finance/IFinance.controller';
-import { IFinanceService } from '../../../../../src/services/interfaces/IRevenue.service';
-import StatusCode from '../../../../../src/types/statuscode';
+import { IFinanceController } from '../../../../controllers/interfaces/Admin/Finance/IFinance.controller';
+import { IFinanceService } from '../../../../services/interfaces/IRevenue.service';
+import StatusCode from '../../../../types/statuscode';
 import { inject, injectable } from 'tsyringe';
 import { 
   RevenueStatsDto, 
   PaginatedRevenueTransactionsDto, 
   PaginatedRefundTransactionsDto 
-} from '../../../../../src/dto/admin/finance/Finance.dto';
+} from '../../../../dto/admin/finance/Finance.dto';
 
 @injectable()
 export class FinanceController implements IFinanceController {

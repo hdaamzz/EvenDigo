@@ -1,4 +1,4 @@
-import { IUser } from "../../../../../src/models/interfaces/auth.interface";
+import { IUser } from "../../../../models/interfaces/auth.interface";
 
 export interface IFirebaseAuthService {
   verifyIdToken(idToken: string): Promise<any>;

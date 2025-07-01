@@ -1,12 +1,12 @@
 import { Schema } from 'mongoose';
-import { ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { IEventService } from '../../../../../src/services/interfaces/user/dashboard/IEvent.service';
+import { ForbiddenException, NotFoundException } from '../../../../error/error-handlers';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { IEventService } from '../../../../services/interfaces/user/dashboard/IEvent.service';
 import { inject, injectable } from 'tsyringe';
-import { IBookingRepository } from 'src/repositories/interfaces/IBooking.repository';
-import { IBooking } from 'src/models/interfaces/booking.interface';
-import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
+import { IBookingRepository } from '../../../../repositories/interfaces/IBooking.repository';
+import { IBooking } from '../../../../models/interfaces/booking.interface';
+import { IChatService } from '../../../../services/interfaces/user/chat/IChat.service';
 
 
 @injectable()

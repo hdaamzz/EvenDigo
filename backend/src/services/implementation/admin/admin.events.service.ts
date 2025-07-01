@@ -1,9 +1,9 @@
 import { ServiceResponse } from "../../../models/interfaces/auth.interface";
 import { inject, injectable } from "tsyringe";
-import { IEventRepository } from "../../../../src/repositories/interfaces/IEvent.repository";
-import { IEventsAdminService } from "../../../../src/services/interfaces/IEvents.admin.service";
-import { AdminEventDTO, AdminEventListDTO } from "../../../../src/dto/admin/event/event.dto";
-import { AdminEventMapper } from "../../../../src/dto/admin/event/admin-event.mapper";
+import { IEventRepository } from "../../../repositories/interfaces/IEvent.repository";
+import { IEventsAdminService } from "../../../services/interfaces/IEvents.admin.service";
+import { AdminEventDTO, AdminEventListDTO } from "../../../dto/admin/event/event.dto";
+import { AdminEventMapper } from "../../../dto/admin/event/admin-event.mapper";
 
 
 @injectable()

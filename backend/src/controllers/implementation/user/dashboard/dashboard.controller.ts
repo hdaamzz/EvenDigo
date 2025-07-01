@@ -3,10 +3,10 @@ import { inject, injectable } from 'tsyringe';
 import { IDashboardController } from '../../../interfaces/User/Dashboard/IDashboard.controller';
 import { IUserAchievementService } from '../../../../services/interfaces/IAchievement';
 import StatusCode from '../../../../types/statuscode';
-import { EventMapper } from '../../../../../src/services/implementation/user/dashboard/eventMapper.service';
-import { IEventService } from '../../../../../src/services/interfaces/user/dashboard/IEvent.service';
-import { IFileService } from '../../../../../src/services/interfaces/user/dashboard/IFile.service';
-import { ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
+import { EventMapper } from '../../../../services/implementation/user/dashboard/eventMapper.service';
+import { IEventService } from '../../../../services/interfaces/user/dashboard/IEvent.service';
+import { IFileService } from '../../../../services/interfaces/user/dashboard/IFile.service';
+import { ForbiddenException, NotFoundException } from '../../../../error/error-handlers';
 @injectable()
 export class DashboardController implements IDashboardController {
   constructor(

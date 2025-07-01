@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
-import { IUser, ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { CloudinaryUploadResult } from '../../../../../src/models/interfaces/profile.interface';
+import { IUser, ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { CloudinaryUploadResult } from '../../../../models/interfaces/profile.interface';
 
 export interface IProfileUserService {
   fetchUserById(userId: Schema.Types.ObjectId | string): Promise<ServiceResponse<IUser>>;

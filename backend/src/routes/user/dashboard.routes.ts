@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { authMiddleware } from '../../../src/middlewares/auth.middleware';
-import { upload } from '../../../src/utils/helpers';
+import { authMiddleware } from '../../middlewares/auth.middleware';
+import { upload } from '../../utils/helpers';
 import { container } from 'tsyringe';
-import { DashboardController } from '../../../src/controllers/implementation/user/dashboard/dashboard.controller';
+import { DashboardController } from '../../controllers/implementation/user/dashboard/dashboard.controller';
 
 const dashboardController = container.resolve(DashboardController);
 const dashboardRouter = Router();

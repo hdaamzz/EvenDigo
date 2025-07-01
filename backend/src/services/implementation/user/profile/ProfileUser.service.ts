@@ -1,15 +1,15 @@
 import { Schema } from 'mongoose';
 import { inject, injectable } from 'tsyringe';
 import { Readable } from 'stream';
-import { IProfileUserService } from '../../../../../src/services/interfaces/user/profile/IProfileUser.service';
-import { IUserRepository } from '../../../../../src/repositories/interfaces/IUser.repository';
-import { IVerificationRepository } from '../../../../../src/repositories/interfaces/IVerification.repository';
-import { IUser, ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
-import { CloudinaryUploadResult } from '../../../../../src/models/interfaces/profile.interface';
-import cloudinary from '../../../../../src/configs/cloudinary';
-import { IUserAchievementRepository } from '../../../../../src/repositories/interfaces/IBadge.repository';
-import { hashPassword, reHash } from '../../../../../src/utils/helpers';
+import { IProfileUserService } from '../../../../services/interfaces/user/profile/IProfileUser.service';
+import { IUserRepository } from '../../../../repositories/interfaces/IUser.repository';
+import { IVerificationRepository } from '../../../../repositories/interfaces/IVerification.repository';
+import { IUser, ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { BadRequestException, NotFoundException } from '../../../../error/error-handlers';
+import { CloudinaryUploadResult } from '../../../../models/interfaces/profile.interface';
+import cloudinary from '../../../../configs/cloudinary';
+import { IUserAchievementRepository } from '../../../../repositories/interfaces/IBadge.repository';
+import { hashPassword, reHash } from '../../../../utils/helpers';
 
 
 @injectable()

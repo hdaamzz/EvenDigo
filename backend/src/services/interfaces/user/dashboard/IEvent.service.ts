@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
-import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
+import { IBooking } from '../../../../models/interfaces/booking.interface';
 
 export interface IEventService {
   createEvent(eventData: Partial<EventDocument>): Promise<EventDocument>;

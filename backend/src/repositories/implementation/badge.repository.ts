@@ -1,5 +1,4 @@
 import { injectable } from 'tsyringe';
-// import { IAchievement } from '../../models/interfaces/achievements.interface';
 import { IUserAchievementRepository } from '../interfaces/IBadge.repository';
 import AchievementModel from '../../models/AchievementsModel';
 import BadgeModal from '../../models/BadgeModal';

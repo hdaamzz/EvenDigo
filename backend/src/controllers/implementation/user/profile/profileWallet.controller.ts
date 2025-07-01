@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { IProfileWalletController } from '../../../../controllers/interfaces/User/Profile/IProfileWallet.controller';
 import { ResponseHandler } from '../../../../utils/response-handler';
-import { IProfileWalletService } from '../../../../../src/services/interfaces/user/profile/IProfileWallet.service';
+import { IProfileWalletService } from '../../../../services/interfaces/user/profile/IProfileWallet.service';
 
 @injectable()
 export class ProfileWalletController implements IProfileWalletController {

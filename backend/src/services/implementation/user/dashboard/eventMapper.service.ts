@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { injectable } from 'tsyringe';
 import { EventFileData } from './file.service';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
 
 
 @injectable()

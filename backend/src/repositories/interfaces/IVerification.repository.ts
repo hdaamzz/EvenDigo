@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { IVerification } from '../../../src/models/interfaces/profile.interface';
+import { IVerification } from '../../models/interfaces/profile.interface';
 
 export interface IVerificationRepository {
   findAllVerificationUsers(): Promise<IVerification[]>;

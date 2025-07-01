@@ -1,4 +1,4 @@
-import { IVerification } from "src/models/interfaces/profile.interface";
+import { IVerification } from "../../models/interfaces/profile.interface";
 import { IUser, ServiceResponse, ServiceResponseWithMessage } from "../../models/interfaces/auth.interface";
 
 export interface IUsersAdminService {

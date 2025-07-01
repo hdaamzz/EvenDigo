@@ -1,8 +1,8 @@
 import { container } from "tsyringe";
-import { BookingsModel } from "../../../src/models/BookingModel";
-import { WalletModel } from "../../../src/models/WalletModel";
-import { RevenueDistributionModel } from "../../../src/models/RevenueModal";
-import { EventModel } from "../../../src/models/EventModel";
+import { BookingsModel } from "../../models/BookingModel";
+import { WalletModel } from "../../models/WalletModel";
+import { RevenueDistributionModel } from "../../models/RevenueModal";
+import { EventModel } from "../../models/EventModel";
 import { SubscriptionModel } from "../../models/SubscriptionModal";
 
 export function registerModels() {

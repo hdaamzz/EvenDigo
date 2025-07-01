@@ -1,8 +1,8 @@
 import { Schema } from "mongoose";
-import { VerificationModel } from "../../../src/models/VerificationModel";
+import { VerificationModel } from "../../models/VerificationModel";
 import { IVerificationRepository } from "../interfaces/IVerification.repository";
 import { injectable } from "tsyringe";
-import { IVerification } from "../../../src/models/interfaces/profile.interface";
+import { IVerification } from "../../models/interfaces/profile.interface";
 
 @injectable()
 export class VerificationRepository implements IVerificationRepository {

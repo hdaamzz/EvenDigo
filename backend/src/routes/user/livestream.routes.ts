@@ -1,5 +1,5 @@
 import express from 'express';
-import { LiveStreamController } from '../../../src/controllers/implementation/user/live/LiveStreamController';
+import { LiveStreamController } from '../../controllers/implementation/user/live/LiveStreamController';
 import { container } from 'tsyringe';
 
 const router = express.Router();

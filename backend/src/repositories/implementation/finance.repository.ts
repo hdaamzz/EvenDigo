@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { inject, injectable } from 'tsyringe';
 import { IFinanceRepository } from '../interfaces/IFinance.repository';
 import { IBooking } from '../../models/interfaces/booking.interface';
-import { IWallet, TransactionType } from '../../../src/models/interfaces/wallet.interface';
+import { IWallet, TransactionType } from '../../models/interfaces/wallet.interface';
 
 @injectable()
 export class FinanceRepository implements IFinanceRepository {

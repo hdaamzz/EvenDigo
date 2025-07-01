@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { AdminEventsController } from '../../../src/controllers/implementation/admin/event/admin.events.controller';
+import { AdminEventsController } from '../../controllers/implementation/admin/event/admin.events.controller';
 import { container } from 'tsyringe';
 
 const adminEventsController = container.resolve(AdminEventsController);

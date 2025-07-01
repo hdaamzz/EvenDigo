@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
-import { IHomeController } from '../../../../../src/controllers/interfaces/Admin/Home/IHome.controller';
-import { IDashboardService } from '../../../../../src/services/interfaces/admin/IDashboard.admin.service';
-import StatusCode from '../../../../../src/types/statuscode';
+import { IHomeController } from '../../../../controllers/interfaces/Admin/Home/IHome.controller';
+import { IDashboardService } from '../../../../services/interfaces/admin/IDashboard.admin.service';
+import StatusCode from '../../../../types/statuscode';
 import {
   DashboardStatsDto,
   RevenueChartDto,
@@ -11,7 +11,7 @@ import {
   SubscriptionPlanDto,
   RecentActivityDto,
   UpcomingEventDto
-} from '../../../../../src/dto/admin/home/admin.home.dto';
+} from '../../../../dto/admin/home/admin.home.dto';
 
 @injectable()
 export class AdminHomeController implements IHomeController {

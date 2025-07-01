@@ -1,9 +1,9 @@
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { ChatService } from '../../src/services/implementation/user/chat/chat.service';
+import { ChatService } from '../services/implementation/user/chat/chat.service';
 import { container } from 'tsyringe';
 import jwt from 'jsonwebtoken';
-import { TokenService } from '../../src/services/implementation/user/auth/TokenService';
+import { TokenService } from '../services/implementation/user/auth/TokenService';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;

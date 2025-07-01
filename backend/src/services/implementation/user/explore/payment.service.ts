@@ -1,15 +1,15 @@
 import { inject, injectable } from 'tsyringe';
 import Stripe from 'stripe';
-import { IPaymentService } from '../../../../../src/services/interfaces/user/explore/IPaymentService';
-import { IBookingRepository } from '../../../../../src/repositories/interfaces/IBooking.repository';
-import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
-import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
-import { BadRequestException } from '../../../../../src/error/error-handlers';
-import { IWallet, TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
-import { generateRandomId } from '../../../../../src/utils/helpers';
-import { IChatService } from '../../../../../src/services/interfaces/user/chat/IChat.service';
+import { IPaymentService } from '../../../../services/interfaces/user/explore/IPaymentService';
+import { IBookingRepository } from '../../../../repositories/interfaces/IBooking.repository';
+import { IWalletRepository } from '../../../../repositories/interfaces/IWallet.repository';
+import { IBookingService } from '../../../../services/interfaces/user/explore/IBookingService';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { IBooking } from '../../../../models/interfaces/booking.interface';
+import { BadRequestException } from '../../../../error/error-handlers';
+import { IWallet, TransactionType } from '../../../../models/interfaces/wallet.interface';
+import { generateRandomId } from '../../../../utils/helpers';
+import { IChatService } from '../../../../services/interfaces/user/chat/IChat.service';
 
 @injectable()
 export class PaymentService implements IPaymentService {

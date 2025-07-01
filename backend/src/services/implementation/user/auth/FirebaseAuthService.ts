@@ -1,9 +1,9 @@
 import { inject, injectable } from 'tsyringe';
 import * as admin from 'firebase-admin';
-import { IFirebaseAuthService } from 'src/services/interfaces/user/auth/IFirebaseAuthService';
-import { IUserRepository } from 'src/repositories/interfaces/IUser.repository';
-import { ITokenService } from 'src/services/interfaces/user/auth/ITokenService';
-import { IUser } from 'src/models/interfaces/auth.interface';
+import { IFirebaseAuthService } from '../../../../services/interfaces/user/auth/IFirebaseAuthService';
+import { IUserRepository } from '../../../../repositories/interfaces/IUser.repository';
+import { ITokenService } from '../../../../services/interfaces/user/auth/ITokenService';
+import { IUser } from '../../../../models/interfaces/auth.interface';
 
 @injectable()
 export class FirebaseAuthService implements IFirebaseAuthService {

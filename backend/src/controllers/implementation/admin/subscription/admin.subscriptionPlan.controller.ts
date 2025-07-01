@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { ISubscriptionPlanService } from '../../../../../src/services/implementation/admin/SubscriptionPlan.service';
-import StatusCode from '../../../../../src/types/statuscode';
+import { ISubscriptionPlanService } from '../../../../services/implementation/admin/SubscriptionPlan.service';
+import StatusCode from '../../../../types/statuscode';
 import { inject, injectable } from 'tsyringe';
-import { CreateSubscriptionPlanDto, SubscriptionPlanMapper, UpdateSubscriptionPlanDto } from '../../../../../src/dto/admin/subscription/Subscription-plan.dto';
+import { CreateSubscriptionPlanDto, SubscriptionPlanMapper, UpdateSubscriptionPlanDto } from '../../../../dto/admin/subscription/Subscription-plan.dto';
 
 
 export interface ISubscriptionPlanController {

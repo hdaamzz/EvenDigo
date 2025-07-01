@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose';
-import { ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { IWallet } from '../../../../../src/models/interfaces/wallet.interface';
-import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
-import { IProfileWalletService } from '../../../../../src/services/interfaces/user/profile/IProfileWallet.service';
+import { ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { IWallet } from '../../../../models/interfaces/wallet.interface';
+import { IWalletRepository } from '../../../../repositories/interfaces/IWallet.repository';
+import { IProfileWalletService } from '../../../../services/interfaces/user/profile/IProfileWallet.service';
 import { inject, injectable } from 'tsyringe';
 
 

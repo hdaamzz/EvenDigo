@@ -1,5 +1,5 @@
-import { IFileService } from '../../../../../src/services/interfaces/user/dashboard/IFile.service';
-import { uploadToCloudinary } from '../../../../../src/utils/helpers';
+import { IFileService } from '../../../../services/interfaces/user/dashboard/IFile.service';
+import { uploadToCloudinary } from '../../../../utils/helpers';
 import { injectable } from 'tsyringe';
 
 

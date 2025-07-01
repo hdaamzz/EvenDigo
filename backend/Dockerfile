@@ -4,15 +4,20 @@ FROM node:18
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install
+# Copy package.json and lock
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy source code
+# Copy the rest of the application source
 COPY . .
 
-# Expose backend port (e.g., 3000 or 5000)
+# Build TypeScript project
+RUN npm run build
+
+# Expose port
 EXPOSE 3000
 
-# Start the server
-CMD ["npm", "start"]
+# Start the server from dist
+CMD ["node", "dist/server.js"]

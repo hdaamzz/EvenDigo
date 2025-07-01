@@ -1,14 +1,14 @@
 import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
-import { IAuthService } from '../../../../../src/services/interfaces/IAuth.service';
-import { IUserAuthService } from '../../../../../src/services/interfaces/user/auth/IUserAuthService';
-import { IOTPService } from '../../../../../src/services/interfaces/user/auth/IOTPService';
-import { IPasswordService } from '../../../../../src/services/interfaces/user/auth/IPasswordService';
-import { IEmailService } from '../../../../../src/services/interfaces/user/auth/IEmailService';
-import { IFirebaseAuthService } from '../../../../../src/services/interfaces/user/auth/IFirebaseAuthService';
-import { ITokenService } from '../../../../../src/services/interfaces/user/auth/ITokenService';
-import { IAuthResponse, ILogin, IUser, OTPVerificationData, ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { InternalServerErrorException } from '../../../../../src/error/error-handlers';
+import { IAuthService } from '../../../../services/interfaces/IAuth.service';
+import { IUserAuthService } from '../../../../services/interfaces/user/auth/IUserAuthService';
+import { IOTPService } from '../../../../services/interfaces/user/auth/IOTPService';
+import { IPasswordService } from '../../../../services/interfaces/user/auth/IPasswordService';
+import { IEmailService } from '../../../../services/interfaces/user/auth/IEmailService';
+import { IFirebaseAuthService } from '../../../../services/interfaces/user/auth/IFirebaseAuthService';
+import { ITokenService } from '../../../../services/interfaces/user/auth/ITokenService';
+import { IAuthResponse, ILogin, IUser, OTPVerificationData, ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { InternalServerErrorException } from '../../../../error/error-handlers';
 
 @injectable()
 export class AuthService implements IAuthService {

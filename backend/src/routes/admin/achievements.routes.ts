@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { AchievementController } from '../../../src/controllers/implementation/admin/achievement/admin.achievements.controller';
+import { AchievementController } from '../../controllers/implementation/admin/achievement/admin.achievements.controller';
 import { container } from 'tsyringe';
 
 const achievementController = container.resolve(AchievementController);

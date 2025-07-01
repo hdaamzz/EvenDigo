@@ -2,14 +2,14 @@ import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
 import QRCode from 'qrcode';
 import PDFDocument from 'pdfkit';
-import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { IBookingRepository } from '../../../../../src/repositories/interfaces/IBooking.repository';
-import { IUserRepository } from '../../../../../src/repositories/interfaces/IUser.repository';
-import { IBooking, ITicket } from '../../../../../src/models/interfaces/booking.interface';
-import { NotFoundException } from '../../../../../src/error/error-handlers';
-import { generateAndUploadQrCode, generateUniqueId } from '../../../../../src/utils/helpers';
-import { IUser } from '../../../../../src/models/interfaces/auth.interface';
+import { IBookingService } from '../../../../services/interfaces/user/explore/IBookingService';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { IBookingRepository } from '../../../../repositories/interfaces/IBooking.repository';
+import { IUserRepository } from '../../../../repositories/interfaces/IUser.repository';
+import { IBooking, ITicket } from '../../../../models/interfaces/booking.interface';
+import { NotFoundException } from '../../../../error/error-handlers';
+import { generateAndUploadQrCode, generateUniqueId } from '../../../../utils/helpers';
+import { IUser } from '../../../../models/interfaces/auth.interface';
 
 @injectable()
 export class BookingService implements IBookingService {

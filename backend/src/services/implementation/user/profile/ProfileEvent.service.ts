@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose';
-import { NotFoundException } from '../../../../../src/error/error-handlers';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { IProfileEventService } from '../../../../../src/services/interfaces/user/profile/IProfileEvent.service';
+import { NotFoundException } from '../../../../error/error-handlers';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { IProfileEventService } from '../../../../services/interfaces/user/profile/IProfileEvent.service';
 import { inject, injectable } from 'tsyringe';
 
 

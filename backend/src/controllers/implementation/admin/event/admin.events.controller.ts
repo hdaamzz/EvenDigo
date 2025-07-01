@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
-import { IEventsAdminService } from '../../../../../src/services/interfaces/IEvents.admin.service';
-import StatusCode from '../../../../../src/types/statuscode';
-import { IEventsAdminController } from '../../../../../src/controllers/interfaces/Admin/Event/IEvents.admin.controller';
-import { ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { AdminEventDTO, AdminEventListDTO } from '../../../../../src/dto/admin/event/event.dto';
+import { IEventsAdminService } from '../../../../services/interfaces/IEvents.admin.service';
+import StatusCode from '../../../../types/statuscode';
+import { IEventsAdminController } from '../../../../controllers/interfaces/Admin/Event/IEvents.admin.controller';
+import { ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { AdminEventDTO, AdminEventListDTO } from '../../../../dto/admin/event/event.dto';
 
 @injectable()
 export class AdminEventsController implements IEventsAdminController {

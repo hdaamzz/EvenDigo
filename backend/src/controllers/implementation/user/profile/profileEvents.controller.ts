@@ -4,7 +4,7 @@ import { IProfileEventsController } from '../../../../controllers/interfaces/Use
 import { ResponseHandler } from '../../../../utils/response-handler';
 import { uploadToCloudinary } from '../../../../utils/helpers';
 import { EventDocument } from '../../../../models/interfaces/event.interface';
-import { IProfileEventService } from '../../../../../src/services/interfaces/user/profile/IProfileEvent.service';
+import { IProfileEventService } from '../../../../services/interfaces/user/profile/IProfileEvent.service';
 
 @injectable()
 export class ProfileEventsController implements IProfileEventsController {

@@ -1,7 +1,7 @@
 // src/repositories/interfaces/IRevenueDistribution.repository.ts
 import { Schema } from 'mongoose';
 import { EventDocument } from '../../models/interfaces/event.interface';
-import { IRevenueDistribution } from 'src/models/interfaces/distribution.interface';
+import { IRevenueDistribution } from '../../models/interfaces/distribution.interface';
 
 export interface IRevenueDistributionRepository {
   findCompletedDistributions(): Promise<IRevenueDistribution[]>;

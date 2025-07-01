@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { IAchievementAdminController } from '../../../../../src/controllers/interfaces/Admin/Achievement/IAchievements.admin.controller';
-import { IAchievementAdminService } from '../../../../../src/services/interfaces/IAchievements.admin';
-import StatusCode from '../../../../../src/types/statuscode';
+import { IAchievementAdminController } from '../../../../controllers/interfaces/Admin/Achievement/IAchievements.admin.controller';
+import { IAchievementAdminService } from '../../../../services/interfaces/IAchievements.admin';
+import StatusCode from '../../../../types/statuscode';
 import { inject, injectable } from 'tsyringe';
-import { AchievementResponseDto } from '../../../../../src/dto/admin/achievements/achievement-response.dto';
-import { AchievementListResponseDto } from '../../../../../src/dto/admin/achievements/achievement-list-response.dto';
-import { UpdateAchievementDto } from '../../../../../src/dto/admin/achievements/update-achievement.dto';
-import { CreateAchievementDto } from '../../../../../src/dto/admin/achievements/create-achievement.dto';
+import { AchievementResponseDto } from '../../../../dto/admin/achievements/achievement-response.dto';
+import { AchievementListResponseDto } from '../../../../dto/admin/achievements/achievement-list-response.dto';
+import { UpdateAchievementDto } from '../../../../dto/admin/achievements/update-achievement.dto';
+import { CreateAchievementDto } from '../../../../dto/admin/achievements/create-achievement.dto';
 
 
 @injectable()

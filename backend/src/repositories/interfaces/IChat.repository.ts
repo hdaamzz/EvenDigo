@@ -1,4 +1,4 @@
-import { IChat, IMessage } from "../../../src/models/ChatModel";
+import { IChat, IMessage } from "../../models/ChatModel";
 
 export interface IChatRepository {
   createChat(

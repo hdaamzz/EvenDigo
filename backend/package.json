@@ -4,9 +4,10 @@
   "description": "Backend for EventDigo - An Event Management Platform",
   "main": "server.js",
   "scripts": {
-    "start": "server.js",
-    "dev": "nodemon server.js",
-    "lint": "eslint"
+    "start": "node server.js",
+    "dev": "nodemon server.ts",
+    "lint": "eslint",
+    "build": "tsc"
   },
   "author": "hamzathul dilshad",
   "license": "ISC",

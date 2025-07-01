@@ -1,9 +1,9 @@
 import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
-import { IAdminSubscriptionService, PaginatedSubscriptions, SubscriptionFilter, SubscriptionFilterOptions, SubscriptionStats } from '../../../../src/services/interfaces/IAdminSubscription.service';
-import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
+import { IAdminSubscriptionService, PaginatedSubscriptions, SubscriptionFilter, SubscriptionFilterOptions, SubscriptionStats } from '../../../services/interfaces/IAdminSubscription.service';
+import { IUserRepository } from '../../../repositories/interfaces/IUser.repository';
 import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../models/SubscriptionModal';
-import { ISubscriptionRepository } from '../../../../src/repositories/interfaces/ISubscription.repository';
+import { ISubscriptionRepository } from '../../../repositories/interfaces/ISubscription.repository';
 
 
 @injectable()

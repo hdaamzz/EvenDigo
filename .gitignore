@@ -48,6 +48,7 @@ Thumbs.db
 # frontend/src/app/environments
 
 backend/node_modules
+backend/dist
 backend/.env
 backend/src/configs/serviceAccountKey.json
 backend/src/node_modules

@@ -1,6 +1,6 @@
-import { ICouponRepository } from '../../../../src/repositories/interfaces/ICoupon.repository';
+import { ICouponRepository } from '../../../repositories/interfaces/ICoupon.repository';
 import { ICoupon } from '../../../models/interfaces/coupon.interface';
-import { ICouponAdminService } from '../../../../src/services/interfaces/ICoupon.admin.service';
+import { ICouponAdminService } from '../../../services/interfaces/ICoupon.admin.service';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()

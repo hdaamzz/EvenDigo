@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { IAuthResponse, ILogin, IUser, ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
+import { IAuthResponse, ILogin, IUser, ServiceResponse } from '../../../../models/interfaces/auth.interface';
 
 export interface IUserAuthService {
   registerUser(userData: IUser, hashedPassword: string): Promise<IUser>;

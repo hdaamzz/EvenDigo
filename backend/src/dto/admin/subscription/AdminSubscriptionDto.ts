@@ -1,4 +1,4 @@
-import { SubscriptionStatus, SubscriptionType } from "../../../../src/models/SubscriptionModal";
+import { SubscriptionStatus, SubscriptionType } from "../../../models/SubscriptionModal";
 
 export class AdminSubscriptionDto {
   _id: string;

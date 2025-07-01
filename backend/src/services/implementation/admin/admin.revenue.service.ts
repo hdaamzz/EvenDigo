@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import { ServiceResponse } from '../../../models/interfaces/auth.interface';
-import { IFinanceService, RevenueStats, RevenueTransactions } from '../../../../src/services/interfaces/IRevenue.service';
-import { IFinanceRepository } from '../../../../src/repositories/interfaces/IFinance.repository';
+import { IFinanceService, RevenueStats, RevenueTransactions } from '../../../services/interfaces/IRevenue.service';
+import { IFinanceRepository } from '../../../repositories/interfaces/IFinance.repository';
 
 @injectable()
 export class FinanceService implements IFinanceService {

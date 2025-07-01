@@ -1,8 +1,8 @@
-import { IBookingRepository } from '../../../../src/repositories/interfaces/IBooking.repository';
-import { IEventRepository } from '../../../../src/repositories/interfaces/IEvent.repository';
-import { IRevenueDistributionRepository } from '../../../../src/repositories/interfaces/IRevenue.repository';
-import { ISubscriptionRepository } from '../../../../src/repositories/interfaces/ISubscription.repository';
-import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
+import { IBookingRepository } from '../../../repositories/interfaces/IBooking.repository';
+import { IEventRepository } from '../../../repositories/interfaces/IEvent.repository';
+import { IRevenueDistributionRepository } from '../../../repositories/interfaces/IRevenue.repository';
+import { ISubscriptionRepository } from '../../../repositories/interfaces/ISubscription.repository';
+import { IUserRepository } from '../../../repositories/interfaces/IUser.repository';
 import { inject, injectable } from 'tsyringe';
 
 

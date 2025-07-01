@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { IChatService } from '../../../../services/interfaces/user/chat/IChat.service';
 import { inject, injectable } from 'tsyringe';
 import StatusCode from '../../../../types/statuscode';
-import { ResponseHandler } from '../../../../../src/utils/response-handler';
+import { ResponseHandler } from '../../../../utils/response-handler';
 
 @injectable()
 export class PersonalChatController {

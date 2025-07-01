@@ -1,4 +1,4 @@
-import { DiscountType } from "../../../../src/models/interfaces/coupon.interface";
+import { DiscountType } from "../../../models/interfaces/coupon.interface";
 
 export interface CreateCouponDTO {
     couponCode: string;

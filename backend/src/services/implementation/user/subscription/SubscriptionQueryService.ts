@@ -2,12 +2,12 @@ import { inject, injectable } from 'tsyringe';
 import { ISubscription } from '../../../../models/SubscriptionModal';
 import Stripe from 'stripe';
 import { SubscriptionStatus } from '../../../../models/SubscriptionModal';
-import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
-import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/ISubscription.repository';
-import { StripeProvider } from '../../../../../src/utils/stripeProvider';
-import { ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
-import { TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
-import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
+import { ISubscriptionQueryService } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { ISubscriptionRepository } from '../../../../repositories/interfaces/ISubscription.repository';
+import { StripeProvider } from '../../../../utils/stripeProvider';
+import { ForbiddenException, NotFoundException } from '../../../../error/error-handlers';
+import { TransactionType } from '../../../../models/interfaces/wallet.interface';
+import { IWalletRepository } from '../../../../repositories/interfaces/IWallet.repository';
 
 @injectable()
 export class SubscriptionQueryService implements ISubscriptionQueryService {

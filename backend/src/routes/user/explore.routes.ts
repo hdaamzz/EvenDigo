@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ExploreController } from '../../controllers/implementation/user/explore/explore.controller';
-import { authMiddleware } from '../../../src/middlewares/auth.middleware';
+import { authMiddleware } from '../../middlewares/auth.middleware';
 import { container } from 'tsyringe';
 
 const exploreController = container.resolve(ExploreController);

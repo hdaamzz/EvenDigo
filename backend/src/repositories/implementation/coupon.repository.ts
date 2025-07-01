@@ -1,4 +1,4 @@
-import { CouponModel } from '../../../src/models/CouponModel';
+import { CouponModel } from '../../models/CouponModel';
 import { ICoupon } from '../../models/interfaces/coupon.interface';
 import { BaseRepository } from '../BaseRepository';
 import { ICouponRepository } from '../interfaces/ICoupon.repository';

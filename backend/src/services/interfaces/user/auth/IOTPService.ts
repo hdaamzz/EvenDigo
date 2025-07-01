@@ -1,4 +1,4 @@
-import { IUser, OTPVerificationData, ServiceResponse } from "../../../../../src/models/interfaces/auth.interface";
+import { IUser, OTPVerificationData, ServiceResponse } from "../../../../models/interfaces/auth.interface";
 
 export interface IOTPService {
   generateOTP(): string;

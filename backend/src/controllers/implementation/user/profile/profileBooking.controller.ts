@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { IProfileBookingController } from '../../../../controllers/interfaces/User/Profile/IProfileBooking.controller';
 import { ResponseHandler } from '../../../../utils/response-handler';
-import { IProfileBookingService } from '../../../../../src/services/interfaces/user/profile/IProfileBooking.service';
+import { IProfileBookingService } from '../../../../services/interfaces/user/profile/IProfileBooking.service';
 
 @injectable()
 export class ProfileBookingController implements IProfileBookingController {

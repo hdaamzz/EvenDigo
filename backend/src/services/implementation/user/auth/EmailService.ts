@@ -1,5 +1,5 @@
-import { EmailOptions, IEmailService } from '../../../../../src/services/interfaces/user/auth/IEmailService';
-import { sendEmail } from '../../../../../src/utils/helpers';
+import { EmailOptions, IEmailService } from '../../../../services/interfaces/user/auth/IEmailService';
+import { sendEmail } from '../../../../utils/helpers';
 import { injectable } from 'tsyringe';
 
 

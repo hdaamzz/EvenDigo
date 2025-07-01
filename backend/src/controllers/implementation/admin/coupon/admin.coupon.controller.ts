@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { ICouponAdminController } from '../../../../../src/controllers/interfaces/Admin/Coupon/ICoupon.admin.controller';
-import { ICouponAdminService } from '../../../../../src/services/interfaces/ICoupon.admin.service';
-import StatusCode from '../../../../../src/types/statuscode';
+import { ICouponAdminController } from '../../../../controllers/interfaces/Admin/Coupon/ICoupon.admin.controller';
+import { ICouponAdminService } from '../../../../services/interfaces/ICoupon.admin.service';
+import StatusCode from '../../../../types/statuscode';
 import { inject, injectable } from 'tsyringe';
-import { CouponMapper } from '../../../../../src/dto/admin/coupon/coupon.mapper';
-import { CreateCouponDTO, UpdateCouponDTO } from '../../../../../src/dto/admin/coupon/coupon.dto';
+import { CouponMapper } from '../../../../dto/admin/coupon/coupon.mapper';
+import { CreateCouponDTO, UpdateCouponDTO } from '../../../../dto/admin/coupon/coupon.dto';
 
 
 @injectable()

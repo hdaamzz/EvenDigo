@@ -1,9 +1,9 @@
 import { inject, injectable } from 'tsyringe';
 import { IAuthResponse, ILogin } from '../../../models/interfaces/auth.interface';
 import { reHash } from '../../../utils/helpers';
-import { IAuthAdminService } from '../../../../src/services/interfaces/IAuth.admin.service';
-import { IUserRepository } from '../../../../src/repositories/interfaces/IUser.repository';
-import { ITokenService } from '../../../../src/services/interfaces/user/auth/ITokenService';
+import { IAuthAdminService } from '../../../services/interfaces/IAuth.admin.service';
+import { IUserRepository } from '../../../repositories/interfaces/IUser.repository';
+import { ITokenService } from '../../../services/interfaces/user/auth/ITokenService';
 
 @injectable()
 export class AdminAuthService implements IAuthAdminService {

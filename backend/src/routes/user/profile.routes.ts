@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { FileRequest } from '../../models/interfaces/profile.interface';
 import {upload} from '../../utils/helpers'
-import { authMiddleware } from '../../../src/middlewares/auth.middleware';
+import { authMiddleware } from '../../middlewares/auth.middleware';
 import { container } from 'tsyringe';
-import { ProfileBookingController } from '../../../src/controllers/implementation/user/profile/profileBooking.controller';
-import { ProfileEventsController } from '../../../src/controllers/implementation/user/profile/profileEvents.controller';
-import { ProfileWalletController } from '../../../src/controllers/implementation/user/profile/profileWallet.controller';
-import { ProfileUserController } from '../../../src/controllers/implementation/user/profile/profileUser.controller';
+import { ProfileBookingController } from '../../controllers/implementation/user/profile/profileBooking.controller';
+import { ProfileEventsController } from '../../controllers/implementation/user/profile/profileEvents.controller';
+import { ProfileWalletController } from '../../controllers/implementation/user/profile/profileWallet.controller';
+import { ProfileUserController } from '../../controllers/implementation/user/profile/profileUser.controller';
 
 
 

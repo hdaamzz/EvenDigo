@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
-import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
-import { ProfileServiceResponse } from '../../../../../src/models/interfaces/profile.interface';
+import { IBooking } from '../../../../models/interfaces/booking.interface';
+import { ProfileServiceResponse } from '../../../../models/interfaces/profile.interface';
 
 export interface IProfileBookingService {
   getUserBookings(userId: Schema.Types.ObjectId | string): Promise<IBooking[]>;

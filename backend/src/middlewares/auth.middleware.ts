@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserModel } from '../../src/models/UserModel';
-import { ITokenService } from '../../src/services/interfaces/user/auth/ITokenService';
-import StatusCode from '../../src/types/statuscode';
-import { container } from '../../src/configs/container';
-import { cookieConfig } from '../../src/configs/cookie.config';
+import { UserModel } from '../models/UserModel';
+import { ITokenService } from '../services/interfaces/user/auth/ITokenService';
+import StatusCode from '../types/statuscode';
+import { container } from '../configs/container';
+import { cookieConfig } from '../configs/cookie.config';
 
 declare global {
   namespace Express {

@@ -1,8 +1,8 @@
 // src/controllers/livestream/LiveStreamController.ts
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
-import StatusCode from '../../../../../src/types/statuscode';
-import { ILiveStreamService } from '../../../../../src/services/interfaces/user/live-stream/ILiveStreamService';
+import StatusCode from '../../../../types/statuscode';
+import { ILiveStreamService } from '../../../../services/interfaces/user/live-stream/ILiveStreamService';
 
 
 @injectable()

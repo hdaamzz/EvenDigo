@@ -1,4 +1,4 @@
-import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
+import { IBooking } from '../../../../models/interfaces/booking.interface';
 import Stripe from 'stripe';
 
 

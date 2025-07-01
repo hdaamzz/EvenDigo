@@ -1,12 +1,12 @@
-import { SubscriptionPayload } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
-import { BadRequestException, ConflictException, NotFoundException } from '../../../../../src/error/error-handlers';
-import { TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
+import { SubscriptionPayload } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { BadRequestException, ConflictException, NotFoundException } from '../../../../error/error-handlers';
+import { TransactionType } from '../../../../models/interfaces/wallet.interface';
 import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../../models/SubscriptionModal';
-import { ISubscriptionRepository } from '../../../../../src/repositories/interfaces/ISubscription.repository';
-import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
-import { IWalletSubscriptionService } from '../../../../../src/services/interfaces/user/subscription/IWalletSubscription.service';
+import { ISubscriptionRepository } from '../../../../repositories/interfaces/ISubscription.repository';
+import { IWalletRepository } from '../../../../repositories/interfaces/IWallet.repository';
+import { IWalletSubscriptionService } from '../../../../services/interfaces/user/subscription/IWalletSubscription.service';
 import { inject, injectable } from 'tsyringe';
-import { generateRandomId } from '../../../../../src/utils/helpers';
+import { generateRandomId } from '../../../../utils/helpers';
 
 
 @injectable()

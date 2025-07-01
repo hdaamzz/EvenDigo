@@ -5,7 +5,7 @@ import {
   IUser,
   OTPVerificationData,
   ServiceResponse,
-} from 'src/models/interfaces/auth.interface';
+} from '../../models/interfaces/auth.interface';
 
 export interface IAuthService {
   sendOTP(userData: Partial<IUser>): Promise<{ success: boolean; message: string }>;

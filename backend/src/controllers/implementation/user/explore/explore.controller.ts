@@ -3,12 +3,12 @@ import { inject, injectable } from 'tsyringe';
 import { IExploreController } from '../../../../controllers/interfaces/User/Explore/IExplore.controller';
 import { ResponseHandler } from '../../../../utils/response-handler';
 import StatusCode from '../../../../types/statuscode';
-import { IExploreService } from '../../../../../src/services/interfaces/user/explore/IExplore.service';
-import { IPaymentService } from '../../../../../src/services/interfaces/user/explore/IPaymentService';
-import { IBookingService } from '../../../../../src/services/interfaces/user/explore/IBookingService';
-import { BadRequestException, NotFoundException } from '../../../../../src/error/error-handlers';
-import { ISubscriptionQueryService } from '../../../../../src/services/interfaces/user/subscription/ISubscriptionQuery.service';
-import { EventDto } from '../../../../../src/dto/user/explore/explore.dto';
+import { IExploreService } from '../../../../services/interfaces/user/explore/IExplore.service';
+import { IPaymentService } from '../../../../services/interfaces/user/explore/IPaymentService';
+import { IBookingService } from '../../../../services/interfaces/user/explore/IBookingService';
+import { BadRequestException, NotFoundException } from '../../../../error/error-handlers';
+import { ISubscriptionQueryService } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
+import { EventDto } from '../../../../dto/user/explore/explore.dto';
 
 @injectable()
 export class ExploreController implements IExploreController {

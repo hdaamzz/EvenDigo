@@ -1,8 +1,8 @@
-import { IUser, OTPVerificationData, ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { IAuthRepository } from '../../../../../src/repositories/interfaces/IAuth.repository';
-import { IUserRepository } from '../../../../../src/repositories/interfaces/IUser.repository';
-import { IOTPService } from '../../../../../src/services/interfaces/user/auth/IOTPService';
-import { generateOTP } from '../../../../../src/utils/helpers';
+import { IUser, OTPVerificationData, ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { IAuthRepository } from '../../../../repositories/interfaces/IAuth.repository';
+import { IUserRepository } from '../../../../repositories/interfaces/IUser.repository';
+import { IOTPService } from '../../../../services/interfaces/user/auth/IOTPService';
+import { generateOTP } from '../../../../utils/helpers';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()

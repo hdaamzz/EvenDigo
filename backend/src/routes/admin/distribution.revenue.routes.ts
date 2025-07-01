@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { RevenueDistributionController } from '../../../src/controllers/implementation/admin/finance/admin.distribution.controller';
+import { RevenueDistributionController } from '../../controllers/implementation/admin/finance/admin.distribution.controller';
 import { container } from 'tsyringe';
 
 const distributionController = container.resolve(RevenueDistributionController);

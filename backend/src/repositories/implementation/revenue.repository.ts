@@ -3,8 +3,8 @@ import { injectable, inject } from 'tsyringe';
 import { Model } from 'mongoose';
 
 import { IRevenueDistributionRepository } from '../interfaces/IRevenue.repository';
-import { IRevenueDistribution } from '../../../src/models/interfaces/distribution.interface';
-import { EventDocument } from '../../../src/models/interfaces/event.interface';
+import { IRevenueDistribution } from '../../models/interfaces/distribution.interface';
+import { EventDocument } from '../../models/interfaces/event.interface';
 
 @injectable()
 export class RevenueDistributionRepository implements IRevenueDistributionRepository {

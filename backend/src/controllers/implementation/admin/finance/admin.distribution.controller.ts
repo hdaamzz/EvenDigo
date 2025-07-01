@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
-import { IRevenueDistributionService } from '../../../../../src/services/interfaces/IDistribution.service';
+import { IRevenueDistributionService } from '../../../../services/interfaces/IDistribution.service';
 import { IRevenueDistributionController } from 'src/controllers/interfaces/Admin/Finance/IDistribution.controller';
-import StatusCode from '../../../../../src/types/statuscode';
+import StatusCode from '../../../../types/statuscode';
 import { 
   RevenueDistributionDto, 
   RevenueStatsDto, 
   PaginatedRevenueDistributionDto,
   ManualDistributionResponseDto 
-} from '../../../../../src/dto/admin/finance/RevenueDistribution.dto';
+} from '../../../../dto/admin/finance/RevenueDistribution.dto';
 
 @injectable()
 export class RevenueDistributionController implements IRevenueDistributionController {

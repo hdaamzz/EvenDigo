@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { container } from 'tsyringe';
 import revenueDistributionRouter from './distribution.routes';
-import { FinanceController } from '../../../src/controllers/implementation/admin/finance/admin.revenue.controller';
+import { FinanceController } from '../../controllers/implementation/admin/finance/admin.revenue.controller';
 
 const financeController = container.resolve(FinanceController);
 const financeRouter = Router();

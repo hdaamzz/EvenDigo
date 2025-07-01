@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { IBooking, ITicket } from 'src/models/interfaces/booking.interface';
+import { IBooking, ITicket } from '../../../../models/interfaces/booking.interface';
 import PDFDocument from 'pdfkit';
 
 export interface IBookingService {

@@ -4,7 +4,7 @@ import { AuthController } from '../../controllers/implementation/user/auth/auth.
 import { authMiddleware, validateFirebaseSignInRequest } from '../../middlewares/auth.middleware';
 import { authRateLimit, otpRateLimit } from '../../middlewares/security.middleware';
 import { container } from 'tsyringe';
-import { SubscriptionPlanController } from '../../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller';
+import { SubscriptionPlanController } from '../../controllers/implementation/admin/subscription/admin.subscriptionPlan.controller';
 
 const authController = container.resolve(AuthController);
 const subscriptionPlanController = container.resolve(SubscriptionPlanController);

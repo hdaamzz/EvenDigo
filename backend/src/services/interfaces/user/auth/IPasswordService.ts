@@ -1,4 +1,4 @@
-import { ServiceResponse } from "../../../../../src/models/interfaces/auth.interface";
+import { ServiceResponse } from "../../../../models/interfaces/auth.interface";
 
 export interface IPasswordService {
   hashPassword(password: string): Promise<string>;

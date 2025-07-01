@@ -1,8 +1,8 @@
-import { ServiceResponse } from '../../../../../src/models/interfaces/auth.interface';
-import { IAuthRepository } from '../../../../../src/repositories/interfaces/IAuth.repository';
-import { IUserRepository } from '../../../../../src/repositories/interfaces/IUser.repository';
-import { IPasswordService } from '../../../../../src/services/interfaces/user/auth/IPasswordService';
-import { hashPassword, reHash } from '../../../../../src/utils/helpers';
+import { ServiceResponse } from '../../../../models/interfaces/auth.interface';
+import { IAuthRepository } from '../../../../repositories/interfaces/IAuth.repository';
+import { IUserRepository } from '../../../../repositories/interfaces/IUser.repository';
+import { IPasswordService } from '../../../../services/interfaces/user/auth/IPasswordService';
+import { hashPassword, reHash } from '../../../../utils/helpers';
 import { inject, injectable } from 'tsyringe';
 
 

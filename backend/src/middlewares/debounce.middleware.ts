@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import StatusCode from '../../src/types/statuscode';
+import StatusCode from '../types/statuscode';
 
 interface RequestStore {
   [key: string]: {

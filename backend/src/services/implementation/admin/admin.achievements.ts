@@ -1,6 +1,6 @@
-import { IAchievement } from '../../../../src/models/interfaces/achievements.interface';
-import { IAchievementRepository } from '../../../../src/repositories/interfaces/IAchievements.repository';
-import { IAchievementAdminService } from '../../../../src/services/interfaces/IAchievements.admin';
+import { IAchievement } from '../../../models/interfaces/achievements.interface';
+import { IAchievementRepository } from '../../../repositories/interfaces/IAchievements.repository';
+import { IAchievementAdminService } from '../../../services/interfaces/IAchievements.admin';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()

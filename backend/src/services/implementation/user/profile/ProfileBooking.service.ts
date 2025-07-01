@@ -1,12 +1,12 @@
 import { Schema } from 'mongoose';
-import { BadRequestException, ForbiddenException, NotFoundException } from '../../../../../src/error/error-handlers';
-import { IBooking } from '../../../../../src/models/interfaces/booking.interface';
-import { ProfileServiceResponse } from '../../../../../src/models/interfaces/profile.interface';
-import { TransactionType } from '../../../../../src/models/interfaces/wallet.interface';
-import { IBookingRepository } from '../../../../../src/repositories/interfaces/IBooking.repository';
-import { IWalletRepository } from '../../../../../src/repositories/interfaces/IWallet.repository';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { IProfileBookingService } from '../../../../../src/services/interfaces/user/profile/IProfileBooking.service';
+import { BadRequestException, ForbiddenException, NotFoundException } from '../../../../error/error-handlers';
+import { IBooking } from '../../../../models/interfaces/booking.interface';
+import { ProfileServiceResponse } from '../../../../models/interfaces/profile.interface';
+import { TransactionType } from '../../../../models/interfaces/wallet.interface';
+import { IBookingRepository } from '../../../../repositories/interfaces/IBooking.repository';
+import { IWalletRepository } from '../../../../repositories/interfaces/IWallet.repository';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { IProfileBookingService } from '../../../../services/interfaces/user/profile/IProfileBooking.service';
 import { inject, injectable } from 'tsyringe';
 
 

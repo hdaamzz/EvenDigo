@@ -1,7 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 import cron from 'node-cron';
 import {logger} from '../../../utils/logger'
-import { IRevenueDistributionCronService, IRevenueDistributionService } from '../../../../src/services/interfaces/IDistribution.service';
+import { IRevenueDistributionCronService, IRevenueDistributionService } from '../../../services/interfaces/IDistribution.service';
 
 @injectable()
 export class RevenueDistributionCronService implements IRevenueDistributionCronService{

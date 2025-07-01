@@ -1,4 +1,4 @@
-import { IAchievement } from "../../../src/models/interfaces/achievements.interface";
+import { IAchievement } from "../../models/interfaces/achievements.interface";
 
 export interface IAchievementAdminService {
     getAllAchievements(): Promise<IAchievement[]>;

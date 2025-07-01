@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { IUser, ServiceResponse } from "../../../../models/interfaces/auth.interface";
 import { inject, injectable } from "tsyringe";
-import { IVerification } from "../../../../../src/models/interfaces/profile.interface";
-import { IUsersAdminController } from "../../../../../src/controllers/interfaces/Admin/User/IUsers.admin.controller";
-import StatusCode from "../../../../../src/types/statuscode";
-import { IUsersAdminService } from "../../../../../src/services/interfaces/IUsers.admin.service";
+import { IVerification } from "../../../../models/interfaces/profile.interface";
+import { IUsersAdminController } from "../../../../controllers/interfaces/Admin/User/IUsers.admin.controller";
+import StatusCode from "../../../../types/statuscode";
+import { IUsersAdminService } from "../../../../services/interfaces/IUsers.admin.service";
 import { 
   AdminUserResponseDto, 
   AdminVerificationResponseDto, 

@@ -1,8 +1,8 @@
 import { IUser, ServiceResponse, ServiceResponseWithMessage } from "../../../models/interfaces/auth.interface";
 import { inject, injectable } from "tsyringe";
-import { IUsersAdminService } from "../../../../src/services/interfaces/IUsers.admin.service";
-import { IUserRepository } from "../../../../src/repositories/interfaces/IUser.repository";
-import { IVerificationRepository } from "../../../../src/repositories/interfaces/IVerification.repository";
+import { IUsersAdminService } from "../../../services/interfaces/IUsers.admin.service";
+import { IUserRepository } from "../../../repositories/interfaces/IUser.repository";
+import { IVerificationRepository } from "../../../repositories/interfaces/IVerification.repository";
 import { IVerification } from "src/models/interfaces/profile.interface";
 
 @injectable()

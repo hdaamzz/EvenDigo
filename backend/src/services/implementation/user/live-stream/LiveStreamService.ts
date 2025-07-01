@@ -1,8 +1,8 @@
 import { injectable, inject } from 'tsyringe';
 import crypto from 'crypto';
-import { ILiveStreamService } from '../../../../../src/services/interfaces/user/live-stream/ILiveStreamService';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { ILiveStreamRepository } from '../../../../../src/repositories/interfaces/ILivestream.repository';
+import { ILiveStreamService } from '../../../../services/interfaces/user/live-stream/ILiveStreamService';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { ILiveStreamRepository } from '../../../../repositories/interfaces/ILivestream.repository';
 
 
 

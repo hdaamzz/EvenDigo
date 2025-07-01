@@ -1,8 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
-import { IExploreService } from '../../../../../src/services/interfaces/user/explore/IExplore.service';
-import { IEventRepository } from '../../../../../src/repositories/interfaces/IEvent.repository';
-import { EventDocument } from '../../../../../src/models/interfaces/event.interface';
+import { IExploreService } from '../../../../services/interfaces/user/explore/IExplore.service';
+import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
+import { EventDocument } from '../../../../models/interfaces/event.interface';
 
 
 @injectable()

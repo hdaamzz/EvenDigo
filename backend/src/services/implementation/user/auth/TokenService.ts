@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe';
 import * as jwt from 'jsonwebtoken';
-import { ITokenService } from '../../../../../src/services/interfaces/user/auth/ITokenService';
-import { IUser } from '../../../../../src/models/interfaces/auth.interface';
+import { ITokenService } from '../../../../services/interfaces/user/auth/ITokenService';
+import { IUser } from '../../../../models/interfaces/auth.interface';
 
 @injectable()
 export class TokenService implements ITokenService {

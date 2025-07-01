@@ -3,9 +3,9 @@ import { ILogin } from '../../../../models/interfaces/auth.interface';
 import { IUser } from '../../../../models/interfaces/auth.interface';
 import { inject, injectable } from 'tsyringe';
 import StatusCode from '../../../../types/statuscode';
-import { IAuthController } from '../../../../../src/controllers/interfaces/User/Auth/IAuth.controller';
-import { IAuthService } from '../../../../../src/services/interfaces/IAuth.service';
-import { cookieConfig } from '../../../../../src/configs/cookie.config';
+import { IAuthController } from '../../../../controllers/interfaces/User/Auth/IAuth.controller';
+import { IAuthService } from '../../../../services/interfaces/IAuth.service';
+import { cookieConfig } from '../../../../configs/cookie.config';
 
 export interface AuthenticatedRequest extends Request {
   user?: IUser;

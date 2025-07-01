@@ -2,7 +2,7 @@ import bcryptjs from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import multer from 'multer';
-import cloudinary from '../../src/configs/cloudinary';
+import cloudinary from '../configs/cloudinary';
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
 // stripe listen --forward-to localhost:3000/webhooks/stripe

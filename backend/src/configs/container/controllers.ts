@@ -2,29 +2,29 @@ import { container } from "tsyringe";
 
 // User Controllers
 import { AuthController } from "../../controllers/implementation/user/auth/auth.controller";
-import { DashboardController } from "../../../src/controllers/implementation/user/dashboard/dashboard.controller";
+import { DashboardController } from "../../controllers/implementation/user/dashboard/dashboard.controller";
 import { ExploreController } from "../../controllers/implementation/user/explore/explore.controller";
-import { SubscriptionController } from "../../../src/controllers/implementation/user/premium/subscription.controller";
-import { ProfileBookingController } from "../../../src/controllers/implementation/user/profile/profileBooking.controller";
-import { ProfileEventsController } from "../../../src/controllers/implementation/user/profile/profileEvents.controller";
-import { ProfileWalletController } from "../../../src/controllers/implementation/user/profile/profileWallet.controller";
-import { ProfileUserController } from "../../../src/controllers/implementation/user/profile/profileUser.controller";
-import { PersonalChatController } from "../../../src/controllers/implementation/user/chat/chat-management.controller";
-import { PersonalMessageController } from "../../../src/controllers/implementation/user/chat/message.controller";
-// import { EventChatController } from "../../../src/controllers/implementation/user/chat/event-chat.controller";
+import { SubscriptionController } from "../../controllers/implementation/user/premium/subscription.controller";
+import { ProfileBookingController } from "../../controllers/implementation/user/profile/profileBooking.controller";
+import { ProfileEventsController } from "../../controllers/implementation/user/profile/profileEvents.controller";
+import { ProfileWalletController } from "../../controllers/implementation/user/profile/profileWallet.controller";
+import { ProfileUserController } from "../../controllers/implementation/user/profile/profileUser.controller";
+import { PersonalChatController } from "../../controllers/implementation/user/chat/chat-management.controller";
+import { PersonalMessageController } from "../../controllers/implementation/user/chat/message.controller";
+// import { EventChatController } from "../../controllers/implementation/user/chat/event-chat.controller";
 
 
 // Admin Controllers
-import { AdminAuthController } from "../../../src/controllers/implementation/admin/auth/admin.auth.controller";
-import { CouponController } from "../../../src/controllers/implementation/admin/coupon/admin.coupon.controller";
-import { AdminEventsController } from "../../../src/controllers/implementation/admin/event/admin.events.controller";
-import { AdminUsersController } from "../../../src/controllers/implementation/admin/user/admin.users.controller";
-import { AchievementController } from "../../../src/controllers/implementation/admin/achievement/admin.achievements.controller";
-import { RevenueDistributionController } from "../../../src/controllers/implementation/admin/finance/admin.distribution.controller";
-import { AdminSubscriptionController } from "../../../src/controllers/implementation/admin/subscription/admin.subscription.controller";
-import { SubscriptionPlanController } from "../../../src/controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
-import { AdminHomeController } from "../../../src/controllers/implementation/admin/home/admin.home.controller";
-import { LiveStreamController } from "../../../src/controllers/implementation/user/live/LiveStreamController";
+import { AdminAuthController } from "../../controllers/implementation/admin/auth/admin.auth.controller";
+import { CouponController } from "../../controllers/implementation/admin/coupon/admin.coupon.controller";
+import { AdminEventsController } from "../../controllers/implementation/admin/event/admin.events.controller";
+import { AdminUsersController } from "../../controllers/implementation/admin/user/admin.users.controller";
+import { AchievementController } from "../../controllers/implementation/admin/achievement/admin.achievements.controller";
+import { RevenueDistributionController } from "../../controllers/implementation/admin/finance/admin.distribution.controller";
+import { AdminSubscriptionController } from "../../controllers/implementation/admin/subscription/admin.subscription.controller";
+import { SubscriptionPlanController } from "../../controllers/implementation/admin/subscription/admin.subscriptionPlan.controller";
+import { AdminHomeController } from "../../controllers/implementation/admin/home/admin.home.controller";
+import { LiveStreamController } from "../../controllers/implementation/user/live/LiveStreamController";
 
 
 export function registerControllers() {

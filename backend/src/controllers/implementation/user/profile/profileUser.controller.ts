@@ -5,7 +5,7 @@ import { inject, injectable } from 'tsyringe';
 import { IProfileUserController } from '../../../../controllers/interfaces/User/Profile/IProfileUser.controller';
 import { ResponseHandler } from '../../../../utils/response-handler';
 import { uploadToCloudinary } from '../../../../utils/helpers';
-import { IProfileUserService } from '../../../../../src/services/interfaces/user/profile/IProfileUser.service';
+import { IProfileUserService } from '../../../../services/interfaces/user/profile/IProfileUser.service';
 
 @injectable()
 export class ProfileUserController implements IProfileUserController {

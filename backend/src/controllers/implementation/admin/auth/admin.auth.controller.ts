@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { ILogin } from '../../../../models/interfaces/auth.interface';
 import { inject, injectable } from 'tsyringe';
-import { IAuthAdminController } from '../../../../../src/controllers/interfaces/Admin/Auth/IAuth.admin.controller';
-import { IAuthAdminService } from '../../../../../src/services/interfaces/IAuth.admin.service';
-import StatusCode from '../../../../../src/types/statuscode';
-import { CookieUtils } from '../../../../../src/utils/cookie.utils';
+import { IAuthAdminController } from '../../../../controllers/interfaces/Admin/Auth/IAuth.admin.controller';
+import { IAuthAdminService } from '../../../../services/interfaces/IAuth.admin.service';
+import StatusCode from '../../../../types/statuscode';
+import { CookieUtils } from '../../../../utils/cookie.utils';
 
 @injectable()
 export class AdminAuthController implements IAuthAdminController {

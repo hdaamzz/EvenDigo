@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import { IWallet, TransactionType } from "../../models/interfaces/wallet.interface";
-import { WalletModel } from "../../../src/models/WalletModel";
+import { WalletModel } from "../../models/WalletModel";
 import { v4 as uuidv4 } from 'uuid';
 import { IWalletRepository } from "../interfaces/IWallet.repository";
 import { injectable } from "tsyringe";

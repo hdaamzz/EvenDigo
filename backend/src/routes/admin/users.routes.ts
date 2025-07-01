@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AdminUsersController } from "../../../src/controllers/implementation/admin/user/admin.users.controller";
+import { AdminUsersController } from "../../controllers/implementation/admin/user/admin.users.controller";
 import { container } from 'tsyringe';
 
 const adminUsersController = container.resolve(AdminUsersController);

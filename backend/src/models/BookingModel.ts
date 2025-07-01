@@ -1,5 +1,5 @@
 import { Document, Schema, model } from "mongoose";
-import { IBooking } from "src/models/interfaces/booking.interface";
+import { IBooking } from "./interfaces/booking.interface";
 
 const ticketSchema = new Schema({
     type: {

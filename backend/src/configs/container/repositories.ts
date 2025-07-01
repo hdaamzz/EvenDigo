@@ -1,19 +1,19 @@
 import { container } from "tsyringe";
-import { UserRepository } from "../../../src/repositories/implementation/user.repository";
-import { AuthRepository } from "../../../src/repositories/implementation/auth.repository";
-import { BookingRepository } from "../../../src/repositories/implementation/booking.repository";
-import { CouponRepository } from "../../../src/repositories/implementation/coupon.repository";
-import { EventRepository } from "../../../src/repositories/implementation/event.repository";
-import { VerificationRepository } from "../../../src/repositories/implementation/verification.repository";
-import { WalletRepository } from "../../../src/repositories/implementation/wallet.repository";
-import { AchievementRepository } from "../../../src/repositories/implementation/achievements.repository";
-import { FinanceRepository } from "../../../src/repositories/implementation/finance.repository";
-import { RevenueDistributionRepository } from "../../../src/repositories/implementation/revenue.repository";
-import { UserAchievementRepository } from "../../../src/repositories/implementation/badge.repository";
+import { UserRepository } from "../../repositories/implementation/user.repository";
+import { AuthRepository } from "../../repositories/implementation/auth.repository";
+import { BookingRepository } from "../../repositories/implementation/booking.repository";
+import { CouponRepository } from "../../repositories/implementation/coupon.repository";
+import { EventRepository } from "../../repositories/implementation/event.repository";
+import { VerificationRepository } from "../../repositories/implementation/verification.repository";
+import { WalletRepository } from "../../repositories/implementation/wallet.repository";
+import { AchievementRepository } from "../../repositories/implementation/achievements.repository";
+import { FinanceRepository } from "../../repositories/implementation/finance.repository";
+import { RevenueDistributionRepository } from "../../repositories/implementation/revenue.repository";
+import { UserAchievementRepository } from "../../repositories/implementation/badge.repository";
 import { SubscriptionRepository } from "../../repositories/implementation/subscription.repository";
-import { SubscriptionPlanRepository } from "../../../src/repositories/implementation/subscriptionPlan.repository";
-import { ChatRepository } from "../../../src/repositories/implementation/chat.repository";
-import { LiveStreamRepository } from "../../../src/repositories/implementation/livestream.repository";
+import { SubscriptionPlanRepository } from "../../repositories/implementation/subscriptionPlan.repository";
+import { ChatRepository } from "../../repositories/implementation/chat.repository";
+import { LiveStreamRepository } from "../../repositories/implementation/livestream.repository";
 
 
 export function registerRepositories() {
