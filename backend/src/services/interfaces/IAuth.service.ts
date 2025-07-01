@@ -8,7 +8,7 @@ import {
 } from 'src/models/interfaces/auth.interface';
 
 export interface IAuthService {
-  sendOTP(userData: IUser): Promise<{ success: boolean; message: string }>;
+  sendOTP(userData: Partial<IUser>): Promise<{ success: boolean; message: string }>;
 
   verifyOTP(email: string, otp: string): Promise<ServiceResponse<OTPVerificationData>>;
 
@@ -31,7 +31,7 @@ export interface IAuthService {
   ): Promise<{
     success: boolean;
     message: string;
-    user?: IUser;
+    user?: Partial<IUser>;
     accessToken?: string;
     refreshToken?: string;
   }>;

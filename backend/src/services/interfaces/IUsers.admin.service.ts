@@ -9,4 +9,6 @@ export interface IUsersAdminService {
   unblockUser(userId: string): Promise<ServiceResponseWithMessage>;
   approveUser(userId: string): Promise<ServiceResponseWithMessage>;
   rejectUser(userId: string): Promise<ServiceResponseWithMessage>;
+  searchUsers(searchTerm: string): Promise<ServiceResponse<IUser[]>>
+  searchVerificationUsers(searchTerm: string): Promise<ServiceResponse<IVerification[]>>
 }

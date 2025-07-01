@@ -21,9 +21,9 @@ export class AuthService implements IAuthService {
     @inject('TokenService') private tokenService: ITokenService
   ) {}
 
-  async sendOTP(userData: IUser): Promise<{ success: boolean; message: string }> {
+  async sendOTP(userData: Partial<IUser>): Promise<{ success: boolean; message: string }> {
     try {
-      const existingUser = await this.userAuthService.findUserByEmail(userData.email);
+      const existingUser = await this.userAuthService.findUserByEmail(userData.email as string);
       if (existingUser) {
         return {
           success: false,
@@ -32,8 +32,8 @@ export class AuthService implements IAuthService {
       }
 
       const otp = this.otpService.generateOTP();
-      await this.otpService.storeOTP(userData.email, otp, userData);
-      await this.emailService.sendOTPEmail(userData.email, userData.name, otp);
+      await this.otpService.storeOTP(userData.email as string, otp, userData as IUser);
+      await this.emailService.sendOTPEmail(userData.email as string, userData.name as string, otp);
 
       return {
         success: true,
@@ -114,7 +114,7 @@ export class AuthService implements IAuthService {
   async verifyFirebaseToken(idToken: string, name: string, profileImg?: string): Promise<{
     success: boolean;
     message: string;
-    user?: IUser;
+    user?: Partial<IUser>;
     accessToken?: string;
     refreshToken?: string;
   }> {
@@ -124,8 +124,8 @@ export class AuthService implements IAuthService {
       return result;
     }
 
-    const accessToken = this.tokenService.generateToken(result.user);
-    const refreshToken = this.tokenService.generateRefreshToken(result.user);
+    const accessToken = this.tokenService.generateToken(result.user as IUser);
+    const refreshToken = this.tokenService.generateRefreshToken(result.user as IUser);
 
     return {
       ...result,

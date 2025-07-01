@@ -10,7 +10,7 @@ const verificationSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Approved", "Rejected", "Pending"],
+      enum: ["Verified", "Rejected", "Pending"],
       default:'Pending'
     },
     note: {

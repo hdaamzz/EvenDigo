@@ -3,8 +3,8 @@ import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 
 export const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 5, 
+  windowMs: 5 * 60 * 1000, 
+  max: 7, 
   message: {
     success: false,
     message: 'Too many authentication attempts, please try again later.'

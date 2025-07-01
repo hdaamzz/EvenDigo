@@ -22,7 +22,7 @@ export class UserAuthService implements IUserAuthService {
 
   async registerUser(userData: IUser, hashedPassword: string): Promise<IUser> {
     try {
-      const user = await this.userRepository.createUser({
+      const user = await this.userRepository.create({
         ...userData,
         password: hashedPassword,
         role: 'user',
@@ -99,16 +99,16 @@ export class UserAuthService implements IUserAuthService {
   }
 
   async findUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
-    return this.userRepository.findUserById(userId);
+    return this.userRepository.findById(userId);
   }
 
   async updateUser(userId: Schema.Types.ObjectId | string, updateData: Partial<IUser>): Promise<IUser> {
     try {
-      const user = await this.userRepository.findUserById(userId);
+      const user = await this.userRepository.findById(userId);
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const updatedUser = await this.userRepository.updateUser(userId, updateData);
+      const updatedUser = await this.userRepository.updateById(userId, updateData);
       if (!updatedUser) {
         throw new InternalServerErrorException('Failed to update user');
       }

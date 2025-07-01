@@ -12,7 +12,7 @@ import { alphabetsValidator, onlyNumbersValidator, futureDateValidator } from '.
 import Notiflix from 'notiflix';
 import { ICoupon } from '../../../../core/models/admin/coupon.interface';
 import { Subject, fromEvent, Subscription } from 'rxjs';
-import { takeUntil, debounceTime, filter, finalize } from 'rxjs/operators';
+import { takeUntil, debounceTime, filter, finalize, distinctUntilChanged, tap } from 'rxjs/operators';
 import { MenuItem } from 'primeng/api';
 import { AdminCardComponent } from '../../../../shared/admin-card/admin-card.component';
 
@@ -41,6 +41,8 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   pageSize = 9;
   hasMoreCoupons = true;
   allLoaded = false;
+  private searchSubject$ = new Subject<string>();
+  isSearching = false;
 
   private destroy$ = new Subject<void>();
 
@@ -61,6 +63,7 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.loadCoupons(true);
     this.setupResizeListener();
+    this.setupSearchListener();
   }
 
   ngAfterViewInit(): void {
@@ -108,6 +111,19 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
   }
+  private setupSearchListener(): void {
+    this.searchSubject$
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(500), // Wait for 500ms after user stops typing
+        distinctUntilChanged(), // Only emit if search term changes
+        tap(() => this.isSearching = true)
+      )
+      .subscribe(searchTerm => {
+        this.searchTerm = searchTerm;
+        this.loadCoupons(true);
+      });
+  }
 
   private isScrolledToBottom(): boolean {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
@@ -125,10 +141,13 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.loading || this.allLoaded) return;
 
     this.loading = true;
-    this.couponService.getCouponsWithPagination(this.currentPage, this.pageSize)
+    this.couponService.getCouponsWithPaginationAndSearch(this.currentPage, this.pageSize, this.searchTerm)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.loading = false)
+        finalize(() => {
+          this.loading = false;
+          this.isSearching = false;
+        })
       )
       .subscribe({
         next: (response) => {
@@ -170,19 +189,15 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (reset) {
       this.couponsList = newCoupons;
       this.originalCoupons = [...newCoupons];
+      this.filteredCoupons = [...newCoupons];
     } else {
       this.couponsList = [...this.couponsList, ...newCoupons];
       this.originalCoupons = [...this.couponsList];
+      this.filteredCoupons = [...this.couponsList];
     }
 
     this.hasMoreCoupons = hasMore;
     this.allLoaded = !hasMore;
-
-    if (this.searchTerm.trim()) {
-      this.applySearchFilter();
-    } else {
-      this.filteredCoupons = [...this.originalCoupons];
-    }
   }
 
 
@@ -433,27 +448,11 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.searchTerm = target.value.toLowerCase();
-    this.applySearchFilter();
+    this.searchSubject$.next(target.value);
   }
 
   onSearchClear(): void {
     this.searchTerm = '';
-    this.filteredCoupons = [...this.originalCoupons];
-  }
-
-  private applySearchFilter(): void {
-    if (!this.searchTerm.trim()) { 
-      this.filteredCoupons = [...this.originalCoupons];
-      return;
-    }
-
-    const searchTermLower = this.searchTerm.toLowerCase();
-    this.filteredCoupons = this.originalCoupons.filter(coupon =>
-      coupon.code.toLowerCase().includes(searchTermLower) ||
-      (coupon.description && coupon.description.toLowerCase().includes(searchTermLower)) ||
-      coupon.discountType.toLowerCase().includes(searchTermLower) ||
-      coupon.status.toLowerCase().includes(searchTermLower)
-    );
+    this.searchSubject$.next('');
   }
 }

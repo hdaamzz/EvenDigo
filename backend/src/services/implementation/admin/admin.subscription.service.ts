@@ -243,7 +243,7 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
       
       // Fetch users in bulk
       for (const userId of userIds) {
-        const user = await this.userRepository.findUserById(userId);
+        const user = await this.userRepository.findById(userId);
         if (user) {
           userMap.set(userId.toString(), user);
         }

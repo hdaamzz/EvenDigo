@@ -1,8 +1,8 @@
-import { Schema } from "mongoose";
+import { Schema, Document } from "mongoose";
 import { IBooking } from "./booking.interface";
 
-export interface IUser {
-  _id?: Schema.Types.ObjectId | string;
+export interface IUser extends Document {
+  _id: Schema.Types.ObjectId;
   userId?: Schema.Types.ObjectId | string;
   name: string;
   email: string;
@@ -85,4 +85,3 @@ export interface IJwtPayload {
   token: string,
   role: string
 }
-

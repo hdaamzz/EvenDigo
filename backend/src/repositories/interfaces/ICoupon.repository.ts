@@ -1,12 +1,37 @@
-import { Schema } from "mongoose";
-import { ICoupon } from "../../models/interfaces/coupon.interface";
+import { ICoupon } from '../../models/interfaces/coupon.interface';
+import { IBaseRepository } from '../IBase.repository';
 
-export interface ICouponRepository {
+export interface ICouponRepository extends IBaseRepository<ICoupon> {
+  // Basic coupon queries
+  findByCode(couponCode: string): Promise<ICoupon | null>;
+  findActiveCoupons(): Promise<ICoupon[]>;
+  findExpiredCoupons(): Promise<ICoupon[]>;
+  findByDiscountType(discountType: string): Promise<ICoupon[]>;
+  findByUsageLimit(usageLimit: number): Promise<ICoupon[]>;
+  findCouponsInDateRange(startDate: Date, endDate: Date): Promise<ICoupon[]>;
+
+  // Pagination methods
+  findActiveCouponsPaginated(page?: number, limit?: number): Promise<{
+    items: ICoupon[];
+    totalCount: number;
+    hasMore: boolean;
+    currentPage: number;
+    totalPages: number;
+  }>;
+
+  findAllCouponsPagination(page: number, limit: number, search: string): Promise<{
+    coupons: ICoupon[];
+    totalCount: number;
+    hasMore: boolean;
+}>
+
+  // Alias methods for better readability
   findAllCoupons(): Promise<ICoupon[]>;
-  findAllCouponsPagination(page: number, limit: number): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}>;
-  findCouponById(couponId: Schema.Types.ObjectId | string): Promise<ICoupon | null>;
+  findCouponById(couponId: string): Promise<ICoupon | null>;
   findCouponByCode(couponCode: string): Promise<ICoupon | null>;
+
+  // CRUD operations
   createCoupon(couponData: Partial<ICoupon>): Promise<ICoupon>;
-  updateCoupon(couponId: Schema.Types.ObjectId | string, updateData: Partial<ICoupon>): Promise<ICoupon | null>;
-  deleteCoupon(couponId: Schema.Types.ObjectId | string): Promise<void>;
+  updateCoupon(couponId: string, updateData: Partial<ICoupon>): Promise<ICoupon | null>;
+  deleteCoupon(couponId: string): Promise<boolean>;
 }

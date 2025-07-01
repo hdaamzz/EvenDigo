@@ -11,11 +11,17 @@ export class CouponService implements ICouponAdminService{
     ) {}
 
     async getAllCoupons(): Promise<ICoupon[]> {
-        return this.couponRepository.findAllCoupons();
+        return this.couponRepository.findAll();
     }
-    async getAllCouponsWithPagination(page: number = 1, limit: number = 10): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}> {
-        return this.couponRepository.findAllCouponsPagination(page, limit);
-    }
+    async getAllCouponsWithPagination(page: number = 1, limit: number = 10, search: string = ''): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}> {
+    const result = await this.couponRepository.findAllCouponsPagination(page, limit, search);
+    
+    return {
+            coupons: result.coupons,
+            totalCount: result.totalCount,
+            hasMore: result.hasMore
+        };
+        }
 
     async createCoupon(couponData: Partial<ICoupon>): Promise<ICoupon> {
         const existingCoupon = await this.couponRepository.findCouponByCode(couponData.couponCode!);
@@ -26,34 +32,34 @@ export class CouponService implements ICouponAdminService{
     }
 
     async updateCoupon(couponId: string, updateData: Partial<ICoupon>): Promise<ICoupon | null> {
-        const coupon = await this.couponRepository.findCouponById(couponId);
+        const coupon = await this.couponRepository.findById(couponId);
         if (!coupon) {
             throw new Error('Coupon not found');
         }
-        return this.couponRepository.updateCoupon(couponId, updateData);
+        return this.couponRepository.updateById(couponId, updateData);
     }
 
     async activateCoupon(couponId: string): Promise<ICoupon | null> {
-        const coupon = await this.couponRepository.findCouponById(couponId);
+        const coupon = await this.couponRepository.findById(couponId);
         if (!coupon) {
             throw new Error('Coupon not found');
         }
-        return this.couponRepository.updateCoupon(couponId, { isActive: true });
+        return this.couponRepository.updateById(couponId, { isActive: true });
     }
 
     async deactivateCoupon(couponId: string): Promise<ICoupon | null> {
-        const coupon = await this.couponRepository.findCouponById(couponId);
+        const coupon = await this.couponRepository.findById(couponId);
         if (!coupon) {
             throw new Error('Coupon not found');
         }
-        return this.couponRepository.updateCoupon(couponId, { isActive: false });
+        return this.couponRepository.updateById(couponId, { isActive: false });
     }
 
     async deleteCoupon(couponId: string): Promise<void> {
-        const coupon = await this.couponRepository.findCouponById(couponId);
+        const coupon = await this.couponRepository.findById(couponId);
         if (!coupon) {
             throw new Error('Coupon not found');
         }
-        await this.couponRepository.deleteCoupon(couponId);
+        await this.couponRepository.deleteById(couponId);
     }
 }

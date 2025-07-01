@@ -1,77 +1,117 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { UserModel } from '../../src/models/UserModel';
 import StatusCode from '../../src/types/statuscode';
 
+// Enum for user roles
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user'
+}
 
-export const userRole = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
+export const adminMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   try {
-    const token = req.cookies.session;
-    
-    if (!token) {
-      console.log('no token');
-      
-      return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'No authentication token, access denied' });
+    if (!req.user) {
+      res.status(StatusCode.UNAUTHORIZED).json({
+        success: false,
+        message: 'Authentication required',
+        code: 'NO_USER'
+      });
+      return;
     }
-    
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
-    
-    const user = await UserModel.findById(decoded.userId).select('-password');
-        
-    if (!user) {
-      console.log('user not found');
-      
-      return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user not found' });
+    if (req.user.role !== UserRole.ADMIN) {
+      res.status(StatusCode.FORBIDDEN).json({
+        success: false,
+        message: 'Admin access required',
+        code: 'INSUFFICIENT_PERMISSIONS'
+      });
+      return;
     }
-    if (user.status=='blocked') {
-      console.log('blocked');
-      
-      return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user has blocked' });
-    }
-    if (user.role !=='user') {
-      console.log('not user');
-      
-        return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but its not user' });
-    }
-  
-    
-    req.user = user;
+
     next();
   } catch (error) {
-    console.error('Roelbased middleware error:', error);
-    res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Authentication failed' });
+    console.error('Admin middleware error:', error);
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Authorization failed',
+      code: 'INTERNAL_ERROR'
+    });
   }
 };
 
+export const userMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    if (!req.user) {
+      res.status(StatusCode.UNAUTHORIZED).json({
+        success: false,
+        message: 'Authentication required',
+        code: 'NO_USER'
+      });
+      return;
+    }
 
-export const adminRole = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
+    if (req.user.role !== UserRole.USER) {
+      res.status(StatusCode.FORBIDDEN).json({
+        success: false,
+        message: 'User access required',
+        code: 'INSUFFICIENT_PERMISSIONS'
+      });
+      return;
+    }
+
+    next();
+  } catch (error) {
+    console.error('User middleware error:', error);
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Authorization failed',
+      code: 'INTERNAL_ERROR'
+    });
+  }
+};
+
+export const requireRole = (...roles: UserRole[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      const token = req.cookies.session;
-      
-      if (!token) {
-        return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'No authentication token, access denied' });
+      if (!req.user) {
+        res.status(StatusCode.UNAUTHORIZED).json({
+          success: false,
+          message: 'Authentication required',
+          code: 'NO_USER'
+        });
+        return;
       }
-      
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
-  
-      
-      const user = await UserModel.findById(decoded.userId).select('-password');    
-      if (!user) {
-        return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user not found' });
+
+      if (!roles.includes(req.user.role)) {
+        res.status(StatusCode.FORBIDDEN).json({
+          success: false,
+          message: `Access denied. Required roles: ${roles.join(', ')}`,
+          code: 'INSUFFICIENT_PERMISSIONS'
+        });
+        return;
       }
-      if (user.status=='blocked') {
-        return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but user has blocked' });
-      }
-      if (user.role !=='admin') {
-          return res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Token is valid, but its not admin' });
-        }
-    
-      
-      req.user = user;
+
       next();
     } catch (error) {
-      console.error('Roelbased middleware error:', error);
-      res.status(StatusCode.UNAUTHORIZED).json({ success: false, error: 'Authentication failed' });
+      console.error('Role middleware error:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Authorization failed',
+        code: 'INTERNAL_ERROR'
+      });
     }
   };
+};
+
+export const requireAnyRole = requireRole(UserRole.ADMIN, UserRole.USER);
+
+export const requireAdminRole = requireRole(UserRole.ADMIN);
+
+export const requireUserRole = requireRole(UserRole.USER);

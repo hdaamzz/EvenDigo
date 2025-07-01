@@ -13,7 +13,7 @@ export interface IEventService {
   updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null>;
   deleteEvent(eventId: Schema.Types.ObjectId | string): Promise<boolean>;
   findAllEvents(): Promise<EventDocument[]>;
-  findAllEventsWithPagination(page: number, limit: number): Promise<EventDocument[]>;
+   findAllEventsWithPagination(page: number, limit: number): Promise<{ data: EventDocument[]; total: number; currentPage: number; totalPages: number; }>
   findUpcomingEventsWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findAllEventWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]>;

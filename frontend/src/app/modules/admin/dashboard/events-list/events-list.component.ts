@@ -20,7 +20,7 @@ interface FilterOption {
 
 @Component({
   selector: 'app-events-list',
-  imports: [CommonModule, TruncatePipe, MenuModule, ButtonModule, DialogModule, DropdownModule, AdminCardComponent,FormsModule],
+  imports: [CommonModule, TruncatePipe, MenuModule, ButtonModule, DialogModule, DropdownModule, AdminCardComponent, FormsModule],
   templateUrl: './events-list.component.html',
   styleUrl: './events-list.component.css'
 })
@@ -31,12 +31,11 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
   displayModal = false;
   selectedEvent: IEvent | null = null;
 
-  // Pagination
   currentPage = 1;
   readonly pageLimit = 9;
   hasMoreEvents = true;
+  totalEvents = 0;
 
-  // Search and Filter
   searchValue = '';
   selectedFilter: FilterOption | null = null;
   private readonly _searchSubject = new Subject<string>();
@@ -52,61 +51,52 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
 
   constructor(private _eventsService: AdminEventsService, private _el: ElementRef) {
-    this.selectedFilter = this.filterOptions[0]; // Default to 'All Events'
+    this.selectedFilter = this.filterOptions[0];
   }
 
-  /**
-   * Initialize component and fetch first page of events
-   */
+
   ngOnInit(): void {
     this._setupSearchDebounce();
     this._fetchEvents();
   }
 
-  /**
-   * Set up the infinite scroll functionality after view is initialized
-   */
+
   ngAfterViewInit(): void {
     this._setupInfiniteScroll();
   }
 
-  /**
-   * Clean up subscriptions and observers when component is destroyed
-   */
+
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
-    
+
     if (this._intersectionObserver) {
       this._intersectionObserver.disconnect();
     }
   }
 
-  /**
-   * Setup search debounce to avoid excessive API calls
-   */
   private _setupSearchDebounce(): void {
     this._searchSubject
       .pipe(
-        debounceTime(300),
+        debounceTime(500),
         distinctUntilChanged(),
         takeUntil(this._destroy$)
       )
       .subscribe(searchTerm => {
-        this._applyFilters();
+        this.searchValue = searchTerm;
+        this._fetchEvents(true);
       });
   }
 
-  /**
-   * Setup infinite scroll using IntersectionObserver
-   */
+
+
   private _setupInfiniteScroll(): void {
     if (!this._endOfList) return;
-    
+
     const options = {
-      root: null, 
+      root: null,
       rootMargin: '0px',
-      threshold: 0.5 
+      threshold: 0.5
     };
 
     this._intersectionObserver = new IntersectionObserver((entries) => {
@@ -115,23 +105,24 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
         this._loadMoreEvents();
       }
     }, options);
-    
+
     this._intersectionObserver.observe(this._endOfList.nativeElement);
   }
 
-  /**
-   * Fetch events from the service with optional reset parameter
-   * @param reset Whether to reset the event list or append to it
-   */
+
   private _fetchEvents(reset: boolean = true): void {
     if (reset) {
       this.currentPage = 1;
       this.events = [];
+      this.filteredEvents = [];
       this.hasMoreEvents = true;
     }
-    
+
     this.isLoading = true;
-    this._eventsService.getEvents(this.currentPage, this.pageLimit)
+
+    const filterValue = this.selectedFilter?.value || 'all';
+
+    this._eventsService.getEvents(this.currentPage, this.pageLimit, this.searchValue, filterValue)
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (response) => {
@@ -139,9 +130,13 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (response.data.length < this.pageLimit) {
               this.hasMoreEvents = false;
             }
-            
+
             this.events = reset ? response.data : [...this.events, ...response.data];
-            this._applyFilters();
+            this.filteredEvents = [...this.events];
+
+            if (response.total !== undefined) {
+            this.totalEvents = response.total;
+          }
           }
         },
         error: (error) => {
@@ -153,27 +148,19 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
   }
-
-  /**
-   * Load more events when scrolling down
-   */
   private _loadMoreEvents(): void {
     if (this.isLoading || !this.hasMoreEvents) return;
-    
+
     this.currentPage++;
     this._fetchEvents(false);
   }
 
-  /**
-   * Apply search and filter to events
-   */
   private _applyFilters(): void {
     let filtered = [...this.events];
 
-    // Apply search filter
     if (this.searchValue.trim()) {
       const searchTerm = this.searchValue.toLowerCase().trim();
-      filtered = filtered.filter(event => 
+      filtered = filtered.filter(event =>
         event.eventTitle.toLowerCase().includes(searchTerm) ||
         event.eventType.toLowerCase().includes(searchTerm) ||
         event.city.toLowerCase().includes(searchTerm) ||
@@ -182,7 +169,6 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
       );
     }
 
-    // Apply status filter
     if (this.selectedFilter && this.selectedFilter.value !== 'all') {
       const currentDate = new Date();
       currentDate.setHours(0, 0, 0, 0);
@@ -203,62 +189,36 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filteredEvents = filtered;
   }
 
-  /**
-   * Handle search input changes
-   * @param searchTerm The search term
-   */
-   onSearchChange(event: Event): void {
+
+  onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this._searchSubject.next(target.value.toLowerCase());
+    this._searchSubject.next(target.value);
   }
 
-  /**
-   * Handle search clear
-   */
   onSearchClear(): void {
     this.searchValue = '';
-    this._applyFilters();
+    this._searchSubject.next('');
   }
-
-  /**
-   * Handle filter change
-   * @param filter The selected filter option
-   */
   onFilterChange(filter: FilterOption): void {
     this.selectedFilter = filter;
-    this._applyFilters();
+    this._fetchEvents(true);
   }
 
-  /**
-   * Refresh events list
-   */
+
   refreshEvents(): void {
     this._fetchEvents(true);
   }
 
-  /**
-   * Handler for viewing event analysis
-   * @param event The event to analyze
-   */
+
   viewAnalysis(event: IEvent): void {
     console.log('View analysis', event);
-    // TODO: Implement analysis view
   }
 
-  /**
-   * Display details modal for selected event
-   * @param event The event to display details for
-   */
   viewDetails(event: IEvent): void {
     this.selectedEvent = event;
     this.displayModal = true;
   }
 
-  /**
-   * Generate menu items for event actions
-   * @param event The event to generate menu for
-   * @returns Array of menu items
-   */
   getMenuItems(event: IEvent): MenuItem[] {
     return [
       {
@@ -279,14 +239,11 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
   }
 
-  /**
-   * Toggle the listing status of an event
-   * @param event The event to update
-   */
+
   private _toggleEventStatus(event: IEvent): void {
     this.isLoading = true;
     const newStatus = !event.status;
-    
+
     this._eventsService.updateEventStatus(event._id, newStatus)
       .pipe(takeUntil(this._destroy$))
       .subscribe({
@@ -295,9 +252,9 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
             const index = this.events.findIndex(e => e._id === event._id);
             if (index !== -1) {
               this.events[index].status = newStatus;
-              this._applyFilters(); // Re-apply filters to update the filtered list
+              this._applyFilters();
             }
-            
+
             Notiflix.Notify.success(`Event ${newStatus ? 'listed' : 'unlisted'} successfully`);
           }
         },
@@ -311,26 +268,17 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  /**
-   * Get the appropriate badge styling for event status
-   * @param event The event to get badge for
-   * @returns Object with text and CSS classes for badge
-   */
   getEventStatusBadge(event: IEvent): { text: string, classes: string } {
-    return event.status 
+    return event.status
       ? { text: 'Listed', classes: 'bg-green-100 text-green-600' }
       : { text: 'Unlisted', classes: 'bg-gray-100 text-gray-600' };
   }
 
-  /**
-   * Get event date status badge
-   * @param event The event to check
-   * @returns Object with text and CSS classes for date status badge
-   */
+
   getEventDateBadge(event: IEvent): { text: string, classes: string } {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
-    
+
     const eventDate = new Date(event.startDate);
     eventDate.setHours(0, 0, 0, 0);
 

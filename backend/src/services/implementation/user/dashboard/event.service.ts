@@ -86,8 +86,8 @@ export class EventService implements IEventService {
     return this.eventRepository.findAllEvents();
   }
 
-  async findAllEventsWithPagination(page: number, limit: number): Promise<EventDocument[]> {
-    return this.eventRepository.findAllEventsWithPagination(page, limit);
+  async findAllEventsWithPagination(page: number, limit: number): Promise<{ data: EventDocument[]; total: number; currentPage: number; totalPages: number; }> {
+    return this.eventRepository.findAllEventsWithPagination(page, limit, '', 'all');
   }
 
   async findUpcomingEventsWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {

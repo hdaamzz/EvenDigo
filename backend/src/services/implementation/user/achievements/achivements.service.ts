@@ -16,7 +16,7 @@ export class UserAchievementService implements IUserAchievementService {
   ) {}
 
   async checkUserAchievements(userId: string): Promise<void> {
-    const user = await this.userRepository.findUserById(userId);    
+    const user = await this.userRepository.findById(userId);    
     if (!user) throw new Error('User not found');
 
     const eventsCreated = await this.eventRepository.findDocumentCount(userId);

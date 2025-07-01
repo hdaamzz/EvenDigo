@@ -1,26 +1,71 @@
-import { UserModel } from "../../models/UserModel";
-import { MongoError } from 'mongodb';
 import { Schema } from "mongoose";
 import { injectable } from "tsyringe";
-import { IUser } from "../../../src/models/interfaces/auth.interface";
+import { MongoError } from 'mongodb';
+import { UserModel } from "../../models/UserModel";
+import { IUser } from "../../models/interfaces/auth.interface";
 import { IUserRepository } from "../interfaces/IUser.repository";
-
+import { BaseRepository } from "../BaseRepository";
 
 @injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository extends BaseRepository<IUser> implements IUserRepository {
 
+    constructor() {
+        super(UserModel);
+    }
 
     async findUserByIdWithoutPassword(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
-        return UserModel.findById({ userId }, { password: 0 });
+        return this.model.findById(userId, { password: 0 }).exec();
+    }
+
+    async findUserByEmail(email: string): Promise<IUser | null> {
+        return this.findOne({ email });
+    }
+
+    async updateUserLastLogin(userId: Schema.Types.ObjectId | string): Promise<void> {
+        await this.model.findByIdAndUpdate(userId, {
+            lastLogin: new Date()
+        }).exec();
+    }
+
+    async blockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
+        return this.updateById(userId, { status: "blocked" } as Partial<IUser>);
+    }
+
+    async unblockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
+        return this.updateById(userId, { status: "active" } as Partial<IUser>);
+    }
+
+    async approveUserStatusChange(userId: Schema.Types.ObjectId | string): Promise<void> {
+        await this.updateById(userId, { verified: true } as Partial<IUser>);
+    }
+
+    async findAllActiveUsers(): Promise<IUser[]> {
+        return this.findWithSort({ role: 'user' }, { createdAt: -1 });
+    }
+
+    async searchUsers(searchTerm: string): Promise<IUser[]> {
+        const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive search
+        
+        return this.model.find({
+            role: 'user', // Only search for users, not admins
+            $or: [
+                { name: { $regex: searchRegex } },
+                { email: { $regex: searchRegex } },
+                { phone: { $regex: searchRegex } },
+                { status: { $regex: searchRegex } },
+                { gender: { $regex: searchRegex } }
+            ]
+        })
+        .select('-password -firebaseUid') // Exclude sensitive fields
+        .sort({ createdAt: -1 })
+        .exec();
     }
 
     async createUser(userData: IUser): Promise<IUser> {
         try {
-            const user = new UserModel(userData);
-            const savedUser = await user.save();
-            return savedUser;
+            return await this.create(userData);
         } catch (error: unknown) {
-            if (error instanceof MongoError && (error).code === 11000) {
+            if (error instanceof MongoError && (error as any).code === 11000) {
                 throw new Error('Email already exists');
             }
             console.error("Error while creating user:", error);
@@ -28,50 +73,22 @@ export class UserRepository implements IUserRepository {
         }
     }
 
-
-    async findUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
-        return UserModel.findById(userId);
-    }
-
-
-    async findUserByEmail(email: string): Promise<IUser | null> {
-        return UserModel.findOne({ email });
-    }
-
-    async updateUserLastLogin(userId: Schema.Types.ObjectId | string): Promise<void> {
-        await UserModel.findByIdAndUpdate(userId, {
-            lastLogin: new Date()
-        });
-    }
-    async updateUser(userId: Schema.Types.ObjectId | string, updateData: Partial<IUser>): Promise<IUser | null> {
-        return UserModel.findByIdAndUpdate(
-            userId,
-            { $set: updateData },
-            { new: true }
+    async findUsersByRole(role: string, page: number = 1, limit: number = 10): Promise<any> {
+        return this.findWithPagination(
+            { role },
+            { page, limit, sort: { createdAt: -1 } }
         );
     }
 
-
-    async findAllUsers(): Promise<IUser[]> {
-        return UserModel.find({ role: 'user' }).sort({ createdAt: -1 })
+    async findActiveUsers(): Promise<IUser[]> {
+        return this.findAll({ status: 'active' });
     }
 
-    async blockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
-        return UserModel.findByIdAndUpdate(
-            userId,
-            { $set: { status: "blocked" } },
-            { new: true }
-        );
-    }
-    async unblockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null> {
-        return UserModel.findByIdAndUpdate(
-            userId,
-            { $set: { status: "active" } },
-            { new: true }
-        );
+    async findBlockedUsers(): Promise<IUser[]> {
+        return this.findAll({ status: 'blocked' });
     }
 
-    async approveUserStatusChange(userId: Schema.Types.ObjectId | string): Promise<void> {
-        await UserModel.findByIdAndUpdate(userId, { $set: { verified: true } }, { new: true });
+    async findUnverifiedUsers(): Promise<IUser[]> {
+        return this.findAll({ verified: false });
     }
 }

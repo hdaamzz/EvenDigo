@@ -54,7 +54,7 @@ export class PasswordService implements IPasswordService {
       
       const hashedPassword = await this.hashPassword(newPassword);
       
-      await this.userRepository.updateUser(user._id.toString(), { password: hashedPassword });
+      await this.userRepository.updateById(user._id.toString(), { password: hashedPassword });
       
       await this.deleteResetToken(email);
       
