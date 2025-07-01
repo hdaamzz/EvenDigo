@@ -19,6 +19,20 @@ export class AdminCouponService {
         map((response) => response.data)
       );
   }
+  getCouponsWithPaginationAndSearch(page: number = 1, limit: number = 10, searchTerm: string = ''): Observable<AllCouponResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (searchTerm.trim()) {
+      params = params.set('search', searchTerm.trim());
+    }
+
+    return this.http.get<AllCouponResponse>(this.apiUrl, {
+      params,
+      withCredentials: true
+    });
+  }
   getCouponsWithPagination(page: number = 1, limit: number = 10): Observable<AllCouponResponse> {
     const params = new HttpParams()
       .set('page', page.toString())

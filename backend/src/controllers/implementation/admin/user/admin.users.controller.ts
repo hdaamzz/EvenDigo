@@ -28,8 +28,42 @@ export class AdminUsersController implements IUsersAdminController {
     }
   }
 
+  async searchUsers(req: Request, res: Response): Promise<void> {
+    const searchTerm = req.query.search as string;
+    
+    if (!searchTerm || searchTerm.trim() === '') {
+      return this.fetchAllUsers(req, res);
+    }
+    
+    const response: ServiceResponse<IUser[]> = await this.adminUsersService.searchUsers(searchTerm.trim());
+    if (response.success) {
+      const userDtos = AdminUserResponseDto.fromUsers(response.data!);
+      res.status(StatusCode.OK).json(userDtos);
+    } else {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
+    }
+  }
+
   async fetchAllRequestedUsers(_req: Request, res: Response): Promise<void> {
     const response: ServiceResponse<IVerification[]> = await this.adminUsersService.fetchAllVerificationUsers();
+    if (response.success) {
+      const verificationDtos = AdminVerificationResponseDto.fromVerifications(response.data!);
+      res.status(StatusCode.OK).json(verificationDtos);
+    } else {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json(response);
+    }
+  }
+
+  async searchVerificationUsers(req: Request, res: Response): Promise<void> {
+    const searchTerm = req.query.search as string;
+    
+    if (!searchTerm || searchTerm.trim() === '') {
+      return this.fetchAllRequestedUsers(req, res);
+    }
+    
+    const response: ServiceResponse<IVerification[]> = await this.adminUsersService.searchVerificationUsers(searchTerm.trim());
+    console.log(response);
+    
     if (response.success) {
       const verificationDtos = AdminVerificationResponseDto.fromVerifications(response.data!);
       res.status(StatusCode.OK).json(verificationDtos);

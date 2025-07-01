@@ -19,7 +19,7 @@ import { AdminUsersService } from '../../../../core/services/admin/users/admin.u
   styleUrls: ['./users-list.component.css']
 })
 export class UsersListComponent implements OnInit, OnDestroy {
-  
+
   usersList: User[] = [];
   filteredUsersList: User[] = [];
   verificationList: any[] = [];
@@ -30,18 +30,20 @@ export class UsersListComponent implements OnInit, OnDestroy {
   visible = false;
   position = 'right';
   isMobile = false;
-  
+
   // Search properties
   usersSearchTerm = '';
   verificationSearchTerm = '';
-  
+  isSearching = false;
+  isVerificationSearching = false;
+
   selectedUser: User = {
     _id: '',
     name: '',
     email: ''
   };
 
-  
+
   private readonly _destroy$ = new Subject<void>();
   private readonly _colors = [
     'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-red-600',
@@ -50,7 +52,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
     'bg-rose-600', 'bg-amber-600', 'bg-fuchsia-600', 'bg-violet-600',
   ];
 
-  constructor(private _usersService: AdminUsersService) {}
+  constructor(private _usersService: AdminUsersService) { }
 
   @HostListener('window:resize')
   onResize(): void {
@@ -68,57 +70,95 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 
-  // Search methods
   onUsersSearchChange(searchValue: string): void {
     this.usersSearchTerm = searchValue;
-    this._filterUsers();
   }
 
   onUsersSearchClear(): void {
     this.usersSearchTerm = '';
-    this.filteredUsersList = [...this.usersList];
+    this.isSearching = false;
+    this._fetchUserData();
+  }
+
+
+  onUsersSearchSubmit(): void {
+    if (this.isSearching) return;
+
+    this.isSearching = true;
+    const searchTerm = this.usersSearchTerm.trim();
+
+    if (searchTerm) {
+      this._searchUsers(searchTerm);
+    } else {
+      this._fetchUserData();
+    }
   }
 
   onVerificationSearchChange(searchValue: string): void {
     this.verificationSearchTerm = searchValue;
-    this._filterVerificationUsers();
+  }
+
+  onVerificationSearchSubmit(): void {
+    if (this.isVerificationSearching) return;
+
+    this.isVerificationSearching = true;
+    const searchTerm = this.verificationSearchTerm.trim();
+
+    if (searchTerm) {
+      this._searchVerificationUsers(searchTerm);
+    } else {
+      this._fetchVerificationUserData();
+    }
   }
 
   onVerificationSearchClear(): void {
     this.verificationSearchTerm = '';
-    this.filteredVerificationList = [...this.verificationList];
+    this.isVerificationSearching = false;
+    this._fetchVerificationUserData();
   }
 
-  private _filterUsers(): void {
-    if (!this.usersSearchTerm) {
-      this.filteredUsersList = [...this.usersList];
-      return;
-    }
-
-    const searchTerm = this.usersSearchTerm.toLowerCase();
-    this.filteredUsersList = this.usersList.filter(user => 
-      user.name.toLowerCase().includes(searchTerm) ||
-      user.email.toLowerCase().includes(searchTerm) ||
-      (user.phone && user.phone.includes(searchTerm)) ||
-      (user.status && user.status.toLowerCase().includes(searchTerm))
-    );
+  private _searchUsers(searchTerm: string): void {
+    this._usersService.searchUsers(searchTerm)
+      .pipe(
+        takeUntil(this._destroy$),
+        catchError((error) => {
+          console.error('Error searching users:', error);
+          Notiflix.Notify.failure('Error searching users');
+          return of(null);
+        }),
+        finalize(() => this.isSearching = false)
+      )
+      .subscribe(response => {
+        if (response?.success) {
+          this.usersList = response.data;
+        } else if (response) {
+          console.error('Failed to search users:', response.message);
+          Notiflix.Notify.failure(response.message);
+        }
+      });
   }
 
-  private _filterVerificationUsers(): void {
-    if (!this.verificationSearchTerm) {
-      this.filteredVerificationList = [...this.verificationList];
-      return;
-    }
-
-    const searchTerm = this.verificationSearchTerm.toLowerCase();
-    this.filteredVerificationList = this.verificationList.filter(verification => 
-      verification.user_id.name.toLowerCase().includes(searchTerm) ||
-      verification.user_id.email.toLowerCase().includes(searchTerm) ||
-      (verification.user_id.phone && verification.user_id.phone.includes(searchTerm)) ||
-      (verification.status && verification.status.toLowerCase().includes(searchTerm))
-    );
+  private _searchVerificationUsers(searchTerm: string): void {
+    this._usersService.searchVerificationUsers(searchTerm)
+      .pipe(
+        takeUntil(this._destroy$),
+        catchError((error) => {
+          console.error('Error searching verification users:', error);
+          Notiflix.Notify.failure('Error searching verification users');
+          return of(null);
+        }),
+        finalize(() => this.isVerificationSearching = false)
+      )
+      .subscribe(response => {
+        if (response?.success) {
+          this.verificationList = response.data;
+        } else if (response) {
+          console.error('Failed to search verification users:', response.message);
+          Notiflix.Notify.failure(response.message);
+        }
+      });
   }
-  
+
   showDialog(id: string, position: string): void {
     this._usersService.userDetails(id)
       .pipe(takeUntil(this._destroy$))
@@ -222,7 +262,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
         command: () => this.showDialog(verification.user_id._id, 'bottom')
       }
     ];
-  
+
     if (verification.status === 'Pending') {
       items.unshift(
         {
@@ -237,7 +277,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
         }
       );
     }
-    
+
     return items;
   }
 
@@ -251,7 +291,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
         return { text: 'Blocked', classes: 'bg-red-100 text-red-600' };
     }
   }
-  
+
   getUserMenuItems(user: User): MenuItem[] {
     return [
       {
@@ -267,13 +307,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
     ];
   }
 
-  // Private methods
   private _checkScreenSize(): void {
     this.isMobile = window.innerWidth < 768;
   }
 
   private _fetchUserData(): void {
     this.loading = true;
+    this.isSearching = false;
     this._usersService.usersList()
       .pipe(
         takeUntil(this._destroy$),
@@ -287,7 +327,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         if (response?.success) {
           this.usersList = response.data;
-          this.filteredUsersList = [...this.usersList];
         } else if (response) {
           console.error('Failed to fetch users:', response.message);
           Notiflix.Notify.failure(response.message);
@@ -297,6 +336,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   private _fetchVerificationUserData(): void {
     this.verificationLoading = true;
+    this.isVerificationSearching = false;
     this._usersService.verificationUsersList()
       .pipe(
         takeUntil(this._destroy$),
@@ -310,7 +350,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         if (response?.success) {
           this.verificationList = response.data;
-          this.filteredVerificationList = [...this.verificationList];
         } else if (response) {
           console.error('Failed to fetch verification users:', response.message);
           Notiflix.Notify.failure(response.message);

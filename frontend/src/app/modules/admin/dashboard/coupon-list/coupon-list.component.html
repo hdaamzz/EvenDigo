@@ -17,14 +17,22 @@
       <div class="mb-4">
         <div class="relative max-w-md">
           <input type="text" [(ngModel)]="searchTerm"
-            placeholder="Search coupons by code, description, type, or status..."
-            (input)="onSearchChange($event)"
+            placeholder="Search coupons by code, description, type, or status..." (input)="onSearchChange($event)"
             class="w-full pr-10 pl-4 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
-          <button *ngIf="searchTerm" type="button" (click)="onSearchClear()"
+
+          <!-- Loading spinner when searching -->
+          <div *ngIf="isSearching" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+          </div>
+
+          <!-- Clear button -->
+          <button *ngIf="searchTerm && !isSearching" type="button" (click)="onSearchClear()"
             class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
             <i class="pi pi-times text-sm"></i>
           </button>
-          <i *ngIf="!searchTerm"
+
+          <!-- Search icon when no search term -->
+          <i *ngIf="!searchTerm && !isSearching"
             class="pi pi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
         </div>
       </div>

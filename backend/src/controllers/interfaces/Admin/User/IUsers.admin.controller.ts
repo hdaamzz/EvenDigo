@@ -8,4 +8,6 @@ export interface IUsersAdminController {
   unblockAndUnblockUser(req: Request, res: Response): Promise<void>;
   approveUser(req: Request, res: Response): Promise<void>;
   rejectUser(req: Request, res: Response): Promise<void>;
+  searchUsers(req: Request, res: Response): Promise<void>
+  searchVerificationUsers(req: Request, res: Response): Promise<void>
 }

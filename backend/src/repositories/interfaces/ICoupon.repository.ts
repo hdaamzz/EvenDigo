@@ -19,11 +19,11 @@ export interface ICouponRepository extends IBaseRepository<ICoupon> {
     totalPages: number;
   }>;
 
-  findAllCouponsPagination(page?: number, limit?: number): Promise<{
+  findAllCouponsPagination(page: number, limit: number, search: string): Promise<{
     coupons: ICoupon[];
     totalCount: number;
     hasMore: boolean;
-  }>;
+}>
 
   // Alias methods for better readability
   findAllCoupons(): Promise<ICoupon[]>;

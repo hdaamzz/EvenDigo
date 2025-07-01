@@ -13,15 +13,15 @@ export class CouponService implements ICouponAdminService{
     async getAllCoupons(): Promise<ICoupon[]> {
         return this.couponRepository.findAll();
     }
-    async getAllCouponsWithPagination(page: number = 1, limit: number = 10): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}> {
-        const result = await this.couponRepository.findAllCouponsPagination(page, limit);
-        
-        return {
+    async getAllCouponsWithPagination(page: number = 1, limit: number = 10, search: string = ''): Promise<{coupons: ICoupon[], totalCount: number, hasMore: boolean}> {
+    const result = await this.couponRepository.findAllCouponsPagination(page, limit, search);
+    
+    return {
             coupons: result.coupons,
             totalCount: result.totalCount,
             hasMore: result.hasMore
         };
-    }
+        }
 
     async createCoupon(couponData: Partial<ICoupon>): Promise<ICoupon> {
         const existingCoupon = await this.couponRepository.findCouponByCode(couponData.couponCode!);

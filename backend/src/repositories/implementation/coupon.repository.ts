@@ -68,9 +68,9 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
             validFrom: { $lte: currentDate },
             validUntil: { $gte: currentDate }
         };
-        
+
         const result = await this.findWithPagination(filter, { page, limit });
-        
+
         return {
             items: result.data,
             totalCount: result.total,
@@ -84,13 +84,40 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
         return this.findAll();
     }
 
-    async findAllCouponsPagination(page: number = 1, limit: number = 10): Promise<{
+    async findAllCouponsPagination(page: number = 1, limit: number = 10, search: string = ''): Promise<{
         coupons: ICoupon[];
         totalCount: number;
         hasMore: boolean;
     }> {
-        const result = await this.findWithPagination({}, { page, limit });
-        
+        const searchFilter: any = {};
+
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search.trim(), 'i');
+
+            searchFilter.$or = [
+                { couponCode: searchRegex },
+                { description: searchRegex },
+                { discountType: searchRegex },
+                {
+                    $expr: {
+                        $regexMatch: {
+                            input: {
+                                $cond: {
+                                    if: "$isActive",
+                                    then: "active",
+                                    else: "inactive"
+                                }
+                            },
+                            regex: search.trim(),
+                            options: "i"
+                        }
+                    }
+                }
+            ];
+        }
+
+        const result = await this.findWithPagination(searchFilter, { page, limit });
+
         return {
             coupons: result.data,
             totalCount: result.total,

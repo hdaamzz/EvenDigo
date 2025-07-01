@@ -43,6 +43,24 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
         return this.findWithSort({ role: 'user' }, { createdAt: -1 });
     }
 
+    async searchUsers(searchTerm: string): Promise<IUser[]> {
+        const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive search
+        
+        return this.model.find({
+            role: 'user', // Only search for users, not admins
+            $or: [
+                { name: { $regex: searchRegex } },
+                { email: { $regex: searchRegex } },
+                { phone: { $regex: searchRegex } },
+                { status: { $regex: searchRegex } },
+                { gender: { $regex: searchRegex } }
+            ]
+        })
+        .select('-password -firebaseUid') // Exclude sensitive fields
+        .sort({ createdAt: -1 })
+        .exec();
+    }
+
     async createUser(userData: IUser): Promise<IUser> {
         try {
             return await this.create(userData);

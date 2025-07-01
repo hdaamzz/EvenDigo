@@ -4,7 +4,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { User } from '../../../models/userModel';
 import { ApiResponse } from '../../../models/admin/admin.interface';
-
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +14,35 @@ export class AdminUsersService {
 
   constructor(private _http: HttpClient) {}
 
+    searchUsers(searchTerm: string): Observable<ApiResponse> {
+    const params = searchTerm ? new HttpParams().set('search', searchTerm) : new HttpParams();
+    
+    return this._http.get<User[]>(
+      `${this._apiUrl}/search-users`,
+      { params }
+    ).pipe(
+      map(users => ({
+        success: true as const, 
+        data: users
+      })),
+      catchError(this._handleError)
+    );
+  }
+
+  searchVerificationUsers(searchTerm: string): Observable<ApiResponse> {
+    const params = searchTerm ? new HttpParams().set('search', searchTerm) : new HttpParams();
+    
+    return this._http.get<User[]>(
+      `${this._apiUrl}/search-verification-users`,
+      { params }
+    ).pipe(
+      map(users => ({
+        success: true as const, 
+        data: users
+      })),
+      catchError(this._handleError)
+    );
+  }
 
   usersList(): Observable<ApiResponse> {
     return this._http.get<User[]>(

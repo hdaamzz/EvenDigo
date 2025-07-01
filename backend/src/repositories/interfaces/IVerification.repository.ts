@@ -7,4 +7,5 @@ export interface IVerificationRepository {
   rejectUser(userId: Schema.Types.ObjectId | string): Promise<IVerification | null>;
   createVerificationRequest(data: {}): Promise<IVerification | null>;
   getVerificationRequest(userId: Schema.Types.ObjectId | string): Promise<IVerification | null>;
+  searchVerificationUsers(searchTerm: string): Promise<IVerification[]>
 }
