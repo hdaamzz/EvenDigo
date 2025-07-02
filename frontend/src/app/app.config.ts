@@ -11,7 +11,7 @@ import { AuthEffects } from './core/store/auth/auth.effects';
 import { provideRouterStore, routerReducer } from '@ngrx/router-store';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { environment } from './environments/environment';
+import { environment } from '../environments/environment';
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { tokenRefreshInterceptor } from './core/interceptors/auth.interceptor';

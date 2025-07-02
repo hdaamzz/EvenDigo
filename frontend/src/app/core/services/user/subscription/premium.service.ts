@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { Subscription } from '../../../models/admin/subscription.interface';
 import { SubscriptionPlan } from '../../../interfaces/admin/subscriptionPlan';
 import { ApiResponse, PremiumSubscriptionPayload, StripeSessionResponse, SubscriptionResponse } from '../../../interfaces/user/premium';
