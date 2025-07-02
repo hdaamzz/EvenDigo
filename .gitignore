@@ -57,3 +57,4 @@ backend/package-lock.json
 frontend/src/custom-theme.scss
 frontend/src/styles.css
 frontend/src/app/environments/environment.ts
+frontend/src/app/environments/environment.prod.ts
