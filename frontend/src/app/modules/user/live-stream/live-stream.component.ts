@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LivestreamService } from '../../../core/services/user/stream/livestream.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { UserNavComponent } from "../../../shared/user-nav/user-nav.component";
 import { ZegoConfig } from '../../../core/interfaces/user/zego';
 

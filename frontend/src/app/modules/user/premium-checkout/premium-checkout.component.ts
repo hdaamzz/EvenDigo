@@ -7,7 +7,7 @@ import { UserFooterComponent } from "../../../shared/user-footer/user-footer.com
 import { catchError, finalize, Observable, of, Subject, takeUntil, tap } from 'rxjs';
 import Notiflix from 'notiflix';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 import { WalletService } from '../../../core/services/user/wallet/wallet.service';
 import { IWallet } from '../../../core/models/wallet.interface';

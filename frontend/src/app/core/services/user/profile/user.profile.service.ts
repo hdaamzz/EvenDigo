@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { User, VerificationRequestResponse } from '../../../models/userModel';
 import { UpdateProfileResponse } from '../../../models/profile.interfaces';
 import { AllEventResponse, EventResponse } from '../../../models/event.interface';

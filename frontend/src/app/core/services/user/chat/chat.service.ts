@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, Subject, combineLatest } from 'rxjs';
 import { map, catchError, tap, takeUntil, switchMap } from 'rxjs/operators';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { SocketService } from '../socket/socket.service';
 import { ApiChat, ApiGroupChat, ApiMessage, ChatMessage, ChatUser, GroupChat, MessagesReadData, SocketEventData, TypingData, UserStatusData } from '../../../interfaces/user/chat';

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { ZegoConfig } from '../../interfaces/user/zego';
 declare global {
   interface Window {

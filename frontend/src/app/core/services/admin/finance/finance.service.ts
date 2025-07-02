@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { FinanceApiResponse, RevenueStats } from '../../../interfaces/admin/finance.revenue';

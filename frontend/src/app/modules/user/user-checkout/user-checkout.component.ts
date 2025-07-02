@@ -14,7 +14,7 @@ import { UserDashboardService } from '../../../core/services/user/dashboard/user
 import { UserExploreService } from '../../../core/services/user/explore/user.explore.service';
 import { AdminCouponService } from '../../../core/services/admin/coupon/admin-coupon.service';
 import { WalletService } from '../../../core/services/user/wallet/wallet.service';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { Coupon, TicketData } from '../../../core/interfaces/user/checkout';
 
 

@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, delay, tap } from 'rxjs/operators';
 
 import Notiflix from 'notiflix';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../models/admin/subscription.interface';
 import { SubscriptionPlan } from '../../../interfaces/admin/subscriptionPlan';
 
