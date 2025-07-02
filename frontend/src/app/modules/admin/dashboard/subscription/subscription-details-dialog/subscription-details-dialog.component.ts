@@ -15,7 +15,7 @@ import { SubscriptionService } from '../../../../../core/services/admin/subscrip
   standalone: true,
   imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule],
   templateUrl: './subscription-details-dialog.component.html',
-  styleUrls: ['./subscription-details-dialog.component.scss']
+  styleUrls: ['./subscription-details-dialog.component.css']
 })
 export class SubscriptionDetailsDialogComponent implements OnDestroy {
   subscription: Subscription;
@@ -39,7 +39,6 @@ export class SubscriptionDetailsDialogComponent implements OnDestroy {
     this._destroy$.complete();
   }
   
-
   private _initFormattedDates(): void {
     if (this.subscription.startDate) {
       const startDate = new Date(this.subscription.startDate);

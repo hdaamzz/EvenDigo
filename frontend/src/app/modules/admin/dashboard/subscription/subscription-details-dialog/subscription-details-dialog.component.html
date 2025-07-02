@@ -1,153 +1,153 @@
-<div class=" relative z-1">
-<div class="dialog-container ">
-  <!-- Dialog Header -->
-  <div class="dialog-header">
-    <h2 class="dialog-title">Subscription Details</h2>
-    <button mat-icon-button class="close-button" (click)="close()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-  
-  <!-- Status Badge -->
-  <div class="status-badge-container">
-    <span class="status-badge" [ngClass]="{
-      'status-active': subscription.status === 'active', 
-      'status-inactive': subscription.status === 'inactive',
-      'status-pending': subscription.status === 'pending'
-    }">
-      {{ subscription.status | titlecase }}
-    </span>
-  </div>
-  
-  <!-- Loading Indicator -->
-  <div *ngIf="isUpdating" class="loading-overlay">
-    <div class="loading-container">
-      <div class="loading-spinner"></div>
-      <p class="loading-text">Updating subscription...</p>
-    </div>
-  </div>
-  
-  <!-- Subscription Details -->
-  <div *ngIf="!isEditing" class="content-section">
-    <div class="details-card">
-      <div class="details-grid">
-        <div class="detail-item">
-          <div class="detail-label">Subscription ID</div>
-          <div class="detail-value">{{ subscription.subscriptionId }}</div>
+ <div class="relative z-10">
+      <div class="max-w-full p-6 font-sans text-gray-900">
+        <!-- Dialog Header -->
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold m-0 text-gray-800">Subscription Details</h2>
+          <button mat-icon-button class="cursor-pointer bg-transparent border-none text-gray-500 text-2xl flex items-center justify-center transition-colors duration-200 hover:text-gray-900" (click)="close()">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
-        <div class="detail-item">
-          <div class="detail-label">User ID</div>
-          <div class="detail-value truncate" [title]="subscription.userId">{{ subscription.userName }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Plan Type</div>
-          <div class="detail-value capitalize">{{ subscription.type }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Amount</div>
-          <div class="detail-value">{{ subscription.amount }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Payment Method</div>
-          <div class="detail-value capitalize">{{ subscription.paymentMethod }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Active</div>
-          <div class="detail-value">{{ subscription.isActive ? 'Yes' : 'No' }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Start Date</div>
-          <div class="detail-value">{{ formatDate(subscription.startDate) }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">End Date</div>
-          <div class="detail-value">{{ formatDate(subscription.endDate) }}</div>
-        </div>
-      </div>
-    </div>
-
-  
-    <!-- Timeline Section -->
-    
-  </div>
-  
-  <!-- Edit Form -->
-  <div *ngIf="isEditing" class="edit-form-container">
-    <div class="details-card">
-      <div class="edit-grid">
-        <div class="form-group">
-          <label class="form-label">Plan Type</label>
-          <select [(ngModel)]="subscription.type" class="form-control">
-            <option value="premium">Premium</option>
-            <option value="basic">Basic</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Amount (in cents)</label>
-          <input type="number" [(ngModel)]="subscription.amount" class="form-control">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Payment Method</label>
-          <select [(ngModel)]="subscription.paymentMethod" class="form-control">
-            <option value="card">Card</option>
-            <option value="paypal">PayPal</option>
-            <option value="bank_transfer">Bank Transfer</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select [(ngModel)]="subscription.status" class="form-control">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="pending">Pending</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Start Date</label>
-          <input type="date" [value]="startDateFormatted" (change)="updateStartDate($event)" class="form-control">
-        </div>
-        <div class="form-group">
-          <label class="form-label">End Date</label>
-          <input type="date" [value]="endDateFormatted" (change)="updateEndDate($event)" class="form-control">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Stripe Customer ID</label>
-          <input type="text" [(ngModel)]="subscription.stripeCustomerId" class="form-control">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Stripe Subscription ID</label>
-          <input type="text" [(ngModel)]="subscription.stripeSubscriptionId" class="form-control">
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Action Buttons -->
-  <div class="dialog-actions">
-    <div class="action-left">
-      <button class="status-toggle-button" 
-              [ngClass]="{'activate': !subscription.isActive, 'deactivate': subscription.isActive}"
-              (click)="toggleSubscriptionStatus()" 
-              [disabled]="isUpdating">
-        {{ subscription.isActive ? 'Deactivate' : 'Activate' }}
-      </button>
-    </div>
-    
-    <div class="action-right">
-      <!-- <button *ngIf="!isEditing" class="edit-button" (click)="toggleEditMode()" [disabled]="isUpdating">
-        Edit
-      </button> -->
-      
-      <ng-container *ngIf="isEditing">
-        <button class="cancel-button" (click)="toggleEditMode()" [disabled]="isUpdating">
-          Cancel
-        </button>
         
-        <button class="save-button" (click)="saveChanges()" [disabled]="isUpdating">
-          Save Changes
-        </button>
-      </ng-container>
+        <!-- Status Badge -->
+        <div class="mb-4">
+          <span class="inline-block px-3 py-1.5 rounded-full text-xs font-medium" 
+                [ngClass]="{
+                  'bg-green-100 text-green-800': subscription.status === 'active', 
+                  'bg-red-100 text-red-800': subscription.status === 'inactive',
+                  'bg-yellow-100 text-yellow-800': subscription.status === 'pending'
+                }">
+            {{ subscription.status | titlecase }}
+          </span>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div *ngIf="isUpdating" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div class="bg-white p-5 rounded-lg shadow-lg flex flex-col items-center">
+            <div class="inline-block w-10 h-10 border-3 border-green-200 rounded-full border-t-green-600 animate-spin mb-3"></div>
+            <p class="m-0 text-gray-600 text-sm">Updating subscription...</p>
+          </div>
+        </div>
+        
+        <!-- Subscription Details -->
+        <div *ngIf="!isEditing" class="content-section">
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">Subscription ID</div>
+                <div class="text-sm font-medium text-gray-800">{{ subscription.subscriptionId }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">User ID</div>
+                <div class="text-sm font-medium text-gray-800 truncate" [title]="subscription.userId">{{ subscription.userName }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">Plan Type</div>
+                <div class="text-sm font-medium text-gray-800 capitalize">{{ subscription.type }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">Amount</div>
+                <div class="text-sm font-medium text-gray-800">{{ subscription.amount }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">Payment Method</div>
+                <div class="text-sm font-medium text-gray-800 capitalize">{{ subscription.paymentMethod }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">Active</div>
+                <div class="text-sm font-medium text-gray-800">{{ subscription.isActive ? 'Yes' : 'No' }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">Start Date</div>
+                <div class="text-sm font-medium text-gray-800">{{ formatDate(subscription.startDate) }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="text-xs text-gray-500 mb-1">End Date</div>
+                <div class="text-sm font-medium text-gray-800">{{ formatDate(subscription.endDate) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Edit Form -->
+        <div *ngIf="isEditing" class="mb-6">
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Plan Type</label>
+                <select [(ngModel)]="subscription.type" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+                  <option value="premium">Premium</option>
+                  <option value="basic">Basic</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Amount (in cents)</label>
+                <input type="number" [(ngModel)]="subscription.amount" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Payment Method</label>
+                <select [(ngModel)]="subscription.paymentMethod" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+                  <option value="card">Card</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Status</label>
+                <select [(ngModel)]="subscription.status" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Start Date</label>
+                <input type="date" [value]="startDateFormatted" (change)="updateStartDate($event)" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">End Date</label>
+                <input type="date" [value]="endDateFormatted" (change)="updateEndDate($event)" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Stripe Customer ID</label>
+                <input type="text" [(ngModel)]="subscription.stripeCustomerId" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+              </div>
+              <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-2">Stripe Subscription ID</label>
+                <input type="text" [(ngModel)]="subscription.stripeSubscriptionId" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-800 bg-white transition-all duration-150 focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center">
+          <div>
+            <button class="px-4 py-2 rounded-md text-sm font-medium border-none cursor-pointer transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed" 
+                    [ngClass]="{
+                      'bg-green-600 text-white hover:bg-green-700': !subscription.isActive, 
+                      'bg-red-600 text-white hover:bg-red-700': subscription.isActive
+                    }"
+                    (click)="toggleSubscriptionStatus()" 
+                    [disabled]="isUpdating">
+              {{ subscription.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+          </div>
+          
+          <div class="flex space-x-2">
+            <ng-container *ngIf="isEditing">
+              <button class="px-4 py-2 rounded-md text-sm font-medium bg-gray-200 text-gray-600 border-none cursor-pointer transition-colors duration-200 hover:bg-gray-300" 
+                      (click)="toggleEditMode()" 
+                      [disabled]="isUpdating">
+                Cancel
+              </button>
+              
+              <button class="px-4 py-2 rounded-md text-sm font-medium bg-green-600 text-white border-none cursor-pointer transition-colors duration-200 hover:bg-green-700" 
+                      (click)="saveChanges()" 
+                      [disabled]="isUpdating">
+                Save Changes
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</div>
