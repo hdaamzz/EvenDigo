@@ -17,27 +17,5 @@ module.exports = {
         'NG_APP_FIREBASE_APP_ID': JSON.stringify(process.env.NG_APP_FIREBASE_APP_ID || '')
       }
     })
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                plugins: [
-                  require('tailwindcss'),
-                  require('autoprefixer'),
-                ],
-              },
-            },
-          },
-        ],
-      },
-    ],
-  },
+  ]
 };
