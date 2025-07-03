@@ -11,7 +11,6 @@ class CookieConfig {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
     };
   }
 
@@ -50,7 +49,6 @@ class CookieConfig {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      domain: process.env.NODE_ENV === 'production' ? process.env.CLIENT_SERVER : 'localhost',
     };
   }
 }
