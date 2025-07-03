@@ -1,18 +1,13 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-@import "tailwindcss";
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+  overflow-y: scroll !important;
+}
 
-  /* .back{
-    background:  #131517 80%;
-    
-  } */
-  .no-scrollbar {
-    -ms-overflow-style: none !important; /* IE and Edge */
-    scrollbar-width: none !important; /* Firefox */
-    overflow-y: scroll !important; /* Ensure scrolling is still possible */
-  }
-  
-  .no-scrollbar::-webkit-scrollbar {
-    display: none !important; /* Chrome, Safari */
-  }
-
-  
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
