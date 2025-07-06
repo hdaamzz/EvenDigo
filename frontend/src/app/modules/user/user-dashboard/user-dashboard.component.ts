@@ -20,7 +20,8 @@ import { AppState } from '../../../core/interfaces/user/profile';
 
 @Component({
   selector: 'app-user-dashboard',
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
     RouterModule,
     FormsModule,
     DialogModule,
@@ -28,7 +29,8 @@ import { AppState } from '../../../core/interfaces/user/profile';
     InputTextModule,
     UserNavComponent,
     EventCreationComponent, 
-    EventCardComponent],
+    EventCardComponent
+  ],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',
   animations: [
@@ -50,16 +52,11 @@ import { AppState } from '../../../core/interfaces/user/profile';
         animate('350ms cubic-bezier(0.4, 0.0, 0.2, 1)', style({ opacity: 1, transform: 'translateX(0)' }))
       ])
     ]),
-    trigger('tabAnimation', [
-      state('active', style({ 
-        transform: 'scale(1.05)',
-        backgroundColor: '#065f46'
-      })),
-      state('inactive', style({ 
-        transform: 'scale(1)',
-        backgroundColor: '#1f2937'
-      })),
-      transition('active <=> inactive', animate('200ms ease-in-out'))
+    trigger('tabSlide', [
+      transition('* => *', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
     ]),
     trigger('cardStagger', [
       transition('* => *', [
@@ -76,7 +73,7 @@ import { AppState } from '../../../core/interfaces/user/profile';
   ]
 })
 export class UserDashboardComponent implements OnInit {
-   @ViewChild(EventCardComponent) eventCardComponent!: EventCardComponent;
+  @ViewChild(EventCardComponent) eventCardComponent!: EventCardComponent;
    
   user$: Observable<User | null>;
   currentUser: User | null = null;
@@ -91,6 +88,9 @@ export class UserDashboardComponent implements OnInit {
   displayEventDialog: boolean = false;
   searchQuery: string = '';
   selectedFilter: string = 'newest';
+  
+  // Mobile navigation state
+  isMobileMenuOpen: boolean = false;
 
   constructor(
     private dashboardService: UserDashboardService,
@@ -108,10 +108,12 @@ export class UserDashboardComponent implements OnInit {
             this.eventLoading = false;
             this.eventOrganizedList = response.data;
           } else {
+            this.eventLoading = false;
             Notiflix.Notify.failure('Failed to load your events.');
           }
         },
         error: (error) => {
+          this.eventLoading = false;
           console.error('Error loading events:', error);
           Notiflix.Notify.failure('Error loading your events.');
         },
@@ -127,10 +129,12 @@ export class UserDashboardComponent implements OnInit {
             this.eventLoading = false;
             this.ongoingEventsList = response.data;
           } else {
+            this.eventLoading = false;
             Notiflix.Notify.failure('Failed to load ongoing events.');
           }
         },
         error: (error) => {
+          this.eventLoading = false;
           console.error('Error loading ongoing events:', error);
           Notiflix.Notify.failure('Error loading ongoing events.');
         },
@@ -156,8 +160,17 @@ export class UserDashboardComponent implements OnInit {
 
   tabChange(tab: 'participated' | 'organized' | 'ongoing') {    
     this.activeTab = tab;
+    this.isMobileMenuOpen = false; // Close mobile menu on tab change
+    
+    // Add haptic feedback for mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
   }
-  
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
 
   fetchAllEvents() {
     this.eventLoading = true;
@@ -167,6 +180,7 @@ export class UserDashboardComponent implements OnInit {
         this.eventLoading = false;
       }),
       catchError((error) => {
+        this.eventLoading = false;
         console.error('Error fetching users:', error);
         Notiflix.Notify.failure('Error fetching users');
         return of(null);
@@ -181,7 +195,9 @@ export class UserDashboardComponent implements OnInit {
     return Math.min(...event.tickets.map(ticket => ticket.price));
   }
 
-  purchaseTickets(item: IEvent) {}
+  purchaseTickets(item: IEvent) {
+    // Implementation for ticket purchase
+  }
 
   fetchAllParticipatedEvents() {
     this.eventLoading = true;
@@ -191,6 +207,7 @@ export class UserDashboardComponent implements OnInit {
         this.eventLoading = false;
       }),
       catchError((error) => {
+        this.eventLoading = false;
         console.error('Error fetching users:', error);
         Notiflix.Notify.failure('Error fetching users');
         return of(null);
@@ -222,5 +239,35 @@ export class UserDashboardComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  getTabDescription(): string {
+    switch (this.activeTab) {
+      case 'participated':
+        return 'Events you have joined or attended';
+      case 'organized':
+        return 'Events you have created and organized';
+      case 'ongoing':
+        return 'Currently active events happening now';
+      default:
+        return '';
+    }
+  }
+
+  getTabIcon(): string {
+    switch (this.activeTab) {
+      case 'participated':
+        return 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z';
+      case 'organized':
+        return 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4';
+      case 'ongoing':
+        return 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z';
+      default:
+        return '';
+    }
+  }
+
+  getEventCount(): number {
+    return this.getCurrentEventList()?.length || 0;
   }
 }

@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose';
 import { injectable } from 'tsyringe';
-import { ILiveStream, LiveStreamModel } from '../../models/LiveStreamModel';
+import { LiveStreamModel } from '../../models/LiveStreamModel';
 import { ILiveStreamRepository } from '../interfaces/ILivestream.repository';
+import { ILiveStream } from '../../models/interfaces/livestream.interfaces';
 
 @injectable()
 export class LiveStreamRepository implements ILiveStreamRepository {

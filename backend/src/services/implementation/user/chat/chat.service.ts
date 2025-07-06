@@ -1,5 +1,5 @@
+import { IChat, IMessage } from "../../../../models/interfaces/chat.interface";
 import { IChatRepository } from "../../../../repositories/interfaces/IChat.repository";
-import { IChat, IMessage } from "../../../../models/ChatModel";
 import { IChatService } from "../../../interfaces/user/chat/IChat.service";
 import { inject, injectable } from "tsyringe";
 
@@ -211,7 +211,7 @@ export class ChatService implements IChatService {
         return false;
       }
 
-      const isParticipant = chat.participants.some(participant => {
+      const isParticipant = chat.participants.some((participant: { _id: { toString: () => any; }; toString: () => any; }) => {
         const participantId = participant._id ? participant._id.toString() : participant.toString();
         return participantId === userId;
       });

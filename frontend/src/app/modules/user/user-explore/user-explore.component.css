@@ -58,14 +58,12 @@ button:focus {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
 }
 
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 /* Button active states */
@@ -99,3 +97,44 @@ button:active {
   backdrop-filter: blur(4px);
   background-color: rgba(0, 0, 0, 0.5);
 }
+
+.dropdown-enter {
+      animation: dropdownSlideIn 0.2s ease-out;
+    }
+    
+    @keyframes dropdownSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Focus ring improvements */
+    .focus-ring:focus {
+      box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.2);
+    }
+    
+    /* Button press animation */
+    .btn-press:active {
+      transform: scale(0.97);
+    }
+    
+    /* Smooth height transitions for mobile filters */
+    .mobile-filters-enter {
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }

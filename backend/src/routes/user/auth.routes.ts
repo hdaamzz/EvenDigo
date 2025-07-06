@@ -1,4 +1,3 @@
-// routes/user/auth.routes.ts
 import { Router } from 'express';
 import { AuthController } from '../../controllers/implementation/user/auth/auth.controller';
 import { authMiddleware, validateFirebaseSignInRequest } from '../../middlewares/auth.middleware';
@@ -41,10 +40,7 @@ authRouter.post('/firebase-signin',
   (req, res) => authController.firebaseSignIn(req, res)
 );
 
-// Remove the manual refresh token endpoint
-// authRouter.post('/refresh-token', (req, res) => authController.refreshToken(req, res));
 
-// Protected routes - these will automatically handle token refresh via middleware
 authRouter.get('/status', authMiddleware, (req, res) => authController.isAuthenticated(req, res));
 authRouter.get('/logout', (req, res) => authController.logout(req, res));
 authRouter.get('/plans', (req, res) => subscriptionPlanController.getAll(req, res));

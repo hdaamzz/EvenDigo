@@ -48,23 +48,35 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   selectedTransaction: Transaction | null = null;
   isLoading = false;
   errorMessage: string | null = null;
+  isMobile = false;
+  showAllPages = false;
 
   readonly currencySymbol = '₹';
-  readonly transactionTypes = ['all', 'credit', 'debit', 'refund', 'withdrawal'];
+  readonly transactionTypes = ['all', 'credit', 'debit', 'refund'];
   selectedType = 'all';
 
   currentPage = 1;
   pageSize = 5;
   totalPages = 1;
 
-  constructor(private _walletService: WalletService) {}
+  constructor(private _walletService: WalletService) { }
 
   ngOnInit(): void {
-    this._loadWalletData();
-  }
+  console.log('Component initialized with pageSize:', this.pageSize);
+  this._checkMobileView();
+  this._loadWalletData();
+}
+private _checkMobileView(): void {
+  this.isMobile = window.innerWidth < 768;
+  
+  // Listen for window resize
+  window.addEventListener('resize', () => {
+    this.isMobile = window.innerWidth < 768;
+  });
+}
 
   ngOnDestroy(): void {
-    document.body.style.overflow = 'auto'; // Reset overflow in case component is destroyed with modal open
+    document.body.style.overflow = 'auto';
     this._destroy$.next();
     this._destroy$.complete();
   }
@@ -79,7 +91,14 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success) {
             this.currentBalance = response.data.walletBalance;
+            
             this.transactions = response.data.transactions;
+
+            console.log('Wallet data loaded:', {
+              totalTransactions: this.transactions.length,
+              sampleTransaction: this.transactions[0]
+            });
+
             this._calculateTotalPages();
             this.isInitialLoadComplete = true;
           } else {
@@ -98,7 +117,7 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   private _calculateTotalPages(): void {
     const filteredCount = this._getFilteredTransactions().length;
     this.totalPages = Math.max(1, Math.ceil(filteredCount / this.pageSize));
-    
+
     if (this.currentPage > this.totalPages) {
       this.currentPage = 1;
     }
@@ -107,6 +126,25 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   private _getFilteredTransactions(): Transaction[] {
     if (this.selectedType === 'all') return this.transactions;
     return this.transactions.filter(transaction => transaction.type === this.selectedType);
+  }
+
+  changeFilter(type: string): void {
+    if (this.selectedType !== type) {
+      this.selectedType = type;
+      this.onFilterChange();
+    }
+  }
+  getFilterButtonClass(type: string): string {
+    return this.selectedType === type
+      ? 'bg-[#00ff66] text-black font-medium'
+      : 'bg-[#262626] text-gray-300 hover:bg-[#333333] hover:text-white';
+  }
+  trackByType(index: number, type: string): string {
+    return type;
+  }
+
+  trackByTransaction(index: number, transaction: Transaction): string {
+    return transaction.transactionId;
   }
 
   get filteredTransactions(): Transaction[] {
@@ -121,19 +159,48 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   }
 
   closeTransactionDetails(): void {
-    this.selectedTransaction = null;
-    document.body.style.overflow = 'auto';
+  this.selectedTransaction = null;
+  document.body.style.overflow = 'auto';
+  
+  if (this.isMobile) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+}
+
+
 
   getAmountClass(amount: number): string {
     return amount >= 0 ? 'text-[#00ff66]' : 'text-red-500';
   }
 
   formatAmount(amount: number): string {
-    const absAmount = Math.abs(amount);
-    const prefix = amount >= 0 ? '+' : '-';
-    return `${prefix}${this.currencySymbol}${absAmount.toLocaleString('en-IN')}`;
+  const absAmount = Math.abs(amount);
+  const prefix = amount >= 0 ? '+' : '-';
+  
+  // Use shorter format on mobile for very large numbers
+  if (this.isMobile && absAmount >= 100000) {
+    const formatted = (absAmount / 100000).toFixed(1);
+    return `${prefix}${this.currencySymbol}${formatted}L`;
   }
+  
+  return `${prefix}${this.currencySymbol}${absAmount.toLocaleString('en-IN')}`;
+}
+getTruncatedDescription(description: string, maxLength: number = 30): string {
+  if (!description) return '';
+  
+  if (this.isMobile && description.length > maxLength) {
+    return description.substring(0, maxLength) + '...';
+  }
+  
+  return description;
+}
+onMobileCardClick(transaction: Transaction): void {
+  // Add haptic feedback for mobile
+  if (this.isMobile && 'vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
+  this.openTransactionDetails(transaction);
+}
 
   getTransactionClass(transaction: Transaction): string {
     return this._transactionTypeStyles[transaction.type] || 'text-gray-300';
@@ -148,6 +215,7 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(): void {
+    this.currentPage = 1;
     this._calculateTotalPages();
   }
 
@@ -170,29 +238,54 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   }
 
   getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxPages = 5;
-    
-    if (this.totalPages <= maxPages) {
-      for (let i = 1; i <= this.totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-      let endPage = startPage + maxPages - 1;
+  const pages: number[] = [];
+  const maxVisiblePages = this.isMobile ? 3 : 5; // Show fewer pages on mobile
+
+  if (this.totalPages <= maxVisiblePages) {
+    for (let i = 1; i <= this.totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    if (this.isMobile && !this.showAllPages) {
+      // For mobile, show current page and adjacent pages
+      let startPage = Math.max(1, this.currentPage - 1);
+      let endPage = Math.min(this.totalPages, this.currentPage + 1);
       
-      if (endPage > this.totalPages) {
-        endPage = this.totalPages;
-        startPage = Math.max(1, endPage - maxPages + 1);
+      // Ensure we always show 3 pages if possible
+      if (endPage - startPage + 1 < 3) {
+        if (startPage === 1) {
+          endPage = Math.min(this.totalPages, 3);
+        } else if (endPage === this.totalPages) {
+          startPage = Math.max(1, this.totalPages - 2);
+        }
       }
       
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
+    } else {
+      // Desktop or show all pages
+      let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
     }
-    
-    return pages;
   }
+
+  return pages;
+}
+togglePageView(): void {
+  this.showAllPages = !this.showAllPages;
+}
+getResponsivePageSize(): number {
+  return this.isMobile ? 3 : this.pageSize;
+}
 
   getMetadataKeys(transaction: Transaction): string[] {
     return transaction.metadata ? Object.keys(transaction.metadata) : [];

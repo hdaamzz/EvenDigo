@@ -1,95 +1,118 @@
 <div class="flex min-h-screen bg-[#121212]">
+  <!-- Mobile Backdrop -->
+  <div 
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity duration-300"
+    [ngClass]="{
+      'opacity-100 pointer-events-auto': isMenuActive,
+      'opacity-0 pointer-events-none': !isMenuActive
+    }"
+    (click)="toggleMenu()"
+  ></div>
+
   <aside
     #sidebarRef
-    class="fixed top-0 left-0 m-4 rounded-2xl bg-[#1E1E1E] transition-all duration-400"
+    class="fixed top-0 left-0 rounded-2xl bg-[#1E1E1E] transition-all duration-400 z-50"
     [ngClass]="{
-      'w-[85px]': isCollapsed,
-      'w-[270px]': !isCollapsed,
-      'max-lg:h-auto max-lg:overflow-y-auto z-50': isMenuActive,
-      'max-lg:h-14 max-lg:overflow-y-hidden': !isMenuActive,
-      'lg:h-[calc(100vh-32px)] max-lg:w-[calc(100%-26px)] max-lg:m-3': true
+      'w-[85px] m-4 h-[calc(100vh-32px)]': isCollapsed && window.innerWidth >= 1024,
+      'w-[270px] m-4 h-[calc(100vh-32px)]': !isCollapsed && window.innerWidth >= 1024,
+      'w-[280px] h-full m-0 transform': window.innerWidth < 1024,
+      'translate-x-0': isMenuActive || window.innerWidth >= 1024,
+      '-translate-x-full': !isMenuActive && window.innerWidth < 1024
     }"
+    style="min-height: calc(100vh - 32px);"
   >
-    <header class="flex items-center justify-between p-6 max-lg:p-2 max-lg:sticky max-lg:top-0 max-lg:z-20 max-lg:bg-[#151A2D]">
+    <!-- Header -->
+    <header class="flex items-center justify-between p-6 lg:p-6 md:p-4 sticky top-0 z-20 bg-[#1E1E1E] rounded-t-2xl lg:rounded-t-2xl">
       <a routerLink="/" class="header-logo">
         <img 
           src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318747/user.icon_slz5l0.png" 
           alt="Logo" 
-          class="h-10 w-10 object-contain rounded-full max-lg:h-10 max-lg:w-10"
+          class="h-10 w-10 object-contain rounded-full"
         />
       </a>
       
       <button 
-        class="h-9 w-9 flex items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer hover:bg-[#00ff66] max-lg:hidden absolute right-5"
-        [ngClass]="{'transform translate-x-[-4px] translate-y-[65px]': isCollapsed}"
-        (click)="toggleSidebar()"
-        aria-label="Toggle sidebar"
-      >
-        <i class="fa fa-chevron-left transition-transform duration-400" [ngClass]="{'rotate-180': isCollapsed}"></i>
-      </button>
-      
-      <button 
-        class="h-8 w-8 hidden max-lg:flex items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer"
+        class="h-8 w-8 flex lg:hidden items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer"
         (click)="toggleMenu()"
-        aria-label="Toggle mobile menu"
+        aria-label="Close mobile menu"
       >
-        <i class="fa" [ngClass]="isMenuActive ? 'fa-times' : 'fa-bars'"></i>
+        <i class="fa fa-times"></i>
       </button>
     </header>
     
-    <!-- Navigation -->
-    <nav class="sidebar-nav">
-      <!-- Primary navigation -->
-      <ul class="list-none flex flex-col gap-1 px-4 transform transition-transform max-lg:px-3"
-          [ngClass]="{'translate-y-16': isCollapsed, 'translate-y-4': !isCollapsed}">
-        @for (item of navItems; track item.path) {
-          <li class="relative start-card hover:translate-x-2 transition-all">
-            <a 
-              [routerLink]="item.path"
-              routerLinkActive="text-[#151A2D] bg-[#00ff66]"
-              [routerLinkActiveOptions]="{exact: item.exact || false}"
-              class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
-            >
-              <span class="nav-icon">
-                <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
-              </span>
-              <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed}" class="transition-opacity duration-300"> 
-                {{item.label}}
-              </span>
-            </a>
-          </li>
-        }
-      </ul>
+    <nav class="sidebar-nav flex flex-col justify-between overflow-hidden" style="height: calc(100vh - 112px);">
+      <div class="flex-1 overflow-y-auto">
+        <ul class="list-none flex flex-col gap-1 px-4 pt-4"
+            [ngClass]="{'translate-y-0': true}">
+          @for (item of navItems; track item.path) {
+            <li class="relative start-card hover:translate-x-2 transition-all">
+              <a 
+                [routerLink]="item.path"
+                routerLinkActive="text-[#151A2D] bg-[#00ff66]"
+                [routerLinkActiveOptions]="{exact: item.exact || false}"
+                class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
+                (click)="onNavItemClick()"
+              >
+                <span class="nav-icon">
+                  <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
+                </span>
+                <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed && window.innerWidth >= 1024}" class="transition-opacity duration-300"> 
+                  {{item.label}}
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
 
-      <ul class="list-none flex flex-col gap-1 px-4 absolute bottom-8 w-full max-lg:relative max-lg:bottom-0 max-lg:my-10 max-lg:mb-8 max-lg:px-3">
-        @for (item of secondaryNavItems; track item.path) {
-          <li class="relative start-card hover:translate-x-2 transition-all">
-            <a
-              [routerLink]="item.path"
-              routerLinkActive="text-[#151A2D] bg-[#00ff66]"
-              [routerLinkActiveOptions]="{exact: true}"
-              class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
-            >
-              <span class="nav-icon">
-                <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
-              </span>
-              <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed}" class="transition-opacity duration-300"> 
-                {{item.label}}
-              </span>
-            </a>
-          </li>
-        }
-      </ul>
+      <!-- Secondary navigation -->
+      <div class="flex-shrink-0">
+        <ul class="list-none flex flex-col gap-1 px-4 pb-4">
+          @for (item of secondaryNavItems; track item.path) {
+            <li class="relative start-card hover:translate-x-2 transition-all">
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="text-[#151A2D] bg-[#00ff66]"
+                [routerLinkActiveOptions]="{exact: true}"
+                class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
+                (click)="onNavItemClick()"
+              >
+                <span class="nav-icon">
+                  <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
+                </span>
+                <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed && window.innerWidth >= 1024}" class="transition-opacity duration-300"> 
+                  {{item.label}}
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
     </nav>
   </aside>
 
+  <!-- Mobile Menu Toggle Button -->
+  <button 
+    class="fixed top-4 left-4 h-12 w-12 flex lg:hidden items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer z-30 transition-all duration-300"
+    [ngClass]="{
+      'opacity-0 pointer-events-none': isMenuActive,
+      'opacity-100 pointer-events-auto': !isMenuActive
+    }"
+    (click)="toggleMenu()"
+    aria-label="Open mobile menu"
+  >
+    <i class="fa fa-bars"></i>
+  </button>
+
+  <!-- Main Content -->
   <main 
     class="flex-1 p-4 transition-all duration-400"
     [ngClass]="{
-      'ml-[117px]': isCollapsed, 
-      'ml-[0px] pt-16 lg:ml-[300px]': !isCollapsed
+      'lg:ml-[117px]': isCollapsed && window.innerWidth >= 1024, 
+      'lg:ml-[300px]': !isCollapsed && window.innerWidth >= 1024,
+      'ml-0 pt-16': window.innerWidth < 1024
     }"
   >
-  <router-outlet></router-outlet>
+    <router-outlet></router-outlet>
   </main>
 </div>

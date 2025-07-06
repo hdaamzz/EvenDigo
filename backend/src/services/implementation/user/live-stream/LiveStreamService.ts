@@ -50,13 +50,11 @@ export class LiveStreamService implements ILiveStreamService {
     eventId: string,
     hostId: string
   ): Promise<{ roomId: string; streamKey: string; rtmpUrl: string }> {
-    // Check if event exists
     const event = await this.eventRepository.findEventById(eventId);
     if (!event) {
       throw new Error('Event not found');
     }
 
-    // Check if there's already an active stream for this event
     const existingStream = await this.liveStreamRepository.findActiveLiveStreamByEventId(eventId);
     if (existingStream) {
       return {
@@ -92,20 +90,17 @@ export class LiveStreamService implements ILiveStreamService {
     eventId: string,
     userId: string
   ): Promise<{ token: string; roomId: string }> {
-    // Check if there's an active live stream for this event
     const liveStream = await this.liveStreamRepository.findActiveLiveStreamByEventId(eventId);
     if (!liveStream) {
       throw new Error('No active live stream for this event');
     }
 
-    // Generate token for audience
     const { token, roomId } = await this.generateLiveStreamToken(
       eventId,
       userId,
       'audience'
     );
 
-    // Increment viewer count
     await this.liveStreamRepository.incrementViewerCount(
       liveStream._id as string,
       liveStream.viewerCount
@@ -115,17 +110,14 @@ export class LiveStreamService implements ILiveStreamService {
   }
 
   async endLiveStream(eventId: string, hostId: string): Promise<boolean> {
-    // Find active live stream by event and host
     const liveStream = await this.liveStreamRepository.findLiveStreamByEventAndHost(eventId, hostId);
     if (!liveStream) {
       throw new Error('No active live stream found');
     }
 
-    // Calculate duration
     const endTime = new Date();
     const duration = Math.floor((endTime.getTime() - liveStream.startTime.getTime()) / (1000 * 60));
 
-    // End the live stream
     await this.liveStreamRepository.endLiveStream(liveStream._id as string, endTime, duration);
 
     return true;

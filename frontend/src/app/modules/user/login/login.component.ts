@@ -96,8 +96,16 @@ export class LoginComponent implements OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (response) => {
+          console.log(response);
+          
+          if(response.success){
           this._router.navigateByUrl('/');
           Notiflix.Notify.success('Reset email sent to your inbox');
+          }else{
+            Notiflix.Notify.failure(`${response.message}`);
+
+          }
+          
         },
         error: (err) => {
           Notiflix.Notify.failure(err.error.message);

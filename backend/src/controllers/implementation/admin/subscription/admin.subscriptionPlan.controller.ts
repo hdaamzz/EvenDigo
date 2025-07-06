@@ -1,17 +1,10 @@
 import { Request, Response } from 'express';
-import { ISubscriptionPlanService } from '../../../../services/implementation/admin/SubscriptionPlan.service';
 import StatusCode from '../../../../types/statuscode';
 import { inject, injectable } from 'tsyringe';
 import { CreateSubscriptionPlanDto, SubscriptionPlanMapper, UpdateSubscriptionPlanDto } from '../../../../dto/admin/subscription/Subscription-plan.dto';
+import { ISubscriptionPlanController } from '../../../../controllers/interfaces/Admin/Subscription/IAdminSubscription.controller';
+import { ISubscriptionPlanService } from '../../../../services/interfaces/admin/ISubsriptionPan.admin.service';
 
-
-export interface ISubscriptionPlanController {
-  getAll(req: Request, res: Response): Promise<void>;
-  getById(req: Request, res: Response): Promise<void>;
-  update(req: Request, res: Response): Promise<void>;
-  delete(req: Request, res: Response): Promise<void>;
-  create(req: Request, res: Response): Promise<void>
-}
 
 @injectable()
 export class SubscriptionPlanController implements ISubscriptionPlanController{

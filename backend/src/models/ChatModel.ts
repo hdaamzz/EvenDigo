@@ -1,16 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import { IChat, IMessage } from './interfaces/chat.interface';
 
-export interface IMessage extends Document {
-  _id: mongoose.Types.ObjectId;
-  chatId: mongoose.Types.ObjectId;
-  sender: mongoose.Types.ObjectId;
-  content: string;
-  timestamp: Date;
-  read: boolean;
-  messageType: 'text' | 'system' | 'image' | 'file';
-  createdAt: Date;
-  updatedAt: Date;
-}
+
 
 const MessageSchema = new Schema<IMessage>({
   chatId: {
@@ -43,25 +34,6 @@ const MessageSchema = new Schema<IMessage>({
 }, {
   timestamps: true
 });
-
-export interface IChat extends Document {
-  _id: mongoose.Types.ObjectId | string;
-  participants: mongoose.Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
-  lastMessage?: {
-    content: string;
-    sender: mongoose.Types.ObjectId;
-    timestamp: Date;
-    messageType: string;
-  };
-  lastMessageAt?: Date;
-  messageCount: number;
-  isActive: boolean;
-  chatType: 'personal' | 'group';
-  eventId?: mongoose.Types.ObjectId;
-  name?: string;
-}
 
 const ChatSchema = new Schema<IChat>({
   participants: [{

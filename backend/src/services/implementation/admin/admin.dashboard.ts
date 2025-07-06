@@ -55,7 +55,6 @@ export class DashboardService {
       );
       const ticketsSold = allBookings.flat().reduce((total, booking) => total + booking.tickets.length, 0);
 
-      // Replace mock ticketsGrowth with actual calculation
       const previousMonthBookings = await Promise.all(
         allEvents.map((event) =>
           this.bookingRepository.findBookingsByEventId(event._id as string, {

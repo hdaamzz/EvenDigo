@@ -1,9 +1,9 @@
 import { Model, Schema } from 'mongoose';
 import { inject, injectable } from 'tsyringe';
 import { ISubscriptionRepository } from '../interfaces/ISubscription.repository';
-import { ISubscription, SubscriptionStatus } from '../../models/SubscriptionModal';
 import mongoose from 'mongoose';
 import { BaseRepository } from '../BaseRepository';
+import { ISubscription, SubscriptionStatus } from '../../models/interfaces/subscription.interface';
 
 @injectable()
 export class SubscriptionRepository extends BaseRepository<ISubscription> implements ISubscriptionRepository {

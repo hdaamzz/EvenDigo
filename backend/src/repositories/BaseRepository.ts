@@ -83,7 +83,6 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
     const total = await this.model.countDocuments(filter);
     const pages = Math.ceil(total / limit);
 
-    // Build query without chaining to avoid type issues
     const queryBuilder = this.model.find(filter);
     queryBuilder.skip(skip);
     queryBuilder.limit(limit);

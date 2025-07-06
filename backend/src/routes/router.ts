@@ -25,7 +25,6 @@ import livestreamRoutes from './user/livestream.routes';
 
 const router = express.Router();
 
-// Apply security middleware to all routes
 router.use(securityHeaders);
 router.use(express.json({ limit: '10mb' }));
 router.use(express.urlencoded({ extended: true, limit: '10mb' }));

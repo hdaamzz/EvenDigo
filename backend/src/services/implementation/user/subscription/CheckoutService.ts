@@ -5,7 +5,7 @@ import { ISubscriptionRepository } from '../../../../repositories/interfaces/ISu
 import { StripeProvider } from '../../../../utils/stripeProvider';
 import { SubscriptionPayload } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
 import { ConflictException, InternalServerErrorException } from '../../../../error/error-handlers';
-import { SubscriptionStatus, SubscriptionType } from '../../../../models/SubscriptionModal';
+import { SubscriptionStatus, SubscriptionType } from '../../../../models/interfaces/subscription.interface';
 
 
 @injectable()

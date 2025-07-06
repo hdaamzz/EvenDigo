@@ -16,7 +16,6 @@ import stripeWebhookRouter from "./routes/user/webhook.routes";
 import { container } from "./configs/container";
 import { RevenueDistributionCronService } from "./services/implementation/cronjob/revenue.distribution";
 import configureSocketIO from "./configs/socket";
-// import { debounceMiddleware } from './middlewares/debounce.middleware';
 
 
 const PORT: string | undefined = process.env.PORT;
@@ -31,7 +30,6 @@ const corsOptions={
 };
 const io = configureSocketIO(server);
 
-// stripe listen --forward-to localhost:3000/webhooks/stripe
 const revenueDistributionCron = container.resolve(RevenueDistributionCronService);
 revenueDistributionCron.startCronJob();
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
@@ -63,3 +61,4 @@ server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+// ssh -i "evendigo-key.pem" ubuntu@ec2-13-200-49-95.ap-south-1.compute.amazonaws.com

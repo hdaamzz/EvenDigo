@@ -1,134 +1,217 @@
-/* profile.component.css */
 :host {
-    display: block;
-    width: 100%;
-    font-family: 'Poppins', sans-serif;
-  }
-  
-  /* Sidebar styles */
+  display: block;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Sidebar styles */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100vh - 112px);
+}
+
+.sidebar-nav > div:first-child {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.sidebar-nav > div:last-child {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+/* Card hover effects */
+.start-card {
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.start-card::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
+  background-color: #00ff66;
+  transition: height 0.3s ease;
+}
+
+.start-card:hover::before {
+  height: 70%;
+}
+
+/* Scrollbar customization */
+.sidebar-nav > div:first-child::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav > div:first-child::-webkit-scrollbar-track {
+  background: #1E1E1E;
+}
+
+.sidebar-nav > div:first-child::-webkit-scrollbar-thumb {
+  background: #00ff66;
+  border-radius: 4px;
+}
+
+/* Mobile specific styles */
+@media (max-width: 1023px) {
   .sidebar-nav {
-    height: calc(100% - 80px);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow-y: auto;
+    min-height: calc(100vh - 80px);
+    height: calc(100vh - 80px);
+    padding-bottom: env(safe-area-inset-bottom);
   }
   
-  .nav-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
+  /* Ensure sidebar is above other content on mobile */
+  aside {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    min-height: 100vh !important;
+    height: 100vh !important;
   }
   
-  /* Card hover effects */
-  .start-card {
-    overflow: hidden;
-    transition: all 0.3s ease;
+  /* Smooth slide animation for mobile */
+  aside {
+    transition: transform 0.3s ease-in-out;
+  }
+}
+
+/* Desktop specific styles */
+@media (min-width: 1024px) {
+  .sidebar-nav {
+    min-height: calc(100vh - 112px);
+    height: calc(100vh - 112px);
   }
   
+  aside {
+    min-height: calc(100vh - 32px) !important;
+    height: calc(100vh - 32px) !important;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes progressFill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes barRise {
+  from { height: 0; }
+  to { height: 100%; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Apply animations */
+.shape {
+  animation: float 6s ease-in-out infinite;
+}
+
+.header {
+  animation: slideDown 0.5s ease-out;
+}
+
+.stat-card {
+  animation: slideUp 0.5s ease-out;
+}
+
+.card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.progress {
+  animation: progressFill 1s ease-out;
+}
+
+.chart-bar {
+  animation: barRise 1s ease-out;
+}
+
+.header-logo {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Mobile menu animation */
+@media (max-width: 1023px) {
+  .sidebar-nav {
+    animation: slideInFromLeft 0.3s ease-out;
+  }
+}
+
+/* Accessibility improvements */
+a:focus, button:focus {
+  outline: 2px solid #00ff66;
+  outline-offset: 2px;
+}
+
+/* Focus trap for mobile menu */
+@media (max-width: 1023px) {
+  aside:focus-within {
+    outline: none;
+  }
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 1023px) {
+  .start-card a {
+    padding: 16px 12px;
+    min-height: 48px;
+  }
+  
+  button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* Respect user's reduced motion settings */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
   .start-card::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 0;
-    background-color: #00ff66;
-    transition: height 0.3s ease;
-  }
-  
-  .start-card:hover::before {
-    height: 70%;
-  }
-  
-  /* Scrollbar customization */
-  .sidebar-nav::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .sidebar-nav::-webkit-scrollbar-track {
-    background: #1E1E1E;
-  }
-  
-  .sidebar-nav::-webkit-scrollbar-thumb {
-    background: #00ff66;
-    border-radius: 4px;
-  }
-  
-  /* Animations */
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-  }
-  
-  @keyframes slideDown {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes progressFill {
-    from { width: 0; }
-    to { width: 100%; }
-  }
-  
-  @keyframes barRise {
-    from { height: 0; }
-    to { height: 100%; }
-  }
-  
-  /* Apply animations */
-  .shape {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .header {
-    animation: slideDown 0.5s ease-out;
-  }
-  
-  .stat-card {
-    animation: slideUp 0.5s ease-out;
-  }
-  
-  .card {
-    animation: fadeIn 0.5s ease-out;
-  }
-  
-  .progress {
-    animation: progressFill 1s ease-out;
-  }
-  
-  .chart-bar {
-    animation: barRise 1s ease-out;
-  }
-  
-  .header-logo {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  /* Accessibility improvements */
-  a:focus, button:focus {
-    outline: 2px solid #00ff66;
-    outline-offset: 2px;
-  }
-  
-  /* Respect user's reduced motion settings */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-    }
-  }
+    background-color: #ffffff;
+  }}

@@ -1,4 +1,3 @@
-// src/routes/admin.dashboard.router.ts
 import { Router } from 'express';
 import { container } from 'tsyringe';
 import { AdminHomeController } from '../../controllers/implementation/admin/home/admin.home.controller';

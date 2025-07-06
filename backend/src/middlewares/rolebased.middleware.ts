@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import StatusCode from '../types/statuscode';
 
-// Enum for user roles
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user'

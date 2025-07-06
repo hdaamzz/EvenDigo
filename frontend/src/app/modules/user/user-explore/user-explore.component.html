@@ -3,136 +3,291 @@
 <!-- Main Container -->
 <div class="min-h-screen bg-[#000000] text-white pt-20">
   <!-- Header Section -->
-  <div class="bg-[#121212] border-b border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <!-- Title and Search -->
-        <div class="flex-1">
-          <div class="relative max-w-lg">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              [(ngModel)]="searchQuery"
-              (input)="onSearch()"
-              placeholder="Search events, venues, or cities..."
-              class="w-full pl-10 pr-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] transition-colors duration-300"
-            >
-          </div>
+<div class="bg-[#121212] border-b border-gray-800 sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Mobile Search Bar (Always Visible) -->
+    <div class="py-4 md:hidden">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="Search events..."
+          class="w-full pl-10 pr-12 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-[#00ff66] focus:ring-2 focus:ring-[#00ff66]/20 transition-all duration-300"
+        >
+        <!-- Mobile Filter Toggle Button -->
+        <button 
+          (click)="toggleMobileFilters()"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-[#00ff66] transition-colors duration-200">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
 
-        <!-- Filters -->
-        <div class="flex flex-col sm:flex-row gap-3">
-          <!-- Event Type Filter -->
-          <div class="relative" (clickOutside)="closeEventTypeDropdown()">
-            <button 
-              (click)="toggleEventTypeDropdown()"
-              class="flex items-center justify-between w-full sm:w-48 px-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white hover:border-[#00ff66] transition-colors duration-200">
-              <span class="text-sm">{{ selectedEventType || 'All Event Types' }}</span>
-              <svg class="w-4 h-4 ml-2 transition-transform duration-200" [class.rotate-180]="isEventTypeDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </button>
-            
-            <!-- Event Type Dropdown -->
-            <div *ngIf="isEventTypeDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-[#121212] border border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+    <!-- Desktop Layout -->
+    <div class="hidden md:flex md:items-center md:justify-between py-6 gap-6">
+      
+      <!-- Desktop Search Bar -->
+      <div class="flex-1 max-w-2xl">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+            placeholder="Search events, venues, or cities..."
+            class="w-full pl-12 pr-4 py-4 bg-[#000000] border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-[#00ff66] focus:ring-2 focus:ring-[#00ff66]/20 transition-all duration-300 text-lg"
+          >
+        </div>
+      </div>
+
+      <!-- Desktop Filter Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Event Type Filter -->
+        <div class="relative" (clickOutside)="closeEventTypeDropdown()">
+          <button 
+            (click)="toggleEventTypeDropdown()"
+            class="flex items-center justify-between min-w-[160px] px-4 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white hover:border-[#00ff66] hover:bg-[#00ff66]/5 transition-all duration-200 group">
+            <span class="text-sm font-medium">{{ selectedEventType || 'Event Type' }}</span>
+            <svg class="w-4 h-4 ml-3 transition-transform duration-200 group-hover:text-[#00ff66]" [class.rotate-180]="isEventTypeDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <div *ngIf="isEventTypeDropdownOpen" class="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-gray-700 rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto">
+            <div class="p-2">
               <button 
                 (click)="selectEventType('')"
-                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700">
+                class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
                 All Event Types
               </button>
               <button 
                 *ngFor="let eventType of eventTypes"
                 (click)="selectEventType(eventType.value)"
-                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700 last:border-b-0">
+                class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
                 {{ eventType.label }}
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- Sort Filter -->
-          <div class="relative" (clickOutside)="closeSortDropdown()">
-            <button 
-              (click)="toggleSortDropdown()"
-              class="flex items-center justify-between w-full sm:w-40 px-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white hover:border-[#00ff66] transition-colors duration-200">
-              <span class="text-sm">{{ selectedSort }}</span>
-              <svg class="w-4 h-4 ml-2 transition-transform duration-200" [class.rotate-180]="isSortDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </button>
-            
-            <!-- Sort Dropdown -->
-            <div *ngIf="isSortDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-[#121212] border border-gray-700 rounded-lg shadow-xl z-50">
+        <!-- Sort Filter -->
+        <div class="relative" (clickOutside)="closeSortDropdown()">
+          <button 
+            (click)="toggleSortDropdown()"
+            class="flex items-center justify-between min-w-[120px] px-4 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white hover:border-[#00ff66] hover:bg-[#00ff66]/5 transition-all duration-200 group">
+            <span class="text-sm font-medium">{{ selectedSort }}</span>
+            <svg class="w-4 h-4 ml-3 transition-transform duration-200 group-hover:text-[#00ff66]" [class.rotate-180]="isSortDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <div *ngIf="isSortDropdownOpen" class="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-gray-700 rounded-xl shadow-2xl z-50">
+            <div class="p-2">
               <button 
                 *ngFor="let sort of sortOptions"
                 (click)="selectSort(sort.value, sort.label)"
-                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700 last:border-b-0">
+                class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
                 {{ sort.label }}
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- Visibility Filter -->
-          <div class="relative" (clickOutside)="closeVisibilityDropdown()">
-            <button 
-              (click)="toggleVisibilityDropdown()"
-              class="flex items-center justify-between w-full sm:w-36 px-4 py-3 bg-[#000000] border border-gray-700 rounded-lg text-white hover:border-[#00ff66] transition-colors duration-200">
-              <span class="text-sm">{{ selectedVisibility }}</span>
-              <svg class="w-4 h-4 ml-2 transition-transform duration-200" [class.rotate-180]="isVisibilityDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </button>
-            
-            <!-- Visibility Dropdown -->
-            <div *ngIf="isVisibilityDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-[#121212] border border-gray-700 rounded-lg shadow-xl z-50">
+        <!-- Visibility Filter -->
+        <div class="relative" (clickOutside)="closeVisibilityDropdown()">
+          <button 
+            (click)="toggleVisibilityDropdown()"
+            class="flex items-center justify-between min-w-[100px] px-4 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white hover:border-[#00ff66] hover:bg-[#00ff66]/5 transition-all duration-200 group">
+            <span class="text-sm font-medium">{{ selectedVisibility }}</span>
+            <svg class="w-4 h-4 ml-3 transition-transform duration-200 group-hover:text-[#00ff66]" [class.rotate-180]="isVisibilityDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <div *ngIf="isVisibilityDropdownOpen" class="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-gray-700 rounded-xl shadow-2xl z-50">
+            <div class="p-2">
               <button 
                 (click)="selectVisibility('All', 'All')"
-                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700">
+                class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
                 All
               </button>
               <button 
                 (click)="selectVisibility('public', 'Public')"
-                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200 border-b border-gray-700">
+                class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
                 Public
               </button>
               <button 
                 (click)="selectVisibility('private', 'Private')"
-                class="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black transition-colors duration-200">
+                class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
                 Private
               </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Active Filters -->
-      <div *ngIf="hasActiveFilters()" class="flex flex-wrap gap-2 mt-4">
-        <span class="text-sm text-gray-400 mr-2">Active filters:</span>
-        <span *ngIf="selectedEventType" class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-[#00ff66] text-black">
-          {{ selectedEventType }}
-          <button (click)="clearEventTypeFilter()" class="ml-2 hover:text-gray-600">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-            </svg>
-          </button>
-        </span>
-        <span *ngIf="selectedVisibility !== 'All'" class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-[#00ff66] text-black">
-          {{ selectedVisibility }}
-          <button (click)="clearVisibilityFilter()" class="ml-2 hover:text-gray-600">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-            </svg>
-          </button>
-        </span>
-        <button (click)="clearAllFilters()" class="text-xs text-gray-400 hover:text-[#00ff66] underline">
-          Clear all
-        </button>
+    <div *ngIf="isMobileFiltersOpen" class="md:hidden pb-4 border-t border-gray-800">
+      <div class="pt-4 space-y-3">
+        
+        <!-- Mobile Filter Grid -->
+        <div class="grid grid-cols-1 gap-3">
+          
+          <!-- Event Type Filter Mobile -->
+          <div class="relative" (clickOutside)="closeEventTypeDropdown()">
+            <button 
+              (click)="toggleEventTypeDropdown()"
+              class="flex items-center justify-between w-full px-4 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white hover:border-[#00ff66] transition-all duration-200">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-3 text-[#00ff66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                <span class="text-sm font-medium">{{ selectedEventType || 'Event Type' }}</span>
+              </div>
+              <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isEventTypeDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <div *ngIf="isEventTypeDropdownOpen" class="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-gray-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+              <div class="p-2">
+                <button 
+                  (click)="selectEventType('')"
+                  class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
+                  All Event Types
+                </button>
+                <button 
+                  *ngFor="let eventType of eventTypes"
+                  (click)="selectEventType(eventType.value)"
+                  class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
+                  {{ eventType.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sort and Visibility in a row for mobile -->
+          <div class="grid grid-cols-2 gap-3">
+            
+            <!-- Sort Filter Mobile -->
+            <div class="relative" (clickOutside)="closeSortDropdown()">
+              <button 
+                (click)="toggleSortDropdown()"
+                class="flex items-center justify-between w-full px-4 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white hover:border-[#00ff66] transition-all duration-200">
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-[#00ff66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                  </svg>
+                  <span class="text-sm font-medium truncate">{{ selectedSort }}</span>
+                </div>
+                <svg class="w-4 h-4 transition-transform duration-200 flex-shrink-0" [class.rotate-180]="isSortDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              <div *ngIf="isSortDropdownOpen" class="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-gray-700 rounded-xl shadow-2xl z-50">
+                <div class="p-2">
+                  <button 
+                    *ngFor="let sort of sortOptions"
+                    (click)="selectSort(sort.value, sort.label)"
+                    class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
+                    {{ sort.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visibility Filter Mobile -->
+            <div class="relative" (clickOutside)="closeVisibilityDropdown()">
+              <button 
+                (click)="toggleVisibilityDropdown()"
+                class="flex items-center justify-between w-full px-4 py-3 bg-[#000000] border border-gray-700 rounded-xl text-white hover:border-[#00ff66] transition-all duration-200">
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-[#00ff66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <span class="text-sm font-medium truncate">{{ selectedVisibility }}</span>
+                </div>
+                <svg class="w-4 h-4 transition-transform duration-200 flex-shrink-0" [class.rotate-180]="isVisibilityDropdownOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              <div *ngIf="isVisibilityDropdownOpen" class="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-gray-700 rounded-xl shadow-2xl z-50">
+                <div class="p-2">
+                  <button 
+                    (click)="selectVisibility('All', 'All')"
+                    class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
+                    All
+                  </button>
+                  <button 
+                    (click)="selectVisibility('public', 'Public')"
+                    class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
+                    Public
+                  </button>
+                  <button 
+                    (click)="selectVisibility('private', 'Private')"
+                    class="w-full px-3 py-2 text-left text-sm text-white hover:bg-[#00ff66] hover:text-black rounded-lg transition-colors duration-200">
+                    Private
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <div *ngIf="hasActiveFilters()" class="flex flex-wrap items-center gap-2 pb-4 border-b border-gray-800">
+      <span class="text-sm text-gray-400 font-medium">Active:</span>
+      
+      <div class="flex flex-wrap gap-2">
+        <span *ngIf="selectedEventType" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#00ff66] text-black">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" clip-rule="evenodd"></path>
+          </svg>
+          {{ selectedEventType }}
+          <button (click)="clearEventTypeFilter()" class="ml-1 hover:text-gray-700 transition-colors duration-200">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </span>
+        
+        <span *ngIf="selectedVisibility !== 'All'" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#00ff66] text-black">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+          </svg>
+          {{ selectedVisibility }}
+          <button (click)="clearVisibilityFilter()" class="ml-1 hover:text-gray-700 transition-colors duration-200">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+      
+      <button (click)="clearAllFilters()" class="text-xs text-gray-400 hover:text-[#00ff66] font-medium underline transition-colors duration-200">
+        Clear all
+      </button>
+    </div>
   </div>
+</div>
 
   <!-- Events Grid -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -158,7 +313,7 @@
         <!-- Event Image -->
         <div class="relative aspect-w-16 aspect-h-9 overflow-hidden">
           <img 
-            [src]="event.mainBanner" 
+            [src]="event.promotionalImage" 
             [alt]="event.eventTitle"
             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
             (error)="onImageError($event)"
