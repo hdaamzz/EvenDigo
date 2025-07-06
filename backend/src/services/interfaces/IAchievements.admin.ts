@@ -1,12 +1,17 @@
-import { IAchievement } from "../../models/interfaces/achievements.interface";
+import { 
+  AchievementResponseDTO, 
+  CreateAchievementDTO, 
+  UpdateAchievementDTO, 
+  AchievementPaginationResponseDTO 
+} from '../../mappers/admin/acheivement/achievement.mapper';
 
 export interface IAchievementAdminService {
-    getAllAchievements(): Promise<IAchievement[]>;
-    getAllAchievementsWithPagination(page?: number, limit?: number): Promise<{achievements: IAchievement[], totalCount: number, hasMore: boolean}>;
-    getAchievementById(achievementId: string): Promise<IAchievement>;
-    createAchievement(achievementData: Partial<IAchievement>): Promise<IAchievement>;
-    updateAchievement(achievementId: string, updateData: Partial<IAchievement>): Promise<IAchievement | null>;
-    activateAchievement(achievementId: string): Promise<IAchievement | null>;
-    deactivateAchievement(achievementId: string): Promise<IAchievement | null>;
+    getAllAchievements(): Promise<AchievementResponseDTO[]>;
+    getAllAchievementsWithPagination(page?: number, limit?: number): Promise<AchievementPaginationResponseDTO>;
+    getAchievementById(achievementId: string): Promise<AchievementResponseDTO>;
+    createAchievement(achievementData: CreateAchievementDTO): Promise<AchievementResponseDTO>;
+    updateAchievement(achievementId: string, updateData: UpdateAchievementDTO): Promise<AchievementResponseDTO | null>;
+    activateAchievement(achievementId: string): Promise<AchievementResponseDTO | null>;
+    deactivateAchievement(achievementId: string): Promise<AchievementResponseDTO | null>;
     deleteAchievement(achievementId: string): Promise<void>;
 }
