@@ -189,8 +189,6 @@ export class FinanceBookingComponent implements OnInit, OnDestroy {
    * View detailed information for a booking
    */
   viewBookingDetails(booking: any): void {
-    console.log('View booking details:', booking.rawData);
-    // Implementation for viewing details would go here
   }
   
   /**

@@ -62,7 +62,6 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   constructor(private _walletService: WalletService) { }
 
   ngOnInit(): void {
-  console.log('Component initialized with pageSize:', this.pageSize);
   this._checkMobileView();
   this._loadWalletData();
 }
@@ -93,11 +92,6 @@ private _checkMobileView(): void {
             this.currentBalance = response.data.walletBalance;
             
             this.transactions = response.data.transactions;
-
-            console.log('Wallet data loaded:', {
-              totalTransactions: this.transactions.length,
-              sampleTransaction: this.transactions[0]
-            });
 
             this._calculateTotalPages();
             this.isInitialLoadComplete = true;

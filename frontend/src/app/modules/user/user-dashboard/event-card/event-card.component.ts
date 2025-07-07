@@ -34,7 +34,6 @@ export class EventCardComponent implements OnInit {
     this.events.forEach(event => {
       statesMap.set(event._id, { isStarting: false, isLive: false });
     });
-    console.log('initializeLiveStreamStates',statesMap)
     this.liveStreamStates.set(statesMap);
   }
 
@@ -91,9 +90,7 @@ export class EventCardComponent implements OnInit {
       : "url('/placeholder-event.jpg')";
   }
 
-  goLive(event: CardIEvent): void {
-    console.log("eveeeeent",event);
-    
+  goLive(event: CardIEvent): void {    
     const currentState = this.getLiveStreamState(event._id);
     if (currentState.isLive) {
       this.router.navigate(['/live-stream'], {
@@ -106,7 +103,6 @@ export class EventCardComponent implements OnInit {
     }
 
     if (currentState.isStarting) {
-      console.log('Stream is already starting...');
       return;
     }
 
@@ -114,8 +110,6 @@ export class EventCardComponent implements OnInit {
 
     this.livestreamService.startLiveStream(event._id).subscribe({
       next: (response) => {
-        console.log('Start stream response:', response);
-
         if (response.success && response.data) {
           this.updateLiveStreamState(event._id, { isStarting: false, isLive: true });
 

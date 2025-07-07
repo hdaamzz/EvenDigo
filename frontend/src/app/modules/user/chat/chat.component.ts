@@ -391,19 +391,16 @@ private async startChatWithUserId(userId: string) {
       }),
 
       this.socketService.listen<any>('groupChatInfo').subscribe(data => {
-        console.log('Group chat info received:', data);
         this.loadChats();
       }),
 
       this.socketService.listen<any>('userJoinedChat').subscribe(data => {
-        console.log('User joined chat:', data);
         if (data.chatType === 'group') {
           this.loadChats();
         }
       }),
 
       this.socketService.listen<any>('userLeftChat').subscribe(data => {
-        console.log('User left chat:', data);
         if (data.chatType === 'group') {
           this.loadChats();
         }
@@ -653,7 +650,6 @@ private async startChatWithUserId(userId: string) {
   markMessagesAsRead(chatId: string, chatType: 'personal' | 'group') {
     this.chatService.markMessagesAsRead(chatId, chatType).subscribe({
       next: () => {
-        console.log('Messages marked as read on server');
         if (chatType === 'personal') {
           this.personalChats = this.chatHelper.clearUnreadCount(this.personalChats, chatId);
         } else {

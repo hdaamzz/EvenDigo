@@ -87,7 +87,6 @@ export class FinanceRefundComponent implements OnInit, OnDestroy {
       this.itemsPerPage
     ).subscribe({
       next: (response) => {
-        console.log(response.data);
 
         if (Array.isArray(response.data) && response.data.length > 0) {
           const transactionData = Array.isArray(response.data[0])

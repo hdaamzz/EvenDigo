@@ -211,7 +211,6 @@ export class EventsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   viewAnalysis(event: IEvent): void {
-    console.log('View analysis', event);
   }
 
   viewDetails(event: IEvent): void {

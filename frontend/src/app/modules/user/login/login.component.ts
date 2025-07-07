@@ -95,9 +95,7 @@ export class LoginComponent implements OnDestroy {
     this._authService.forgotPassword(formData)
       .pipe(takeUntil(this._destroy$))
       .subscribe({
-        next: (response) => {
-          console.log(response);
-          
+        next: (response) => {          
           if(response.success){
           this._router.navigateByUrl('/');
           Notiflix.Notify.success('Reset email sent to your inbox');

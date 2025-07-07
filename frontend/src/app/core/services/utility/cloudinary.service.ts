@@ -15,7 +15,6 @@ export class CloudinaryService {
   uploadProfileImage(file: File): Observable<CloudinaryResponse> {
     const formData = new FormData();
     formData.append('profileImage', file);
-    console.log(formData);
     
     
     return this.http.post<CloudinaryResponse>(

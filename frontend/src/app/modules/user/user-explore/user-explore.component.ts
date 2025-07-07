@@ -285,7 +285,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
 
   onChatWithOrganizer(eventId: string): void {
     // Implement chat functionality
-    console.log('Chat with organizer for event:', eventId);
+    
   }
 
   onImageError(event: any): void {
