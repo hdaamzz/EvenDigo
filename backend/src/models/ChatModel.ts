@@ -79,7 +79,15 @@ const ChatSchema = new Schema<IChat>({
   name: {
     type: String,
     required: function() { return this.chatType === 'group'; }
-  }
+  },
+  username: {
+    type: String,
+    option:true
+  },
+  profileImg: {
+    type: String,
+    option:true
+  },
 }, {
   timestamps: true
 });

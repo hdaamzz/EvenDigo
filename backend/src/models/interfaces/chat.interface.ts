@@ -29,4 +29,6 @@ export interface IChat extends Document {
   chatType: 'personal' | 'group';
   eventId?: mongoose.Types.ObjectId;
   name?: string;
+  profileImg?: string;
+  username?: string;
 }

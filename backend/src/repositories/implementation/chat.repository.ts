@@ -7,7 +7,7 @@ import { IChat, IMessage } from "../../models/interfaces/chat.interface";
 @injectable()
 export class ChatRepository implements IChatRepository {
 
-  async createChat(participantIds: string[], chatType: 'personal' | 'group' = 'personal', eventId?: string, name?: string): Promise<IChat> {
+  async createChat(participantIds: string[], chatType: 'personal' | 'group' = 'personal', eventId?: string, name?: string,username?:string,profileImg?:string): Promise<IChat> {
     const participantObjectIds = participantIds.map(id => new Types.ObjectId(id));
 
     if (chatType === 'personal') {
@@ -46,6 +46,8 @@ export class ChatRepository implements IChatRepository {
       isActive: true,
       messageCount: 0,
       chatType,
+      username:chatType === 'personal' ? username : undefined,
+      profileImg:chatType === 'personal' ? profileImg : undefined,
       eventId: eventId ? new Types.ObjectId(eventId) : undefined,
       name: chatType === 'group' ? name : undefined
     };

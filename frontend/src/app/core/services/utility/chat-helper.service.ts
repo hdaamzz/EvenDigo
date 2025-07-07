@@ -128,6 +128,8 @@ export class ChatHelperService {
   }
 
   createChatUser(user: User, chat?: any): ChatUser {
+    console.log("createChatUser",user);
+    
     return {
       id: user.id ?? '',
       name: user.name,

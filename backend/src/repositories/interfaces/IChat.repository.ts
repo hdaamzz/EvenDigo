@@ -1,11 +1,14 @@
-import { IChat, IMessage } from "../../models/ChatModel";
+
+import { IChat,IMessage } from "../../models/interfaces/chat.interface";
 
 export interface IChatRepository {
   createChat(
     participantIds: string[],
     chatType?: 'personal' | 'group',
     eventId?: string,
-    name?: string
+    name?: string,
+    username?:string,
+    profileImg?:string
   ): Promise<IChat>;
 
   addParticipantToGroupChat(

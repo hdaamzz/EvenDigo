@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/user/auth/auth.service';
 import { User } from '../../../core/models/userModel';
 import { ChatHelperService } from '../../../core/services/utility/chat-helper.service';
 import { ChatItem, ChatMessage, ChatUser, GroupChat } from '../../../core/interfaces/user/chat';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -53,7 +54,8 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     private chatService: ChatService,
     public socketService: SocketService,
     private authService: AuthService,
-    private chatHelper: ChatHelperService
+    private chatHelper: ChatHelperService,
+    private route: ActivatedRoute
   ) {
     this.isMobile = this.chatHelper.checkIsMobile();
   }
@@ -65,6 +67,11 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.loadAllUsers();
       this.loadChats();
       this.subscribeToUnreadCount();
+      this.route.queryParams.subscribe(params => {
+      if (params['userId']) {
+        this.handleDirectChatNavigation(params['userId']);
+      }
+    });
     } catch (error) {
       this.handleError('Failed to initialize chat. Please refresh the page.', error);
     }
@@ -80,6 +87,73 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.shouldScrollToBottom = false;
     }
   }
+
+  private async handleDirectChatNavigation(userId: string) {
+  try {
+    
+     this.chatService.getAllUsers().subscribe((response)=>{
+       let allUser:any=response
+       let targetUser = allUser.find((user: { id: string; }) => user.id === userId);
+       if (!targetUser) {
+           this.startChatWithUserId(userId);
+          return;
+       }
+        this.startChatWithUser(targetUser);
+      
+     
+    });
+
+  } catch (error) {
+    this.handleError('Failed to start chat with organizer', error);
+  }
+}
+
+private async startChatWithUserId(userId: string) {
+  try {
+    this.isLoading = true;
+    this.error = '';
+
+
+    const existingChat = await this.chatService.getChatBetweenUsers(userId).toPromise();
+    
+    if (existingChat) {
+      const chatItem: ChatItem = {
+        id: userId,
+        name: 'Organizer', 
+        username: 'organizer',
+        lastMessage: '',
+        lastMessageTime: new Date(),
+        isOnline: false,
+        unreadCount: 0,
+        chatId: existingChat._id,
+        chatType: 'personal'
+      };
+      
+      this.selectChat(chatItem);
+    } else {
+      const newChat = await this.chatService.createOrGetPersonalChat(userId).toPromise();
+      if (newChat) {
+        const chatItem: ChatItem = {
+          id: userId,
+          name: 'Organizer',
+          username: 'organizer',
+          lastMessage: '',
+          lastMessageTime: new Date(),
+          isOnline: false,
+          unreadCount: 0,
+          chatId: newChat._id,
+          chatType: 'personal'
+        };
+        
+        this.selectChat(chatItem);
+      }
+    }
+    
+    this.isLoading = false;
+  } catch (error) {
+    this.handleError('Failed to start chat', error);
+  }
+}
 
   private scrollToBottom(): void {
     try {
@@ -690,7 +764,6 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  // Utility methods
   formatTime = (date: Date) => this.chatHelper.formatTime(date);
   formatLastMessageTime = (date: Date) => this.chatHelper.formatLastMessageTime(date);
   getUserInitials = (name: string) => this.chatHelper.getUserInitials(name);
