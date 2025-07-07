@@ -212,7 +212,6 @@ export class AchievementsComponent implements OnInit, OnDestroy, AfterViewInit {
         error: (err) => {
           console.error('Error loading achievements:', err);
           this.loading = false;
-          Notiflix.Notify.failure('Failed to load achievements');
         }
       });
   }

@@ -52,7 +52,7 @@ router.use('/user/chats', requireUserRole, chatRoutes);
 router.use('/user/livestream', requireUserRole, livestreamRoutes);
 
 // Admin-only routes
-router.use('/admin/coupon', requireAdminRole, couponRouter);
+router.use('/admin/coupon', couponRouter);
 router.use('/admin/events', requireAdminRole, adminEventsRouter);
 router.use('/admin/users', adminUsersRouter);
 router.use('/admin/achievements', requireAdminRole, achievementRouter);

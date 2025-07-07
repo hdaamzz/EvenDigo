@@ -44,10 +44,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     }
 
     async searchUsers(searchTerm: string): Promise<IUser[]> {
-        const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive search
+        const searchRegex = new RegExp(searchTerm, 'i'); 
         
         return this.model.find({
-            role: 'user', // Only search for users, not admins
+            role: 'user',
             $or: [
                 { name: { $regex: searchRegex } },
                 { email: { $regex: searchRegex } },
@@ -56,7 +56,7 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
                 { gender: { $regex: searchRegex } }
             ]
         })
-        .select('-password -firebaseUid') // Exclude sensitive fields
+        .select('-password -firebaseUid')
         .sort({ createdAt: -1 })
         .exec();
     }

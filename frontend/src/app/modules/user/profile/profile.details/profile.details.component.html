@@ -1,42 +1,6 @@
 <div class="min-h-screen bg-[#121212] text-white">
   <div class="max-w-5xl mx-auto">
 
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-      <div
-        class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
-        <div class="flex items-center justify-between">
-          <span class="text-gray-400 text-sm">Events Attended</span>
-          <div class="bg-indigo-900 p-2 rounded-lg">
-            <i class="fas fa-calendar text-indigo-300"></i>
-          </div>
-        </div>
-        <h3 class="text-3xl font-bold mt-2">{{eventParticipated}}</h3>
-      </div>
-
-      <div
-        class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
-        <div class="flex items-center justify-between">
-          <span class="text-gray-400 text-sm">Achievements</span>
-          <div class="bg-yellow-900 p-2 rounded-lg">
-            <i class="fas fa-trophy text-yellow-300"></i>
-          </div>
-        </div>
-        <h3 class="text-3xl font-bold mt-2">{{achievements.length}}</h3>
-      </div>
-
-      <div
-        class="bg-black opacity-80 rounded-xl p-4 shadow-lg transition hover:border-[#00ff66] hover:shadow-[#00ff6633]">
-        <div class="flex items-center justify-between">
-          <span class="text-gray-400 text-sm">Events Organized</span>
-          <div class="bg-pink-900 p-2 rounded-lg">
-            <i class="fas fa-heart text-pink-300"></i>
-          </div>
-        </div>
-        <h3 class="text-3xl font-bold mt-2">{{eventOrganized}}</h3>
-      </div>
-    </div>
-
     @if (user) {
     <!-- User profile card -->
     <div class="bg-black opacity-70 rounded-2xl shadow-xl overflow-hidden mb-8 ">

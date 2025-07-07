@@ -101,7 +101,6 @@ export class DashboardService {
     } else {
       errorMessage = error.error?.message || `Server Error: ${error.status} - ${error.statusText}`;
     }
-    Notiflix.Notify.failure(errorMessage);
     return throwError(() => ({
       success: false,
       message: errorMessage,

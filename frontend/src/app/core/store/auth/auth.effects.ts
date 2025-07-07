@@ -107,7 +107,6 @@ export class AuthEffects {
                     }),
                     catchError(error => {
                         const errorMessage = error.error?.message || error.message || 'Failed to Login';
-                        Notiflix.Notify.failure(errorMessage);
                         return of(AuthActions.loginFailure({
                             error: errorMessage
                         }));
@@ -137,7 +136,6 @@ export class AuthEffects {
                     }),
                     catchError(error => {
                         const errorMessage = error.message || error.error?.message || 'Admin Failed to Login';
-                        Notiflix.Notify.failure(errorMessage);
                         return of(AuthActions.adminLoginFailure({
                             error: errorMessage
                         }));
@@ -181,7 +179,6 @@ export class AuthEffects {
                             return AuthActions.logoutSuccess();
                         }),
                         catchError(error => {
-                            Notiflix.Notify.failure('Logout failed');
                             return of(AuthActions.logoutFailure({ error: error.message }));
                         })
                     )
@@ -207,7 +204,6 @@ export class AuthEffects {
                     }),
                     catchError(error => {
                         const errorMessage = error.error?.message || error.message || 'Failed to Login with Google';
-                        Notiflix.Notify.failure(errorMessage);
                         return of(AuthActions.googleLoginFailure({
                             error: errorMessage
                         }));
