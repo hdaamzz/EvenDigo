@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { ISubscription, SubscriptionStatus } from '../../models/SubscriptionModal';
+import { ISubscription, SubscriptionStatus } from '../../models/interfaces/subscription.interface';
 
 export interface ISubscriptionRepository {
   createSubscription(subscriptionData: Partial<ISubscription>): Promise<ISubscription>;

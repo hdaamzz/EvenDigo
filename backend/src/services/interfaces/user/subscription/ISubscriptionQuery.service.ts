@@ -1,4 +1,4 @@
-import { ISubscription } from '../../../../models/SubscriptionModal';
+import { ISubscription } from '../../../../models/interfaces/subscription.interface';
 import Stripe from 'stripe';
 
 export interface SubscriptionPayload {

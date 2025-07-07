@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { ISubscription } from "../../models/SubscriptionModal";
+import { ISubscription } from "../../models/interfaces/subscription.interface";
 
 export interface SubscriptionFilter {
   activeOnly?: boolean;

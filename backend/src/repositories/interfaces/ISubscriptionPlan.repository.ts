@@ -1,4 +1,4 @@
-import { ISubscriptionPlan } from "../../models/SubscriptionPlanModal";
+import { ISubscriptionPlan } from "../../models/interfaces/subscriptionPlan.interface";
 
 export interface ISubscriptionPlanRepository {
   findAll(): Promise<ISubscriptionPlan[]>;
