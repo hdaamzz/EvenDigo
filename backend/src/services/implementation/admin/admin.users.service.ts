@@ -15,7 +15,7 @@ export class AdminUsersService implements IUsersAdminService {
 
     async fetchAllUsers(): Promise<ServiceResponse<IUser[]>> {
       try {
-        const users = await this.userRepository.findAll();
+        const users = await this.userRepository.findAllActiveUsers();
         
         return {
           success: true,

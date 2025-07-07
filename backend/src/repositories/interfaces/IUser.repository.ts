@@ -10,4 +10,5 @@ export interface IUserRepository extends IBaseRepository<IUser> {
   unblockUserById(userId: Schema.Types.ObjectId | string): Promise<IUser | null>;
   approveUserStatusChange(userId: Schema.Types.ObjectId | string): Promise<void>;
   searchUsers(searchTerm: string): Promise<IUser[]>
+  findAllActiveUsers(): Promise<IUser[]>
 }
