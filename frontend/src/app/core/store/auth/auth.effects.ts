@@ -123,7 +123,6 @@ export class AuthEffects {
             switchMap(({ email, password }) =>
                 this.adminAuthService.adminLogin({ email, password }).pipe(
                     map(response => {
-                        console.log("adminLogin",response);
                         
                         if (response.success) {
                             Notiflix.Notify.success('Welcome to EvenDigo');

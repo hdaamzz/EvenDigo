@@ -1,12 +1,13 @@
 import { Types } from "mongoose";
 import { injectable } from "tsyringe";
 import { IChatRepository } from "../interfaces/IChat.repository";
-import { ChatModel, MessageModel, IChat, IMessage } from "../../models/ChatModel";
+import { ChatModel, MessageModel } from "../../models/ChatModel";
+import { IChat, IMessage } from "../../models/interfaces/chat.interface";
 
 @injectable()
 export class ChatRepository implements IChatRepository {
 
-  async createChat(participantIds: string[], chatType: 'personal' | 'group' = 'personal', eventId?: string, name?: string): Promise<IChat> {
+  async createChat(participantIds: string[], chatType: 'personal' | 'group' = 'personal', eventId?: string, name?: string,username?:string,profileImg?:string): Promise<IChat> {
     const participantObjectIds = participantIds.map(id => new Types.ObjectId(id));
 
     if (chatType === 'personal') {
@@ -45,6 +46,8 @@ export class ChatRepository implements IChatRepository {
       isActive: true,
       messageCount: 0,
       chatType,
+      username:chatType === 'personal' ? username : undefined,
+      profileImg:chatType === 'personal' ? profileImg : undefined,
       eventId: eventId ? new Types.ObjectId(eventId) : undefined,
       name: chatType === 'group' ? name : undefined
     };
@@ -64,7 +67,7 @@ export class ChatRepository implements IChatRepository {
     }
 
     if (chat.participants.some(p => p.toString() === userId)) {
-      return chat; // User already in chat
+      return chat;
     }
 
     chat.participants.push(userObjectId);

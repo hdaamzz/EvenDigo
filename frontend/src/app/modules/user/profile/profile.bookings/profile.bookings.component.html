@@ -1,105 +1,185 @@
-<div class="min-h-screen text-white p-4">
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex items-center gap-3 w-full md:w-auto">  
-            <div class="relative flex-1 md:w-64">
+<div class="min-h-screen text-white p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-3 w-full sm:w-auto">  
+            <div class="relative flex-1 sm:flex-none sm:w-80">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <input type="text" placeholder="Search events by title, city" class="w-full pl-10 pr-4 py-2 bg-[#1E1E1E] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
+                <input type="text" placeholder="Search events by title, city" class="w-full pl-10 pr-4 py-3 bg-[#1E1E1E] rounded-lg text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
             </div>
         </div>
     </div>
 
-    <div class="text-sm text-gray-400 mb-4">
+    <!-- Results Counter -->
+    <div class="text-sm text-gray-400 mb-6">
         Showing {{bookings.length}} events
     </div>
 
-    <div class="space-y-4">
-    @for (booking of bookings; track $index) {
-    <div class="bg-[#1E1E1E] rounded-lg overflow-hidden border border-gray-600">
-        <div class="flex flex-col md:flex-row">
-            <div class="relative w-full md:w-38 h-38 md:h-auto">
-                <img [src]="booking?.event?.mainBanner" alt="Event Image" class="w-full h-full object-cover">
-                <div class="absolute top-2 left-2 bg-green-500 text-xs font-medium px-2 py-1 rounded text-white">
-                    {{booking.event?.eventType}}
-                </div>
-            </div>
-            
-            <div class="flex-1 p-4">
-                <div class="flex justify-between items-start pt-10">
-                    <div>
-                        <h3 class="text-lg font-semibold">{{booking.event?.eventTitle}}</h3>
-                        <p class="text-gray-400 text-sm mt-1">Booking ID: <span class="text-gray-300">{{ booking.bookingId }}</span></p>
-                        <div class="mt-2 flex items-center text-gray-400 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <p>{{ booking.event?.startDate | date:'MMM d, y' }} at {{ booking.event?.startTime | date:'shortTime' }}</p>
+    <!-- Bookings List -->
+    <div class="space-y-6">
+        @for (booking of bookings; track $index) {
+            <div class="bg-[#1E1E1E] rounded-xl overflow-hidden border border-gray-600 hover:border-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <!-- Mobile Layout -->
+                <div class="block sm:hidden">
+                    <!-- Image Section -->
+                    <div class="relative h-48 w-full">
+                        <img [src]="booking?.event?.mainBanner" alt="Event Image" class="w-full h-full object-cover">
+                        <div class="absolute top-3 left-3 bg-green-500 text-xs font-semibold px-3 py-1 rounded-full text-white shadow-md">
+                            {{booking.event?.eventType}}
+                        </div>
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-4 space-y-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white leading-tight">{{booking.event?.eventTitle}}</h3>
+                            <p class="text-gray-400 text-sm mt-1">
+                                Booking ID: <span class="text-gray-300 font-medium">{{ booking.bookingId }}</span>
+                            </p>
                         </div>
                         
-                        <div class="mt-1 flex items-center text-gray-400 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>{{booking.event?.venueName}}, {{booking.event?.venueAddress}}, {{booking.event?.city}}</span>
+                        <!-- Event Details -->
+                        <div class="space-y-2">
+                            <div class="flex items-start text-gray-300 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <div>
+                                    <p class="font-medium">{{ booking.event?.startDate | date:'MMM d, y' }}</p>
+                                    <p class="text-gray-400">{{ booking.event?.startTime | date:'shortTime' }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start text-gray-300 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <div>
+                                    <p class="font-medium">{{booking.event?.venueName}}</p>
+                                    <p class="text-gray-400">{{booking.event?.venueAddress}}, {{booking.event?.city}}</p>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="mt-1 text-xs text-gray-400">
-                            <!-- Created by <span class="text-blue-400">{{booking.event?.user_id.name}}</span> -->
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col gap-3 pt-2">
+                            <button (click)="showBookingDetails(booking)" 
+                                    class="flex items-center justify-center gap-2 bg-[#00ff66] hover:bg-green-600 text-black px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm w-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Show Details</span>
+                            </button>
+
+                            <button *ngIf="booking.event" 
+                                    (click)="watchLive(booking.event)" 
+                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm w-full shadow-lg hover:shadow-red-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <span>Watch Live</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="bg-[#121212] p-4 flex flex-col justify-center items-center gap-3">
-                <!-- Show Details Button -->
-                <button (click)="showBookingDetails(booking)" 
-                        class="flex items-center gap-2 bg-[#00ff66] hover:bg-green-600 text-black px-4 py-2 rounded-lg transition-colors duration-200 font-medium min-w-[130px] justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Show Details</span>
-                </button>
 
-                <!-- Watch Live Button - Enhanced -->
-                <button *ngIf="booking.event" 
-                        (click)="watchLive(booking.event)" 
-                        class="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all duration-200 font-medium min-w-[130px] justify-center shadow-lg hover:shadow-red-500/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <span>Watch Live</span>
-                </button>
+                <!-- Desktop Layout -->
+                <div class="hidden sm:flex">
+                    <!-- Image Section -->
+                    <div class="relative w-48 lg:w-56 h-40 lg:h-48 flex-shrink-0">
+                        <img [src]="booking?.event?.mainBanner" alt="Event Image" class="w-full h-full object-cover">
+                        <div class="absolute top-3 left-3 bg-green-500 text-xs font-semibold px-3 py-1 rounded-full text-white shadow-md">
+                            {{booking.event?.eventType}}
+                        </div>
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="flex-1 p-4 lg:p-6 flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div>
+                                <h3 class="text-lg lg:text-xl font-semibold text-white leading-tight">{{booking.event?.eventTitle}}</h3>
+                                <p class="text-gray-400 text-sm mt-1">
+                                    Booking ID: <span class="text-gray-300 font-medium">{{ booking.bookingId }}</span>
+                                </p>
+                            </div>
+                            
+                            <!-- Event Details -->
+                            <div class="space-y-2">
+                                <div class="flex items-center text-gray-300 text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <div>
+                                        <span class="font-medium">{{ booking.event?.startDate | date:'MMM d, y' }}</span>
+                                        <span class="text-gray-400 ml-2">at {{ booking.event?.startTime | date:'shortTime' }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start text-gray-300 text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <div>
+                                        <span class="font-medium">{{booking.event?.venueName}}</span>
+                                        <span class="text-gray-400">, {{booking.event?.venueAddress}}, {{booking.event?.city}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons Section -->
+                    <div class="bg-[#121212] p-4 lg:p-6 flex flex-col justify-center items-center gap-3 min-w-[160px]">
+                        <button (click)="showBookingDetails(booking)" 
+                                class="flex items-center justify-center gap-2 bg-[#00ff66] hover:bg-green-600 text-black px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Show Details</span>
+                        </button>
+
+                        <button *ngIf="booking.event" 
+                                (click)="watchLive(booking.event)" 
+                                class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm w-full shadow-lg hover:shadow-red-500/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            <span>Watch Live</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
+        }
     </div>
-    }
-</div>
 </div>
 
 <!-- Cancellation Modal -->
 @if (showModal) {
-    <div class="fixed inset-0 backdrop-blur-sm animate-fadeIn bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-[#1E1E1E] rounded-lg p-6 max-w-md w-full mx-4">
+    <div class="fixed inset-0 backdrop-blur-sm animate-fadeIn bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-[#1E1E1E] rounded-xl p-6 max-w-md w-full border border-gray-600">
             <h3 class="text-xl font-semibold text-white mb-4">Ticket Cancellation Terms</h3>
             
             <div class="mb-4 text-gray-300 text-sm space-y-3">
                 <p>Please review our ticket cancellation policy before proceeding:</p>
                 
-                <div class="bg-[#121212] p-3 rounded-lg">
-                    <p class="font-medium text-white mb-1">Important Notes</p>
-                    <p>• Cancellation cannot be reversed once confirmed</p>
-                    <p>• 10% cancellation charge applicable </p>
-                    <p>• Wallet credits can be used for future bookings</p>
+                <div class="bg-[#121212] p-4 rounded-lg border border-gray-700">
+                    <p class="font-medium text-white mb-2">Important Notes</p>
+                    <ul class="space-y-1 text-gray-300">
+                        <li>• Cancellation cannot be reversed once confirmed</li>
+                        <li>• 10% cancellation charge applicable</li>
+                        <li>• Wallet credits can be used for future bookings</li>
+                    </ul>
                 </div>
             </div>
             
             <div class="flex gap-3 justify-end mt-6">
-                <button (click)="hideModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm">
+                <button (click)="hideModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors">
                     Cancel
                 </button>
-                <button (click)="proceedWithCancellation()" class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm">
+                <button (click)="proceedWithCancellation()" class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors">
                     Proceed to Cancel
                 </button>
             </div>
@@ -109,11 +189,11 @@
 
 <!-- Booking Details Modal -->
 @if (showBookingDetailsModal) {
-    <div class="fixed inset-0 backdrop-blur-sm animate-fadeIn bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-[#1E1E1E] rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-5">
+    <div class="fixed inset-0 backdrop-blur-sm animate-fadeIn bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-[#1E1E1E] rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-600">
+            <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-semibold text-white">Booking Details</h3>
-                <button (click)="hideBookingDetailsModal()" class="text-gray-400 hover:text-white">
+                <button (click)="hideBookingDetailsModal()" class="text-gray-400 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -122,78 +202,87 @@
 
             @if (selectedBooking) {
                 <div class="space-y-6">
-                    <div class="relative rounded-lg overflow-hidden">
-                        <img [src]="selectedBooking.event?.promotionalImage" alt="Event Banner" class="w-full h-80 object-cover">
-                        <div class="absolute top-3 left-3 bg-green-500 text-xs font-medium px-2 py-1 rounded text-white">
+                    <!-- Event Banner -->
+                    <div class="relative rounded-xl overflow-hidden">
+                        <img [src]="selectedBooking.event?.promotionalImage" alt="Event Banner" class="w-full h-60 sm:h-80 object-cover">
+                        <div class="absolute top-4 left-4 bg-green-500 text-sm font-semibold px-3 py-1 rounded-full text-white shadow-md">
                             {{selectedBooking.event?.eventType}}
                         </div>
                     </div>
 
+                    <!-- Event Title -->
                     <div>
-                        <h2 class="text-xl font-bold">{{selectedBooking.event?.eventTitle}}</h2>
-                        <p class="text-gray-400 text-sm mt-1">Booking ID: <span class="text-gray-300">{{selectedBooking.bookingId}}</span></p>
+                        <h2 class="text-2xl font-bold text-white">{{selectedBooking.event?.eventTitle}}</h2>
+                        <p class="text-gray-400 text-sm mt-1">
+                            Booking ID: <span class="text-gray-300 font-medium">{{selectedBooking.bookingId}}</span>
+                        </p>
                     </div>
 
-                    <div class="bg-[#121212] p-4 rounded-lg space-y-3">
-                        <h4 class="font-medium">Event Details</h4>
+                    <!-- Event Details -->
+                    <div class="bg-[#121212] p-4 sm:p-6 rounded-xl border border-gray-700">
+                        <h4 class="font-semibold text-white mb-4">Event Details</h4>
                         
-                        <div class="flex items-center text-gray-300 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <div>
-                                <p>Date: {{ selectedBooking.event?.startDate | date:'EEEE, MMM d, y' }}</p>
-                                <p>Time: {{ selectedBooking.event?.startTime | date:'shortTime' }}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-start text-gray-300 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 mt-0.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <div>
+                                    <p class="font-medium text-white">{{ selectedBooking.event?.startDate | date:'EEEE, MMM d, y' }}</p>
+                                    <p class="text-gray-400 mt-1">{{ selectedBooking.event?.startTime | date:'shortTime' }}</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-center text-gray-300 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <div>
-                                <p>Venue: {{selectedBooking.event?.venueName}}</p>
-                                <p>Address: {{selectedBooking.event?.venueAddress}}, {{selectedBooking.event?.city}}</p>
+                            
+                            <div class="flex items-start text-gray-300 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 mt-0.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <div>
+                                    <p class="font-medium text-white">{{selectedBooking.event?.venueName}}</p>
+                                    <p class="text-gray-400 mt-1">{{selectedBooking.event?.venueAddress}}, {{selectedBooking.event?.city}}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-[#121212] p-4 rounded-lg">
-                        <h4 class="font-medium mb-3">Your Tickets</h4>
+                    <!-- Tickets Section -->
+                    <div class="bg-[#121212] p-4 sm:p-6 rounded-xl border border-gray-700">
+                        <h4 class="font-semibold text-white mb-4">Your Tickets</h4>
                         
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             @for (ticket of selectedBooking.tickets; track ticket.uniqueId) {
-                                <div class="bg-[#1E1E1E] p-3 rounded-lg">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-medium">{{ticket.type}} Ticket</p>
-                                            <div class="text-sm text-gray-300 mt-1">
-                                                <p>Quantity: {{ticket.quantity}}</p>
-                                                <p>Price: ₹{{ticket.price}} each</p>
+                                <div class="bg-[#1E1E1E] p-4 rounded-lg border border-gray-600">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                                        <div class="flex-1">
+                                            <p class="font-medium text-white text-lg">{{ticket.type}} Ticket</p>
+                                            <div class="text-sm text-gray-300 mt-2 space-y-1">
+                                                <p>Quantity: <span class="font-medium">{{ticket.quantity}}</span></p>
+                                                <p>Price: <span class="font-medium">₹{{ticket.price}} each</span></p>
                                             </div>
                                         </div>
-                                        <div>
+                                        
+                                        <div class="flex flex-col sm:items-end gap-2">
                                             @if (ticket.status === 'Success') {
-                                                <span class="bg-green-500/20 text-green-500 px-2 py-1 rounded text-xs font-medium">Active</span>
+                                                <span class="bg-green-500/20 text-green-500 px-3 py-1 rounded-full text-sm font-medium w-fit">Active</span>
                                             }
                                             @if (ticket.status === 'Cancelled') {
-                                                <span class="bg-red-500/20 text-red-500 px-2 py-1 rounded text-xs font-medium">Cancelled</span>
+                                                <span class="bg-red-500/20 text-red-500 px-3 py-1 rounded-full text-sm font-medium w-fit">Cancelled</span>
                                             }
                                             
                                             @if (ticket.status !== 'Cancelled') {
                                                 <button 
                                                     (click)="showCancellationModal(selectedBooking.bookingId, ticket)"
-                                                    class="mt-2 bg-gray-700 hover:bg-gray-600 px-3 py-1 text-xs font-medium rounded-lg block ml-auto">
+                                                    class="bg-gray-700 hover:bg-gray-600 px-4 py-2 text-sm font-medium rounded-lg transition-colors w-fit">
                                                     Cancel Ticket
                                                 </button>
                                             }
                                         </div>
                                     </div>
                                     
-                                    <div class="mt-3 pt-3 border-t border-gray-700">
-                                        <button (click)="showQRCode(ticket)" class="text-sm text-blue-400 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div class="mt-4 pt-4 border-t border-gray-700">
+                                        <button (click)="showQRCode(ticket)" class="text-sm text-blue-400 hover:text-blue-300 flex items-center transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                                             </svg>
                                             View Ticket QR Code
@@ -204,50 +293,52 @@
                         </div>
                     </div>
 
-                    <div class="bg-[#121212] p-4 rounded-lg">
-                        <h4 class="font-medium mb-3">Payment Details</h4>
+                    <!-- Payment Details -->
+                    <div class="bg-[#121212] p-4 sm:p-6 rounded-xl border border-gray-700">
+                        <h4 class="font-semibold text-white mb-4">Payment Details</h4>
                         
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
                                 <span class="text-gray-400">Payment Status:</span>
                                 <span class="text-green-500 font-medium">{{selectedBooking.paymentStatus}}</span>
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between items-center">
                                 <span class="text-gray-400">Payment Method:</span>
-                                <span>{{selectedBooking.paymentType}}</span>
+                                <span class="text-white font-medium">{{selectedBooking.paymentType}}</span>
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between items-center">
                                 <span class="text-gray-400">Sub Total:</span>
                                 @if (selectedBooking.discount) {
-                                    <span>₹{{selectedBooking.totalAmount + selectedBooking.discount}}</span>
+                                    <span class="text-white font-medium">₹{{selectedBooking.totalAmount + selectedBooking.discount}}</span>
                                 } @else {
-                                    <span>₹{{selectedBooking.totalAmount}}</span>
+                                    <span class="text-white font-medium">₹{{selectedBooking.totalAmount}}</span>
                                 }
                             </div>
                             
                             @if (selectedBooking.discount && selectedBooking.discount > 0) {
-                                <div class="flex justify-between">
+                                <div class="flex justify-between items-center">
                                     <span class="text-gray-400">Discount:</span>
-                                    <span class="text-green-500">-₹{{selectedBooking.discount}}</span>
+                                    <span class="text-green-500 font-medium">-₹{{selectedBooking.discount}}</span>
                                 </div>
                             }
                         
-                            <div class="flex justify-between font-medium pt-2 border-t border-gray-700 mt-2">
-                                <span>Total Amount Paid:</span>
-                                <span>₹{{selectedBooking.totalAmount}}</span>
+                            <div class="flex justify-between items-center font-semibold pt-3 border-t border-gray-700 mt-4">
+                                <span class="text-white">Total Amount Paid:</span>
+                                <span class="text-white text-lg">₹{{selectedBooking.totalAmount}}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex justify-between pt-2">
-                        <button (click)="downloadTicket(selectedBooking)" class="bg-green-500 hover:bg-green-600 rounded-lg px-4 py-2 text-sm font-medium flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-between gap-4 pt-4">
+                        <button (click)="downloadTicket(selectedBooking)" class="bg-green-500 hover:bg-green-600 rounded-lg px-6 py-3 font-medium flex items-center justify-center transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             Download Tickets
                         </button>
                         
-                        <button (click)="hideBookingDetailsModal()" class="bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm font-medium">
+                        <button (click)="hideBookingDetailsModal()" class="bg-gray-700 hover:bg-gray-600 rounded-lg px-6 py-3 font-medium transition-colors">
                             Close
                         </button>
                     </div>
@@ -259,11 +350,11 @@
 
 <!-- QR Code Modal -->
 @if (showQRModal) {
-    <div class="fixed inset-0 backdrop-blur-sm animate-fadeIn bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-[#1E1E1E] rounded-lg p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
+    <div class="fixed inset-0 backdrop-blur-sm animate-fadeIn bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-[#1E1E1E] rounded-xl p-6 max-w-md w-full border border-gray-600">
+            <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold text-white">Your Ticket QR Code</h3>
-                <button (click)="hideQRModal()" class="text-gray-400 hover:text-white">
+                <button (click)="hideQRModal()" class="text-gray-400 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -272,20 +363,20 @@
             
             @if (selectedTicket) {
                 <div class="flex flex-col items-center">
-                    <div class="bg-white p-4 rounded-lg">
-                        <img [src]="selectedTicket.uniqueQrCode" alt="Ticket QR Code" class="w-64 h-64">
+                    <div class="bg-white p-4 rounded-xl shadow-lg">
+                        <img [src]="selectedTicket.uniqueQrCode" alt="Ticket QR Code" class="w-48 h-48 sm:w-64 sm:h-64">
                     </div>
                     
-                    <div class="mt-4 text-center">
-                        <p class="font-medium">{{selectedTicket.type}} Ticket</p>
-                        <p class="text-sm text-gray-400 mt-1">Ticket ID: {{selectedTicket.uniqueId}}</p>
+                    <div class="mt-6 text-center">
+                        <p class="font-semibold text-white text-lg">{{selectedTicket.type}} Ticket</p>
+                        <p class="text-sm text-gray-400 mt-1">Ticket ID: <span class="font-medium">{{selectedTicket.uniqueId}}</span></p>
                     </div>
                     
-                    <div class="mt-6 text-xs text-gray-400 text-center">
+                    <div class="mt-4 text-xs text-gray-400 text-center max-w-xs">
                         <p>Show this QR code at the event entrance for entry</p>
                     </div>
                     
-                    <button (click)="hideQRModal()" class="mt-6 bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 text-sm font-medium">
+                    <button (click)="hideQRModal()" class="mt-6 bg-gray-700 hover:bg-gray-600 rounded-lg px-6 py-3 font-medium transition-colors">
                         Close
                     </button>
                 </div>

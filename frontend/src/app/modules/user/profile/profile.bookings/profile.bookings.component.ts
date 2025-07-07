@@ -80,6 +80,18 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
     if (!this.selectedBookingId || !this.selectedTicket) {
       return;
     }
+
+    const bookingEventDate = this.selectedBooking?.event?.startDate;
+    const currentDate = new Date();
+    
+    if (bookingEventDate) {
+      const eventDate = new Date(bookingEventDate);
+      
+      if (currentDate >= eventDate) {
+        Notiflix.Notify.failure('You cannot cancel tickets for events that have already started');
+        return;
+      }
+    }
     
     const ticketPrice = this.selectedTicket.price;
     const refundAmount = Math.floor((ticketPrice * 0.9) * this.selectedTicket.quantity);

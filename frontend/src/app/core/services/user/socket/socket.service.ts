@@ -56,9 +56,9 @@ export class SocketService {
 
         this.socket.on('connect', () => {
           clearTimeout(connectionTimeout);
-          console.log('Connected to socket server');
-          console.log('Socket ID:', this.socket.id);
-          console.log('Socket connected:', this.socket.connected);
+          // console.log('Connected to socket server');
+          // console.log('Socket ID:', this.socket.id);
+          // console.log('Socket connected:', this.socket.connected);
           this.connectionStatusSubject.next(true);
           this.reconnectAttempts = 0;
           this.connectionPromise = null;
@@ -66,7 +66,7 @@ export class SocketService {
         });
 
         this.socket.on('disconnect', (reason) => {
-          console.log('Disconnected from socket server:', reason);
+          // console.log('Disconnected from socket server:', reason);
           this.connectionStatusSubject.next(false);
 
           if (reason === 'io server disconnect') {
@@ -100,7 +100,7 @@ export class SocketService {
         });
 
         this.socket.on('reconnect', (attemptNumber) => {
-          console.log('Reconnected after', attemptNumber, 'attempts');
+          // console.log('Reconnected after', attemptNumber, 'attempts');
           this.connectionStatusSubject.next(true);
           this.reconnectAttempts = 0;
         });
@@ -128,7 +128,7 @@ export class SocketService {
   private handleReconnection(token: string) {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      // console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
 
       setTimeout(() => {
         this.connect(token).catch(error => {
@@ -152,14 +152,14 @@ export class SocketService {
 
   testConnection(token: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      console.log('Testing connection to:', environment.baseUrl);
-      console.log('Using token:', token ? 'Token provided' : 'No token');
-      console.log('Token length:', token ? token.length : 0);
-      console.log('Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
+      // console.log('Testing connection to:', environment.baseUrl);
+      // console.log('Using token:', token ? 'Token provided' : 'No token');
+      // console.log('Token length:', token ? token.length : 0);
+      // console.log('Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
 
       if (token) {
         const parts = token.split('.');
-        console.log('Token parts count:', parts.length);
+        // console.log('Token parts count:', parts.length);
         if (parts.length !== 3) {
           console.error('Invalid JWT format - should have 3 parts separated by dots');
           reject({ success: false, error: 'Invalid JWT format' });
@@ -176,7 +176,7 @@ export class SocketService {
       });
 
       testSocket.on('connect', () => {
-        console.log('Test connection successful');
+        // console.log('Test connection successful');
         testSocket.disconnect();
         resolve({ success: true, message: 'Connection test passed' });
       });

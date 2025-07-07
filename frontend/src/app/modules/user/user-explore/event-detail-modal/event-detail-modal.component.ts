@@ -75,9 +75,9 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
     this.liked = !this.liked;
   }
 
-  handleChat(): void {
-    this.chat.emit(this.eventData.user_id._id);
-  }
+  // handleChat(): void {
+  //   this.chat.emit(this.eventData.user_id._id);
+  // }
 
   shareEvent(): void {
     if (navigator.share) {
@@ -199,7 +199,16 @@ proceedToCheckout(): void {
       this.handleClose();
     }
   }
-  onChatWithOrganizer(organizerId: string) {
-  this._router.navigate(['/chat', organizerId]);
+ async handleChat(organizerId: string) {
+  try {
+    this.handleClose();
+    
+    await this._router.navigate(['/chats'], { 
+      queryParams: { userId: organizerId }
+    });
+  } catch (error) {
+    console.error('Error navigating to chat:', error);
+    Notiflix.Notify.failure('Failed to open chat');
   }
+}
 }

@@ -1,7 +1,8 @@
-import { ISubscriptionPlan, SubscriptionPlanModel } from '../../models/SubscriptionPlanModal';
+import { SubscriptionPlanModel } from '../../models/SubscriptionPlanModal';
 import { injectable } from 'tsyringe';
 import { BaseRepository } from '../BaseRepository';
 import { ISubscriptionPlanRepository } from '../interfaces/ISubscriptionPlan.repository';
+import { ISubscriptionPlan } from '../../models/interfaces/subscriptionPlan.interface';
 
 
 

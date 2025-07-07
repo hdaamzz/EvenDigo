@@ -8,14 +8,13 @@ import { CloudinaryResponse } from '../../models/userModel';
   providedIn: 'root'
 })
 export class CloudinaryService {
-  private baseUrl = environment.baseUrl;
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   uploadProfileImage(file: File): Observable<CloudinaryResponse> {
     const formData = new FormData();
     formData.append('profileImage', file);
-    console.log(formData);
     
     
     return this.http.post<CloudinaryResponse>(

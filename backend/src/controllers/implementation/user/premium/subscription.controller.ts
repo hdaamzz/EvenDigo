@@ -141,7 +141,6 @@ export class SubscriptionController implements ISubscriptionController {
         });
         return;
       }
-      console.log(sessionId);
       
       const subscription = await this.adminSubscriptionService.getSubscriptionBySessionId(sessionId);
       

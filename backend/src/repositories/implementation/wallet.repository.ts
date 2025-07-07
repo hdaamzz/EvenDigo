@@ -6,7 +6,7 @@ import { IWalletRepository } from "../interfaces/IWallet.repository";
 import { injectable } from "tsyringe";
 
 @injectable()
-export class WalletRepository implements IWalletRepository{
+export class WalletRepository implements IWalletRepository {
     async findWalletById(userId: Schema.Types.ObjectId | string): Promise<IWallet | null> {
         return WalletModel.findOne({ userId }).exec();
     }
@@ -61,16 +61,23 @@ export class WalletRepository implements IWalletRepository{
         ).exec();
     }
 
-    async getWalletWithTransactions(userId: Schema.Types.ObjectId | string, limit = 10): Promise<IWallet | null> {
-        return WalletModel.findOne({ userId })
+    async getWalletWithTransactions(userId: Schema.Types.ObjectId | string): Promise<IWallet | null> {
+        const wallet = await WalletModel.findOne({ userId })
             .select({
-                transactions: { $slice: limit },
+                transactions: 1,
                 walletBalance: 1,
                 userId: 1
             })
-            .sort({ 'transactions.date': -1 })
-            .exec();
+            .lean();
+
+        if (!wallet) return null;
+
+        wallet.transactions = wallet.transactions.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+
+        return wallet;
     }
 
-    
+
 }

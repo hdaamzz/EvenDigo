@@ -1,61 +1,233 @@
-/* wallet.component.css */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+/* Mobile Card Hover Effects */
+.mobile-card:hover {
+  box-shadow: 0 0 0 1px rgba(0, 255, 102, 0.1);
+}
+
+/* Enhanced Mobile Transaction Cards */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Pagination Styles */
+.pagination-container button {
+  min-width: 40px;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+
+.page-numbers-mobile {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+  scroll-behavior: smooth;
+}
+
+.page-numbers-mobile::-webkit-scrollbar {
+  height: 4px;
+}
+
+.page-numbers-mobile::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.page-numbers-mobile::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 2px;
+}
+
+/* Modal Enhancements */
+.transaction-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.transaction-modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.transaction-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transaction-modal::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 2px;
+}
+
+/* Small Mobile Devices */
+@media (max-width: 360px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
   }
   
-  @keyframes scaleIn {
-    from { 
-      opacity: 0; 
-      transform: scale(0.95);
-    }
-    to { 
-      opacity: 1;
-      transform: scale(1);
-    }
+  .transaction-modal {
+    margin: 8px;
+    max-height: calc(100vh - 16px);
+    padding: 16px;
   }
   
-  @keyframes shimmer {
-    0% {
-      background-position: -468px 0;
-    }
-    100% {
-      background-position: 468px 0;
-    }
+  .pagination-container {
+    padding: 12px;
   }
   
-  .animate-fadeIn {
-    animation: fadeIn 0.3s ease-in-out forwards;
+  .page-numbers-mobile {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+/* Medium Mobile Devices */
+@media (max-width: 480px) {
+  .balance-amount {
+    font-size: 1.5rem;
+    word-break: break-all;
   }
   
-  .animate-scaleIn {
-    animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  .filter-button {
+    min-width: 65px;
+    padding: 8px 12px;
   }
   
-  /* Loading animation for skeleton */
-  .shimmer {
-    background: linear-gradient(to right, #1a1a1a 8%, #333 18%, #1a1a1a 33%);
-    background-size: 800px 104px;
-    animation: shimmer 1.5s infinite linear;
+  .mobile-transaction-card {
+    padding: 12px;
+  }
+}
+
+/* Tablet and Small Desktop */
+@media (min-width: 640px) and (max-width: 1024px) {
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
-  /* Subtle hover effect for transaction rows */
-  tr.hover\:bg-\[\#262626\]:hover {
-    box-shadow: 0 0 0 1px rgba(0, 255, 102, 0.1);
+  .table-container table {
+    min-width: 700px;
+  }
+}
+
+/* Button States */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  transform: none;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Animation Classes */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.shimmer {
+  background: linear-gradient(to right, #1a1a1a 8%, #333 18%, #1a1a1a 33%);
+  background-size: 800px 104px;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Table Hover Effects */
+tr.hover\:bg-\[\#262626\]:hover {
+  box-shadow: 0 0 0 1px rgba(0, 255, 102, 0.1);
+}
+
+/* Focus States */
+input:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.3);
+}
+
+/* Responsive Text */
+@media (max-width: 640px) {
+  .text-responsive {
+    font-size: 0.875rem;
   }
   
-  /* Pulse animation for add/withdraw buttons on hover */
-  button:not(:disabled):hover {
-    transform: translateY(-1px);
-    transition: transform 0.2s;
+  .text-responsive-sm {
+    font-size: 0.75rem;
+  }
+}
+
+/* Touch Optimization */
+@media (max-width: 768px) {
+  button, .clickable {
+    min-height: 44px;
+    touch-action: manipulation;
   }
   
-  /* Ensure inputs have a nice focus state */
-  input:focus {
-    box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.3);
+  .mobile-card {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 255, 102, 0.1);
   }
   
-  /* Add click effect for buttons */
-  button:active:not(:disabled) {
-    transform: translateY(1px);
+  .mobile-card:active {
+    background-color: rgba(38, 38, 38, 0.8);
   }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Safe Areas for Devices with Notches */
+@supports (padding: max(0px)) {
+  .container {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  
+  .transaction-modal {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}

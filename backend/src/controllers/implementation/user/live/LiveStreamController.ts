@@ -16,6 +16,7 @@ export class LiveStreamController {
       const { eventId } = req.params;
       const hostId = req.user.id;
 
+
       const streamData = await this.liveStreamService.createLiveStream(eventId, hostId);
       const tokenData = await this.liveStreamService.generateLiveStreamToken(
         eventId,

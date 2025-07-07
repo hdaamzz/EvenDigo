@@ -115,7 +115,6 @@ export class FirebaseAuthService implements IFirebaseAuthService {
     } catch (error) {
       console.error('Firebase authentication error:', error);
       
-      // Return appropriate error message
       if (error instanceof Error) {
         if (error.message.includes('ID token')) {
           return {

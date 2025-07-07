@@ -3,105 +3,155 @@
     <p>{{ errorMessage }}</p>
   </div>
 
-
-  <div
-    class="bg-[#00ff66] rounded-lg p-4 md:p-6 shadow-lg text-white mb-6 transform transition-all duration-300 hover:shadow-xl">
+  <!-- Balance Card - Improved mobile responsiveness -->
+  <div class="bg-[#00ff66] rounded-lg p-4 md:p-6 shadow-lg text-white mb-6 transform transition-all duration-300 hover:shadow-xl">
     <div class="mb-2">
       <h2 class="text-xs md:text-sm font-medium uppercase tracking-wider">CURRENT BALANCE</h2>
     </div>
     <div class="mb-4">
-      <h1 class="text-2xl md:text-3xl font-bold">₹{{currentBalance.toLocaleString('en-IN')}}</h1>
+      <h1 class="text-xl sm:text-2xl md:text-3xl font-bold break-all">₹{{currentBalance.toLocaleString('en-IN')}}</h1>
     </div>
   </div>
 
-
-  <div class="mb-4 flex flex-wrap gap-2">
-    <button *ngFor="let type of transactionTypes" (click)="selectedType = type; onFilterChange(); currentPage = 1;"
-      class="px-3 py-1 text-xs md:text-sm rounded-md transition-all duration-200"
-      [ngClass]="selectedType === type ? 'bg-[#00ff66] text-black' : 'bg-[#262626] text-gray-300 hover:bg-[#333333]'">
-      {{ type | titlecase }}
-    </button>
+  <!-- Filter Buttons - Improved mobile layout -->
+  <div class="mb-4">
+    <div class="flex flex-wrap gap-2 sm:gap-3">
+      <button *ngFor="let type of transactionTypes; trackBy: trackByType" 
+              (click)="changeFilter(type)"
+              class="px-3 py-2 text-xs sm:text-sm rounded-md transition-all duration-200 flex-shrink-0 min-w-[70px] sm:min-w-[80px] text-center"
+              [ngClass]="getFilterButtonClass(type)">
+        {{ type | titlecase }}
+      </button>
+    </div>
   </div>
 
+  <!-- Transactions Container -->
+  <div class="bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden">
+    <!-- Mobile Card View - Enhanced -->
+    <div class="block md:hidden" [style.min-height.px]="isLoading ? 200 : 'auto'">
+      <div *ngIf="isLoading" class="p-6 text-center">
+        <div class="flex justify-center items-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00ff66]"></div>
+          <span class="ml-3 text-sm text-gray-400">Loading transactions...</span>
+        </div>
+      </div>
+      
+      <div *ngIf="!isLoading && filteredTransactions.length === 0" 
+           class="p-6 text-center text-sm text-gray-400">
+        No transactions found for "{{ selectedType }}" filter
+      </div>
+      
+      <div *ngFor="let transaction of filteredTransactions; let i = index; trackBy: trackByTransaction"
+           class="border-b border-gray-800 last:border-b-0 p-3 sm:p-4 transition-all duration-200 hover:bg-[#262626] cursor-pointer"
+           (click)="openTransactionDetails(transaction)">
+        
+        <!-- Mobile Transaction Card Layout -->
+        <div class="space-y-2">
+          <!-- Header Row -->
+          <div class="flex justify-between items-start">
+            <div class="flex-1 min-w-0 pr-3">
+              <h3 class="text-white text-sm font-medium line-clamp-2 leading-tight">
+                {{ transaction.eventName || transaction.description }}
+              </h3>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <p class="text-sm font-medium whitespace-nowrap" [ngClass]="getTransactionClass(transaction)">
+                {{ formatAmount(transaction.amount) }}
+              </p>
+            </div>
+          </div>
+          
+          <!-- Details Row -->
+          <div class="flex justify-between items-center text-xs">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <span class="text-gray-400">{{ formatDate(transaction.date) }}</span>
+              <span *ngIf="transaction.status && transaction.status !== 'completed'"
+                    class="px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0" 
+                    [ngClass]="{
+                      'bg-yellow-800 text-yellow-100': transaction.status === 'pending',
+                      'bg-red-800 text-red-100': transaction.status === 'failed'
+                    }">
+                {{ transaction.status }}
+              </span>
+            </div>
+            <div class="text-right flex-shrink-0 ml-2">
+              <p class="text-gray-400 text-xs">
+                Bal: {{ currencySymbol }}{{ transaction.balance.toLocaleString('en-IN') }}
+              </p>
+            </div>
+          </div>
+          
+          <!-- Footer Row -->
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-gray-400 truncate">
+              ID: {{ transaction.transactionId | slice:0:8 }}...
+            </span>
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div class="bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-    <div class="overflow-x-auto">
+    <!-- Desktop Table View -->
+    <div class="hidden md:block overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-700">
         <thead class="bg-[#1a1a1a]">
           <tr>
-            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Description</th>
-            <th
-              class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              ID</th>
-            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount
-            </th>
-            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance
-            </th>
-            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action
-            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action</th>
           </tr>
         </thead>
         <tbody class="bg-[#1a1a1a] divide-y divide-gray-800">
           <tr *ngIf="isLoading">
-            <td colspan="6" class="px-6 py-8 md:py-12 text-center">
+            <td colspan="6" class="px-6 py-12 text-center">
               <div class="flex justify-center items-center">
-                <div class="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-t-2 border-b-2 border-[#00ff66]">
-                </div>
-                <span class="ml-3 text-xs md:text-sm text-gray-400">Loading transactions...</span>
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00ff66]"></div>
+                <span class="ml-3 text-sm text-gray-400">Loading transactions...</span>
               </div>
             </td>
           </tr>
           <tr *ngIf="!isLoading && filteredTransactions.length === 0">
-            <td colspan="6" class="px-6 py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
-              No transactions found
+            <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-400">
+              No transactions found for "{{ selectedType }}" filter
             </td>
           </tr>
-          <ng-container *ngIf="isLoading && transactions.length === 0">
-            <tr *ngFor="let item of [1,2,3,4,5]">
-              <td colspan="6" class="px-6 py-4">
-                <div class="animate-pulse flex space-x-4">
-                  <div class="flex-1 space-y-4 py-1">
-                    <div class="h-4 bg-gray-700 rounded w-3/4"></div>
-                    <div class="space-y-2">
-                      <div class="h-4 bg-gray-700 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </ng-container>
-          <tr *ngFor="let transaction of filteredTransactions; let i = index"
-            class="hover:bg-[#262626] transition-colors duration-150"
-            [ngClass]="{'animate-fadeIn': !isInitialLoadComplete}" [style.animation-delay]="(i * 100) + 'ms'">
-            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-300">
+          <tr *ngFor="let transaction of filteredTransactions; let i = index; trackBy: trackByTransaction"
+              class="hover:bg-[#262626] transition-colors duration-150">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
               {{ formatDate(transaction.date) }}
             </td>
-            <td
-              class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-white max-w-[100px] md:max-w-none truncate">
-              {{ transaction.eventName || transaction.description }}
+            <td class="px-6 py-4 text-sm text-white">
+              <div class="max-w-xs truncate">
+                {{ transaction.eventName || transaction.description }}
+              </div>
               <span *ngIf="transaction.status && transaction.status !== 'completed'"
-                class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full" [ngClass]="{
+                    class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                    [ngClass]="{
                       'bg-yellow-800 text-yellow-100': transaction.status === 'pending',
                       'bg-red-800 text-red-100': transaction.status === 'failed'
                     }">
                 {{ transaction.status }}
               </span>
             </td>
-            <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-300">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
               {{ transaction.transactionId | slice:0:8 }}...
             </td>
-            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium"
-              [ngClass]="getTransactionClass(transaction)">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" 
+                [ngClass]="getTransactionClass(transaction)">
               {{ formatAmount(transaction.amount) }}
             </td>
-            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-white">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
               {{ currencySymbol }}{{ transaction.balance.toLocaleString('en-IN') }}
             </td>
-            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm">
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
               <button (click)="openTransactionDetails(transaction)"
-                class="bg-[#262626] hover:bg-[#333333] text-gray-300 py-1 px-2 rounded-md text-xs transition-all duration-200">
+                      class="bg-[#262626] hover:bg-[#333333] text-gray-300 py-1 px-3 rounded-md text-xs transition-all duration-200">
                 Details
               </button>
             </td>
@@ -109,146 +159,164 @@
         </tbody>
       </table>
     </div>
+  </div>
 
-    <div *ngIf="totalPages > 1" class="px-4 py-3 flex items-center justify-between border-t border-gray-700">
-      <div class="flex-1 flex justify-between sm:hidden">
+  <!-- Enhanced Mobile-First Pagination -->
+  <div *ngIf="totalPages > 1" class="mt-4 px-3 sm:px-4 py-3 bg-[#1a1a1a] rounded-lg">
+    <!-- Mobile Pagination -->
+    <div class="flex flex-col sm:hidden space-y-3">
+      <div class="flex justify-between items-center">
         <button (click)="prevPage()" [disabled]="currentPage === 1"
           [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
-          class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-[#262626] hover:bg-[#333333]">
+          class="px-3 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-[#262626] hover:bg-[#333333] disabled:hover:bg-[#262626] transition-colors">
           Previous
         </button>
-        <div class="mx-2 flex items-center text-gray-400 text-sm">
-          Page {{ currentPage }} of {{ totalPages }}
-        </div>
+        <span class="text-sm text-gray-400 px-2">
+          {{ currentPage }} / {{ totalPages }}
+        </span>
         <button (click)="nextPage()" [disabled]="currentPage === totalPages"
           [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
-          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-[#262626] hover:bg-[#333333]">
+          class="px-3 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-[#262626] hover:bg-[#333333] disabled:hover:bg-[#262626] transition-colors">
           Next
         </button>
       </div>
-      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-400">
-            Showing page <span class="font-medium">{{ currentPage }}</span> of <span class="font-medium">{{ totalPages
-              }}</span>
-          </p>
-        </div>
-        <div>
-          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <button (click)="prevPage()" [disabled]="currentPage === 1"
-              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
-              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-[#262626] text-sm font-medium text-gray-400 hover:bg-[#333333]">
-              <span class="sr-only">Previous</span>
-              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                aria-hidden="true">
-                <path fill-rule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clip-rule="evenodd" />
-              </svg>
-            </button>
 
-            <button *ngFor="let page of getPageNumbers()" (click)="goToPage(page)"
-              [ngClass]="{'bg-[#00ff66] text-black': currentPage === page, 'bg-[#262626] text-gray-300 hover:bg-[#333333]': currentPage !== page}"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium">
-              {{ page }}
-            </button>
-
-            <button (click)="nextPage()" [disabled]="currentPage === totalPages"
-              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
-              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-[#262626] text-sm font-medium text-gray-400 hover:bg-[#333333]">
-              <span class="sr-only">Next</span>
-              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                aria-hidden="true">
-                <path fill-rule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd" />
-              </svg>
-            </button>
-          </nav>
+      <!-- Page numbers for mobile (scrollable) -->
+      <div class="flex justify-center">
+        <div class="flex space-x-1 overflow-x-auto pb-2 px-2 page-numbers-mobile">
+          <button *ngFor="let page of getPageNumbers()" (click)="goToPage(page)"
+            [ngClass]="{'bg-[#00ff66] text-black': currentPage === page, 'bg-[#262626] text-gray-300 hover:bg-[#333333]': currentPage !== page}"
+            class="min-w-[32px] h-8 text-xs font-medium border border-gray-700 rounded flex-shrink-0 flex items-center justify-center transition-colors">
+            {{ page }}
+          </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Desktop Pagination -->
+    <div class="hidden sm:flex sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-400">
+          Showing page <span class="font-medium">{{ currentPage }}</span> of
+          <span class="font-medium">{{ totalPages }}</span>
+        </p>
+      </div>
+      <div>
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+          <button (click)="prevPage()" [disabled]="currentPage === 1"
+            [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-[#262626] text-sm font-medium text-gray-400 hover:bg-[#333333] disabled:hover:bg-[#262626] transition-colors">
+            <span class="sr-only">Previous</span>
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <button *ngFor="let page of getPageNumbers()" (click)="goToPage(page)"
+            [ngClass]="{'bg-[#00ff66] text-black': currentPage === page, 'bg-[#262626] text-gray-300 hover:bg-[#333333]': currentPage !== page}"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium transition-colors">
+            {{ page }}
+          </button>
+
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+            [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-[#262626] text-sm font-medium text-gray-400 hover:bg-[#333333] disabled:hover:bg-[#262626] transition-colors">
+            <span class="sr-only">Next</span>
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd" />
+            </svg>
+          </button>
+        </nav>
       </div>
     </div>
   </div>
 
+  <!-- Enhanced Mobile-Responsive Modal -->
   @if(selectedTransaction){
-  <div class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 animate-fadeIn p-4"
+  <div class="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50 animate-fadeIn p-4"
     (click)="closeTransactionDetails()">
-    <div
-      class="bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-4 md:p-6 transform transition-all duration-300 animate-scaleIn"
+    <div class="bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 md:p-6 transform transition-all duration-300 animate-scaleIn transaction-modal"
       (click)="$event.stopPropagation()">
-      <div class="flex justify-between items-center mb-4 md:mb-6">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center mb-4 md:mb-6 sticky top-0 bg-[#1a1a1a] pb-2 border-b border-gray-700">
         <h3 class="text-lg md:text-xl font-semibold text-white">Transaction Details</h3>
         <button (click)="closeTransactionDetails()"
-          class="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none text-xl md:text-2xl leading-none">
+          class="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none text-xl md:text-2xl leading-none p-1">
           ×
         </button>
       </div>
 
+      <!-- Modal Content -->
       <div class="space-y-3 mb-4">
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Date</span>
-            <span class="text-white">{{ formatDate(selectedTransaction.date) }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm">Date</span>
+            <span class="text-white text-sm text-right">{{ formatDate(selectedTransaction.date) }}</span>
           </div>
         </div>
 
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Description</span>
-            <span class="text-white">{{ selectedTransaction.description || selectedTransaction.eventName }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm flex-shrink-0 mr-3">Description</span>
+            <span class="text-white text-sm text-right break-words">{{ selectedTransaction.description || selectedTransaction.eventName }}</span>
           </div>
         </div>
 
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Transaction Type</span>
-            <span class="text-white">{{ selectedTransaction.type | titlecase }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm">Type</span>
+            <span class="text-white text-sm">{{ selectedTransaction.type | titlecase }}</span>
           </div>
         </div>
 
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Amount</span>
-            <span [ngClass]="getTransactionClass(selectedTransaction)">
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm">Amount</span>
+            <span class="text-sm font-medium" [ngClass]="getTransactionClass(selectedTransaction)">
               {{ formatAmount(selectedTransaction.amount) }}
             </span>
           </div>
         </div>
 
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Balance</span>
-            <span class="text-white">₹{{ selectedTransaction.balance.toLocaleString('en-IN') }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm">Balance</span>
+            <span class="text-white text-sm">₹{{ selectedTransaction.balance.toLocaleString('en-IN') }}</span>
           </div>
         </div>
 
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Status</span>
-            <span class="text-white">{{ selectedTransaction.status || 'completed' | titlecase }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm">Status</span>
+            <span class="text-white text-sm">{{ selectedTransaction.status || 'completed' | titlecase }}</span>
           </div>
         </div>
 
         <div class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Transaction ID</span>
-            <span class="text-white text-xs break-all">{{ selectedTransaction.transactionId }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm flex-shrink-0 mr-3">Transaction ID</span>
+            <span class="text-white text-xs break-all text-right">{{ selectedTransaction.transactionId }}</span>
           </div>
         </div>
 
         <div *ngIf="selectedTransaction.eventId" class="pb-3 border-b border-gray-700">
-          <div class="flex justify-between">
-            <span class="text-gray-400">Event ID</span>
-            <span class="text-white text-xs break-all">{{ selectedTransaction.eventId }}</span>
+          <div class="flex justify-between items-start">
+            <span class="text-gray-400 text-sm flex-shrink-0 mr-3">Event ID</span>
+            <span class="text-white text-xs break-all text-right">{{ selectedTransaction.eventId }}</span>
           </div>
         </div>
 
         <div *ngIf="selectedTransaction.metadata" class="pt-2">
-          <h4 class="text-gray-400 mb-2">Additional Details</h4>
+          <h4 class="text-gray-400 mb-2 text-sm">Additional Details</h4>
           <div *ngFor="let key of getMetadataKeys(selectedTransaction)" class="pb-2 pl-2">
-            <div class="flex justify-between">
-              <span class="text-gray-400">{{ formatKey(key) }}</span>
-              <span class="text-white">{{ selectedTransaction.metadata[key] }}</span>
+            <div class="flex justify-between items-start">
+              <span class="text-gray-400 text-sm flex-shrink-0 mr-3">{{ formatKey(key) }}</span>
+              <span class="text-white text-sm break-words text-right">{{ selectedTransaction.metadata[key] }}</span>
             </div>
           </div>
         </div>

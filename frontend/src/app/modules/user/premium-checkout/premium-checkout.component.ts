@@ -186,9 +186,7 @@ export class PremiumCheckoutComponent implements OnInit, OnDestroy {
   private async _processCardPayment(): Promise<void> {
     if (!this._stripe) {
       throw new Error('Payment service not initialized. Please refresh the page.');
-    }
-    console.log(this.planDetails.type);
-    
+    }    
     const payload = {
       planType: this.planDetails.type,
       amount: this.planDetails.price,

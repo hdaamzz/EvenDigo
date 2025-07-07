@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../../../../models/interfaces/profile.interface';
+import { IUser } from '../../../../models/interfaces/auth.interface';
 
 export interface IAuthController {
   sendOTP(req: Request, res: Response): Promise<void>;
@@ -10,4 +10,8 @@ export interface IAuthController {
   isAuthenticated(req: AuthenticatedRequest, res: Response): Promise<void>;
   firebaseSignIn(req: Request, res: Response): Promise<void>;
   logout(req: Request, res: Response): void;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: IUser;
 }

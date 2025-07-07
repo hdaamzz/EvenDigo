@@ -2,8 +2,8 @@ import { inject, injectable } from 'tsyringe';
 import { Schema } from 'mongoose';
 import { IAdminSubscriptionService, PaginatedSubscriptions, SubscriptionFilter, SubscriptionFilterOptions, SubscriptionStats } from '../../../services/interfaces/IAdminSubscription.service';
 import { IUserRepository } from '../../../repositories/interfaces/IUser.repository';
-import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../models/SubscriptionModal';
 import { ISubscriptionRepository } from '../../../repositories/interfaces/ISubscription.repository';
+import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../models/interfaces/subscription.interface';
 
 
 @injectable()
@@ -48,7 +48,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
         query.startDate = { $lte: filters.endDate };
       }
     } else {
-      // Default to active subscriptions only
       query.isActive = true;
       query.status = 'active';
     }
@@ -81,7 +80,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
       const premiumSubscriptions = allSubscriptions.filter((sub: ISubscription) => sub.type === SubscriptionType.PREMIUM).length;
       const basicSubscriptions = allSubscriptions.filter((sub: ISubscription) => sub.type === SubscriptionType.STANDARD).length;
       
-      // Calculate total revenue
       const totalRevenue = allSubscriptions.reduce((sum: number, sub: ISubscription) => sum + sub.amount, 0);
       
       return {
@@ -102,7 +100,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
     try {
       let subscription: ISubscription | null;
       
-      // Check if ID is a subscription ID or ObjectId
       if (id.includes('ObjectId')) {
         subscription = await this.subscriptionRepository.findSubscriptionByObjectId(id);
       } else {
@@ -159,7 +156,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
     try {
       let subscription: ISubscription | null;
       
-      // Check if ID is a subscription ID or ObjectId
       if (id.includes('ObjectId')) {
         subscription = await this.subscriptionRepository.findSubscriptionByObjectId(id);
       } else {
@@ -172,7 +168,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
       
       const status = isActive ? SubscriptionStatus.ACTIVE : SubscriptionStatus.INACTIVE;
       
-      // Update the subscription
       const updatedSubscription = await this.subscriptionRepository.updateSubscription(
         subscription.subscriptionId,
         {
@@ -192,7 +187,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
     try {
       let subscription: ISubscription | null;
       
-      // Check if ID is a subscription ID or ObjectId
       if (id.includes('ObjectId')) {
         subscription = await this.subscriptionRepository.findSubscriptionByObjectId(id);
       } else {
@@ -203,7 +197,6 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
         return false;
       }
       
-      // Delete the subscription
       await this.subscriptionRepository.deleteSubscription(subscription.subscriptionId);
       
       return true;
@@ -235,13 +228,10 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
 
   private async enhanceSubscriptionsWithUserInfo(subscriptions: ISubscription[]): Promise<ISubscription[]> {
     try {
-      // Create a map for efficient user lookups
       const userMap = new Map();
       
-      // Get unique user IDs
       const userIds = [...new Set(subscriptions.map(sub => sub.userId.toString()))];
       
-      // Fetch users in bulk
       for (const userId of userIds) {
         const user = await this.userRepository.findById(userId);
         if (user) {
@@ -249,16 +239,13 @@ export class AdminSubscriptionService implements IAdminSubscriptionService {
         }
       }
       
-      // Enhance subscriptions with user info
       return subscriptions.map(subscription => {
         const sub = subscription.toObject ? subscription.toObject() : { ...subscription };
         const user = userMap.get(sub.userId.toString());
         
         if (user) {
-          // @ts-ignore: Adding userName property
           sub.userName = user.name || user.email || 'Unknown User';
         } else {
-          // @ts-ignore: Adding userName property
           sub.userName = 'Unknown User';
         }
         

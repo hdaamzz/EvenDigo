@@ -62,7 +62,6 @@ export class AdminUsersController implements IUsersAdminController {
     }
     
     const response: ServiceResponse<IVerification[]> = await this.adminUsersService.searchVerificationUsers(searchTerm.trim());
-    console.log(response);
     
     if (response.success) {
       const verificationDtos = AdminVerificationResponseDto.fromVerifications(response.data!);

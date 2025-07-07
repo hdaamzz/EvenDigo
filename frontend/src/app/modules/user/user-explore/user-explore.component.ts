@@ -25,6 +25,8 @@ export class UserExploreComponent implements OnInit, OnDestroy {
   isLoading = false;
   selectedEventId: string | null = null;
   isModalOpen = false;
+  isMobileFiltersOpen = false;
+
 
   // Search and Filter Properties
   searchQuery = '';
@@ -123,6 +125,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
       );
     }
 
+    
     // Apply event type filter
     if (this.selectedEventType) {
       filtered = filtered.filter(event => event.eventType === this.selectedEventType);
@@ -139,6 +142,28 @@ export class UserExploreComponent implements OnInit, OnDestroy {
     this.filteredEvents = filtered;
   }
 
+  toggleMobileFilters(): void {
+    this.isMobileFiltersOpen = !this.isMobileFiltersOpen;
+  }
+  closeMobileFilters(): void {
+    this.isMobileFiltersOpen = false;
+  }
+  onMobileFiltersClickOutside(): void {
+    this.isMobileFiltersOpen = false;
+  }
+  selectEventTypeAndCloseMobile(eventType: string): void {
+    this.selectEventType(eventType);
+    this.closeMobileFilters();
+  }
+  selectSortAndCloseMobile(value: string, label: string): void {
+    this.selectSort(value, label);
+    this.closeMobileFilters();
+  }
+
+  selectVisibilityAndCloseMobile(value: string, label: string): void {
+    this.selectVisibility(value, label);
+    this.closeMobileFilters();
+  }
   private _sortEvents(events: IEvent[]): IEvent[] {
     switch (this.selectedSort) {
       case 'newest':
@@ -260,7 +285,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
 
   onChatWithOrganizer(eventId: string): void {
     // Implement chat functionality
-    console.log('Chat with organizer for event:', eventId);
+    
   }
 
   onImageError(event: any): void {

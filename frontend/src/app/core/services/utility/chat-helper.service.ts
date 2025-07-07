@@ -128,6 +128,7 @@ export class ChatHelperService {
   }
 
   createChatUser(user: User, chat?: any): ChatUser {
+    
     return {
       id: user.id ?? '',
       name: user.name,

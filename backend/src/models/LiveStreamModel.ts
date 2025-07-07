@@ -1,20 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-export interface ILiveStream extends Document {
-  eventId:string | mongoose.Types.ObjectId;
-  hostId:string | mongoose.Types.ObjectId;
-  roomId: string;
-  streamKey: string;
-  rtmpUrl: string;
-  status: 'active' | 'ended' | 'paused';
-  startTime: Date;
-  endTime?: Date;
-  viewerCount: number;
-  maxViewers: number;
-  totalDuration: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from 'mongoose';
+import { ILiveStream } from './interfaces/livestream.interfaces';
 
 const LiveStreamSchema: Schema = new Schema({
   eventId: {
@@ -30,7 +15,6 @@ const LiveStreamSchema: Schema = new Schema({
   roomId: {
     type: String,
     required: true,
-    unique: true
   },
   streamKey: {
     type: String,
@@ -68,8 +52,5 @@ const LiveStreamSchema: Schema = new Schema({
   timestamps: true
 });
 
-// // Index for efficient queries
-// LiveStreamSchema.index({ eventId: 1, status: 1 });
-// LiveStreamSchema.index({ hostId: 1, status: 1 });
 
 export const LiveStreamModel = mongoose.model<ILiveStream>('LiveStream', LiveStreamSchema);

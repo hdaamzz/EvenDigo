@@ -153,14 +153,12 @@ export class ChatService {
     this.socketService.listenSafe<any>('groupChatInfo')
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        console.log('Group chat info received:', data);
         this.refreshGroupChats();
       });
 
     this.socketService.listenSafe<any>('userJoinedChat')
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        console.log('User joined chat:', data);
         if (data.chatType === 'group') {
           this.refreshGroupChats();
         }
@@ -169,7 +167,6 @@ export class ChatService {
     this.socketService.listenSafe<any>('userLeftChat')
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
-        console.log('User left chat:', data);
         if (data.chatType === 'group') {
           this.refreshGroupChats();
         }

@@ -2,7 +2,7 @@
     <app-user-nav></app-user-nav>
     <div>
         <div class="back min-h-screen text-white font-sans pt-20">
-           <header class="container mx-auto px-4 py-12 md:py-20">
+            <header class="container mx-auto px-4 py-12 md:py-20">
                 <h1 class="text-4xl md:text-6xl font-bold mb-2">
                     <span class="neon-bg px-4 py-1 rounded">Simplify</span> Event
                 </h1>
@@ -11,7 +11,8 @@
                 </h2>
                 <p class="text-xl md:text-2xl mb-12 text-gray-300">Book Your Event Now – Seamless, Fast, and Easy!</p>
 
-               <div class="flex flex-wrap gap-8 md:gap-40 items-center justify-center md:justify-start py-8 border-t border-gray-800 px-4 md:px-10">
+                <div
+                    class="flex flex-wrap gap-8 md:gap-40 items-center justify-center md:justify-start py-8 border-t border-gray-800 px-4 md:px-10">
                     <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318775/event-kerala-summit_hofmjl.webp"
                         alt="Partner logo" class="h-8 md:h-10 partner-logo" />
                     <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318775/event-scaleup-2024_z9qquu.webp"
@@ -47,10 +48,32 @@
                         <br>Tickets and Event <span class="neon-bg px-4 py-1 rounded">Seamlessly!</span>
                     </h2>
                     <div class="flex flex-wrap gap-4 md:gap-8 justify-center">
-                        <div class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[-5deg]"></div>
-                        <div class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg]"></div>
-                        <div class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[-5deg]"></div>
-                        <div class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg]"></div>
+                        <div
+                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[-5deg] overflow-hidden">
+                            <video autoplay muted loop playsinline class="w-full h-full object-cover">
+                                <source
+                                    src="https://res.cloudinary.com/dfpezlzsy/video/upload/v1751629333/7249c089bb53cf0d1f8fb15690ba28df_moytqs.mp4"
+                                    type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        <div
+                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg] overflow-hidden">
+                            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1751629323/2a09a6b1bf6ee8cd55463cda9789299a_fxcjv8.jpg" alt="Ticket Image" class="w-full h-full object-cover" />
+                        </div>
+                        <div
+                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg] overflow-hidden">
+                            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1751629322/191ccf23a10b8cf02e0a8c97003aef92_no6vut.jpg" alt="Ticket Image" class="w-full h-full object-cover" />
+                        </div>
+                        <div
+                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[-5deg] overflow-hidden">
+                            <video autoplay muted loop playsinline class="w-full h-full object-cover">
+                                <source
+                                    src="https://res.cloudinary.com/dfpezlzsy/video/upload/v1751629333/7249c089bb53cf0d1f8fb15690ba28df_moytqs.mp4"
+                                    type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
                     </div>
                 </section>
 
@@ -63,7 +86,6 @@
                     <h3 class="text-xl font-bold mb-6 neon-green text-center">Choose Your Event Plan</h3>
 
                     <div class="glass-card rounded-xl p-6 md:p-8">
-                        <!-- Loading State -->
                         <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                             <div *ngFor="let skeleton of skeletonPlans" class="plan-skeleton">
                                 <div class="skeleton-header"></div>
@@ -76,27 +98,25 @@
                             </div>
                         </div>
 
-                        <!-- Loaded Content -->
                         <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 fade-in">
-                            <div *ngFor="let plan of plans; trackBy: trackByPlan" 
-                                 class="bg-[#1a1a1a] bg-opacity-90 rounded-xl p-6 border border-gray-700 transition-all duration-300 hover:-translate-y-2 hover:border-[#00ff66] h-full flex flex-col plan-card"
-                                 [class.border-[#00ff66]]="selectedPlan?.type === plan.type" 
-                                 [class.selected-plan]="selectedPlan?.type === plan.type"
-                                 (click)="selectPlan(plan)">
-                                
+                            <div *ngFor="let plan of plans; trackBy: trackByPlan"
+                                class="bg-[#1a1a1a] bg-opacity-90 rounded-xl p-6 border border-gray-700 transition-all duration-300 hover:-translate-y-2 hover:border-[#00ff66] h-full flex flex-col plan-card"
+                                [class.border-[#00ff66]]="selectedPlan?.type === plan.type"
+                                [class.selected-plan]="selectedPlan?.type === plan.type" (click)="selectPlan(plan)">
+
                                 <div class="text-4xl text-[#00ff66] font-bold mb-2">{{plan.type}}</div>
                                 <div class="text-3xl font-bold mb-4">₹ {{plan.price}} /month</div>
                                 <div class="text-gray-300 mb-4">{{plan.description}}</div>
-                                
+
                                 <ul class="space-y-3 mb-5 arrow-list flex-grow">
                                     <li *ngFor="let feature of plan.features">
                                         {{feature}}
                                     </li>
                                 </ul>
-                                
+
                                 <button (click)="subscribeToPlan(plan); $event.stopPropagation();"
-                                        class="neon-bg text-black font-bold py-2 px-6 rounded-md w-full hover:opacity-90 transition-all duration-300 mt-auto"
-                                        [disabled]="isLoading">
+                                    class="neon-bg text-black font-bold py-2 px-6 rounded-md w-full hover:opacity-90 transition-all duration-300 mt-auto"
+                                    [disabled]="isLoading">
                                     <span *ngIf="plan.type === 'Basic'">Get Started Free</span>
                                     <span *ngIf="plan.type !== 'Basic'">Upgrade Now</span>
                                 </button>
@@ -106,14 +126,16 @@
                         <!-- Error State -->
                         <div *ngIf="!isLoading && plans.length === 0" class="text-center py-12">
                             <div class="text-gray-400 mb-4">
-                                <svg class="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                <svg class="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                 </svg>
                                 <p class="text-lg">Unable to load subscription plans</p>
                                 <p class="text-sm text-gray-500 mt-2">Please check your connection and try again</p>
                             </div>
-                            <button (click)="retryLoadPlans()" 
-                                    class="neon-bg text-black font-bold py-2 px-6 rounded-md hover:opacity-90 transition-all duration-300">
+                            <button (click)="retryLoadPlans()"
+                                class="neon-bg text-black font-bold py-2 px-6 rounded-md hover:opacity-90 transition-all duration-300">
                                 Try Again
                             </button>
                         </div>

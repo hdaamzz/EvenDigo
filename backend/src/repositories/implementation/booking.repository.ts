@@ -74,7 +74,7 @@ class BookingRepository implements IBookingRepository {
         { $unwind: '$event' },
         {
           $match: {
-            'event.startDate': { $gt: new Date() },
+            'event.endingDate': { $gt: new Date() },
           },
         },
         {

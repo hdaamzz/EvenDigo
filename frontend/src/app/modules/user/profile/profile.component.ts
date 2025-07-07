@@ -1,14 +1,11 @@
-// profile.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { AuthState } from '../../../core/models/userModel';
 import { Store } from '@ngrx/store';
 import { selectUser } from '../../../core/store/auth/auth.selectors';
 import { UserProfileService } from '../../../core/services/user/profile/user.profile.service';
 import { AppState } from '../../../core/interfaces/user/profile';
-
 
 @Component({
   selector: 'app-profile',
@@ -23,12 +20,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
   public user$: Observable<any> | undefined;
   
-  // Component state
   public userId: string | undefined;
   public isCollapsed = false;
   public isMenuActive = false;
+  public window = window;
   
-  // Navigation items
   public readonly navItems = [
     { icon: 'fa-user', label: 'Profile', path: '/profile/details', exact: true },
     { icon: 'fa-code-branch', label: 'My Events', path: '/profile/events' },
@@ -39,13 +35,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   public readonly secondaryNavItems = [
     { icon: 'fa-home', label: 'Home', path: '/' },
-    { icon: 'fa-sign-out-alt', label: 'Logout', path: '/logout' }
+    // { icon: 'fa-sign-out-alt', label: 'Logout', path: '/logout' }
   ];
 
   constructor(
     private readonly _router: Router,
     private readonly _store: Store<AppState>,
-    private readonly _userProfileService: UserProfileService
   ) {}
 
   public ngOnInit(): void {
@@ -54,7 +49,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    // Proper unsubscribe pattern
     this._destroy$.next();
     this._destroy$.complete();
   }
@@ -64,23 +58,46 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this._checkScreenSize();
   }
 
+  @HostListener('document:keydown.escape')
+  public onEscapePress(): void {
+    if (this.isMenuActive) {
+      this.isMenuActive = false;
+    }
+  }
+
   public toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
+    if (window.innerWidth >= 1024) {
+      this.isCollapsed = !this.isCollapsed;
+    }
   }
 
   public toggleMenu(): void {
-    this.isMenuActive = !this.isMenuActive;
+    if (window.innerWidth < 1024) {
+      this.isMenuActive = !this.isMenuActive;
+      
+      if (this.isMenuActive) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+    }
+  }
+
+  public onNavItemClick(): void {
+    if (window.innerWidth < 1024 && this.isMenuActive) {
+      this.isMenuActive = false;
+      document.body.style.overflow = 'auto';
+    }
   }
   
-  // Uncommented and fixed the isActive method
   public isActive(path: string): boolean {
     return this._router.isActive(path, path === '/profile');
   }
   
-  // Private methods with underscore prefix
   private _checkScreenSize(): void {
     if (window.innerWidth >= 1024) {
       this.isMenuActive = false;
+      document.body.style.overflow = 'auto';
     } else {
       this.isCollapsed = false;
     }

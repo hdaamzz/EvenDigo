@@ -1,20 +1,24 @@
+import { IUserRepository } from "src/repositories/interfaces/IUser.repository";
+import { IChat, IMessage } from "../../../../models/interfaces/chat.interface";
 import { IChatRepository } from "../../../../repositories/interfaces/IChat.repository";
-import { IChat, IMessage } from "../../../../models/ChatModel";
 import { IChatService } from "../../../interfaces/user/chat/IChat.service";
 import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class ChatService implements IChatService {
   constructor(
-    @inject('ChatRepository') private chatRepository: IChatRepository
+    @inject('ChatRepository') private chatRepository: IChatRepository,
+    @inject('UserRepository') private userRepository:IUserRepository
   ) {}
 
   async createPersonalChat(participantIds: string[]): Promise<IChat> {
     if (participantIds.length !== 2) {
       throw new Error('Personal chat requires exactly 2 participants');
     }
+
+    let user=await this.userRepository.findById(participantIds[1]);
     
-    return await this.chatRepository.createChat(participantIds, 'personal');
+    return await this.chatRepository.createChat(participantIds, 'personal','','',user?.name,user?.profileImg);
   }
 
   async createGroupChat(eventId: string, name: string, participantIds: string[]): Promise<IChat> {
@@ -211,7 +215,7 @@ export class ChatService implements IChatService {
         return false;
       }
 
-      const isParticipant = chat.participants.some(participant => {
+      const isParticipant = chat.participants.some((participant: { _id: { toString: () => any; }; toString: () => any; }) => {
         const participantId = participant._id ? participant._id.toString() : participant.toString();
         return participantId === userId;
       });

@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { ILiveStream } from '../../models/LiveStreamModel';
+import { ILiveStream } from '../../models/interfaces/livestream.interfaces';
 
 export interface ILiveStreamRepository {
   createLiveStream(liveStreamData: Partial<ILiveStream>): Promise<ILiveStream>;

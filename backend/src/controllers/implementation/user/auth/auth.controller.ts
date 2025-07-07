@@ -1,15 +1,12 @@
 import { Request, Response } from 'express';
 import { ILogin } from '../../../../models/interfaces/auth.interface';
-import { IUser } from '../../../../models/interfaces/auth.interface';
 import { inject, injectable } from 'tsyringe';
 import StatusCode from '../../../../types/statuscode';
-import { IAuthController } from '../../../../controllers/interfaces/User/Auth/IAuth.controller';
+import { AuthenticatedRequest, IAuthController } from '../../../../controllers/interfaces/User/Auth/IAuth.controller';
 import { IAuthService } from '../../../../services/interfaces/IAuth.service';
 import { cookieConfig } from '../../../../configs/cookie.config';
 
-export interface AuthenticatedRequest extends Request {
-  user?: IUser;
-}
+
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -82,7 +79,6 @@ export class AuthController implements IAuthController {
       }
 
       const result = await this.authService.login(loginData);
-      console.log('Login result:', result);
 
       if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
         res.status(StatusCode.UNAUTHORIZED).json({
@@ -129,6 +125,7 @@ export class AuthController implements IAuthController {
       }
 
       const result = await this.authService.sendForgotPasswordEmail(email);
+      
 
       res.status(result.success ? StatusCode.OK : StatusCode.BAD_REQUEST).json(result);
     } catch (error) {
@@ -173,9 +170,6 @@ export class AuthController implements IAuthController {
         });
         return;
       }
-
-      // Since the middleware already verified the user and refreshed tokens if needed,
-      // we can directly return the user info
       const currentUser = req.user;
       const token = req.cookies.accessToken;
       
@@ -242,9 +236,6 @@ export class AuthController implements IAuthController {
       });
     }
   }
-
-  // Remove the manual refresh token endpoint as it's now handled by middleware
-  // async refreshToken(req: Request, res: Response): Promise<void> { ... }
 
   logout(_req: Request, res: Response): void {
     try {

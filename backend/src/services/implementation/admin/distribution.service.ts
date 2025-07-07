@@ -39,7 +39,6 @@ export class RevenueDistributionService implements IRevenueDistributionService {
         };
       }
 
-      // Process subscription cleanup once (outside the loop)
       const [deletedPending, deletedCancelled, expiredUpdated] = await Promise.all([
         this.subscriptionService.deleteAllPendingSubscriptions(),
         this.subscriptionService.deleteAllCancelledSubscriptions(),
@@ -116,17 +115,14 @@ export class RevenueDistributionService implements IRevenueDistributionService {
         });
       });
 
-      // Calculate revenue split
       const adminAmount = ((totalRevenue + 40) * this.ADMIN_PERCENTAGE) / 100;
       const organizerAmount = (totalRevenue + 40) - adminAmount;
 
-      // Get event details for organizer ID
       const eventWithOrganizer = await this.eventRepository.findEventById(eventId);
       if (!eventWithOrganizer) {
         throw new Error("Event not found");
       }
 
-      // Create or update revenue distribution record
       let distribution: IRevenueDistribution;
 
       if (existingDistribution) {
@@ -186,7 +182,6 @@ export class RevenueDistributionService implements IRevenueDistributionService {
         }
       );
 
-      // Mark as distributed
       const completedDistribution = await this.revenueDistributionRepository.markDistributionCompleted(eventId);
 
       return {

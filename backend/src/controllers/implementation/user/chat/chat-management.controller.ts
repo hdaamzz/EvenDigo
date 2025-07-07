@@ -49,7 +49,7 @@ export class PersonalChatController {
       }
       
       ResponseHandler.success(res, chat, 'Personal chat ready', StatusCode.OK);
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to create or get personal chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -86,7 +86,7 @@ export class PersonalChatController {
       }
       
       ResponseHandler.success(res, chat, 'Group chat ready', StatusCode.OK);
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to create or get group chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -127,7 +127,7 @@ export class PersonalChatController {
 
       const chat = await this.chatService.addParticipantToGroupChat(chatId, userId);
       ResponseHandler.success(res, chat, 'Participant added to group chat', StatusCode.OK);
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to add participant to group chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -168,7 +168,7 @@ export class PersonalChatController {
       }
       
       ResponseHandler.success(res, chat, 'Group chat retrieved successfully');
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to find group chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -199,7 +199,7 @@ export class PersonalChatController {
 
       const chat = await this.chatService.getChatById(chatId);
       ResponseHandler.success(res, chat);
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Chat not found', StatusCode.NOT_FOUND);
     }
   }
@@ -223,7 +223,7 @@ export class PersonalChatController {
         count: chats.length,
         message: 'Chats retrieved successfully'
       });
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to get user chats', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -263,7 +263,7 @@ export class PersonalChatController {
       }
       
       ResponseHandler.success(res, chat);
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to find personal chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -294,7 +294,7 @@ export class PersonalChatController {
 
       await this.chatService.deleteChat(chatId);
       ResponseHandler.success(res, null, 'Chat deleted successfully');
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to delete chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }

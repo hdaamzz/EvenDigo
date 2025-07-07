@@ -43,12 +43,6 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-2">
-                <button (click)="toggleUserList()"
-                    class="flex-1 px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2">
-                    <i class="pi pi-users text-sm"></i>
-                    <span class="hidden sm:inline">{{ showUserList ? 'Hide Users' : 'Start New Chat' }}</span>
-                    <span class="sm:hidden">{{ showUserList ? 'Hide' : 'New Chat' }}</span>
-                </button>
 
                 <button (click)="refreshChats()" [disabled]="isLoading"
                     class="flex-1 sm:flex-none px-3 py-2 text-sm bg-[#121212] border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -57,54 +51,6 @@
                 </button>
             </div>
         </div>
-
-        @if (showUserList) {
-        <div class="p-3 sm:p-4 border-b border-gray-800">
-            <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Start a New Chat</h3>
-
-            @if (isLoadingUsers) {
-            <div class="flex items-center justify-center py-8">
-                <div class="text-center text-gray-400">
-                    <i class="pi pi-spinner pi-spin text-xl mb-2"></i>
-                    <p class="text-sm">Loading users...</p>
-                </div>
-            </div>
-            }
-
-            @if (!isLoadingUsers && allUsers.length === 0) {
-            <div class="text-center text-gray-400 py-8">
-                <i class="pi pi-users text-2xl mb-2"></i>
-                <p class="text-sm">No users found</p>
-            </div>
-            }
-
-            @if (!isLoadingUsers && allUsers.length > 0) {
-            <div class="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
-                @for (user of getFilteredAllUsers(); track trackByUserId($index, user)) {
-                <div (click)="startChatWithUser(user)"
-                    class="p-2 sm:p-3 cursor-pointer hover:bg-[#121212] rounded-lg transition-colors duration-200 flex items-center space-x-3 hover-lift">
-                    <div class="relative flex-shrink-0">
-                        @if (user.profileImg) {
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden">
-                            <img [src]="user.profileImg" alt="Profile Image" class="w-full h-full object-cover">
-                        </div>
-                        } @else {
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff66] rounded-full flex items-center justify-center">
-                            <span class="text-xs sm:text-sm font-semibold text-white">{{ getUserInitials(user.name)
-                                }}</span>
-                        </div>
-                        }
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-white truncate">{{ user.name }}</p>
-                        <p class="text-xs text-gray-400 truncate">{{ user.email }}</p>
-                    </div>
-                </div>
-                }
-            </div>
-            }
-        </div>
-        }
 
         @if (error) {
         <div class="p-3 sm:p-4 bg-red-900/50 border-b border-red-800">
@@ -165,8 +111,10 @@
 
             @for (chat of getFilteredChats(); track trackByChatId($index, chat)) {
             <div (click)="selectChat(chat)"
+            
                 [class]="'p-3 sm:p-4 border-b border-gray-800 cursor-pointer hover:bg-[#121212] transition-colors duration-200 fadeInUp hover-lift ' + 
                                           (selectedChat?.chatId === chat.chatId ? 'bg-[#121212] border-l-2 border-l-[#00ff66]' : '')">
+                                          <h2>{{chat.profileImg}}</h2>
                 <div class="flex items-center space-x-3">
                     <div class="relative flex-shrink-0">
                         @if (chat.chatType === 'group') {
@@ -259,6 +207,7 @@
                     </div>
                     } @else {
                     <!-- Personal Chat Avatar -->
+                     <!-- <h2>{{selectedChat.profileImg}}</h2> -->
                     @if (selectedChat.profileImg) {
                     <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden">
                         <img [src]="selectedChat.profileImg" alt="Profile Image" class="w-full h-full object-cover">
@@ -269,7 +218,6 @@
                             getUserInitials(selectedChat.name) }}</span>
                     </div>
                     }
-                    <!-- Online Status (only for personal chats) -->
                     @if (selectedChat.isOnline) {
                     <div
                         class="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00ff66] border-2 border-[#1a1a1a] rounded-full">
@@ -362,7 +310,6 @@
             </div>
             }
 
-            <!-- Typing Indicator -->
             @if (isTyping) {
             <div class="flex justify-start">
                 <div class="bg-[#1a1a1a] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg rounded-tl-sm">
@@ -451,11 +398,6 @@
 
                 <!-- Action buttons for no chat selected -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <button (click)="toggleUserList(); showMobileSidebar = true"
-                        class="px-4 py-2 bg-[#00ff66] text-black rounded-lg hover:bg-[#00e055] transition-colors flex items-center justify-center gap-2">
-                        <i class="pi pi-users text-sm"></i>
-                        <span>Start New Chat</span>
-                    </button>
 
                     @if (combinedChats.length > 0) {
                     <button (click)="showMobileSidebar = true"

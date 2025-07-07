@@ -382,7 +382,6 @@ export class CouponListComponent implements OnInit, OnDestroy, AfterViewInit {
           });
       },
       () => {
-        console.log('Deletion cancelled');
       },
       {
         width: '320px',

@@ -19,7 +19,6 @@ export class AchievementController implements IAchievementAdminController {
         try {
             const achievements = await this.achievementService.getAllAchievements();
             const response = AchievementResponseDto.success(achievements);
-            console.log(response);
             
             res.status(StatusCode.OK).json(response);
         } catch (error) {

@@ -1,12 +1,12 @@
 import { SubscriptionPayload } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
 import { BadRequestException, ConflictException, NotFoundException } from '../../../../error/error-handlers';
 import { TransactionType } from '../../../../models/interfaces/wallet.interface';
-import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../../models/SubscriptionModal';
 import { ISubscriptionRepository } from '../../../../repositories/interfaces/ISubscription.repository';
 import { IWalletRepository } from '../../../../repositories/interfaces/IWallet.repository';
 import { IWalletSubscriptionService } from '../../../../services/interfaces/user/subscription/IWalletSubscription.service';
 import { inject, injectable } from 'tsyringe';
 import { generateRandomId } from '../../../../utils/helpers';
+import { ISubscription, SubscriptionStatus, SubscriptionType } from '../../../../models/interfaces/subscription.interface';
 
 
 @injectable()

@@ -8,7 +8,7 @@ import { BaseRepository } from '../BaseRepository';
 
 @injectable()
 export class EventRepository extends BaseRepository<EventDocument> implements IEventRepository {
-  
+
   constructor() {
     super(EventModel);
   }
@@ -84,147 +84,146 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
   }
 
   async findAllEvents(): Promise<EventDocument[]> {
-    // Use mongoose query builder for populate
     return await this.model.find({}).sort({ createdAt: -1 }).populate('user_id').exec();
   }
 
   async findAllEventsWithPagination(
-    page: number = 1, 
-    limit: number = 9, 
-    search: string = '', 
+    page: number = 1,
+    limit: number = 9,
+    search: string = '',
     filter: string = 'all'
-): Promise<{
+  ): Promise<{
     data: EventDocument[];
     total: number;
     currentPage: number;
     totalPages: number;
-}> {
+  }> {
     let searchQuery: any = {};
-    
+
     if (search.trim()) {
-        const searchRegex = new RegExp(search.trim(), 'i');
-        searchQuery = {
-            $or: [
-                { eventTitle: searchRegex },
-                { eventType: searchRegex },
-                { city: searchRegex },
-                { eventDescription: searchRegex },
-            ]
-        };
+      const searchRegex = new RegExp(search.trim(), 'i');
+      searchQuery = {
+        $or: [
+          { eventTitle: searchRegex },
+          { eventType: searchRegex },
+          { city: searchRegex },
+          { eventDescription: searchRegex },
+        ]
+      };
     }
-    
+
     let dateFilterQuery: any = {};
     if (filter !== 'all') {
-        const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        
-        if (filter === 'current') {
-            dateFilterQuery = {
-                startDate: { $gte: currentDate }
-            };
-        } else if (filter === 'completed') {
-            dateFilterQuery = {
-                startDate: { $lt: currentDate }
-            };
-        }
-    }
-    
-    const finalQuery = { ...searchQuery, ...dateFilterQuery };
-    
-    if (search.trim()) {
-        return await this.findWithAggregationPagination(search, filter, page, limit);
-    }
-    
-    const result = await this.findWithPagination(finalQuery, {
-        page,
-        limit,
-        sort: { createdAt: -1 },
-        populate: 'user_id'
-    });
-    
-    return {
-        data: result.data,
-        total: result.total,
-        currentPage: result.page,
-        totalPages: result.pages
-    };
-}
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
 
-private async findWithAggregationPagination(
-    search: string, 
-    filter: string, 
-    page: number, 
+      if (filter === 'current') {
+        dateFilterQuery = {
+          startDate: { $gte: currentDate }
+        };
+      } else if (filter === 'completed') {
+        dateFilterQuery = {
+          startDate: { $lt: currentDate }
+        };
+      }
+    }
+
+    const finalQuery = { ...searchQuery, ...dateFilterQuery };
+
+    if (search.trim()) {
+      return await this.findWithAggregationPagination(search, filter, page, limit);
+    }
+
+    const result = await this.findWithPagination(finalQuery, {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+      populate: 'user_id'
+    });
+
+    return {
+      data: result.data,
+      total: result.total,
+      currentPage: result.page,
+      totalPages: result.pages
+    };
+  }
+
+  private async findWithAggregationPagination(
+    search: string,
+    filter: string,
+    page: number,
     limit: number
-): Promise<{
+  ): Promise<{
     data: EventDocument[];
     total: number;
     currentPage: number;
     totalPages: number;
-}> {
+  }> {
     const searchRegex = new RegExp(search.trim(), 'i');
     const skip = (page - 1) * limit;
-    
+
     let dateMatch: any = {};
     if (filter !== 'all') {
-        const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        
-        if (filter === 'current') {
-            dateMatch = { startDate: { $gte: currentDate } };
-        } else if (filter === 'completed') {
-            dateMatch = { startDate: { $lt: currentDate } };
-        }
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+
+      if (filter === 'current') {
+        dateMatch = { startDate: { $gte: currentDate } };
+      } else if (filter === 'completed') {
+        dateMatch = { startDate: { $lt: currentDate } };
+      }
     }
-    
+
     const pipeline: PipelineStage[] = [
-        {
-            $lookup: {
-                from: 'users',
-                localField: 'user_id',
-                foreignField: '_id',
-                as: 'user_id'
-            }
-        },
-        {
-            $unwind: { path: '$user_id' }
-        },
-        {
-            $match: {
-                ...dateMatch,
-                $or: [
-                    { eventTitle: searchRegex },
-                    { eventType: searchRegex },
-                    { city: searchRegex },
-                    { eventDescription: searchRegex },
-                    { 'user_id.name': searchRegex }
-                ]
-            }
-        },
-        {
-            $sort: { createdAt: -1 }
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: '_id',
+          as: 'user_id'
         }
+      },
+      {
+        $unwind: { path: '$user_id' }
+      },
+      {
+        $match: {
+          ...dateMatch,
+          $or: [
+            { eventTitle: searchRegex },
+            { eventType: searchRegex },
+            { city: searchRegex },
+            { eventDescription: searchRegex },
+            { 'user_id.name': searchRegex }
+          ]
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
     ];
-    
+
     const totalPipeline: PipelineStage[] = [...pipeline, { $count: 'total' }];
     const totalResult = await this.model.aggregate(totalPipeline);
     const total = totalResult.length > 0 ? totalResult[0].total : 0;
-    
+
     const dataPipeline: PipelineStage[] = [
-        ...pipeline,
-        { $skip: skip },
-        { $limit: limit }
+      ...pipeline,
+      { $skip: skip },
+      { $limit: limit }
     ];
-    
+
     const data = await this.model.aggregate(dataPipeline);
     const totalPages = Math.ceil(total / limit);
-    
+
     return {
-        data: data as EventDocument[],
-        total,
-        currentPage: page,
-        totalPages
+      data: data as EventDocument[],
+      total,
+      currentPage: page,
+      totalPages
     };
-}
+  }
 
   async findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]> {
     return await this.model.find({ _id: { $in: eventIds } }).populate('user_id').exec();
@@ -235,8 +234,7 @@ private async findWithAggregationPagination(
   }
 
   async updateTicketQuantities(eventId: Schema.Types.ObjectId | string, tickets: { [type: string]: number }): Promise<EventDocument | null> {
-    console.log('Updating ticket quantities:', tickets);
-    
+
     const event = await this.findById(eventId);
     if (!event) {
       throw new BadRequestException('Event not found');
@@ -245,21 +243,19 @@ private async findWithAggregationPagination(
     for (const [type, quantity] of Object.entries(tickets)) {
       if (quantity !== 0) {
         const ticket = event.tickets.find(t => t.type.toLowerCase() === type.toLowerCase());
-        
+
         if (!ticket) {
           throw new BadRequestException(`Ticket type ${type} not found`);
         }
-        
+
         if (quantity > 0) {
           if (ticket.quantity < quantity) {
             throw new BadRequestException(`Insufficient tickets available for ${type}. Available: ${ticket.quantity}, Requested: ${quantity}`);
           }
           ticket.quantity -= quantity;
-          console.log(`Deducted ${quantity} ${type} tickets. Remaining: ${ticket.quantity}`);
         } else {
           const addQuantity = Math.abs(quantity);
           ticket.quantity += addQuantity;
-          console.log(`Restored ${addQuantity} ${type} tickets. New total: ${ticket.quantity}`);
         }
       }
     }

@@ -25,7 +25,6 @@ import livestreamRoutes from './user/livestream.routes';
 
 const router = express.Router();
 
-// Apply security middleware to all routes
 router.use(securityHeaders);
 router.use(express.json({ limit: '10mb' }));
 router.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -55,7 +54,7 @@ router.use('/user/livestream', requireUserRole, livestreamRoutes);
 // Admin-only routes
 router.use('/admin/coupon', requireAdminRole, couponRouter);
 router.use('/admin/events', requireAdminRole, adminEventsRouter);
-router.use('/admin/users', requireAdminRole, adminUsersRouter);
+router.use('/admin/users', adminUsersRouter);
 router.use('/admin/achievements', requireAdminRole, achievementRouter);
 router.use('/admin/finance', requireAdminRole, financeRouter);
 router.use('/admin/dist', requireAdminRole, distributionRouter);

@@ -49,7 +49,6 @@ export class AuthService {
       `${this.apiUrl}/status`
     ).pipe(
       catchError((error) => {
-        console.error('Auth status check error:', error);
         return of({ 
           isAuthenticated: false, 
           user: undefined, 
@@ -77,12 +76,7 @@ export class AuthService {
   }
 
   forgotPassword(formData: {email:string}): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.apiUrl}/forgot-password`, formData).pipe(
-      catchError((error) => {
-        console.error('Forgot password error:', error);
-        return of({ success: false, message: 'Failed to send reset email' });
-      })
-    );
+    return this.http.post<CommonResponse>(`${this.apiUrl}/forgot-password`, formData)
   }
 
   resetPassword(resetData: {email:string,newPassword:string,token:string}): Observable<CommonResponse> {

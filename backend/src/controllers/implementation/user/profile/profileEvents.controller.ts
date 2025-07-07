@@ -55,7 +55,6 @@ export class ProfileEventsController implements IProfileEventsController {
         return ResponseHandler.error(res, null, "Event ID is required", 400);
       }
       
-      // Check if event exists
       const event = await this.profileEventService.getEvent(eventId);
       
       if (!event) {
@@ -64,14 +63,12 @@ export class ProfileEventsController implements IProfileEventsController {
       
       const updateData: Partial<EventDocument> = {};
       
-      // Extract relevant fields from request body
       for (const key in req.body) {
         if (key !== 'eventId') {
           updateData[key as keyof EventDocument] = req.body[key];
         }
       }
       
-      // Process uploaded files if any
       if (req.files) {
         const files = req.files as Record<string, Express.Multer.File[]>;
         
@@ -86,12 +83,10 @@ export class ProfileEventsController implements IProfileEventsController {
         }
       }
       
-      // Parse tickets if they exist as a string
       if (updateData.tickets && typeof updateData.tickets === 'string') {
         updateData.tickets = JSON.parse(updateData.tickets);
       }
       
-      // Update the event
       const result = await this.profileEventService.updateEvent(eventId, updateData);
       
       if (result) {
@@ -112,7 +107,6 @@ export class ProfileEventsController implements IProfileEventsController {
         return ResponseHandler.error(res, null, "Event ID is required", 400);
       }
       
-      // Check if event exists
       const event = await this.profileEventService.getEvent(eventId);
       
       if (!event) {

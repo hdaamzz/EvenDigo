@@ -56,7 +56,7 @@ export class PersonalMessageController {
         },
         message: 'Personal chat messages retrieved successfully'
       });
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Personal chat not found', StatusCode.NOT_FOUND);
     }
   }
@@ -119,7 +119,7 @@ export class PersonalMessageController {
         },
         message: 'Personal chat messages retrieved successfully'
       });
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Personal chat not found', StatusCode.NOT_FOUND);
     }
   }
@@ -162,7 +162,7 @@ export class PersonalMessageController {
       
       const message = await this.chatService.addMessage(chatId, userId, content, messageType);
       ResponseHandler.success(res, message, 'Message sent to personal chat successfully', StatusCode.CREATED);
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to send message to personal chat', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -193,7 +193,7 @@ export class PersonalMessageController {
       
       const updatedMessage = await this.chatService.updateMessage(messageId, content, userId);
       ResponseHandler.success(res, updatedMessage, 'Personal chat message updated successfully');
-    } catch (error: any) {
+    } catch (error) {
       const statusCode = error.message.includes('not found') ? StatusCode.NOT_FOUND : 
                         error.message.includes('only edit your own') ? StatusCode.FORBIDDEN : 
                         StatusCode.INTERNAL_SERVER_ERROR;
@@ -217,7 +217,7 @@ export class PersonalMessageController {
       
       await this.chatService.deleteMessage(messageId, userId);
       ResponseHandler.success(res, null, 'Personal chat message deleted successfully');
-    } catch (error: any) {
+    } catch (error) {
       const statusCode = error.message.includes('not found') ? StatusCode.NOT_FOUND : 
                         error.message.includes('only delete your own') ? StatusCode.FORBIDDEN : 
                         StatusCode.INTERNAL_SERVER_ERROR;
@@ -262,7 +262,7 @@ export class PersonalMessageController {
       }
       
       ResponseHandler.success(res, message, 'Personal chat message retrieved successfully');
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to get personal chat message', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -293,7 +293,7 @@ export class PersonalMessageController {
       
       await this.chatService.markMessagesAsRead(chatId, userId);
       ResponseHandler.success(res, null, 'Personal chat messages marked as read');
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to mark personal chat messages as read', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }
@@ -317,7 +317,7 @@ export class PersonalMessageController {
         unreadCount: count,
         message: 'Unread personal chat messages count retrieved successfully'
       });
-    } catch (error: any) {
+    } catch (error) {
       ResponseHandler.error(res, error, 'Failed to get unread personal chat message count', StatusCode.INTERNAL_SERVER_ERROR);
     }
   }

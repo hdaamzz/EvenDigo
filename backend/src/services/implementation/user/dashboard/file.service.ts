@@ -1,12 +1,6 @@
-import { IFileService } from '../../../../services/interfaces/user/dashboard/IFile.service';
+import { EventFileData, IFileService } from '../../../../services/interfaces/user/dashboard/IFile.service';
 import { uploadToCloudinary } from '../../../../utils/helpers';
 import { injectable } from 'tsyringe';
-
-
-export interface EventFileData {
-  mainBannerUrl: string | null;
-  promotionalImageUrl: string | null;
-}
 
 @injectable()
 export class FileService implements IFileService {

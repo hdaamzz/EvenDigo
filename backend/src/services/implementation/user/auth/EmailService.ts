@@ -18,7 +18,7 @@ export class EmailService implements IEmailService {
   }
 
   async sendPasswordResetEmail(email: string, name: string, resetToken: string): Promise<void> {
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/reset-password?email=${email}&token=${resetToken}`;
+    const resetUrl = `${process.env.CLIENT_SERVER || 'http://localhost:4200'}/reset-password?email=${email}&token=${resetToken}`;
     
     await this.sendEmail({
       to: email,
