@@ -234,7 +234,6 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
   }
 
   async updateTicketQuantities(eventId: Schema.Types.ObjectId | string, tickets: { [type: string]: number }): Promise<EventDocument | null> {
-    console.log('Updating ticket quantities:', tickets);
 
     const event = await this.findById(eventId);
     if (!event) {
@@ -254,11 +253,9 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
             throw new BadRequestException(`Insufficient tickets available for ${type}. Available: ${ticket.quantity}, Requested: ${quantity}`);
           }
           ticket.quantity -= quantity;
-          console.log(`Deducted ${quantity} ${type} tickets. Remaining: ${ticket.quantity}`);
         } else {
           const addQuantity = Math.abs(quantity);
           ticket.quantity += addQuantity;
-          console.log(`Restored ${addQuantity} ${type} tickets. New total: ${ticket.quantity}`);
         }
       }
     }

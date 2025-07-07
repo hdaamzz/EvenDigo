@@ -149,7 +149,6 @@ export class ProfileBookingService implements IProfileBookingService {
       
       await this.eventRepository.updateTicketQuantities(eventId, ticketsToRestore);
       
-      console.log(`Restored ${quantity} ${ticketType} tickets to event ${eventId}`);
     } catch (error) {
       console.error(`Failed to restore ticket quantity for event ${eventId}:`, error);
      

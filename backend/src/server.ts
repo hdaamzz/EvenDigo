@@ -58,7 +58,7 @@ if(!PORT) {
 }
 
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running}`);
 });
 
 // ssh -i "evendigo-key.pem" ubuntu@ec2-13-200-49-95.ap-south-1.compute.amazonaws.com

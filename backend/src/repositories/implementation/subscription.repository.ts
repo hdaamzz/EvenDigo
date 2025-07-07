@@ -24,7 +24,6 @@ export class SubscriptionRepository extends BaseRepository<ISubscription> implem
 
   async findSubscriptionById(subscriptionId: string): Promise<ISubscription | null> {
     try {
-      console.log(subscriptionId);
       return await this.findOne({ subscriptionId });
     } catch (error) {
       throw new Error(`Failed to find subscription: ${(error as Error).message}`);

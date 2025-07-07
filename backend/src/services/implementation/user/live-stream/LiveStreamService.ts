@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { ILiveStreamService } from '../../../../services/interfaces/user/live-stream/ILiveStreamService';
 import { IEventRepository } from '../../../../repositories/interfaces/IEvent.repository';
 import { ILiveStreamRepository } from '../../../../repositories/interfaces/ILivestream.repository';
+import { IUser } from 'src/models/interfaces/auth.interface';
 
 
 
@@ -53,6 +54,10 @@ export class LiveStreamService implements ILiveStreamService {
     const event = await this.eventRepository.findEventById(eventId);
     if (!event) {
       throw new Error('Event not found');
+    }
+    const user:IUser=event.user_id as unknown as IUser
+    if(user._id.toString() !== hostId){
+        throw new Error('Host not authenticate');
     }
 
     const existingStream = await this.liveStreamRepository.findActiveLiveStreamByEventId(eventId);

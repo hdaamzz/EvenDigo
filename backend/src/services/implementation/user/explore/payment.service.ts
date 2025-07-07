@@ -225,7 +225,6 @@ export class PaymentService implements IPaymentService {
         console.warn(`No group chat found for event ${eventId}`);
       }
       if (!booking) {
-        console.log("No booking found with session ID:", sessionId);
         throw new Error(`No booking found with session ID: ${sessionId}`);
       }
 
@@ -250,7 +249,6 @@ export class PaymentService implements IPaymentService {
       if (booking && booking.paymentStatus === 'Pending') {
         booking.paymentStatus = 'Failed';
         await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
-        console.log(`Marked booking ${booking.bookingId} as failed due to expired session`);
       }
     } catch (error) {
       console.error("Error handling expired session:", error);

@@ -106,7 +106,6 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
 
     const subscription = await this.subscriptionRepository.findSubscriptionByStripeSessionId(session.id);
     if (!subscription) {
-      console.log(`No subscription found with session ID: ${session.id}`);
       return;
     }
 

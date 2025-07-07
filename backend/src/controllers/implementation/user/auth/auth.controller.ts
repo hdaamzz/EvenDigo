@@ -79,7 +79,6 @@ export class AuthController implements IAuthController {
       }
 
       const result = await this.authService.login(loginData);
-      console.log('Login result:', result);
 
       if (!result.success || !result.accessToken || !result.refreshToken || !result.user) {
         res.status(StatusCode.UNAUTHORIZED).json({
@@ -126,7 +125,6 @@ export class AuthController implements IAuthController {
       }
 
       const result = await this.authService.sendForgotPasswordEmail(email);
-      console.log(result);
       
 
       res.status(result.success ? StatusCode.OK : StatusCode.BAD_REQUEST).json(result);

@@ -15,7 +15,6 @@ const LiveStreamSchema: Schema = new Schema({
   roomId: {
     type: String,
     required: true,
-    unique: true
   },
   streamKey: {
     type: String,

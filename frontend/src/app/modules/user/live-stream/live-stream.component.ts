@@ -266,7 +266,7 @@ export class LiveStreamComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (state?.['token'] && state?.['roomId']) {
       this.streamConfig = {
-        appId: 21216645,
+        appId: environment.zegoAppId,
         token: state['token'],
         roomId: state['roomId'],
         userId: this.generateUserId(),

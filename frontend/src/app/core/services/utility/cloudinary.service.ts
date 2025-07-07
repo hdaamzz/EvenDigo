@@ -8,7 +8,7 @@ import { CloudinaryResponse } from '../../models/userModel';
   providedIn: 'root'
 })
 export class CloudinaryService {
-  private baseUrl = environment.baseUrl;
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

@@ -21,7 +21,7 @@ export const environment={
     baseUrl:'http://localhost:3000',
     production: false,
     stripePublishKey:'pk_test_51R6SQALey1fPw3RmtMmRKk4u4xaIYP6c8uCl80J3I5KkVR5sDYSchEC6Am1Mviu64NEAjmytcchK5idY3Iczqszr00TRfqqrNc',
-    zegoAppId:21216645,
+    zegoAppId:1702368841,
     firebase: {
         apiKey: "AIzaSyDowOQt6DhNu9AZn1Go8FCHU4hD9dxRvC0",
         authDomain: "evendigo-cebf6.firebaseapp.com",
