@@ -1,11 +1,10 @@
 import { inject, Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { filter, map, mergeMap, catchError, tap, switchMap } from 'rxjs/operators';
-import { Router, NavigationStart } from '@angular/router';
+import { filter, map, catchError, tap, switchMap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { AuthActions } from "./auth.actions";
-import { routerNavigatedAction, routerNavigationAction } from '@ngrx/router-store';
+import { routerNavigatedAction } from '@ngrx/router-store';
 import Notiflix from "notiflix";
 import { GoogleAuthService } from "../../services/user/googleAuth/google-auth.service";
 import { AdminAuthService } from "../../services/admin/auth/admin.auth.service";
@@ -107,6 +106,7 @@ export class AuthEffects {
                     }),
                     catchError(error => {
                         const errorMessage = error.error?.message || error.message || 'Failed to Login';
+                        Notiflix.Notify.failure(errorMessage);
                         return of(AuthActions.loginFailure({
                             error: errorMessage
                         }));
@@ -122,6 +122,7 @@ export class AuthEffects {
             switchMap(({ email, password }) =>
                 this.adminAuthService.adminLogin({ email, password }).pipe(
                     map(response => {
+                        console.log("adminLogin",response);
                         
                         if (response.success) {
                             Notiflix.Notify.success('Welcome to EvenDigo');
@@ -136,6 +137,7 @@ export class AuthEffects {
                     }),
                     catchError(error => {
                         const errorMessage = error.message || error.error?.message || 'Admin Failed to Login';
+                        Notiflix.Notify.failure(errorMessage);
                         return of(AuthActions.adminLoginFailure({
                             error: errorMessage
                         }));
@@ -179,6 +181,7 @@ export class AuthEffects {
                             return AuthActions.logoutSuccess();
                         }),
                         catchError(error => {
+                            Notiflix.Notify.failure('Logout failed');
                             return of(AuthActions.logoutFailure({ error: error.message }));
                         })
                     )
@@ -204,6 +207,7 @@ export class AuthEffects {
                     }),
                     catchError(error => {
                         const errorMessage = error.error?.message || error.message || 'Failed to Login with Google';
+                        Notiflix.Notify.failure(errorMessage);
                         return of(AuthActions.googleLoginFailure({
                             error: errorMessage
                         }));
