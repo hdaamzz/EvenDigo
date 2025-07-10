@@ -28,4 +28,9 @@ export interface IEventRepository {
   findEventsByIds(eventIds: (Schema.Types.ObjectId | string)[]): Promise<EventDocument[]>;
   findDocumentCount(user_id: Schema.Types.ObjectId | string): Promise<number>;
   updateTicketQuantities(eventId: Schema.Types.ObjectId | string, tickets: { [type: string]: number }): Promise<EventDocument | null>;
+  findNotStartedEventByUserIdWithPagination(
+  userId: Schema.Types.ObjectId | string,
+  skip: number,
+  limit: number
+): Promise<EventDocument[]> 
 }

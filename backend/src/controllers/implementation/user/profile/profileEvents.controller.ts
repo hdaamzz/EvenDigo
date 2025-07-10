@@ -19,9 +19,12 @@ export class ProfileEventsController implements IProfileEventsController {
       }
       
       const userId = req.user._id.toString();
-      const events = await this.profileEventService.getUserEvents(userId);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
       
-      ResponseHandler.success(res, events, "User events retrieved successfully");
+      const result = await this.profileEventService.getUserEvents(userId, page, limit);
+      
+      ResponseHandler.success(res, result, "User events retrieved successfully");
     } catch (error) {
       ResponseHandler.error(res, error, "Failed to fetch user events");
     }

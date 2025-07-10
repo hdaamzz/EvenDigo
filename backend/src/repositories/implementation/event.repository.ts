@@ -71,7 +71,6 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
   }
 
   async findEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
-    // Use mongoose query builder for populate since BaseRepository doesn't handle it in findById
     return await this.model.findById(eventId).populate('user_id').exec();
   }
 
@@ -262,4 +261,20 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
 
     return await event.save();
   }
+  async findNotStartedEventByUserIdWithPagination(
+  userId: Schema.Types.ObjectId | string,
+  skip: number,
+  limit: number
+): Promise<EventDocument[]> {
+  const now = new Date();
+  return await this.model
+    .find({
+      user_id: userId,
+      startDate: { $gt: now }
+    })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .exec();
+}
 }

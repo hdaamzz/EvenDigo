@@ -12,14 +12,42 @@ export class ProfileEventService implements IProfileEventService {
     @inject("EventRepository") private eventRepository: IEventRepository,
   ) {}
 
-  async getUserEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+    async getUserEvents(
+    userId: Schema.Types.ObjectId | string, 
+    page: number = 1, 
+    limit: number = 10
+  ): Promise<{
+    events: EventDocument[];
+    currentPage: number;
+    totalPages: number;
+    totalEvents: number;
+    hasMore: boolean;
+  }> {
     try {
-      const events = await this.eventRepository.findNotStartedEventByUserId(userId);      
-      return events;
+      const skip = (page - 1) * limit;
+      
+      const totalEvents = await this.eventRepository.findDocumentCount(userId);
+      
+      const events = await this.eventRepository.findNotStartedEventByUserIdWithPagination(
+        userId, 
+        skip, 
+        limit
+      );
+      
+      const totalPages = Math.ceil(totalEvents / limit);
+      const hasMore = page < totalPages;
+      
+      return {
+        events,
+        currentPage: page,
+        totalPages,
+        totalEvents,
+        hasMore
+      };
     } catch (error) {
       throw new Error(`Failed to fetch user events: ${(error as Error).message}`);
     }
-  }
+}
 
   async getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
     try {

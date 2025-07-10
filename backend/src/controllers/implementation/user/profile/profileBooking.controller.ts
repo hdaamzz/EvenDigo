@@ -8,18 +8,21 @@ import { IProfileBookingService } from '../../../../services/interfaces/user/pro
 export class ProfileBookingController implements IProfileBookingController {
   constructor(
     @inject("ProfileBookingService") private profileBookingService: IProfileBookingService,
-  ) {}
+  ) { }
 
   async getUserBookings(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user?._id) {
         return ResponseHandler.error(res, null, "User not authenticated", 401);
       }
-      
+
       const userId = req.user._id.toString();
-      const bookings = await this.profileBookingService.getUserBookings(userId);
-      
-      ResponseHandler.success(res, bookings, "User bookings retrieved successfully");
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await this.profileBookingService.getUserBookings(userId, page, limit);
+
+      ResponseHandler.success(res, result, "User bookings retrieved successfully");
     } catch (error) {
       ResponseHandler.error(res, error, "Failed to fetch user bookings");
     }
@@ -30,16 +33,16 @@ export class ProfileBookingController implements IProfileBookingController {
       if (!req.user?._id) {
         return ResponseHandler.error(res, null, "User not authenticated", 401);
       }
-      
+
       const userId = req.user._id.toString();
       const { bookingId, ticketUniqueId } = req.body;
-      
+
       if (!bookingId || !ticketUniqueId) {
         return ResponseHandler.error(res, null, "Booking ID and ticket ID are required", 400);
       }
-      
+
       const result = await this.profileBookingService.cancelTicket(userId, bookingId, ticketUniqueId);
-      
+
       if (result.success) {
         ResponseHandler.success(res, result.data, result.message);
       } else {

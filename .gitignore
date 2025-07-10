@@ -53,4 +53,5 @@ backend/src/configs/serviceAccountKey.json
 backend/src/node_modules
 backend/eslint.config.mjs
 backend/package-lock.json
+backend/logs
 frontend/src/app/environments/environment.prod.ts

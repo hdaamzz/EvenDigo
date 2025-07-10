@@ -54,7 +54,11 @@ class BookingRepository implements IBookingRepository {
     }
   }
 
-  async findUpcomingEventBookingByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
+  async findUpcomingEventBookingByUserId(
+    userId: Schema.Types.ObjectId | string,
+    skip: number = 0,
+    limit: number = 10
+  ): Promise<IBooking[]> {
     try {
       const bookings = await this.bookingModel.aggregate([
         {
@@ -80,43 +84,49 @@ class BookingRepository implements IBookingRepository {
         {
           $sort: { createdAt: -1 },
         },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
       ]);
 
       return bookings;
     } catch (error) {
-      console.error('Error in findByUserId:', error);
+      console.error('Error in findUpcomingEventBookingByUserId:', error);
       throw new Error(`Failed to find bookings for user: ${(error as Error).message}`);
     }
   }
 
   async findBookingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<any[]> {
-  try {
-    if (!isValidObjectId(userId)) throw new Error("Invalid userId");
+    try {
+      if (!isValidObjectId(userId)) throw new Error("Invalid userId");
 
-    const bookings = await this.bookingModel
-      .find({ userId, paymentStatus: "Completed" })
-      .sort({ createdAt: -1 })
-      .populate({
-        path: 'eventId',
-        match: { endingDate: { $lt: new Date() } }, 
-        populate: {
-          path: 'user_id'
-        }
-      })
-      .exec();
+      const bookings = await this.bookingModel
+        .find({ userId, paymentStatus: "Completed" })
+        .sort({ createdAt: -1 })
+        .populate({
+          path: 'eventId',
+          match: { endingDate: { $lt: new Date() } },
+          populate: {
+            path: 'user_id'
+          }
+        })
+        .exec();
 
-    return bookings
-      .filter(booking => booking.eventId) 
-      .map(booking => ({
-        ...(booking.eventId as any)._doc,
-        bookingId: booking.bookingId
-      }));
+      return bookings
+        .filter(booking => booking.eventId)
+        .map(booking => ({
+          ...(booking.eventId as any)._doc,
+          bookingId: booking.bookingId
+        }));
 
-  } catch (error) {
-    console.error('Error in findBookingEventByUserId:', error);
-    throw new Error(`Failed to find finished bookings for user: ${(error as Error).message}`);
+    } catch (error) {
+      console.error('Error in findBookingEventByUserId:', error);
+      throw new Error(`Failed to find finished bookings for user: ${(error as Error).message}`);
+    }
   }
-}
 
 
   async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> {
@@ -166,6 +176,40 @@ class BookingRepository implements IBookingRepository {
       }).exec();
     } catch (error) {
       throw new Error(`Failed to find bookings by event ID: ${(error as Error).message}`);
+    }
+  }
+  async countUpcomingEventBookingByUserId(userId: Schema.Types.ObjectId | string): Promise<number> {
+    try {
+      const count = await this.bookingModel.aggregate([
+        {
+          $match: {
+            userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId,
+            paymentStatus: 'Completed',
+          },
+        },
+        {
+          $lookup: {
+            from: 'events',
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event',
+          },
+        },
+        { $unwind: '$event' },
+        {
+          $match: {
+            'event.endingDate': { $gt: new Date() },
+          },
+        },
+        {
+          $count: 'total'
+        }
+      ]);
+
+      return count[0]?.total || 0;
+    } catch (error) {
+      console.error('Error in countUpcomingEventBookingByUserId:', error);
+      throw new Error(`Failed to count bookings for user: ${(error as Error).message}`);
     }
   }
 }

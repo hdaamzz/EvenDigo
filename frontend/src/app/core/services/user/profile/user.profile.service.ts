@@ -16,17 +16,17 @@ export class UserProfileService {
 
   constructor(private http: HttpClient) { }
 
-  
+
   userDetails(): Observable<UpdateProfileResponse> {
-      return this.http.get<UpdateProfileResponse>(`${this.apiUrl}/user-details`).pipe(
-        catchError(error => {
-          console.error('Error fetching user details:', error);
-          return throwError(() => new Error('Failed to fetch user details'));
-        })
-      );
+    return this.http.get<UpdateProfileResponse>(`${this.apiUrl}/user-details`).pipe(
+      catchError(error => {
+        console.error('Error fetching user details:', error);
+        return throwError(() => new Error('Failed to fetch user details'));
+      })
+    );
   }
-  updateUserProfile( userData: Partial<User>): Observable<UpdateProfileResponse> {
-    
+  updateUserProfile(userData: Partial<User>): Observable<UpdateProfileResponse> {
+
     return this.http.post<UpdateProfileResponse>(`${this.apiUrl}/update`, {
       ...userData
     }).pipe(
@@ -37,8 +37,8 @@ export class UserProfileService {
     );
   }
 
-  verificationRequest():Observable<VerificationRequestResponse>{
-    return this.http.post<VerificationRequestResponse>(`${this.apiUrl}/verification-request`,{}).pipe(
+  verificationRequest(): Observable<VerificationRequestResponse> {
+    return this.http.post<VerificationRequestResponse>(`${this.apiUrl}/verification-request`, {}).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
         return throwError(() => new Error('Failed to fetch user details'));
@@ -46,7 +46,7 @@ export class UserProfileService {
     )
   }
 
-  verificationRequestDetails():Observable<any>{
+  verificationRequestDetails(): Observable<any> {
     return this.http.get(`${this.apiUrl}/verification-request`).pipe(
       catchError(error => {
         console.error('Error fetching user details:', error);
@@ -54,32 +54,44 @@ export class UserProfileService {
       })
     )
   }
-  getUserEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.apiUrl}/events`);
+  getUserEvents(page: number = 1, limit: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/events`, {
+      params: { page: page.toString(), limit: limit.toString() }
+    });
   }
 
-  getUserBookings(): Observable<AllBookingResponse> {
-    return this.http.get<AllBookingResponse>(`${this.apiUrl}/bookings`);
+  getUserBookings(page: number = 1, limit: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/bookings`, {
+      params: {
+        page: page.toString(),
+        limit: limit.toString()
+      }
+    }).pipe(
+      catchError(error => {
+        console.error('Error fetching user bookings:', error);
+        return throwError(() => new Error('Failed to fetch user bookings'));
+      })
+    );
   }
-  cancelTicket(bookingId: string, ticketUniqueId: string): Observable<void> {    
-    return this.http.post<void>(`${this.apiUrl}/events/cancel`, { bookingId,ticketUniqueId });
+  cancelTicket(bookingId: string, ticketUniqueId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/events/cancel`, { bookingId, ticketUniqueId });
   }
 
-  deleteEvent(eventId: string):Observable<void> {
+  deleteEvent(eventId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/events/${eventId}`);
   }
   updateEvent(eventId: string, formData: FormData): Observable<void> {
     formData.append('eventId', eventId);
-    
+
     return this.http.put<void>(`${this.apiUrl}/events`, formData);
   }
-  getEventById(eventId: string) :Observable<EventResponse>{
+  getEventById(eventId: string): Observable<EventResponse> {
     return this.http.get<EventResponse>(`${this.apiUrl}/events/${eventId}`);
   }
-  getBadgeById() :Observable<any>{
+  getBadgeById(): Observable<any> {
     return this.http.get(`${this.apiUrl}/badge`);
   }
-  changePassword(data: {currentPassword: string, newPassword: string, confirmPassword: string}): Observable<any> {
+  changePassword(data: { currentPassword: string, newPassword: string, confirmPassword: string }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/change-password`, data).pipe(
       catchError(error => {
         console.error('Error changing password:', error);

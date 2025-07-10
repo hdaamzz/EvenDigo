@@ -1,12 +1,16 @@
 <div class="min-h-screen text-white p-4">
     <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <!-- <h2 class="text-2xl font-bold text-[#00c853]">My Events</h2> -->
-        <div class="flex items-center gap-3 w-full md:w-auto">  
+        <div class="flex items-center gap-3 w-full md:w-auto">
             <div class="relative flex-1 md:w-64">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <input type="text" placeholder="Search events by title, city" class="w-full pl-10 pr-4 py-2 bg-[#1E1E1E] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
+                <input type="text" placeholder="Search events by title, city"
+                    class="w-full pl-10 pr-4 py-2 bg-[#1E1E1E] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
             </div>
         </div>
     </div>
@@ -20,47 +24,60 @@
     </div>
 
     <div *ngIf="!isLoadingEvents && events.length === 0" class="text-center py-10">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
         <p class="text-lg text-gray-400">You haven't created any events yet</p>
     </div>
 
     <div class="space-y-6" *ngIf="!isLoadingEvents && events.length > 0">
         <div *ngFor="let event of events" class="bg-[#1E1E1E] rounded-lg overflow-hidden border border-gray-600">
+            <!-- Your existing event card content remains the same -->
             <div class="flex flex-col md:flex-row">
                 <div class="relative w-full md:w-48 h-48 md:h-auto">
                     <img [src]="event.mainBanner" alt="Event Image" class="w-full h-full object-cover">
                     <div class="absolute top-2 left-2 bg-green-500 text-xs font-medium px-2 py-1 rounded text-white">
                         {{event.eventType}}
                     </div>
-                    <div *ngIf="event.eventVisibility" class="absolute top-2 right-2 bg-blue-500 text-xs font-medium px-2 py-1 rounded text-white">
+                    <div *ngIf="event.eventVisibility"
+                        class="absolute top-2 right-2 bg-blue-500 text-xs font-medium px-2 py-1 rounded text-white">
                         {{event.eventVisibility}}
                     </div>
                 </div>
-                
+
                 <div class="flex-1 p-4">
                     <div class="flex justify-between items-start">
                         <div class="w-full">
                             <h3 class="text-xl font-semibold">{{event.eventTitle}}</h3>
-                            
+
                             <div class="mt-2 flex items-center text-gray-400 text-sm">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <p>{{ event.startDate | date:'MMM d, y' }} at {{ event.startTime | date:'shortTime' }}</p>
-                                <span *ngIf="event.endingDate" class="ml-1">to {{ event.endingDate | date:'MMM d, y' }}</span>
+                                <p>{{ event.startDate | date:'MMM d, y' }} at {{ event.startTime | date:'shortTime' }}
+                                </p>
+                                <span *ngIf="event.endingDate" class="ml-1">to {{ event.endingDate | date:'MMM d, y'
+                                    }}</span>
                             </div>
-                            
+
                             <div class="mt-1 flex items-center text-gray-400 text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>{{event.venueName}}<span *ngIf="event.venueAddress">, {{event.venueAddress}}</span>, {{event.city}}</span>
+                                <span>{{event.venueName}}<span *ngIf="event.venueAddress">,
+                                        {{event.venueAddress}}</span>, {{event.city}}</span>
                             </div>
-                            
-                            <div *ngIf="event.ageRestriction" class="mt-2 inline-block bg-red-500 bg-opacity-20 text-white text-xs px-2 py-1 rounded">
+
+                            <div *ngIf="event.ageRestriction"
+                                class="mt-2 inline-block bg-red-500 bg-opacity-20 text-white text-xs px-2 py-1 rounded">
                                 Age Restricted
                             </div>
 
@@ -71,7 +88,8 @@
                             <div class="mt-3">
                                 <div class="text-sm font-medium mb-1">Tickets</div>
                                 <div class="flex flex-wrap gap-2">
-                                    <div *ngFor="let ticket of event.tickets" class="bg-[#121212] rounded px-3 py-1 text-xs">
+                                    <div *ngFor="let ticket of event.tickets"
+                                        class="bg-[#121212] rounded px-3 py-1 text-xs">
                                         <span class="font-medium">{{ticket.type}}</span>: ₹{{ticket.price}}
                                         <span class="text-gray-400 ml-1">({{ticket.quantity}} available)</span>
                                     </div>
@@ -80,27 +98,37 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-[#121212] p-4 flex md:flex-col justify-center items-center gap-3">
-                    <button (click)="editEvent(event._id)" class="bg-[#00ff66] hover:bg-green-600 text-black font-medium w-full px-4 py-2 rounded-lg flex items-center justify-center">
-                        Edit 
+                    <button (click)="editEvent(event._id)"
+                        class="bg-[#00ff66] hover:bg-green-600 text-black font-medium w-full px-4 py-2 rounded-lg flex items-center justify-center">
+                        Edit
                     </button>
-                    <button (click)="confirmDelete(event._id)" class="border border-gray-600 hover:border-gray-400 w-full px-4 py-2 rounded-lg flex items-center justify-center">
+                    <button (click)="confirmDelete(event._id)"
+                        class="border border-gray-600 hover:border-gray-400 w-full px-4 py-2 rounded-lg flex items-center justify-center">
                         Delete
                     </button>
                 </div>
             </div>
         </div>
     </div>
+    <div *ngIf="isLoadingMore" class="flex justify-center items-center py-6">
+        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+        <span class="ml-2 text-gray-400">Loading more events...</span>
+    </div>
+</div>
+<div *ngIf="!isLoadingEvents && events.length > 0 && !hasMore" class="text-center py-6">
+    <p class="text-gray-400">You've reached the end of your events</p>
 </div>
 
-<!-- Delete Confirmation Dialog -->
-<div *ngIf="isDeleteConfirmDialogVisible" class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
+<div *ngIf="isDeleteConfirmDialogVisible"
+    class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
     <div class="bg-[#1E1E1E] rounded-lg p-6 w-full max-w-md mx-4">
         <h3 class="text-xl font-semibold mb-4">Confirm Delete</h3>
         <p class="text-gray-300 mb-6">Are you sure you want to delete this event? This action cannot be undone.</p>
         <div class="flex justify-end gap-3">
-            <button (click)="cancelDelete()" class="px-4 py-2 bg-transparent border border-gray-600 rounded-lg hover:bg-gray-800">
+            <button (click)="cancelDelete()"
+                class="px-4 py-2 bg-transparent border border-gray-600 rounded-lg hover:bg-gray-800">
                 Cancel
             </button>
             <button (click)="deleteEvent()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
