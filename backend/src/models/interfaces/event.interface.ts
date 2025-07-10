@@ -27,3 +27,25 @@ export interface EventDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+export interface IEvent {
+  _id: string;
+  eventTitle: string;
+  eventDescription: string;
+  eventType: string;
+  startDate: string;
+  endingDate: string;
+  startTime: string;
+  endTime: string;
+  venueName: string;
+  city: string;
+  eventVisibility: string;
+  promotionalImage: string;
+  ageRestriction: boolean;
+  tickets: Ticket[];
+  user_id: string;
+  createdAt: string;
+  updatedAt: string;
+  status: boolean;
+}

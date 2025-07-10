@@ -19,14 +19,22 @@ export class ExploreController implements IExploreController {
     @inject("SubscriptionQueryService") private subscriptionService: ISubscriptionQueryService
   ) {}
 
-  getAllEvents = async (req: Request, res: Response): Promise<void> => {
+    getAllEvents = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId: string = req.user._id;
-      const events = await this.exploreService.getEvents(userId);
-      const eventsDto = events.map(event => new EventDto(event));
-
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 12;
       
-      ResponseHandler.success(res, eventsDto);
+      const result = await this.exploreService.getEvents(userId, page, limit);
+      const eventsDto = result.events.map(event => new EventDto(event));
+
+      ResponseHandler.success(res, {
+        events: eventsDto,
+        total: result.total,
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        hasMore: result.hasMore
+      });
     } catch (error) {
       ResponseHandler.error(res, error, 'Failed to fetch events');
     }

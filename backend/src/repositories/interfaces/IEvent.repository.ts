@@ -33,4 +33,16 @@ export interface IEventRepository {
   skip: number,
   limit: number
 ): Promise<EventDocument[]> 
+
+findUpcomingEventsWithoutCurrentUserPaginated(
+  userId: Schema.Types.ObjectId | string,
+  page: number,
+  limit: number
+): Promise<{
+  events: EventDocument[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+  hasMore: boolean;
+}> 
 }

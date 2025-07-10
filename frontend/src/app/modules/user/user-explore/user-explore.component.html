@@ -307,8 +307,8 @@
 
     <!-- Events Grid -->
     <div *ngIf="!isLoading && filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div *ngFor="let event of filteredEvents; trackBy: trackByEventId" 
-           class="bg-[#121212] rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-gray-800 hover:border-[#00ff66] transition-all duration-300 group">
+  <div *ngFor="let event of filteredEvents; trackBy: trackByEventId" 
+       class="bg-[#121212] rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-gray-800 hover:border-[#00ff66] transition-all duration-300 group">
         
         <!-- Event Image -->
         <div class="relative aspect-w-16 aspect-h-9 overflow-hidden">
@@ -393,12 +393,29 @@
       </div>
     </div>
   </div>
+  <div *ngIf="!isLoading && filteredEvents.length > 0" class="mt-8 text-center ">
+  <div *ngIf="isLoadingMore" class="flex items-center justify-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00ff66] mr-3"></div>
+    <span class="text-gray-400">Loading more events...</span>
+  </div>
+
+  <button 
+    *ngIf="hasMoreEvents && !isLoadingMore && !allEventsLoaded" 
+    (click)="loadMoreEvents()"
+    class="bg-[#00ff66] hover:bg-green-400 text-black font-medium px-6 py-3 rounded-lg transition-colors duration-200">
+    Load More Events
+  </button>
+
+  <div *ngIf="allEventsLoaded && !isLoadingMore" class="text-gray-400 py-4 ">
+    <span>All events loaded ({{ filteredEvents.length }} total)</span>
+  </div>
+  </div>
 </div>
+
 
 <!-- Event Detail Modal -->
 <app-event-detail-modal 
   *ngIf="isModalOpen" 
   [id]="selectedEventId!" 
-  (close)="closeModal()" 
-  (chat)="onChatWithOrganizer($event)">
+  (close)="closeModal()">
 </app-event-detail-modal>

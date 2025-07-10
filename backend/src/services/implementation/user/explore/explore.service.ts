@@ -11,9 +11,20 @@ export class ExploreService implements IExploreService {
     @inject("EventRepository") private eventRepository: IEventRepository
   ) {}
 
-  async getEvents(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
+  async getEvents(
+    userId: Schema.Types.ObjectId | string, 
+    page: number = 1, 
+    limit: number = 12
+  ): Promise<{
+    events: EventDocument[];
+    total: number;
+    currentPage: number;
+    totalPages: number;
+    hasMore: boolean;
+  }> {
     if (!userId) throw new Error('User ID is required');
-    return this.eventRepository.findUpcomingEventsWithoutCurrentUser(userId);
+    
+    return this.eventRepository.findUpcomingEventsWithoutCurrentUserPaginated(userId, page, limit);
   }
   
   async getEvent(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {

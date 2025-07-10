@@ -34,6 +34,13 @@ export class UserExploreComponent implements OnInit, OnDestroy {
   selectedSort = 'Newest';
   selectedVisibility = 'All';
 
+  currentPage = 1;
+  pageSize = 12;
+  totalEvents = 0;
+  isLoadingMore = false;
+  hasMoreEvents = true;
+  allEventsLoaded = false;
+
   // Dropdown States
   isEventTypeDropdownOpen = false;
   isSortDropdownOpen = false;
@@ -84,6 +91,21 @@ export class UserExploreComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 
+  @HostListener('window:scroll', ['$event'])
+  onScroll(): void {
+    if (this.isLoadingMore || !this.hasMoreEvents || this.allEventsLoaded) {
+      return;
+    }
+
+    const threshold = 200;
+    const position = window.pageYOffset + window.innerHeight;
+    const height = document.documentElement.scrollHeight;
+
+    if (position > height - threshold) {
+      this.loadMoreEvents();
+    }
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     // Close dropdowns when clicking outside
@@ -106,7 +128,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
         takeUntil(this._destroy$)
       )
       .subscribe(() => {
-        this._applyFilters();
+        this.resetPaginationAndRefetch();
       });
   }
 
@@ -125,7 +147,6 @@ export class UserExploreComponent implements OnInit, OnDestroy {
       );
     }
 
-    
     // Apply event type filter
     if (this.selectedEventType) {
       filtered = filtered.filter(event => event.eventType === this.selectedEventType);
@@ -140,6 +161,14 @@ export class UserExploreComponent implements OnInit, OnDestroy {
     filtered = this._sortEvents(filtered);
 
     this.filteredEvents = filtered;
+  }
+  private resetPaginationAndRefetch(): void {
+    this.currentPage = 1;
+    this.eventList = [];
+    this.filteredEvents = [];
+    this.hasMoreEvents = true;
+    this.allEventsLoaded = false;
+    this._fetchAllEvents();
   }
 
   toggleMobileFilters(): void {
@@ -227,7 +256,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
   selectEventType(eventType: string): void {
     this.selectedEventType = eventType;
     this.closeEventTypeDropdown();
-    this._applyFilters();
+    this.resetPaginationAndRefetch();
   }
 
   selectSort(sortValue: string, sortLabel: string): void {
@@ -236,10 +265,10 @@ export class UserExploreComponent implements OnInit, OnDestroy {
     this._applyFilters();
   }
 
-  selectVisibility(visibilityValue: string, visibilityLabel: string): void {
+    selectVisibility(visibilityValue: string, visibilityLabel: string): void {
     this.selectedVisibility = visibilityLabel;
     this.closeVisibilityDropdown();
-    this._applyFilters();
+    this.resetPaginationAndRefetch();
   }
 
   // Filter Management
@@ -262,10 +291,9 @@ export class UserExploreComponent implements OnInit, OnDestroy {
     this.selectedEventType = '';
     this.selectedVisibility = 'All';
     this.selectedSort = 'Newest';
-    this._applyFilters();
+    this.resetPaginationAndRefetch();
   }
 
-  // Event Methods
   getLowestTicketPrice(event: IEvent): number {
     if (!event.tickets || event.tickets.length === 0) {
       return 0;
@@ -282,14 +310,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
     this.isModalOpen = false;
     this.selectedEventId = null;
   }
-
-  onChatWithOrganizer(eventId: string): void {
-    // Implement chat functionality
-    
-  }
-
   onImageError(event: any): void {
-    // Set fallback image
     event.target.src = 'assets/images/event-placeholder.jpg';
   }
 
@@ -299,13 +320,19 @@ export class UserExploreComponent implements OnInit, OnDestroy {
 
   private _fetchAllEvents(): void {
     this.isLoading = true;
+    this.currentPage = 1;
+    this.eventList = [];
+    this.filteredEvents = [];
 
-    this._exploreService.getAllEvents()
+    this._exploreService.getAllEvents(this.currentPage, this.pageSize)
       .pipe(
         tap((response) => {
           if (response.data) {
-            this.eventList = response.data;
+            this.eventList = response.data.events;
             this.filteredEvents = [...this.eventList];
+            this.totalEvents = response.data.totalEvents;
+            this.hasMoreEvents = this.eventList.length < this.totalEvents;
+            this.allEventsLoaded = !this.hasMoreEvents;
             this._applyFilters();
           }
         }),
@@ -316,6 +343,36 @@ export class UserExploreComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this._destroy$),
         tap(() => this.isLoading = false)
+      )
+      .subscribe();
+  }
+  loadMoreEvents(): void {
+    if (this.isLoadingMore || !this.hasMoreEvents || this.allEventsLoaded) {
+      return;
+    }
+
+    this.isLoadingMore = true;
+    this.currentPage++;
+
+    this._exploreService.getAllEvents(this.currentPage, this.pageSize)
+      .pipe(
+        tap((response) => {
+          if (response.data && response.data.events) {
+            const newEvents = response.data.events;
+            this.eventList = [...this.eventList, ...newEvents];
+            this.hasMoreEvents = this.eventList.length < this.totalEvents;
+            this.allEventsLoaded = !this.hasMoreEvents;
+            this._applyFilters();
+          }
+        }),
+        catchError((error) => {
+          console.error('Error loading more events:', error);
+          Notiflix.Notify.failure('Error loading more events');
+          this.currentPage--; // Revert page increment on error
+          return of(null);
+        }),
+        takeUntil(this._destroy$),
+        tap(() => this.isLoadingMore = false)
       )
       .subscribe();
   }
