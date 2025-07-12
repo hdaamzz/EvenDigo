@@ -60,7 +60,7 @@ export class ExploreController implements IExploreController {
       }
     } catch (error) {
       const statusCode = error instanceof BadRequestException ? 
-        StatusCode.BAD_REQUEST : StatusCode.INTERNAL_SERVER_ERROR;
+        StatusCode.BAD_REQUEST : StatusCode.PAYMENT_REQUIRED;
         
       ResponseHandler.error(res, error, 'Failed to process checkout', statusCode);
     }

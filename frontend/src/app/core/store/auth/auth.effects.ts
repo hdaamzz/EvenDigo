@@ -94,9 +94,6 @@ export class AuthEffects {
                 this.authService.userLogin({ email, password }).pipe(
                     map(response => {
                         if (response.success) {
-                            Notiflix.Notify.success('Welcome to EvenDigo');
-                           
-
                             return AuthActions.loginSuccess({
                                 user: response.user,
                                 token: response.token

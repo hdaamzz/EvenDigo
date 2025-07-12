@@ -60,7 +60,7 @@ export class AdminEventsService {
 
   private _handleError(error: HttpErrorResponse): Observable<EventsApiResponse> {
     const errorMessage = error.error?.message || 'An error occurred while processing your request';
-    console.error('API Error:', error);
+    console.info('API Error:', error);
 
     return throwError(() => ({
       success: false as const,

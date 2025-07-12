@@ -16,30 +16,15 @@ export class AuthService {
   constructor(private http: HttpClient) { }
 
   userRegister(userData: IRegister): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.apiUrl}/send-otp`, userData).pipe(
-      catchError((error) => {
-        console.error('Registration error:', error);
-        return of({ success: false, message: 'Registration failed. Please try again.' });
-      })
-    );
+    return this.http.post<CommonResponse>(`${this.apiUrl}/send-otp`, userData)
   }
 
   verifyOTP(email: string, otp: string): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.apiUrl}/verify-otp`, { email, otp }).pipe(
-      catchError((error) => {
-        console.error('OTP verification error:', error);
-        return of({ success: false, message: 'OTP verification failed. Please try again.' });
-      })
-    );
+    return this.http.post<CommonResponse>(`${this.apiUrl}/verify-otp`, { email, otp })
   }
 
   userLogin(userData: ILogin): Observable<any> {
-    return this.http.post(`${this.apiUrl}/sign-in`, userData).pipe(
-      catchError((error) => {
-        console.error('Login error:', error);
-        return of({ success: false, message: error.error?.message || error.message });
-      })
-    );
+    return this.http.post(`${this.apiUrl}/sign-in`, userData)
   }
 
   checkAuthStatus(): Observable<{
@@ -47,16 +32,7 @@ export class AuthService {
   }> {
     return this.http.get<{ isAuthenticated: boolean; user?: User; token?: string, role?: string }>(
       `${this.apiUrl}/status`
-    ).pipe(
-      catchError((error) => {
-        return of({ 
-          isAuthenticated: false, 
-          user: undefined, 
-          token: undefined, 
-          role: undefined 
-        });
-      })
-    );
+    )
   }
 
   loginWithFirebase(idToken: string, name?: string | null, email?: string | null, profileImg?: string | null): Observable<any> {
@@ -67,12 +43,7 @@ export class AuthService {
       profileImg: profileImg || '',
     };
 
-    return this.http.post(`${this.apiUrl}/firebase-signin`, payload).pipe(
-      catchError((error) => {
-        console.error('Firebase login error:', error);
-        return of({ success: false, message: 'Firebase authentication failed' });
-      })
-    );
+    return this.http.post(`${this.apiUrl}/firebase-signin`, payload)
   }
 
   forgotPassword(formData: {email:string}): Observable<CommonResponse> {
@@ -80,29 +51,13 @@ export class AuthService {
   }
 
   resetPassword(resetData: {email:string,newPassword:string,token:string}): Observable<CommonResponse> {
-    return this.http.post<CommonResponse>(`${this.apiUrl}/reset-password`, resetData).pipe(
-      catchError((error) => {
-        console.error('Reset password error:', error);
-        return of({ success: false, message: 'Password reset failed' });
-      })
-    );
+    return this.http.post<CommonResponse>(`${this.apiUrl}/reset-password`, resetData)
   }
 
   logout(): Observable<CommonResponse> {
-    return this.http.get<CommonResponse>(`${this.apiUrl}/logout`).pipe(
-      catchError((error) => {
-        console.error('Logout error:', error);
-        return of({ success: false, message: 'Logout failed. Please try again.' });
-      })
-    );
+    return this.http.get<CommonResponse>(`${this.apiUrl}/logout`)
   }   
   getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
-    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.apiUrl}/plans`).pipe(
-      delay(700),
-      catchError(error => {
-        console.error('Get plans error:', error);
-        return of({ success: false, message: 'Failed to fetch subscription plans' });
-      })
-    );
+    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.apiUrl}/plans`)
   }
 }

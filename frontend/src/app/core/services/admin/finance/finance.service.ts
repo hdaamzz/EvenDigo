@@ -180,7 +180,7 @@ export class FinanceService {
         `Server Error: ${error.status} - ${error.statusText}`;
     }
 
-    console.error(errorMessage, error);
+    console.info(errorMessage, error);
     return throwError(() => new Error(errorMessage));
   }
 }
