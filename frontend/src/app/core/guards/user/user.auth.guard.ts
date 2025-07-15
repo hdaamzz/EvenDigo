@@ -30,7 +30,6 @@ export const isLogout: CanActivateFn = (route, state) => {
   return authService.checkAuthStatus().pipe(
     map(response => {
       if (response.isAuthenticated) {
-        // Redirect based on role
         if (response?.user?.role === 'admin') {
           router.navigate(['/admin/dashboard']);
         } else {
@@ -42,7 +41,6 @@ export const isLogout: CanActivateFn = (route, state) => {
       }
     }),
     catchError(error => {
-      // If auth check fails, allow access to login/register pages
       return of(true);
     })
   );
@@ -59,10 +57,10 @@ export const isAdmin: CanActivateFn = (route, state) => {
           router.navigate(['/admin/dashboard']);
           return false;
         } else {
-          return true; // User can access regular pages
+          return true;
         }
       } else {
-        return true; // Allow anonymous access
+        return true; 
       }
     }),
     catchError(error => {

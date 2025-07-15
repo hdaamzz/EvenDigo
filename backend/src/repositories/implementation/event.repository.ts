@@ -21,22 +21,44 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
     return await this.findWithSort({ user_id: userId }, { createdAt: -1 });
   }
 
-  async findCompletedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    const now = new Date();
-    return await this.findWithSort({
-      user_id: userId,
-      endingDate: { $lt: now }
-    }, { createdAt: -1 });
-  }
+  async findCompletedEventByUserIdWithPagination(
+      userId: Schema.Types.ObjectId | string, 
+      page: number = 1, 
+      limit: number = 10
+    ): Promise<EventDocument[]> {
+      const now = new Date();
+      const skip = (page - 1) * limit;
+      
+      return await this.model
+        .find({
+          user_id: userId,
+          endingDate: { $lt: now }
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec();
+    }
 
-  async findOngoingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    const now = new Date();
-    return await this.findWithSort({
-      user_id: userId,
-      startDate: { $lte: now },
-      endingDate: { $gte: now }
-    }, { createdAt: -1 });
-  }
+    async findOngoingEventByUserIdWithPagination(
+      userId: Schema.Types.ObjectId | string, 
+      page: number = 1, 
+      limit: number = 10
+    ): Promise<EventDocument[]> {
+      const now = new Date();
+      const skip = (page - 1) * limit;
+      
+      return await this.model
+        .find({
+          user_id: userId,
+          startDate: { $lte: now },
+          endingDate: { $gte: now }
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec();
+    }
 
   async findNotStartedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
     const now = new Date();

@@ -55,7 +55,10 @@ export class DashboardController implements IDashboardController {
   getUserOrganizedEvents = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user._id;
-      const events = await this.eventService.getOrganizedEventsByUserId(userId);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const events = await this.eventService.getOrganizedEventsByUserId(userId, page, limit);
       res.status(StatusCode.OK).json({ success: true, data: events });
     } catch (error) {
       console.error('Get user events error:', error);
@@ -69,7 +72,10 @@ export class DashboardController implements IDashboardController {
   getUserParticipatedEvents = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user._id;
-      const events = await this.eventService.getParticipatedEventsByUserId(userId);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const events = await this.eventService.getParticipatedEventsByUserId(userId, page, limit);
       res.status(StatusCode.OK).json({ success: true, data: events });
     } catch (error) {
       console.error('Get user events error:', error);
@@ -81,19 +87,21 @@ export class DashboardController implements IDashboardController {
   };
 
   getUserOngoingEvents = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const userId = req.user._id;
-    const events = await this.eventService.getOngoingEventsByUserId(userId);
-    res.status(StatusCode.OK).json({ success: true, data: events });
-  } catch (error) {
-    console.error('Get user events error:', error);
-    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
-      success: false, 
-      error: 'Failed to fetch events' 
-    });
-  }
+    try {
+      const userId = req.user._id;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const events = await this.eventService.getOngoingEventsByUserId(userId, page, limit);
+      res.status(StatusCode.OK).json({ success: true, data: events });
+    } catch (error) {
+      console.error('Get user events error:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
+        success: false, 
+        error: 'Failed to fetch events' 
+      });
+    }
   };
-
   getEventById = async (req: Request, res: Response): Promise<void> => {
     try {
       const eventId = req.params.eventId;
