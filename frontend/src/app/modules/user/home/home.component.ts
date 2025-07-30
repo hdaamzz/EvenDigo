@@ -3,111 +3,89 @@ import { CommonModule } from '@angular/common';
 import { UserFooterComponent } from "../../../shared/user-footer/user-footer.component";
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, delay } from 'rxjs';
+import { Subject, takeUntil, delay, Subscription } from 'rxjs';
 import Notiflix from 'notiflix';
 import { AuthService } from '../../../core/services/user/auth/auth.service';
 import { SubscriptionPlan } from '../../../core/interfaces/admin/subscriptionPlan';
 
 @Component({
   selector: 'app-home',
-  standalone: true, 
+  standalone: true,
   imports: [UserFooterComponent, UserNavComponent, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private readonly _destroy$ = new Subject<void>();
-  
-  // Loading states
+  private readonly destroy$ = new Subject<void>();
+
+  // UI State
   isLoading = true;
   isInitialLoad = true;
-  
+
   // Data
   plans: SubscriptionPlan[] = [];
   selectedPlan?: SubscriptionPlan;
-  
-  // Skeleton data for better UX
-  skeletonPlans = Array(2).fill(null);
-  
+
+  // For skeleton loading
+  readonly skeletonPlans = Array(2);
+
   constructor(
-    private _router: Router,
-    private _authService: AuthService,
+    private readonly router: Router,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this._loadPlans();
+    this.loadPlans();
   }
 
   ngOnDestroy(): void {
-    this._destroy$.next();
-    this._destroy$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
-  
-  private _loadPlans(): void {
+
+  private loadPlans(): void {
     this.isLoading = true;
-    
-    this._authService.getPlans()
+    this.authService.getPlans()
       .pipe(
-        takeUntil(this._destroy$),
-        // Add minimum loading time for better UX
+        takeUntil(this.destroy$),
         delay(this.isInitialLoad ? 800 : 300)
       )
       .subscribe({
-        next: (response) => {
-          if (response.data) {
-            this.plans = response.data;
-          }
-          this._handleLoadingComplete();
+        next: ({ data }) => {
+          this.plans = data ?? [];
+          this.onLoadComplete();
         },
         error: (error) => {
-          this._handleLoadingComplete();
+          this.onLoadComplete();
           Notiflix.Notify.failure('Failed to load subscription plans');
-          console.error('Error loading plans:', error);
+          console.error('[HomeComponent] Error loading plans: ', error);
         }
       });
   }
-  
-  private _handleLoadingComplete(): void {
+
+  private onLoadComplete(): void {
     this.isLoading = false;
     this.isInitialLoad = false;
   }
-  
+
   selectPlan(plan: SubscriptionPlan): void {
-    if (this.isLoading) return;
-    this.selectedPlan = plan;
+    if (!this.isLoading) {
+      this.selectedPlan = plan;
+    }
   }
-  
+
   subscribeToPlan(plan: SubscriptionPlan): void {
     if (this.isLoading) return;
-    
-    if (plan.type === 'premium') {
-      this._router.navigate(['/premium/checkout'], { 
-        queryParams: { 
-          type: plan.type
-        }
-      });
-      return;
-    }
-    
-    if (plan.type === 'basic') {
-      this._router.navigate(['/premium/checkout'], { 
-        queryParams: { 
-          type: plan.type
-        }
-      });
-      return;
-    }
+    this.router.navigate(['/premium/checkout'], { queryParams: { type: plan.type } });
   }
-  
-  // Retry loading function
+
   retryLoadPlans(): void {
     if (!this.isLoading) {
-      this._loadPlans();
+      this.loadPlans();
     }
   }
-  
-  // TrackBy function for better performance
-  trackByPlan(index: number, plan: SubscriptionPlan): any {
-    return plan.type || index;
+
+  trackByPlan(_index: number, plan: SubscriptionPlan): string | undefined {
+    return plan.type;
   }
 }
