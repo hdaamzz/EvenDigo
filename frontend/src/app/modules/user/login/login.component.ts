@@ -101,7 +101,6 @@ export class LoginComponent implements OnDestroy {
           Notiflix.Notify.success('Reset email sent to your inbox');
           }else{
             Notiflix.Notify.failure(`${response.message}`);
-
           }
           
         },

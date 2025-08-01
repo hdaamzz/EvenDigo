@@ -212,6 +212,80 @@ class BookingRepository implements IBookingRepository {
       throw new Error(`Failed to count bookings for user: ${(error as Error).message}`);
     }
   }
+
+  async findBookingEventByUserIdWithPagination(
+    userId: Schema.Types.ObjectId | string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<any[]> {
+    try {
+      if (!isValidObjectId(userId)) throw new Error("Invalid userId");
+
+      const skip = (page - 1) * limit;
+      const userObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
+
+      const bookings = await this.bookingModel.aggregate([
+        {
+          $match: {
+            userId: userObjectId,
+            paymentStatus: "Completed"
+          }
+        },
+        {
+          $lookup: {
+            from: 'events',
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event'
+          }
+        },
+        {
+          $unwind: '$event'
+        },
+        {
+          $match: {
+            'event.endingDate': { $lt: new Date() }
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'event.user_id',
+            foreignField: '_id',
+            as: 'event.user_id'
+          }
+        },
+        {
+          $unwind: '$event.user_id'
+        },
+        {
+          $sort: { createdAt: -1 }
+        },
+        {
+          $skip: skip
+        },
+        {
+          $limit: limit
+        },
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                '$event',
+                { bookingId: '$bookingId' }
+              ]
+            }
+          }
+        }
+      ]);
+
+      return bookings;
+
+    } catch (error) {
+      console.error('Error in findBookingEventByUserIdWithPagination:', error);
+      throw new Error(`Failed to find finished bookings for user: ${(error as Error).message}`);
+    }
+  }
 }
 
 export { IBookingRepository, BookingRepository };

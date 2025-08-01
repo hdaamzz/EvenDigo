@@ -4,8 +4,8 @@ import { EventDocument } from '../../models/interfaces/event.interface';
 export interface IEventRepository {
   createEvent(eventData: Partial<EventDocument>): Promise<EventDocument>;
   findEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
-  findCompletedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
-  findOngoingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
+  findCompletedEventByUserIdWithPagination(userId: Schema.Types.ObjectId | string, skip: number, limit: number): Promise<EventDocument[]>
+  findOngoingEventByUserIdWithPagination(userId: Schema.Types.ObjectId | string, skip: number, limit: number): Promise<EventDocument[]>
   findNotStartedEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findCurrentEventByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findAllEventWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
@@ -33,4 +33,16 @@ export interface IEventRepository {
   skip: number,
   limit: number
 ): Promise<EventDocument[]> 
+
+findUpcomingEventsWithoutCurrentUserPaginated(
+  userId: Schema.Types.ObjectId | string,
+  page: number,
+  limit: number
+): Promise<{
+  events: EventDocument[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+  hasMore: boolean;
+}> 
 }

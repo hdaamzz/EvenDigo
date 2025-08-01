@@ -168,8 +168,6 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       this.proceedLoading = false;
-      console.error('Error during checkout:', error);
-      Notiflix.Notify.failure(`Checkout failed: ${error.message || 'Please try again.'}`);
     }
   }
 
@@ -178,7 +176,6 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       const queryParams = this._route.snapshot.queryParams;
       
       if (!queryParams['eventId'] || !queryParams['tickets']) {
-        console.error('Missing required query parameters');
         this._router.navigate(['/']);
         return;
       }
@@ -191,15 +188,12 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       };
 
       if (!this.ticketData.eventId || !this.ticketData.tickets) {
-        console.error('Invalid ticket data from query params');
         this._router.navigate(['/']);
         return;
       }
 
       this._showEventDetails(this.ticketData.eventId);
     } catch (error) {
-      console.error('Error parsing query parameters:', error);
-      Notiflix.Notify.failure('Invalid ticket data. Please select tickets again.');
       this._router.navigate(['/']);
     }
   }
@@ -214,8 +208,6 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
           }
         }),
         catchError((error) => {
-          console.error('Error fetching event:', error);
-          Notiflix.Notify.failure('Error fetching event details');
           return of(null);
         })
       )
@@ -232,8 +224,6 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
           }
         }),
         catchError((error) => {
-          console.error('Error fetching wallet:', error);
-          Notiflix.Notify.failure('Error fetching wallet details');
           return of(null);
         })
       )
@@ -244,11 +234,11 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
     try {
       this._stripe = await loadStripe(environment.stripePublishKey);
       if (!this._stripe) {
-        Notiflix.Notify.failure('Payment service unavailable. Please try again later.');
+        // Notiflix.Notify.failure('Payment service unavailable. Please try again later.');
       }
     } catch (error) {
       console.error('Failed to initialize Stripe:', error);
-      Notiflix.Notify.failure('Payment service unavailable. Please try again later.');
+      // Notiflix.Notify.failure('Payment service unavailable. Please try again later.');
     }
   }
 

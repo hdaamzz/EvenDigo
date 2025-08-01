@@ -8,7 +8,8 @@
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
     </div>
 
-    <div *ngIf="!isLoading && eventData" class="flex flex-col md:flex-row h-full min-h-[500px]">
+    <div *ngIf="!isLoading && eventData" class="flex flex-col md:flex-row h-full min-h-[500px] max-h-[90vh]">
+      <!-- Left Panel -->
       <div class="md:w-1/2 bg-[#121212] flex flex-col">
         <div class="relative w-full h-64 md:h-80 overflow-hidden flex-shrink-0">
           <img
@@ -25,7 +26,7 @@
           </button>
         </div>
 
-        <div class="p-4 flex-1 flex flex-col justify-between">
+        <div class="p-4 flex-1 flex flex-col justify-between min-h-0">
           <div class="mb-4">
             <h1 class="text-xl md:text-2xl font-bold mb-3 text-white leading-tight">{{ eventData.eventTitle }}</h1>
             
@@ -94,19 +95,24 @@
         </div>
       </div>
 
+      <!-- Right Panel -->
       <div class="md:w-1/2 flex flex-col bg-[#1a1a1a] overflow-hidden">
         <div class="overflow-y-auto flex-1 custom-scrollbar">
-          <div class="p-4">
-            <div @fade class="mb-6">
+          <div class="p-4 space-y-6">
+            <!-- Event Description -->
+            <div @fade>
               <h2 class="text-lg font-semibold text-white mb-2">About this event</h2>
               <p class="text-gray-300 text-sm leading-relaxed">
                 {{ eventData.eventDescription | slice:0:200 }}{{eventData.eventDescription.length > 200 ? '...' : ''}}
               </p>
             </div>
 
-            <div @fade class="mb-4">
+            <!-- Tickets Section -->
+            <div @fade class="pb-4">
               <h2 class="text-lg font-semibold text-white mb-3">Select Tickets</h2>
-              <div class="space-y-3">
+              
+              <!-- Scrollable Tickets Container -->
+              <div class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                 <div
                   *ngFor="let ticket of eventData.tickets; let i = index"
                   class="bg-gray-800/50 rounded-xl p-4 hover:bg-gray-700/50 transition-colors border border-gray-700/50 ticket-card"
@@ -151,6 +157,7 @@
           </div>
         </div>
 
+        <!-- Fixed Bottom Section -->
         <div class="bg-[#1a1a1a] border-t border-gray-700 p-4 flex-shrink-0">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>

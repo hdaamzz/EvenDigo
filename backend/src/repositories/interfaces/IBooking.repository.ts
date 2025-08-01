@@ -17,4 +17,6 @@ export interface IBookingRepository {
   updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null>;
   findBookingsByEventId(eventId: Schema.Types.ObjectId | string, filters: Record<string, any>): Promise<IBooking[]>
   countUpcomingEventBookingByUserId(userId: Schema.Types.ObjectId | string): Promise<number>
+  findBookingEventByUserIdWithPagination(userId: Schema.Types.ObjectId | string, skip: number, limit: number): Promise<IBooking[]>;
+
 }

@@ -32,6 +32,8 @@ export class TokenService implements ITokenService {
       {
         userId: user._id,
         email: user.email,
+        name: user.name,
+        role: user.role,
       },
       process.env.REFRESH_TOKEN_SECRET!,
       { expiresIn: '7d' } 

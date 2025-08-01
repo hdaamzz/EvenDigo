@@ -39,7 +39,7 @@
       <!-- Wallet Balance -->
       <div class="bg-[#121212] p-4 rounded-lg mb-5 text-center">
         <h3 class="text-lg font-semibold">Available Balance</h3>
-        <div *ngIf="!isWalletLoading && wallet" class="text-2xl text-[#00ff66] my-2">₹{{ wallet.walletBalance }}</div>
+        <div *ngIf="!isWalletLoading && wallet" class="text-2xl text-[#00ff66] my-2">{{ wallet.walletBalance | currency:'INR':'symbol':'1.0-2' }}</div>
         <div *ngIf="isWalletLoading" class="text-2xl text-gray-400 my-2 flex justify-center">
           <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -77,7 +77,8 @@
       <!-- Conditional Payment Details -->
       <div *ngIf="selectedPaymentMethod === 'wallet'" class="bg-[#121212] p-5 rounded-lg mb-5 payment-details">
         <h3 class="text-lg font-semibold mb-4">Wallet Payment</h3>
-        <p>Available Balance: ₹{{ wallet.walletBalance || 0 }}</p>
+        <p>Available Balance: {{ wallet.walletBalance | currency:'INR':'symbol':'1.0-2' }}</p>
+
         <p *ngIf="hasInsufficientBalance" class="text-red-500 mt-2">
           Insufficient balance. Please add funds or choose card payment.
         </p>

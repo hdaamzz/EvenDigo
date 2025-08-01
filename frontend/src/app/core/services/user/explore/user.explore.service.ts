@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AllEventResponse } from '../../../models/event.interface';
 import { PayloadData } from '../../../models/booking.interface';
+import { PaginatedEventResponse } from '../../../interfaces/user/event';
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +16,8 @@ export class UserExploreService {
 
   constructor(private http: HttpClient) {}
 
-  getAllEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.apiUrl}`);
+  getAllEvents(page: number = 1, limit: number = 12): Observable<PaginatedEventResponse> {
+    return this.http.get<PaginatedEventResponse>(`${this.apiUrl}?page=${page}&limit=${limit}`);
   }
 
   createStripeCheckoutSession(data:PayloadData): Observable<{ success: boolean, data: { sessionId: string } }> {

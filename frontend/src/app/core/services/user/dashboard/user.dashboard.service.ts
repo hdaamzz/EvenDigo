@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AllEventResponse, EventResponse, IEvent } from '../../../models/event.interface';
+import { AllEventResponse, EventResponse } from '../../../models/event.interface';
 
 
 @Injectable({
@@ -18,20 +18,20 @@ export class UserDashboardService {
     return this.http.post<EventResponse>(`${this.apiUrl}/events`, eventData );
   }
 
-  getUserEvents(): Observable<AllEventResponse> {
-    return this.http.get<AllEventResponse>(`${this.apiUrl}/events`);
+  getUserEvents(page: number = 1, limit: number = 10): Observable<AllEventResponse> {
+    return this.http.get<AllEventResponse>(`${this.apiUrl}/events?page=${page}&limit=${limit}`);
   }
 
-  getOngoingEvents(): Observable<any> {
-    return this.http.get<AllEventResponse>(`${this.apiUrl}/events/ongoing`);
+  getOngoingEvents(page: number = 1, limit: number = 10): Observable<any> {
+    return this.http.get<AllEventResponse>(`${this.apiUrl}/events/ongoing?page=${page}&limit=${limit}`);
   }
 
-  getUserOrganizedEvents(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/events/organized`);
+  getUserOrganizedEvents(page: number = 1, limit: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/events/organized?page=${page}&limit=${limit}`);
   }
 
-  getUserParticipatedEvents(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/events/participated`);
+  getUserParticipatedEvents(page: number = 1, limit: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/events/participated?page=${page}&limit=${limit}`);
   }
 
   getEventById(eventId: string): Observable<EventResponse> {

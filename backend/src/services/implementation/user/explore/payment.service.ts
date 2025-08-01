@@ -179,7 +179,7 @@ export class PaymentService implements IPaymentService {
       return booking;
     } catch (error) {
       console.error('Wallet payment error:', error);
-      throw new Error(`Wallet payment failed: ${(error as Error).message}`);
+      throw new Error(`${(error as Error).message}`);
     }
   }
 

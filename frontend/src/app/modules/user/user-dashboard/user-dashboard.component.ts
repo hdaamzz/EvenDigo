@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { CardIEvent, IEvent } from '../../../core/models/event.interface';
 import { catchError, Observable, of, tap } from 'rxjs';
 import { UserNavComponent } from '../../../shared/user-nav/user-nav.component';
 import { Store } from '@ngrx/store';
-import { AuthState, User } from '../../../core/models/userModel';
+import { User } from '../../../core/models/userModel';
 import { selectUser } from '../../../core/store/auth/auth.selectors';
 import { EventCreationComponent } from '../event-creation/event-creation.component';
 import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
@@ -28,7 +28,7 @@ import { AppState } from '../../../core/interfaces/user/profile';
     ButtonModule,
     InputTextModule,
     UserNavComponent,
-    EventCreationComponent, 
+    EventCreationComponent,
     EventCardComponent
   ],
   templateUrl: './user-dashboard.component.html',
@@ -63,7 +63,7 @@ import { AppState } from '../../../core/interfaces/user/profile';
         query(':enter', [
           style({ opacity: 0, transform: 'translateY(50px) scale(0.8)' }),
           stagger(100, [
-            animate('500ms cubic-bezier(0.25, 0.8, 0.25, 1)', 
+            animate('500ms cubic-bezier(0.25, 0.8, 0.25, 1)',
               style({ opacity: 1, transform: 'translateY(0) scale(1)' })
             )
           ])
@@ -73,8 +73,18 @@ import { AppState } from '../../../core/interfaces/user/profile';
   ]
 })
 export class UserDashboardComponent implements OnInit {
+  private readonly pageSize = 10;
+  private participatedPage = 1;
+  private organizedPage = 1;
+  private ongoingPage = 1;
+  private hasMoreParticipated = true;
+  private hasMoreOrganized = true;
+  private hasMoreOngoing = true;
+
+
+
   @ViewChild(EventCardComponent) eventCardComponent!: EventCardComponent;
-   
+
   user$: Observable<User | null>;
   currentUser: User | null = null;
   isUserVerified: boolean = false;
@@ -88,9 +98,9 @@ export class UserDashboardComponent implements OnInit {
   displayEventDialog: boolean = false;
   searchQuery: string = '';
   selectedFilter: string = 'newest';
-  
-  // Mobile navigation state
+
   isMobileMenuOpen: boolean = false;
+
 
   constructor(
     private dashboardService: UserDashboardService,
@@ -98,15 +108,37 @@ export class UserDashboardComponent implements OnInit {
   ) {
     this.user$ = this.store.select(selectUser);
   }
+  @HostListener('window:scroll', ['$event'])
+  onScroll(): void {
+    const threshold = 100;
+    const position = window.pageYOffset + window.innerHeight;
+    const max = document.documentElement.scrollHeight;
 
-  private _loadUserOrganizedEvents(): void {
-    this.eventLoading = true;
-    this.dashboardService.getUserOrganizedEvents()
+    if (position > max - threshold && this.hasMoreEvents() && !this.eventLoading) {
+      this.loadMoreEvents();
+    }
+  }
+
+  private _loadUserOrganizedEvents(page: number = 1, append: boolean = false): void {
+    if (!this.hasMoreOrganized && page > 1) return;
+
+    this.eventLoading = !append;
+
+    this.dashboardService.getUserOrganizedEvents(page, this.pageSize)
       .subscribe({
         next: (response) => {
           if (response.success) {
+            const newEvents = response.data || [];
+
+            if (append) {
+              this.eventOrganizedList = [...(this.eventOrganizedList || []), ...newEvents];
+            } else {
+              this.eventOrganizedList = newEvents;
+            }
+
+            this.hasMoreOrganized = newEvents.length === this.pageSize;
+            this.organizedPage = page;
             this.eventLoading = false;
-            this.eventOrganizedList = response.data;
           } else {
             this.eventLoading = false;
             Notiflix.Notify.failure('Failed to load your events.');
@@ -120,14 +152,26 @@ export class UserDashboardComponent implements OnInit {
       });
   }
 
-  private _loadOngoingEvents(): void {
-    this.eventLoading = true;
-    this.dashboardService.getOngoingEvents()
+  private _loadOngoingEvents(page: number = 1, append: boolean = false): void {
+    if (!this.hasMoreOngoing && page > 1) return;
+
+    this.eventLoading = !append;
+
+    this.dashboardService.getOngoingEvents(page, this.pageSize)
       .subscribe({
         next: (response) => {
           if (response.success) {
+            const newEvents = response.data || [];
+
+            if (append) {
+              this.ongoingEventsList = [...(this.ongoingEventsList || []), ...newEvents];
+            } else {
+              this.ongoingEventsList = newEvents;
+            }
+
+            this.hasMoreOngoing = newEvents.length === this.pageSize;
+            this.ongoingPage = page;
             this.eventLoading = false;
-            this.ongoingEventsList = response.data;
           } else {
             this.eventLoading = false;
             Notiflix.Notify.failure('Failed to load ongoing events.');
@@ -147,7 +191,7 @@ export class UserDashboardComponent implements OnInit {
     this.user$
       .pipe(
         tap(user => {
-          this.currentUser = user;          
+          this.currentUser = user;
           this.isUserVerified = user?.status == "active" || false;
         })
       )
@@ -158,15 +202,22 @@ export class UserDashboardComponent implements OnInit {
     this._loadOngoingEvents();
   }
 
-  tabChange(tab: 'participated' | 'organized' | 'ongoing') {    
+  tabChange(tab: 'participated' | 'organized' | 'ongoing') {
     this.activeTab = tab;
-    this.isMobileMenuOpen = false; // Close mobile menu on tab change
-    
-    // Add haptic feedback for mobile
+    this.isMobileMenuOpen = false;
+
+    this.participatedPage = 1;
+    this.organizedPage = 1;
+    this.ongoingPage = 1;
+    this.hasMoreParticipated = true;
+    this.hasMoreOrganized = true;
+    this.hasMoreOngoing = true;
+
     if (navigator.vibrate) {
       navigator.vibrate(50);
     }
   }
+
 
   toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
@@ -196,24 +247,69 @@ export class UserDashboardComponent implements OnInit {
   }
 
   purchaseTickets(item: IEvent) {
-    // Implementation for ticket purchase
   }
 
-  fetchAllParticipatedEvents() {
-    this.eventLoading = true;
-    this.dashboardService.getUserParticipatedEvents().pipe(
-      tap((response) => {        
-        this.eventParticipatedList = response.data;
+  fetchAllParticipatedEvents(page: number = 1, append: boolean = false): void {
+    if (!this.hasMoreParticipated && page > 1) return;
+
+    this.eventLoading = !append;
+
+    this.dashboardService.getUserParticipatedEvents(page, this.pageSize).pipe(
+      tap((response) => {
+        const newEvents = response.data || [];
+
+        if (append) {
+          this.eventParticipatedList = [...(this.eventParticipatedList || []), ...newEvents];
+        } else {
+          this.eventParticipatedList = newEvents;
+        }
+
+        this.hasMoreParticipated = newEvents.length === this.pageSize;
+        this.participatedPage = page;
         this.eventLoading = false;
       }),
       catchError((error) => {
         this.eventLoading = false;
-        console.error('Error fetching users:', error);
-        Notiflix.Notify.failure('Error fetching users');
+        console.error('Error fetching participated events:', error);
+        Notiflix.Notify.failure('Error fetching participated events');
         return of(null);
       })
     ).subscribe();
   }
+
+  loadMoreEvents(): void {
+    switch (this.activeTab) {
+      case 'participated':
+        if (this.hasMoreParticipated) {
+          this.fetchAllParticipatedEvents(this.participatedPage + 1, true);
+        }
+        break;
+      case 'organized':
+        if (this.hasMoreOrganized) {
+          this._loadUserOrganizedEvents(this.organizedPage + 1, true);
+        }
+        break;
+      case 'ongoing':
+        if (this.hasMoreOngoing) {
+          this._loadOngoingEvents(this.ongoingPage + 1, true);
+        }
+        break;
+    }
+  }
+
+  hasMoreEvents(): boolean {
+    switch (this.activeTab) {
+      case 'participated':
+        return this.hasMoreParticipated;
+      case 'organized':
+        return this.hasMoreOrganized;
+      case 'ongoing':
+        return this.hasMoreOngoing;
+      default:
+        return false;
+    }
+  }
+
 
   getCurrentEventList(): CardIEvent[] | undefined {
     switch (this.activeTab) {

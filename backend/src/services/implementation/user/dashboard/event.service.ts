@@ -34,16 +34,16 @@ export class EventService implements IEventService {
     return this.eventRepository.findEventByUserId(userId);
   }
 
-  async getOrganizedEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    return this.eventRepository.findCompletedEventByUserId(userId);
+  async getOrganizedEventsByUserId(userId: Schema.Types.ObjectId | string, page: number = 1, limit: number = 10): Promise<EventDocument[]> {
+  return this.eventRepository.findCompletedEventByUserIdWithPagination(userId, page, limit);
   }
 
-  async getOngoingEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]> {
-    return this.eventRepository.findOngoingEventByUserId(userId);
+  async getOngoingEventsByUserId(userId: Schema.Types.ObjectId | string, page: number = 1, limit: number = 10): Promise<EventDocument[]> {
+    return this.eventRepository.findOngoingEventByUserIdWithPagination(userId, page, limit);
   }
 
-  async getParticipatedEventsByUserId(userId: Schema.Types.ObjectId | string): Promise<IBooking[]> {
-    return this.bookingRepository.findBookingEventByUserId(userId);
+  async getParticipatedEventsByUserId(userId: Schema.Types.ObjectId | string, page: number = 1, limit: number = 10): Promise<IBooking[]> {
+    return this.bookingRepository.findBookingEventByUserIdWithPagination(userId, page, limit);
   }
 
   async getEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {

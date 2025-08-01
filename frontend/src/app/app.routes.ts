@@ -22,6 +22,7 @@ import { ProfileSubscriptionComponent } from './modules/user/profile/profile.sub
 import { SubscriptionConfirmationComponent } from './modules/user/premium-checkout/subscription-confirmation/subscription-confirmation.component';
 import { ChatComponent } from './modules/user/chat/chat.component';
 import { LiveStreamComponent } from './modules/user/live-stream/live-stream.component';
+import { subscriptionGuard } from './core/guards/subscription/subscription.guard';
 
 export const routes: Routes = [
     //user - side 
@@ -86,7 +87,7 @@ export const routes: Routes = [
     {
         path: 'chats',
         component: ChatComponent,
-        canActivate: [isLogged]
+        canActivate: [isLogged,subscriptionGuard]
     },
     {
         path: 'dashboard',
@@ -121,7 +122,7 @@ export const routes: Routes = [
     {
         path: 'live-stream',
         component: LiveStreamComponent,
-        canActivate: [isLogged]
+        canActivate: [isLogged,subscriptionGuard]
     },
     //admin - side
     {
