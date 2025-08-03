@@ -13,6 +13,9 @@
        "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "customWebpackConfig": {
+              "path": "./webpack.config.js"
+            },
             "outputPath": "dist/frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
