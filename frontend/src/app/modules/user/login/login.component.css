@@ -98,13 +98,3 @@ input {
 input:hover {
   border-color: #6b7280;
 }
-
-/* Icon Container Hover Effects */
-.w-6.h-6.bg-\[#00ff66\]\/20 {
-  transition: all 0.3s ease;
-}
-
-input:focus + .absolute .w-6.h-6.bg-\[#00ff66\]\/20 {
-  background-color: rgba(0, 255, 102, 0.3);
-  transform: scale(1.1);
-}

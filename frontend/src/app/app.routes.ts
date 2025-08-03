@@ -1,55 +1,33 @@
 import { Routes } from '@angular/router';
-import { RegisterComponent } from './modules/user/register/register.component';
-import { HomeComponent } from './modules/user/home/home.component';
-import { LoginComponent } from './modules/user/login/login.component';
 import { isAdmin, isLogged, isLogout } from './core/guards/user/user.auth.guard';
-import { AdminLoginComponent } from './modules/admin/admin-login/admin-login.component';
-import { DashboardComponent } from './modules/admin/dashboard/dashboard.component';
 import { adminIsLogged, adminIsLogout } from './core/guards/admin/admin.auth.guard';
-import { ProfileComponent } from './modules/user/profile/profile.component';
-import { ProfileDetailsComponent } from './modules/user/profile/profile.details/profile.details.component';
-import { ProfileEventsComponent } from './modules/user/profile/profile.events/profile.events.component';
-import { ResetPasswordComponent } from './modules/user/reset-password/reset-password.component';
-import { UserDashboardComponent } from './modules/user/user-dashboard/user-dashboard.component';
-import { UserExploreComponent } from './modules/user/user-explore/user-explore.component';
-import { UserCheckoutComponent } from './modules/user/user-checkout/user-checkout.component';
-import { PaymentSuccessComponent } from './modules/user/user-checkout/payment-success/payment-success.component';
-import { ProfileWalletComponent } from './modules/user/profile/profile.wallet/profile.wallet.component';
-import { ProfileBookingsComponent } from './modules/user/profile/profile.bookings/profile.bookings.component';
-import { EventEditComponent } from './modules/user/profile/profile.events/event-edit/event-edit.component';
-import { PremiumCheckoutComponent } from './modules/user/premium-checkout/premium-checkout.component';
-import { ProfileSubscriptionComponent } from './modules/user/profile/profile.subscription/profile.subscription.component';
-import { SubscriptionConfirmationComponent } from './modules/user/premium-checkout/subscription-confirmation/subscription-confirmation.component';
-import { ChatComponent } from './modules/user/chat/chat.component';
-import { LiveStreamComponent } from './modules/user/live-stream/live-stream.component';
 import { subscriptionGuard } from './core/guards/subscription/subscription.guard';
-import { EventAnalyticsComponent } from './modules/user/user-dashboard/event-analytics/event-analytics.component';
 
 export const routes: Routes = [
-    //user - side 
+    // User - side
     {
         path: '',
-        component: HomeComponent,
+        loadComponent: () => import('./modules/user/home/home.component').then(m => m.HomeComponent),
         canActivate: [isAdmin]
     },
     {
         path: 'register',
-        component: RegisterComponent,
+        loadComponent: () => import('./modules/user/register/register.component').then(m => m.RegisterComponent),
         canActivate: [isLogout]
     },
     {
         path: 'login',
-        component: LoginComponent,
+        loadComponent: () => import('./modules/user/login/login.component').then(m => m.LoginComponent),
         canActivate: [isLogout]
     },
     {
         path: 'reset-password',
-        component: ResetPasswordComponent,
+        loadComponent: () => import('./modules/user/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
         canActivate: [isLogout]
     },
     {
         path: 'profile',
-        component: ProfileComponent,
+        loadComponent: () => import('./modules/user/profile/profile.component').then(m => m.ProfileComponent),
         children: [
             {
                 path: '',
@@ -58,88 +36,90 @@ export const routes: Routes = [
             },
             {
                 path: 'details',
-                component: ProfileDetailsComponent
+                loadComponent: () => import('./modules/user/profile/profile.details/profile.details.component').then(m => m.ProfileDetailsComponent)
             },
             {
                 path: 'bookings',
-                component: ProfileBookingsComponent
+                loadComponent: () => import('./modules/user/profile/profile.bookings/profile.bookings.component').then(m => m.ProfileBookingsComponent)
             },
             {
                 path: 'events',
-                component: ProfileEventsComponent
+                loadComponent: () => import('./modules/user/profile/profile.events/profile.events.component').then(m => m.ProfileEventsComponent)
             },
             {
                 path: 'edit-event/:id',
-                component: EventEditComponent
-            }
-            ,
+                loadComponent: () => import('./modules/user/profile/profile.events/event-edit/event-edit.component').then(m => m.EventEditComponent)
+            },
             {
                 path: 'subscription',
-                component: ProfileSubscriptionComponent
-            }
-            ,
+                loadComponent: () => import('./modules/user/profile/profile.subscription/profile.subscription.component').then(m => m.ProfileSubscriptionComponent)
+            },
             {
                 path: 'wallet',
-                component: ProfileWalletComponent
+                loadComponent: () => import('./modules/user/profile/profile.wallet/profile.wallet.component').then(m => m.ProfileWalletComponent)
             }
         ],
         canActivate: [isLogged]
     },
     {
         path: 'chats',
-        component: ChatComponent,
-        canActivate: [isLogged,subscriptionGuard]
+        loadComponent: () => import('./modules/user/chat/chat.component').then(m => m.ChatComponent),
+        canActivate: [isLogged, subscriptionGuard]
     },
     {
         path: 'dashboard',
-        component: UserDashboardComponent,
+        loadComponent: () => import('./modules/user/user-dashboard/user-dashboard.component').then(m => m.UserDashboardComponent),
         canActivate: [isLogged]
     },
     {
         path: 'event-analytics/:id',
-        component: EventAnalyticsComponent
-        },
+        loadComponent: () => import('./modules/user/user-dashboard/event-analytics/event-analytics.component').then(m => m.EventAnalyticsComponent),
+        canActivate: [isLogged]
+    },
     {
         path: 'explore',
-        component: UserExploreComponent,
+        loadComponent: () => import('./modules/user/user-explore/user-explore.component').then(m => m.UserExploreComponent),
         canActivate: [isLogged]
     },
     {
         path: 'checkout',
-        component: UserCheckoutComponent,
+        loadComponent: () => import('./modules/user/user-checkout/user-checkout.component').then(m => m.UserCheckoutComponent),
         canActivate: [isLogged]
     },
     {
         path: 'payment/success',
-        component: PaymentSuccessComponent,
+        loadComponent: () => import('./modules/user/user-checkout/payment-success/payment-success.component').then(m => m.PaymentSuccessComponent),
         canActivate: [isLogged]
     },
     {
         path: 'premium/checkout',
-        component: PremiumCheckoutComponent,
+        loadComponent: () => import('./modules/user/premium-checkout/premium-checkout.component').then(m => m.PremiumCheckoutComponent),
         canActivate: [isLogged]
     },
     {
         path: 'premium/success',
-        component: SubscriptionConfirmationComponent,
+        loadComponent: () => import('./modules/user/premium-checkout/subscription-confirmation/subscription-confirmation.component').then(m => m.SubscriptionConfirmationComponent),
         canActivate: [isLogged]
     },
     {
         path: 'live-stream',
-        component: LiveStreamComponent,
-        canActivate: [isLogged,subscriptionGuard]
+        loadComponent: () => import('./modules/user/live-stream/live-stream.component').then(m => m.LiveStreamComponent),
+        canActivate: [isLogged, subscriptionGuard]
     },
-    //admin - side
+    
+    // Admin - side
     {
         path: 'admin/login',
-        component: AdminLoginComponent,
+        loadComponent: () => import('./modules/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent),
         canActivate: [adminIsLogout]
     },
     {
         path: 'admin/dashboard',
-        component: DashboardComponent,
+        loadComponent: () => import('./modules/admin/dashboard/dashboard.component').then(m => m.DashboardComponent),
         canActivate: [adminIsLogged]
     },
+    
+    // Wildcard route
     {
         path: '**',
         redirectTo: '/',
