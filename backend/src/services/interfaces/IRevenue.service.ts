@@ -1,3 +1,4 @@
+import { GetRefundsByDateRangeDTO, GetTransactionsByDateRangeDTO, GetTransactionsByUserDTO, GetTransactionsDTO } from "../../dto/admin/finance/finance.input.dto";
 import { ServiceResponse } from "../../models/interfaces/auth.interface";
 
 export interface RevenueStats {
@@ -26,10 +27,10 @@ export interface RefundData {
 }
 
 export interface IFinanceService {
-  getRevenueTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
+  getRevenueTransactions(dto: GetTransactionsDTO): Promise<ServiceResponse<RevenueTransactions>>;
   getRevenueStats(): Promise<ServiceResponse<RevenueStats>>;
-  getTransactionsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
-  getRefundTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>>;
-  getRefundsByDateRange(startDate: Date, endDate: Date, page: number, limit: number, search?: string): Promise<ServiceResponse<any>>;
-  getTransactionsByUser(userId: string, page: number, limit: number): Promise<ServiceResponse<RevenueTransactions>>;
+  getTransactionsByDateRange(dto: GetTransactionsByDateRangeDTO): Promise<ServiceResponse<RevenueTransactions>>;
+  getRefundTransactions(dto: GetTransactionsDTO): Promise<ServiceResponse<RevenueTransactions>>;
+  getRefundsByDateRange(dto: GetRefundsByDateRangeDTO): Promise<ServiceResponse<any>>;
+  getTransactionsByUser(dto: GetTransactionsByUserDTO): Promise<ServiceResponse<RevenueTransactions>>;
 }
