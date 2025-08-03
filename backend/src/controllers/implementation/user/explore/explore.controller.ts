@@ -9,6 +9,7 @@ import { IBookingService } from '../../../../services/interfaces/user/explore/IB
 import { BadRequestException, NotFoundException } from '../../../../error/error-handlers';
 import { ISubscriptionQueryService } from '../../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
 import { EventDto } from '../../../../dto/user/explore/explore.dto';
+import Stripe from 'stripe';
 
 @injectable()
 export class ExploreController implements IExploreController {
@@ -89,7 +90,7 @@ export class ExploreController implements IExploreController {
     }
   };
 
-  private async routeWebhookEvent(event: any): Promise<void> {
+  private async routeWebhookEvent(event: Stripe.Event): Promise<void> {
     try {
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object;

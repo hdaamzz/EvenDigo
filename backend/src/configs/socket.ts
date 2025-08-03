@@ -4,6 +4,7 @@ import { ChatService } from '../services/implementation/user/chat/chat.service';
 import { container } from 'tsyringe';
 import jwt from 'jsonwebtoken';
 import { TokenService } from '../services/implementation/user/auth/TokenService';
+import { UserJWTPayload } from '../controllers/interfaces/User/Socket/socket.interface';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -42,12 +43,12 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
         return next(new Error('Authentication token required'));
       }
       
-      const decoded = tokenService.verifyToken(token) as any;
+      const decoded = tokenService.verifyToken(token) as UserJWTPayload;
       socket.userId = decoded.userId;
 
       console.log('Authentication successful for user:', socket.userId);
       next();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Authentication failed:', error.message);
       if (error instanceof jwt.TokenExpiredError) {
         console.error('- Token expired at:', error.expiredAt);
@@ -124,7 +125,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
           });
         }
 
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error joining chat:', error);
         socket.emit('error', { message: 'Failed to join chat' });
       }
@@ -171,7 +172,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
 
         console.log(`Message sent to ${chatId}`);
         
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error sending message:', error);
         socket.emit('error', { message: 'Failed to send message' });
       }
@@ -215,7 +216,7 @@ export default function configureSocketIO(server: HttpServer): SocketIOServer {
 
         console.log(`Messages marked as read in chat ${chatId}`);
         
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error marking messages as read:', error);
         socket.emit('error', { message: 'Failed to mark messages as read' });
       }

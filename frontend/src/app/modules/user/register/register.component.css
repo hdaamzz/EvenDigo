@@ -1,4 +1,3 @@
-
 .trn-link {
     transition: all 0.3s ease;
 }
@@ -47,17 +46,14 @@ input::-webkit-inner-spin-button {
   pointer-events: none;
 }
 
-/* Input Focus Animation */
 input:focus {
   box-shadow: 0 0 0 1px #00ff66, 0 0 20px rgba(0, 255, 102, 0.1);
 }
 
-/* Button Hover Effects */
 .neon-bg:hover {
   box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
 }
 
-/* Error Message Animation */
 .text-red-400 {
   animation: slideInFromLeft 0.3s ease-out;
 }
@@ -73,7 +69,6 @@ input:focus {
   }
 }
 
-/* Loading Spinner Animation */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -84,13 +79,11 @@ input:focus {
   animation: spin 1s linear infinite;
 }
 
-/* Custom Placeholder Color */
 ::placeholder {
   color: #9ca3af !important;
   opacity: 1;
 }
 
-/* Smooth Focus Transitions */
 input {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -99,28 +92,12 @@ input:hover {
   border-color: #6b7280;
 }
 
-/* Icon Container Hover Effects */
-.w-6.h-6.bg-\[#00ff66\]\/20 {
-  transition: all 0.3s ease;
-}
-
-input:focus + .absolute .w-6.h-6.bg-\[#00ff66\]\/20 {
-  background-color: rgba(0, 255, 102, 0.3);
-  transform: scale(1.1);
-}
-
-/* OTP Input Special Styling */
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Special OTP field styling for better UX */
 #otp {
   letter-spacing: 0.5em;
   text-align: center;
@@ -128,12 +105,10 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: bold;
 }
 
-/* Enhanced hover animations */
 .glass-card:hover {
   box-shadow: 0 10px 25px rgba(0, 255, 102, 0.1);
 }
 
-/* Improved button states */
 button:disabled {
   cursor: not-allowed;
 }

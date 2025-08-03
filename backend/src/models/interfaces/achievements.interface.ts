@@ -18,3 +18,10 @@ export interface IAchievementPagination {
   totalCount: number;
   hasMore: boolean;
 }
+
+export interface PaginationInfo {
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    hasMore: boolean;
+}
