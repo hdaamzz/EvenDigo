@@ -95,6 +95,11 @@ export class EventRepository extends BaseRepository<EventDocument> implements IE
   async findEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
     return await this.model.findById(eventId).populate('user_id').exec();
   }
+  
+
+  async findEventByIdWithoutPopulateUser(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null> {
+    return await this.model.findById(eventId).exec();
+  }
 
   async updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null> {
     return await this.updateById(eventId, updateData);

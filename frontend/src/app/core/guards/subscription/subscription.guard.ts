@@ -8,9 +8,10 @@ export const subscriptionGuard: CanActivateFn = (route, state) => {
   const subscriptionService = inject(PremiumService);
 
   return subscriptionService.getCurrentSubscription().pipe(
-    map(response => {
+    map(response => {    
+      return true;  
       if (response?.data?.isActive === true) {
-        return true;
+        
       } else {
         Notiflix.Notify.info("For this feature you must have an active subscription :)");
         return false;

@@ -1,0 +1,213 @@
+<div class="relative">
+  <app-user-nav></app-user-nav>
+  <div class=" min-h-screen text-white font-sans pt-20">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="mb-12">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button
+              (click)="goBack()"
+              class="inline-flex items-center px-6 py-3 bg-[#1a1a1a] bg-opacity-90 border border-gray-700 rounded-xl text-white font-medium hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-1"
+            >
+              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="flex justify-center items-center h-64">
+          <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00ff66]"></div>
+        </div>
+      }
+
+      @if (error) {
+        <div class="glass-card bg-red-900/20 border border-red-500 text-red-300 px-6 py-4 rounded-xl mb-6">
+          <strong class="font-bold">Error!</strong>
+          <span class="block sm:inline ml-2">{{ error }}</span>
+        </div>
+      }
+
+      @if (analytics && !loading && !error) {
+        <div class="space-y-8">
+          <!-- Event Info Card -->
+          <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300">
+            <h2 class="text-3xl font-bold text-white mb-2">{{ analytics.eventTitle }}</h2>
+            <p class="text-gray-300 text-lg mb-4">{{ analytics.eventType }}</p>
+            @if (analytics.isDistributed) {
+              <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/30 text-green-400 border border-green-500">
+                Revenue Distributed
+              </div>
+            } @else {
+              <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-900/30 text-yellow-400 border border-yellow-500">
+                Revenue Pending
+              </div>
+            }
+          </div>
+
+          <!-- Key Metrics -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Total Participants -->
+            <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-2">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-[#00ff66]/20 rounded-xl flex items-center justify-center">
+                    <svg class="h-6 w-6 text-[#00ff66]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-400 truncate">Total Participants</dt>
+                    <dd class="text-2xl font-bold text-white">{{ analytics.totalParticipants }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-2">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                    <svg class="h-6 w-6 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-400 truncate">Total Revenue</dt>
+                    <dd class="text-2xl font-bold text-white">{{ formatCurrency(analytics.totalRevenue) }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <!-- Your Revenue -->
+            <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-2">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                    <svg class="h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H3.75m-1.5 0h1.5v.375c0 .621-.504 1.125-1.125 1.125H1.5m0 0v.75c0 .414.336.75.75.75h.75m0-1.5h.75c.414 0 .75.336.75.75v.75m0 0V21h-1.5v-.75c0-.414.336-.75.75-.75h.75v.75z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-400 truncate">Your Revenue</dt>
+                    <dd class="text-2xl font-bold text-white">{{ formatCurrency(analytics.organizerRevenue) }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Bookings -->
+            <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-2">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                    <svg class="h-6 w-6 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125V15.75c0-.621-.504-1.125-1.125-1.125H17.25v-3.026a2.999 2.999 0 010-5.198V5.25c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-400 truncate">Total Bookings</dt>
+                    <dd class="text-2xl font-bold text-white">{{ analytics.bookingStats.totalBookings }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ticket Breakdown -->
+          <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300">
+            <h3 class="text-2xl font-bold text-white mb-6">
+              Ticket <span class="neon-bg px-3 py-1 rounded">Breakdown</span>
+            </h3>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              @for (ticket of analytics.ticketBreakdown; track ticket.type) {
+                <div class="bg-[#1a1a1a] bg-opacity-90 border border-gray-700 rounded-xl p-5 hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-1">
+                  <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-bold text-white text-lg">{{ ticket.type }}</h4>
+                    <span class="text-[#00ff66] font-semibold">{{ formatCurrency(ticket.price) }}</span>
+                  </div>
+                  <div class="space-y-3">
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-400">Sold:</span>
+                      <span class="font-medium text-white">{{ ticket.soldTickets }}/{{ ticket.totalTickets }}</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        class="bg-gradient-to-r from-[#00ff66] to-[#00cc52] h-2 rounded-full transition-all duration-500"
+                        [style.width.%]="getTicketSoldPercentage(ticket.soldTickets, ticket.totalTickets)"
+                      ></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-400">Revenue:</span>
+                      <span class="font-semibold text-green-400">{{ formatCurrency(ticket.revenue) }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300">
+            <h3 class="text-2xl font-bold text-white mb-6">
+              Payment <span class="neon-bg px-3 py-1 rounded">Methods</span>
+            </h3>
+            <div class="space-y-4">
+              @for (payment of analytics.paymentMethods; track payment.method) {
+                <div class="bg-[#1a1a1a] bg-opacity-90 rounded-xl p-4 border border-gray-700 hover:border-[#00ff66] transition-all duration-300">
+                  <div class="flex justify-between items-center">
+                    <div class="flex-1">
+                      <div class="flex justify-between items-center">
+                        <span class="font-semibold text-white text-lg">{{ payment.method }}</span>
+                        <span class="text-sm text-gray-400">{{ payment.count }} bookings</span>
+                      </div>
+                      <span class="text-green-400 font-bold text-lg">{{ formatCurrency(payment.amount) }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Revenue Distribution -->
+          <div class="glass-card rounded-xl p-6 border border-gray-700 hover:border-[#00ff66] transition-all duration-300">
+            <h3 class="text-2xl font-bold text-white mb-6">
+              Revenue <span class="neon-bg px-3 py-1 rounded">Distribution</span>
+            </h3>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div class="bg-[#1a1a1a] bg-opacity-90 border border-gray-700 rounded-xl p-6 hover:border-[#00ff66] transition-all duration-300 hover:-translate-y-1">
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-[#00ff66] mb-2">{{ formatCurrency(analytics.organizerRevenue) }}</div>
+                  <div class="text-lg text-gray-300 mb-1">Your Share</div>
+                  <div class="text-sm text-gray-500">{{ formatPercentage(100 - analytics.adminPercentage) }}</div>
+                </div>
+              </div>
+              <div class="bg-[#1a1a1a] bg-opacity-90 border border-gray-700 rounded-xl p-6 hover:border-gray-500 transition-all duration-300">
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-gray-400 mb-2">{{ formatCurrency(analytics.adminRevenue) }}</div>
+                  <div class="text-lg text-gray-300 mb-1">Platform Fee</div>
+                  <div class="text-sm text-gray-500">{{ formatPercentage(analytics.adminPercentage) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <app-user-footer></app-user-footer>
+</div>

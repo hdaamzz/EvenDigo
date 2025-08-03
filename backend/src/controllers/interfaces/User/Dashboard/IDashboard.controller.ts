@@ -8,4 +8,5 @@ export interface IDashboardController {
   getEventById(req: AuthenticatedRequest, res: Response): Promise<void>;
   updateEvent(req: AuthenticatedRequest, res: Response): Promise<void>;
   deleteEvent(req: AuthenticatedRequest, res: Response): Promise<void>;
+  getEventAnalytics(req: AuthenticatedRequest, res: Response): Promise<void>;
 }

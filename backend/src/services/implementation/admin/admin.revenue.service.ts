@@ -2,6 +2,13 @@ import { inject, injectable } from 'tsyringe';
 import { ServiceResponse } from '../../../models/interfaces/auth.interface';
 import { IFinanceService, RevenueStats, RevenueTransactions } from '../../../services/interfaces/IRevenue.service';
 import { IFinanceRepository } from '../../../repositories/interfaces/IFinance.repository';
+import { 
+  GetTransactionsDTO, 
+  GetTransactionsByDateRangeDTO, 
+  GetTransactionsByUserDTO,
+  GetRefundsByDateRangeDTO 
+} from '../../../dto/admin/finance/finance.input.dto';
+import { FinanceDTOValidator } from '../../../dto/admin/finance/finance.validator';
 
 @injectable()
 export class FinanceService implements IFinanceService {
@@ -9,9 +16,16 @@ export class FinanceService implements IFinanceService {
     @inject("FinanceRepository") private financeRepository: IFinanceRepository
   ) { }
 
-  async getRevenueTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>> {
+  async getRevenueTransactions(dto: GetTransactionsDTO): Promise<ServiceResponse<RevenueTransactions>> {
     try {
-      const result = await this.financeRepository.findRevenueTransactions(page, limit, search);
+      // Validate DTO
+      FinanceDTOValidator.validateGetTransactionsDTO(dto);
+
+      const result = await this.financeRepository.findRevenueTransactions(
+        dto.page, 
+        dto.limit, 
+        dto.search
+      );
 
       return {
         success: true,
@@ -28,34 +42,29 @@ export class FinanceService implements IFinanceService {
 
   async getRevenueStats(): Promise<ServiceResponse<RevenueStats>> {
     try {
-      const totalRevenue = await this.financeRepository.findTotalRevenue();
-      const previousMonthTotalRevenue = await this.financeRepository.findTotalRevenueForPreviousMonth();
-
-      const todayRevenue = await this.financeRepository.findTodayRevenue();
-      const yesterdayRevenue = await this.financeRepository.findYesterdayRevenue();
-
-      const currentMonthRevenue = await this.financeRepository.findCurrentMonthRevenue();
-      const previousMonthRevenue = await this.financeRepository.findPreviousMonthRevenue();
-
-      const totalRevenueChange = previousMonthTotalRevenue > 0
-        ? ((totalRevenue - previousMonthTotalRevenue) / previousMonthTotalRevenue) * 100
-        : 0;
-
-      const todayRevenueChange = yesterdayRevenue > 0
-        ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100
-        : 0;
-
-      const monthlyRevenueChange = previousMonthRevenue > 0
-        ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100
-        : 0;
+      const [
+        totalRevenue,
+        previousMonthTotalRevenue,
+        todayRevenue,
+        yesterdayRevenue,
+        currentMonthRevenue,
+        previousMonthRevenue
+      ] = await Promise.all([
+        this.financeRepository.findTotalRevenue(),
+        this.financeRepository.findTotalRevenueForPreviousMonth(),
+        this.financeRepository.findTodayRevenue(),
+        this.financeRepository.findYesterdayRevenue(),
+        this.financeRepository.findCurrentMonthRevenue(),
+        this.financeRepository.findPreviousMonthRevenue()
+      ]);
 
       const stats: RevenueStats = {
         totalRevenue: totalRevenue.toFixed(2),
-        totalRevenueChange: Number(totalRevenueChange.toFixed(1)),
+        totalRevenueChange: this._calculatePercentageChange(totalRevenue, previousMonthTotalRevenue),
         todayRevenue: todayRevenue.toFixed(2),
-        todayRevenueChange: Number(todayRevenueChange.toFixed(1)),
+        todayRevenueChange: this._calculatePercentageChange(todayRevenue, yesterdayRevenue),
         monthlyRevenue: currentMonthRevenue.toFixed(2),
-        monthlyRevenueChange: Number(monthlyRevenueChange.toFixed(1))
+        monthlyRevenueChange: this._calculatePercentageChange(currentMonthRevenue, previousMonthRevenue)
       };
 
       return {
@@ -71,20 +80,17 @@ export class FinanceService implements IFinanceService {
     }
   }
 
-  async getTransactionsByDateRange(
-    startDate: Date,
-    endDate: Date,
-    page: number,
-    limit: number,
-    search?: string 
-  ): Promise<ServiceResponse<RevenueTransactions>> {
+  async getTransactionsByDateRange(dto: GetTransactionsByDateRangeDTO): Promise<ServiceResponse<RevenueTransactions>> {
     try {
+      // Validate DTO
+      FinanceDTOValidator.validateGetTransactionsByDateRangeDTO(dto);
+
       const result = await this.financeRepository.findTransactionsByDateRange(
-        startDate,
-        endDate,
-        page,
-        limit,
-        search
+        dto.startDate,
+        dto.endDate,
+        dto.page,
+        dto.limit,
+        dto.search
       );
 
       return {
@@ -100,9 +106,16 @@ export class FinanceService implements IFinanceService {
     }
   }
 
-  async getRefundTransactions(page: number, limit: number, search?: string): Promise<ServiceResponse<RevenueTransactions>> {
+  async getRefundTransactions(dto: GetTransactionsDTO): Promise<ServiceResponse<RevenueTransactions>> {
     try {
-      const result = await this.financeRepository.findRefundTransactions(page, limit, search);
+      // Validate DTO
+      FinanceDTOValidator.validateGetTransactionsDTO(dto);
+
+      const result = await this.financeRepository.findRefundTransactions(
+        dto.page, 
+        dto.limit, 
+        dto.search
+      );
       
       return {
         success: true,
@@ -117,20 +130,17 @@ export class FinanceService implements IFinanceService {
     }
   }
   
-  async getRefundsByDateRange(
-    startDate: Date,
-    endDate: Date,
-    page: number,
-    limit: number,
-    search?: string 
-  ): Promise<ServiceResponse<any>> {
+  async getRefundsByDateRange(dto: GetRefundsByDateRangeDTO): Promise<ServiceResponse<any>> {
     try {
+      // Validate DTO
+      FinanceDTOValidator.validateGetRefundsByDateRangeDTO(dto);
+
       const result = await this.financeRepository.findRefundsByDateRange(
-        startDate,
-        endDate,
-        page,
-        limit,
-        search
+        dto.startDate,
+        dto.endDate,
+        dto.page,
+        dto.limit,
+        dto.search
       );
   
       return {
@@ -146,16 +156,14 @@ export class FinanceService implements IFinanceService {
     }
   }
 
-  async getTransactionsByUser(
-    userId: string,
-    page: number,
-    limit: number
-  ): Promise<ServiceResponse<RevenueTransactions>> {
+  async getTransactionsByUser(dto: GetTransactionsByUserDTO): Promise<ServiceResponse<RevenueTransactions>> {
     try {
+      FinanceDTOValidator.validateGetTransactionsByUserDTO(dto);
+
       const result = await this.financeRepository.findTransactionsByUser(
-        userId,
-        page,
-        limit
+        dto.userId,
+        dto.page,
+        dto.limit
       );
   
       return {
@@ -169,5 +177,10 @@ export class FinanceService implements IFinanceService {
         message: `Failed to fetch user transactions: ${(error as Error).message}`
       };
     }
+  }
+
+  private _calculatePercentageChange(current: number, previous: number): number {
+    if (previous === 0) return 0;
+    return Number(((current - previous) / previous * 100).toFixed(1));
   }
 }

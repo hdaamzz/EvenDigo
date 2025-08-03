@@ -1,30 +1,40 @@
-
-
 <app-user-nav></app-user-nav>
+
+<div class="relative">
+  <div class=" min-h-screen text-white font-sans pt-20">
     @if (!showForgotpassword) {
-<div class="back min-h-screen flex items-center justify-center pt-20">
-    <div class="w-full sm:w-4/5 md:w-3/4 lg:w-2/3 xl:w-1/3 bg-[#1E1E1E] rounded-lg p-8 space-y-6 relative">
-        <div>
-            <h2 class="text-2xl font-normal text-white mb-2">Hola, to EvenDigo</h2>
-            <p class="text-[#A4A4A4] text-base">Log in now to make your event Awesome!</p>
-        </div>
+      <!-- Login Form -->
+      <div class="flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+              Welcome to <span class=" px-3 py-1 rounded">EvenDigo</span>
+            </h1>
+            <p class="text-gray-400 text-lg">Log in now to make your event awesome!</p>
+          </div>
 
-        <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="signIn()">
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="email">Email*</label>
+          <!-- Login Card -->
+          <div class="glass-card rounded-2xl p-8 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 shadow-2xl">
+            <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="signIn()">
+              
+              <!-- Email Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="email">Email Address*</label>
                 <div class="relative">
-                    <input 
-                        type="email" 
-                        id="email" 
-                        formControlName="email" 
-                        class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                               focus:outline-none focus:text-white focus:ring-1 
-                               focus:ring-white text-base placeholder-gray-300" 
-                        autocomplete="username"
-                    >
-
+                  <input 
+                    type="email" 
+                    id="email" 
+                    formControlName="email" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600" 
+                    placeholder="Enter your email"
+                    autocomplete="username"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" 
+                        class="h-4 w-4 text-[#00ff66]" 
                         fill="none"
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
@@ -32,32 +42,51 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
+                  </div>
                 </div>
                 @if(hasError('email','required') && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Email is required</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Email is required
+                    </p>
                 } @else if (hasError('email', 'fullSpaces') && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Email cannot contain spaces</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Email cannot contain spaces
+                    </p>
                 } @else if (hasError('email','email') && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Please enter a valid email address</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Please enter a valid email address
+                    </p>
                 }
-            </div>
+              </div>
 
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="password">Password*</label>
+              <!-- Password Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="password">Password*</label>
                 <div class="relative">
-                    <input 
-                        [type]="showPassword ? 'text' : 'password'"
-                        id="password" 
-                        formControlName="password" 
-                        class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 pr-10 text-white 
-                               focus:outline-none focus:text-white focus:ring-1 
-                               focus:ring-white text-base placeholder-gray-300"
-                        autocomplete="new-password" 
-                    />
-            
-                    <!-- Lock Icon -->
+                  <input 
+                    [type]="showPassword ? 'text' : 'password'"
+                    id="password" 
+                    formControlName="password" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 pr-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600"
+                    placeholder="Enter your password"
+                    autocomplete="current-password" 
+                  />
+          
+                  <!-- Lock Icon -->
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" 
+                        class="h-4 w-4 text-[#00ff66]" 
                         fill="none"
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
@@ -65,122 +94,128 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-            
-                    <!-- Eye Icon Button -->
-                    <button 
-                        type="button"
-                        (click)="togglePasswordVisibility()"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-[#a4a4a441] hover:text-white focus:outline-none"
-                    >
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            class="h-5 w-5" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                        >
-                            @if (showPassword) {
-                                <path 
-                                    stroke-linecap="round" 
-                                    stroke-linejoin="round" 
-                                    stroke-width="2" 
-                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                                />
-                            } @else {
-                                <path 
-                                    stroke-linecap="round" 
-                                    stroke-linejoin="round" 
-                                    stroke-width="2" 
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                                <path 
-                                    stroke-linecap="round" 
-                                    stroke-linejoin="round" 
-                                    stroke-width="2" 
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                />
-                            }
-                        </svg>
-                    </button>
+                  </div>
+          
+                  <!-- Eye Icon Button -->
+                  <button 
+                    type="button"
+                    (click)="togglePasswordVisibility()"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00ff66] focus:outline-none transition-colors duration-200"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        @if (showPassword) {
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        } @else {
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        }
+                    </svg>
+                  </button>
                 </div>
                 
                 @if(hasError('password','required') && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Password field is required</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Password field is required
+                    </p>
                 } @else if (hasError('password', 'strongPassword') && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Password must be at least 8 characters long and include: an uppercase letter, a lowercase letter, a number, and a special character.</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Password must be at least 8 characters long and include: an uppercase letter, a lowercase letter, a number, and a special character.
+                    </p>
                 }
-            </div>
+              </div>
 
-            <div class="flex justify-end mt-6">
+              <!-- Login Button -->
+              <div class="pt-4">
                 <button 
                     type="submit" 
                     [disabled]="loading$ | async"
-                    class="px-6 bg-[#a4a4a441] hover:bg-[#a4a4a408] text-white text-base rounded-md py-2.5 flex items-center justify-center space-x-2 transition-all duration-300 ease-in-out hover:translate-x-1"
+                    class="w-full neon-bg hover:opacity-90 disabled:opacity-50 text-black font-bold py-4 px-6 rounded-xl 
+                           transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 
+                           disabled:scale-100 disabled:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[#00ff66]/50 
+                           flex items-center justify-center space-x-3 text-lg shadow-lg"
                 >   
                     @if(loading$ | async){
+                        <div class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                         <span>Processing...</span>
                     }@else{
                         <span>Continue</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                     }
-
-                    
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
                 </button>
+              </div>
+
+              <!-- Divider -->
+              <div class="relative flex items-center justify-center py-6">
+                <div class="border-t border-gray-700 w-full"></div>
+                <span class="px-4 text-gray-400 bg-[#1a1a1a] bg-opacity-90">OR</span>
+                <div class="border-t border-gray-700 w-full"></div>
+              </div>
+            </form>
+
+            <!-- Google Login Button -->
+            <button
+                class="w-full bg-[#1a1a1a] bg-opacity-90 hover:bg-opacity-100 text-white border border-gray-700 hover:border-[#00ff66] 
+                       rounded-xl py-4 flex items-center justify-center space-x-3 text-lg transition-all duration-300 
+                       transform hover:scale-[1.02] hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-gray-500/50"
+                (click)="loginWithGoogle()">
+                <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318737/google-icon_nmfekr.png" alt="Google Icon" class="w-6 h-6">
+                <span>Continue with Google</span>
+            </button>
+
+            <!-- Forgot Password Link -->
+            <div class="text-center pt-4">
+              <button (click)="openForgotpassword()" 
+                      class="text-gray-400 hover:text-[#00ff66] text-base font-medium transition-colors duration-200 hover:underline">
+                Forgot Password?
+              </button>
             </div>
-
-            <div class="relative flex items-center justify-center py-4">
-                <div class="border-t border-[#a4a4a441] w-full"></div>
-                <span class="px-4 text-base text-[#a4a4a4]">OR</span>
-                <div class="border-t border-[#a4a4a441] w-full"></div>
-            </div>
-
-            
-
-            
-        </form>
-        <button
-            class="w-full bg-[#f2f2f2] hover:bg-[#fff2f2] text-white rounded-md py-2.5 flex items-center justify-center space-x-3 text-base transition-all duration-300 ease-in-out hover:translate-x-1"
-            (click)="loginWithGoogle()">
-            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318737/google-icon_nmfekr.png" alt="Google Icon" class="w-6 h-6">
-            <span class="text-black">Continue with Google</span>
-        </button>
-
-        <div class="text-center">
-            <button (click)="openForgotpassword()" class="text-[#A4A4A4] hover:text-green-400 text-base">Forgot Password?</button>
+          </div>
         </div>
-        
-    </div>
-    
-   
-</div>
-}@else {
-    <div class="back min-h-screen flex items-center justify-center p-4 sm:p-2">
-    <div class="w-full sm:w-4/5 md:w-3/4 lg:w-2/3 xl:w-1/3 bg-[#1E1E1E] rounded-lg p-8 space-y-6 relative">
-        <div>
-            <h2 class="text-2xl font-normal text-white mb-2">Hola, to EvenDigo</h2>
-            <p class="text-[#A4A4A4] text-base">Ohh Don't worry we are with you..</p>
-        </div>
+      </div>
 
-        <form class="space-y-6" [formGroup]="forgotForm" (ngSubmit)="forgotPassword()">
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="forgotemail">Email*</label>
+    } @else {
+      <!-- Forgot Password Form -->
+      <div class="flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+              Reset <span class="neon-bg px-3 py-1 rounded">Password</span>
+            </h1>
+            <p class="text-gray-400 text-lg">Don't worry, we're here to help you!</p>
+          </div>
+
+          <!-- Forgot Password Card -->
+          <div class="glass-card rounded-2xl p-8 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 shadow-2xl">
+            <form class="space-y-6" [formGroup]="forgotForm" (ngSubmit)="forgotPassword()">
+              
+              <!-- Email Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="forgotemail">Email Address*</label>
                 <div class="relative">
-                    <input 
-                        type="email" 
-                        id="forgotemail" 
-                        formControlName="email"
-                        class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                               focus:outline-none focus:text-white focus:ring-1 
-                               focus:ring-white text-base placeholder-gray-300" 
-                        autocomplete="username"
-                    >
-        
+                  <input 
+                    type="email" 
+                    id="forgotemail" 
+                    formControlName="email"
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600" 
+                    placeholder="Enter your email address"
+                    autocomplete="username"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" 
+                        class="h-4 w-4 text-[#00ff66]" 
                         fill="none"
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
@@ -188,37 +223,61 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
+                  </div>
                 </div>
                 @if(hasErrorForgot('email','required') && (forgotForm.get('email')?.dirty || forgotForm.get('email')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Email is required</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Email is required
+                    </p>
                 } @else if (hasErrorForgot('email', 'fullSpaces') && (forgotForm.get('email')?.dirty || forgotForm.get('email')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Email cannot contain spaces</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Email cannot contain spaces
+                    </p>
                 } @else if (hasErrorForgot('email','email') && (forgotForm.get('email')?.dirty || forgotForm.get('email')?.touched)) {
-                    <p class="mt-2 text-center text-sm font-light text-red-500">Please enter a valid email address</p>
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Please enter a valid email address
+                    </p>
                 }
-            </div>
-        
-            <div class="flex justify-end mt-6">
+              </div>
+          
+              <!-- Reset Password Button -->
+              <div class="pt-4">
                 <button 
                     type="submit" 
-                    class="px-6 bg-[#a4a4a441] hover:bg-[#a4a4a408] text-white text-base rounded-md py-2.5 flex items-center justify-center space-x-2 transition-all duration-300 ease-in-out hover:translate-x-1"
+                    class="w-full neon-bg hover:opacity-90 text-black font-bold py-4 px-6 rounded-xl 
+                           transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 
+                           focus:outline-none focus:ring-2 focus:ring-[#00ff66]/50 
+                           flex items-center justify-center space-x-3 text-lg shadow-lg"
                 >
                     <span>Reset Password</span>
-                    
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </button>
-            </div>
-        </form>
+              </div>
+            </form>
 
-        <div class="text-center">
-            <button (click)="openForgotpassword()" class="text-[#A4A4A4] hover:text-green-400 text-base">Back to login ?</button>
+            <!-- Back to Login Link -->
+            <div class="text-center pt-6">
+              <button (click)="openForgotpassword()" 
+                      class="text-gray-400 hover:text-[#00ff66] text-base font-medium transition-colors duration-200 hover:underline">
+                Back to login?
+              </button>
+            </div>
+          </div>
         </div>
-    </div>
-    </div>
+      </div>
     }
+  </div>
+</div>
 
 <app-user-footer></app-user-footer>

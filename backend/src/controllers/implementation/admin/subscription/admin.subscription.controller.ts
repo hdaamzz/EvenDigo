@@ -1,45 +1,45 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import StatusCode from '../../../../types/statuscode';
-import { IAdminSubscriptionController } from '../../../interfaces/Admin/Subscription/IAdminSubscription.controller';
+import { IAdminSubscriptionController, SubscriptionFilters } from '../../../interfaces/Admin/Subscription/IAdminSubscription.controller';
 import { IAdminSubscriptionService } from '../../../../services/interfaces/IAdminSubscription.service';
-import { 
-  AdminSubscriptionDto, 
-  AdminSubscriptionStatsDto, 
+import {
+  AdminSubscriptionDto,
+  AdminSubscriptionStatsDto,
   AdminPaginatedSubscriptionsDto,
-  AdminFilterOptionsDto 
+  AdminFilterOptionsDto
 } from '../../../../dto/admin/subscription/AdminSubscriptionDto';
 
 @injectable()
 export class AdminSubscriptionController implements IAdminSubscriptionController {
   constructor(
     @inject("AdminSubscriptionService") private adminSubscriptionService: IAdminSubscriptionService
-  ) {}
+  ) { }
 
   getAllSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const activeOnly = req.query.activeOnly === 'true';
-      
-      const filters: any = {};
-      
+
+      const filters: SubscriptionFilters = {};
+
       if (activeOnly) {
         filters.activeOnly = true;
       }
-      
+
       if (req.query.planType && req.query.planType !== 'all') {
-        filters.planType = req.query.planType;
+        filters.planType = req.query.planType as string;
       }
-      
+
       if (req.query.search) {
-        filters.searchTerm = req.query.search;
+        filters.searchTerm = req.query.search as string;
       }
-      
+
       if (req.query.startDate) {
         filters.startDate = new Date(req.query.startDate as string);
       }
-      
+
       if (req.query.endDate) {
         filters.endDate = new Date(req.query.endDate as string);
       }
@@ -51,11 +51,11 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
         success: true,
         data: dto
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching subscriptions:', error);
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: (error as Error).message || 'Failed to fetch subscriptions'
+        error: error instanceof Error ? error.message : 'Failed to fetch subscriptions'
       });
     }
   };
@@ -81,7 +81,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   getSubscriptionById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      
+
       if (!id) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -91,7 +91,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       }
 
       const subscription = await this.adminSubscriptionService.getSubscriptionById(id);
-      
+
       if (!subscription) {
         res.status(StatusCode.NOT_FOUND).json({
           success: false,
@@ -118,7 +118,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   getUserSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
-      
+
       if (!userId) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -146,7 +146,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   updateSubscriptionStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id, isActive } = req.body;
-      
+
       if (!id) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -164,7 +164,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       }
 
       const updatedSubscription = await this.adminSubscriptionService.updateSubscriptionStatus(id, isActive);
-      
+
       if (!updatedSubscription) {
         res.status(StatusCode.NOT_FOUND).json({
           success: false,
@@ -192,7 +192,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
   deleteSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      
+
       if (!id) {
         res.status(StatusCode.BAD_REQUEST).json({
           success: false,
@@ -202,7 +202,7 @@ export class AdminSubscriptionController implements IAdminSubscriptionController
       }
 
       const result = await this.adminSubscriptionService.deleteSubscription(id);
-      
+
       if (!result) {
         res.status(StatusCode.NOT_FOUND).json({
           success: false,

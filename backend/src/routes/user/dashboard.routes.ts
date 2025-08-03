@@ -15,6 +15,8 @@ dashboardRouter.get('/events/participated',authMiddleware,(req, res) => dashboar
 dashboardRouter.get('/events/ongoing',authMiddleware,(req, res) => dashboardController.getUserOngoingEvents(req, res));
 dashboardRouter.get('/events/:eventId', authMiddleware,(req, res) => dashboardController.getEventById(req, res));
 dashboardRouter.put('/events/:id',authMiddleware,upload.fields([ { name: 'mainBanner', maxCount: 1 },{ name: 'promotionalImage', maxCount: 1 }]),(req, res) => dashboardController.updateEvent(req, res));
-dashboardRouter.delete('/events/:id',authMiddleware,(req, res) => dashboardController.deleteEvent(req, res));
+dashboardRouter.delete('/events/:eventId',authMiddleware,(req, res) => dashboardController.deleteEvent(req, res));
+dashboardRouter.get('/analytics/event/:eventId',authMiddleware,(req, res) => dashboardController.getEventAnalytics(req, res));
+
 
 export default dashboardRouter;

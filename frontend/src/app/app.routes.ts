@@ -23,6 +23,7 @@ import { SubscriptionConfirmationComponent } from './modules/user/premium-checko
 import { ChatComponent } from './modules/user/chat/chat.component';
 import { LiveStreamComponent } from './modules/user/live-stream/live-stream.component';
 import { subscriptionGuard } from './core/guards/subscription/subscription.guard';
+import { EventAnalyticsComponent } from './modules/user/user-dashboard/event-analytics/event-analytics.component';
 
 export const routes: Routes = [
     //user - side 
@@ -94,6 +95,10 @@ export const routes: Routes = [
         component: UserDashboardComponent,
         canActivate: [isLogged]
     },
+    {
+        path: 'event-analytics/:id',
+        component: EventAnalyticsComponent
+        },
     {
         path: 'explore',
         component: UserExploreComponent,

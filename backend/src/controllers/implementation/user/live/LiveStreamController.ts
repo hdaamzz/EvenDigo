@@ -1,4 +1,3 @@
-// src/controllers/livestream/LiveStreamController.ts
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import StatusCode from '../../../../types/statuscode';

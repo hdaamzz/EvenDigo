@@ -140,11 +140,15 @@ export class EventCardComponent implements OnInit {
 
   watchLive(event: CardIEvent): void {
     this.router.navigate(['/live-stream'], {
-      queryParams: { role: 'audience',eventId:event._id }
+      queryParams: { role: 'audience', eventId: event._id }
     });
   }
 
   viewAnalytics(event: CardIEvent): void {
-    this.router.navigate(['/analytics', event._id]);
+    this.router.navigate(['/event-analytics', event._id]);
+  }
+
+  isOrganizedTab(): boolean {
+    return this.activeTab === 'organized';
   }
 }

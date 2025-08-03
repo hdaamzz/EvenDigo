@@ -1,4 +1,3 @@
-// src/core/services/admin/dashboard/dashboard.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';

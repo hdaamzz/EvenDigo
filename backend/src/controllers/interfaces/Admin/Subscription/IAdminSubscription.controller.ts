@@ -18,3 +18,11 @@ export interface ISubscriptionPlanController {
   delete(req: Request, res: Response): Promise<void>;
   create(req: Request, res: Response): Promise<void>
 }
+
+export interface SubscriptionFilters {
+  activeOnly?: boolean;
+  planType?: string;
+  searchTerm?: string;
+  startDate?: Date;
+  endDate?: Date;
+}

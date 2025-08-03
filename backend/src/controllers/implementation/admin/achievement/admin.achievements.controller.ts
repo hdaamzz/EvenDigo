@@ -8,46 +8,46 @@ import { AchievementListResponseDto } from '../../../../dto/admin/achievements/a
 import { UpdateAchievementDto } from '../../../../dto/admin/achievements/update-achievement.dto';
 import { CreateAchievementDto } from '../../../../dto/admin/achievements/create-achievement.dto';
 
-
 @injectable()
 export class AchievementController implements IAchievementAdminController {
     constructor(
-        @inject("AchievementService") private achievementService: IAchievementAdminService,
+        @inject("AchievementService") private readonly _achievementService: IAchievementAdminService,
     ) {}
 
     async fetchAllAchievements(_req: Request, res: Response): Promise<void> {
         try {
-            const achievements = await this.achievementService.getAllAchievements();
+            const achievements = await this._achievementService.getAllAchievements();
             const response = AchievementResponseDto.success(achievements);
             
             res.status(StatusCode.OK).json(response);
         } catch (error) {
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message });
+            this._handleError(res, error, StatusCode.INTERNAL_SERVER_ERROR);
         }
     }
 
     async fetchAllAchievementsWithPagination(req: Request, res: Response): Promise<void> {
         try {
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 10;
+            const page = this._parsePageNumber(req.query.page as string);
+            const limit = this._parseLimit(req.query.limit as string);
             
-            const result = await this.achievementService.getAllAchievementsWithPagination(page, limit);
+            const result = await this._achievementService.getAllAchievementsWithPagination(page, limit);
             const response = AchievementListResponseDto.fromServiceResult(result, page, limit);
+            
             res.status(StatusCode.OK).json(response);
         } catch (error) {
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message });
+            this._handleError(res, error, StatusCode.INTERNAL_SERVER_ERROR);
         }
     }
 
     async getAchievementById(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.acheivementId;
-            const achievement = await this.achievementService.getAchievementById(achievementId);
+            const achievementId = this._getAchievementIdFromParams(req);
+            const achievement = await this._achievementService.getAchievementById(achievementId);
             const response = AchievementResponseDto.success(achievement);
+            
             res.status(StatusCode.OK).json(response);
         } catch (error) {
-            const response = AchievementResponseDto.error((error as Error).message);
-            res.status(StatusCode.NOT_FOUND).json(response);
+            this._handleError(res, error, StatusCode.NOT_FOUND);
         }
     }
 
@@ -55,61 +55,89 @@ export class AchievementController implements IAchievementAdminController {
         try {
             const createDto = CreateAchievementDto.fromRequest(req.body);
             const achievementData = createDto.toEntity();
-            const newAchievement = await this.achievementService.createAchievement(achievementData);
+            const newAchievement = await this._achievementService.createAchievement(achievementData);
             const response = AchievementResponseDto.success(newAchievement);
+            
             res.status(StatusCode.CREATED).json(response);
         } catch (error) {
-            const response = AchievementResponseDto.error((error as Error).message);
-            res.status(StatusCode.BAD_REQUEST).json(response);
+            this._handleError(res, error, StatusCode.BAD_REQUEST);
         }
     }
 
     async updateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.acheivementId;
+            const achievementId = this._getAchievementIdFromParams(req);
             const updateDto = UpdateAchievementDto.fromRequest(req.body);
             const updateData = updateDto.toEntity();
-            const updatedAchievement = await this.achievementService.updateAchievement(achievementId, updateData);
+            const updatedAchievement = await this._achievementService.updateAchievement(achievementId, updateData);
             const response = AchievementResponseDto.success(updatedAchievement);
+            
             res.status(StatusCode.OK).json(response);
         } catch (error) {
-            const response = AchievementResponseDto.error((error as Error).message);
-            res.status(StatusCode.BAD_REQUEST).json(response);
+            this._handleError(res, error, StatusCode.BAD_REQUEST);
         }
     }
 
     async activateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.acheivementId;
-            const updatedAchievement = await this.achievementService.activateAchievement(achievementId);
+            const achievementId = this._getAchievementIdFromParams(req);
+            const updatedAchievement = await this._achievementService.activateAchievement(achievementId);
             const response = AchievementResponseDto.success(updatedAchievement);
+            
             res.status(StatusCode.OK).json(response);
         } catch (error) {
-            const response = AchievementResponseDto.error((error as Error).message);
-            res.status(StatusCode.BAD_REQUEST).json(response);
+            this._handleError(res, error, StatusCode.BAD_REQUEST);
         }
     }
 
     async deactivateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.acheivementId;
-            const updatedAchievement = await this.achievementService.deactivateAchievement(achievementId);
+            const achievementId = this._getAchievementIdFromParams(req);
+            const updatedAchievement = await this._achievementService.deactivateAchievement(achievementId);
             const response = AchievementResponseDto.success(updatedAchievement);
+            
             res.status(StatusCode.OK).json(response);
         } catch (error) {
-            const response = AchievementResponseDto.error((error as Error).message);
-            res.status(StatusCode.BAD_REQUEST).json(response);
+            this._handleError(res, error, StatusCode.BAD_REQUEST);
         }
     }
 
     async deleteAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = req.params.acheivementId;
-            await this.achievementService.deleteAchievement(achievementId);
+            const achievementId = this._getAchievementIdFromParams(req);
+            await this._achievementService.deleteAchievement(achievementId);
+            
             res.status(StatusCode.NO_CONTENT).send();
         } catch (error) {
-            const response = AchievementResponseDto.error((error as Error).message);
-            res.status(StatusCode.BAD_REQUEST).json(response);
+            this._handleError(res, error, StatusCode.BAD_REQUEST);
         }
+    }
+
+    // Private helper methods
+    private _parsePageNumber(page: string): number {
+        const parsedPage = parseInt(page);
+        return isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+    }
+
+    private _parseLimit(limit: string): number {
+        const parsedLimit = parseInt(limit);
+        return isNaN(parsedLimit) || parsedLimit < 1 ? 10 : Math.min(parsedLimit, 100); 
+    }
+
+    private _getAchievementIdFromParams(req: Request): string {
+        const achievementId = req.params.achievementId;
+        
+        if (!achievementId) {
+            throw new Error('Achievement ID is required');
+        }
+        
+        return achievementId;
+    }
+
+    private _handleError(res: Response, error: unknown, statusCode: number): void {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+        const response = AchievementResponseDto.error(errorMessage);
+        
+        res.status(statusCode).json(response);
     }
 }
