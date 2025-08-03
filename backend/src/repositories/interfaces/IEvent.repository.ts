@@ -11,6 +11,7 @@ export interface IEventRepository {
   findAllEventWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findUpcomingEventsWithoutCurrentUser(userId: Schema.Types.ObjectId | string): Promise<EventDocument[]>;
   findEventById(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null>;
+  findEventByIdWithoutPopulateUser(eventId: Schema.Types.ObjectId | string): Promise<EventDocument | null>;
   updateEvent(eventId: Schema.Types.ObjectId | string, updateData: Partial<EventDocument>): Promise<EventDocument | null>;
   deleteEvent(eventId: Schema.Types.ObjectId | string): Promise<boolean>;
   findAllEvents(): Promise<EventDocument[]>;

@@ -18,12 +18,10 @@ export class AdminEventsService {
     .set('page', page.toString())
     .set('limit', limit.toString());
 
-  // Add search parameter if provided
   if (searchTerm.trim()) {
     params = params.set('search', searchTerm.trim());
   }
 
-  // Add filter parameter if not 'all'
   if (filter !== 'all') {
     params = params.set('filter', filter);
   }

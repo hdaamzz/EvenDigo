@@ -1,204 +1,369 @@
 <app-user-nav></app-user-nav>
 
-<div class="back min-h-screen flex items-center justify-center pt-20">
+<div class="relative">
+  <div class=" min-h-screen text-white font-sans pt-20">
     @if (!showOtpForm) {
+      <!-- Registration Form -->
+      <div class="flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+              Join <span class="neon-bg px-3 py-1 rounded">EvenDigo</span>
+            </h1>
+            <p class="text-gray-400 text-lg">Create your account to make events awesome!</p>
+          </div>
 
-
-    <div class="w-full sm:w-4/5 md:w-3/4 lg:w-2/3 xl:w-1/3 bg-[#1E1E1E] rounded-lg p-8 space-y-6 relative mx-auto">
-        <div>
-            <h2 class="text-2xl font-normal text-white mb-2">Hola, to EvenDigo</h2>
-            <p class="text-[#A4A4A4] text-base">Log in now to make your event Awesome!</p>
-        </div>
-
-        <form class="space-y-6" [formGroup]="registerForm" (ngSubmit)="createAccount()">
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="name">Name*</label>
+          <!-- Registration Card -->
+          <div class="glass-card rounded-2xl p-8 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 shadow-2xl">
+            <form class="space-y-6" [formGroup]="registerForm" (ngSubmit)="createAccount()">
+              
+              <!-- Name Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="name">Full Name*</label>
                 <div class="relative">
-                    <input type="text" id="name" formControlName="name" class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                        focus:outline-none focus:text-white focus:ring-1 
-                        focus:ring-white text-base placeholder-gray-300" autocomplete="name">
-
+                  <input 
+                    type="text" 
+                    id="name" 
+                    formControlName="name" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600" 
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                        class="h-4 w-4 text-[#00ff66]" 
+                        fill="none"
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
+                  </div>
                 </div>
-                @if(hasError('name','required')&& (registerForm.get('name')?.dirty ||
-                registerForm.get('name')?.touched)) {
-                <p class="mt-1 text-center text-[15px] font-extralight text-red-500">Name is required</p>
-                }@else if (hasError('name', 'minlength')&&(registerForm.get('name')?.dirty ||
-                registerForm.get('name')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Name must be longer than 3 characters</p>
-                }@else if (hasError('name','alphabetsOnly')&&(registerForm.get('name')?.dirty ||
-                registerForm.get('name')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Name must not contain numbers, special
-                    characters and unwanted spaces</p>
-                }@else if (hasError('name','fullSpaces')&&(registerForm.get('name')?.dirty ||
-                registerForm.get('name')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">This field cannot contain only spaces</p>
-                }@else if (hasError('name','repeatedCharacters')&&(registerForm.get('name')?.dirty ||
-                registerForm.get('name')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Name cannot contain numerous repeated
-                    characters.</p>
+                @if(hasError('name','required') && (registerForm.get('name')?.dirty || registerForm.get('name')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Name is required
+                    </p>
+                } @else if (hasError('name', 'minlength') && (registerForm.get('name')?.dirty || registerForm.get('name')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Name must be longer than 3 characters
+                    </p>
+                } @else if (hasError('name','alphabetsOnly') && (registerForm.get('name')?.dirty || registerForm.get('name')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Name must not contain numbers, special characters and unwanted spaces
+                    </p>
+                } @else if (hasError('name','fullSpaces') && (registerForm.get('name')?.dirty || registerForm.get('name')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      This field cannot contain only spaces
+                    </p>
+                } @else if (hasError('name','repeatedCharacters') && (registerForm.get('name')?.dirty || registerForm.get('name')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Name cannot contain numerous repeated characters
+                    </p>
                 }
-            </div>
+              </div>
 
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="email">Email*</label>
+              <!-- Email Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="email">Email Address*</label>
                 <div class="relative">
-                    <input type="email" id="email" formControlName="email" class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                        focus:outline-none focus:text-white focus:ring-1 
-                        focus:ring-white text-base placeholder-gray-300" autocomplete="username">
-
+                  <input 
+                    type="email" 
+                    id="email" 
+                    formControlName="email" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600" 
+                    placeholder="Enter your email"
+                    autocomplete="username"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                        class="h-4 w-4 text-[#00ff66]" 
+                        fill="none"
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
+                  </div>
                 </div>
-                @if(hasError('email','required')&& (registerForm.get('email')?.dirty ||
-                registerForm.get('email')?.touched)){
-                <p class="mt-1 text-center text-[15px] font-extralight text-red-500">Email is required</p>
-                }@else if (hasError('email', 'fullSpaces')&&(registerForm.get('email')?.dirty ||
-                registerForm.get('email')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Email cannot contain spaces</p>
-                }@else if (hasError('email','email')&&(registerForm.get('email')?.dirty ||
-                registerForm.get('email')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Please enter a valid email address</p>
+                @if(hasError('email','required') && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Email is required
+                    </p>
+                } @else if (hasError('email', 'fullSpaces') && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Email cannot contain spaces
+                    </p>
+                } @else if (hasError('email','email') && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Please enter a valid email address
+                    </p>
                 }
-            </div>
+              </div>
 
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="password">Password*</label>
+              <!-- Password Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="password">Password*</label>
                 <div class="relative">
-                    <input type="password" id="password" formControlName="password" class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                        focus:outline-none focus:text-white focus:ring-1 
-                        focus:ring-white text-base placeholder-gray-300" autocomplete="new-password">
-
+                  <input 
+                    type="password" 
+                    id="password" 
+                    formControlName="password" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600"
+                    placeholder="Create a strong password"
+                    autocomplete="new-password"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                        class="h-4 w-4 text-[#00ff66]" 
+                        fill="none"
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
                     </svg>
+                  </div>
                 </div>
-                @if(hasError('password','required')&& (registerForm.get('password')?.dirty ||
-                registerForm.get('password')?.touched)){
-                <p class="mt-1 text-center text-[15px] font-extralight text-red-500">Password field is required</p>
-                }@else if (hasError('password', 'strongPassword')&&(registerForm.get('password')?.dirty ||
-                registerForm.get('password')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Password must be at least 8 characters
-                    long and include: an uppercase
-                    letter, a lowercase letter, a number, and a special character.</p>
+                @if(hasError('password','required') && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Password field is required
+                    </p>
+                } @else if (hasError('password', 'strongPassword') && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Password must be at least 8 characters long and include: an uppercase letter, a lowercase letter, a number, and a special character.
+                    </p>
                 }
-            </div>
+              </div>
 
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="confirmPassword">Confirm Password*</label>
+              <!-- Confirm Password Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="confirmPassword">Confirm Password*</label>
                 <div class="relative">
-                    <input type="password" id="confirmPassword" formControlName="confirmPassword" class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                        focus:outline-none focus:text-white focus:ring-1 
-                        focus:ring-white text-base placeholder-gray-300" autocomplete="new-confirmPassword">
-
+                  <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    formControlName="confirmPassword" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600"
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                        class="h-4 w-4 text-[#00ff66]" 
+                        fill="none"
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
                     </svg>
+                  </div>
                 </div>
-                @if(hasError('confirmPassword','required')&& (registerForm.get('confirmPassword')?.dirty ||
-                registerForm.get('confirmPassword')?.touched)){
-                <p class="mt-1 text-center text-[15px] font-extralight text-red-500">Confirm Password field is required
-                </p>
-                }@else if (hasError('confirmPassword', 'fullSpaces')&&(registerForm.get('confirmPassword')?.dirty ||
-                registerForm.get('confirmPassword')?.touched)) {
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">Confirm password cannot contain spaces</p>
-                }@else if(registerForm.hasError('passwordMismatch') &&
-                (registerForm.get('confirmPassword')?.dirty ||
-                registerForm.get('confirmPassword')?.touched)){
-                <p class="mt-1 ml-5 text-[15px] font-extralight text-red-600">
-                    Password and Confirm Password do not match.
-                </p>
+                @if(hasError('confirmPassword','required') && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Confirm Password field is required
+                    </p>
+                } @else if (hasError('confirmPassword', 'fullSpaces') && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Confirm password cannot contain spaces
+                    </p>
+                } @else if(registerForm.hasError('passwordMismatch') && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      Password and Confirm Password do not match
+                    </p>
                 }
-            </div>
+              </div>
 
-            <div class="flex justify-end mt-6">
-                <button type="submit" [disabled]="loading"
-                    class="px-6 bg-[#a4a4a441] hover:bg-[#a4a4a408] text-white text-base rounded-md py-2.5 flex items-center justify-center space-x-2 transition-all duration-300 ease-in-out hover:translate-x-1">
-                    <span>{{ loading ? 'Getting OTP...' : 'Get OTP' }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- <div class="relative flex items-center justify-center py-4">
-                <div class="border-t border-[#a4a4a441] w-full"></div>
-                <span class="px-4 text-base text-[#a4a4a4]">OR</span>
-                <div class="border-t border-[#a4a4a441] w-full"></div>
-            </div> -->
-
-        </form>
-        
-    </div>
-    }
-    @if (showOtpForm) {
-    <div class="w-full sm:w-4/5 md:w-3/4 lg:w-2/3 xl:w-1/3 bg-[#1E1E1E] rounded-lg p-8 space-y-6 relative mx-auto">
-        <div>
-            <h2 class="text-2xl font-normal text-white mb-2">Hola, to EvenDigo</h2>
-            <p class="text-[#A4A4A4] text-base">Asap now to make your event Awesome!</p>
-        </div>
-
-        <form [formGroup]="otpForm" (ngSubmit)="verifyOTP()" class="space-y-6">
-            <div class="mb-0">
-                <label class="text-[#A4A4A4] text-base mb-2 block" for="otp">Enter your OTP*</label>
-                <div class="relative">
-                    <input type="number" id="otp" formControlName="otp" class="w-full bg-[#a4a4a441] rounded px-4 py-2.5 pl-10 text-white 
-                                   focus:outline-none focus:text-white focus:ring-1 
-                                   focus:ring-white text-base placeholder-gray-300 
-                                   appearance-none">
-                    <!-- Key SVG icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#a4a4a441]" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 7a4 4 0 11-8 0 4 4 0 018 0zm-4 7a4 4 0 00-8 0v3h8v-3zM17 11h2m-2 4h4" />
-                    </svg>
-                </div>
-                @if(hasOtpError('required') && otpForm.get('otp')?.touched) {
-                <p class="mt-2 text-center text-sm font-light text-red-500">OTP is required</p>
-                } @else if(hasOtpError('minlength') || hasOtpError('maxlength')) {
-                <p class="mt-2 text-center text-sm font-light text-red-500">OTP must be 6 digits</p>
-                }
-            </div>
-
-            <div class="flex justify-between space-x-4 mt-6">
-                <button type="button" (click)="resendOTP()" [disabled]="loading || resendOtpTimer > 0"
-                  class="flex-1 bg-[#a4a4a441] hover:bg-[#a4a4a408] text-white text-base rounded-md py-2.5 flex items-center justify-center space-x-2">
-                  <span>
-                    {{ loading ? 'Resending...' : (resendOtpTimer > 0 ? 'Resend OTP in ' + resendOtpTimer + 's' : 'Resend OTP') }}
-                  </span>
-                </button>
-              
-                <button type="submit" [disabled]="loading"
-                  class="flex-1 trn-link bg-[#a4a4a441] hover:bg-[#a4a4a408] text-white text-base rounded-md py-2.5 flex items-center justify-center space-x-2">
-                  <span>{{ loading ? 'Verifying...' : 'Continue' }}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
+              <!-- Get OTP Button -->
+              <div class="pt-4">
+                <button 
+                    type="submit" 
+                    [disabled]="loading"
+                    class="w-full neon-bg hover:opacity-90 disabled:opacity-50 text-black font-bold py-4 px-6 rounded-xl 
+                           transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 
+                           disabled:scale-100 disabled:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[#00ff66]/50 
+                           flex items-center justify-center space-x-3 text-lg shadow-lg"
+                >
+                    @if(loading) {
+                        <div class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span>Getting OTP...</span>
+                    } @else {
+                        <span>Get OTP</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    }
                 </button>
               </div>
-        </form>
-    </div>
-    }
-</div>
+            </form>
+          </div>
+        </div>
+      </div>
 
-<!-- <img src="/api/placeholder/150/150" alt="Mascot" class="absolute right-4 top-1/2 transform -translate-y-1/2 w-32 h-32"> -->
+    } @else {
+      <!-- OTP Verification Form -->
+      <div class="flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+              Verify <span class="neon-bg px-3 py-1 rounded">OTP</span>
+            </h1>
+            <p class="text-gray-400 text-lg">Enter the verification code sent to your email</p>
+          </div>
+
+          <!-- OTP Card -->
+          <div class="glass-card rounded-2xl p-8 border border-gray-700 hover:border-[#00ff66] transition-all duration-300 shadow-2xl">
+            <form [formGroup]="otpForm" (ngSubmit)="verifyOTP()" class="space-y-6">
+              
+              <!-- OTP Field -->
+              <div class="space-y-2">
+                <label class="text-gray-300 text-sm font-medium block" for="otp">Enter 6-Digit OTP*</label>
+                <div class="relative">
+                  <input 
+                    type="number" 
+                    id="otp" 
+                    formControlName="otp" 
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 rounded-xl px-4 py-4 pl-12 text-white border border-gray-700
+                           focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] text-base 
+                           placeholder-gray-500 transition-all duration-300 hover:border-gray-600 text-center text-2xl tracking-widest
+                           appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    placeholder="000000"
+                  >
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 text-[#00ff66]" 
+                        fill="none"
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                  </div>
+                </div>
+                @if(hasOtpError('required') && otpForm.get('otp')?.touched) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      OTP is required
+                    </p>
+                } @else if(hasOtpError('minlength') || hasOtpError('maxlength')) {
+                    <p class="text-sm text-red-400 flex items-center">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      OTP must be 6 digits
+                    </p>
+                }
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col space-y-4 pt-4">
+                <!-- Continue Button -->
+                <button 
+                    type="submit" 
+                    [disabled]="loading"
+                    class="w-full neon-bg hover:opacity-90 disabled:opacity-50 text-black font-bold py-4 px-6 rounded-xl 
+                           transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 
+                           disabled:scale-100 disabled:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[#00ff66]/50 
+                           flex items-center justify-center space-x-3 text-lg shadow-lg"
+                >
+                    @if(loading) {
+                        <div class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span>Verifying...</span>
+                    } @else {
+                        <span>Continue</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    }
+                </button>
+
+                <!-- Resend OTP Button -->
+                <button 
+                    type="button" 
+                    (click)="resendOTP()" 
+                    [disabled]="loading || resendOtpTimer > 0"
+                    class="w-full bg-[#1a1a1a] bg-opacity-90 hover:bg-opacity-100 disabled:opacity-50 text-white border border-gray-700 hover:border-[#00ff66] 
+                           disabled:border-gray-700 rounded-xl py-4 flex items-center justify-center space-x-3 text-base transition-all duration-300 
+                           transform hover:scale-[1.02] hover:-translate-y-1 disabled:scale-100 disabled:translate-y-0 
+                           focus:outline-none focus:ring-2 focus:ring-gray-500/50 font-medium"
+                >
+                    @if(loading) {
+                        <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Resending...</span>
+                    } @else if(resendOtpTimer > 0) {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Resend OTP in {{ resendOtpTimer }}s</span>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Resend OTP</span>
+                    }
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
 
 <app-user-footer></app-user-footer>

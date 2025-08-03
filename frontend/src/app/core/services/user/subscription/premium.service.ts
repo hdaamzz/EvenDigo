@@ -71,10 +71,8 @@ export class PremiumService {
     let errorMessage = 'An unknown error occurred';
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       if (error.error && error.error.error) {
         errorMessage = error.error.error;
       } else if (error.status) {

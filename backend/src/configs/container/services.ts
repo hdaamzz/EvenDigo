@@ -38,6 +38,7 @@ import { AdminSubscriptionService } from "../../services/implementation/admin/ad
 import { SubscriptionPlanService } from "../../services/implementation/admin/SubscriptionPlan.service";
 import { DashboardService } from "../../services/implementation/admin/admin.dashboard";
 import { LiveStreamService } from "../../services/implementation/user/live-stream/LiveStreamService";
+import { AnalyticsService } from "../../services/implementation/user/analytics/analytics.service";
 
 export function registerServices() {
   // User services
@@ -79,4 +80,6 @@ export function registerServices() {
   container.register("AdminSubscriptionService", { useClass: AdminSubscriptionService });
   container.register("SubscriptionPlanService", { useClass: SubscriptionPlanService });
   container.register('DashboardService', { useClass: DashboardService });
+  container.register('AnalyticsService', { useClass: AnalyticsService });
+
 }

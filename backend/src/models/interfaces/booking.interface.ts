@@ -24,6 +24,7 @@ export interface IBooking extends Document {
     coupon?: string | null;
     stripeSessionId?: string; 
     paymentStatus?:string;
+    createdAt?:Date;
     
   }
 

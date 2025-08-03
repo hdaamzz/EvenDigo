@@ -40,9 +40,7 @@ export class ReusableTableComponent implements OnChanges {
   private readonly _maxPageButtons = 5;
   
   ngOnChanges(changes: SimpleChanges): void {
-    // Don't reset page automatically - let parent component handle it
     if (changes['currentPage'] && changes['currentPage'].currentValue) {
-      // Ensure currentPage is within valid bounds
       const maxPage = this.totalPages;
       if (this.currentPage > maxPage && maxPage > 0) {
         this.currentPage = maxPage;
@@ -51,23 +49,19 @@ export class ReusableTableComponent implements OnChanges {
   }
   
   get filteredData(): any[] {
-    // If totalItems is provided, assume parent handles pagination
     if (this.totalItems > 0) {
-      return this.data; // Data is already paginated by parent
+      return this.data; 
     }
     
-    // Handle pagination internally
     let filtered = this._filterData();
     return this._paginateData(filtered);
   }
 
   get totalPages(): number {
     if (this.totalItems > 0) {
-      // Use totalItems from parent for server-side pagination
       return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
     }
     
-    // Calculate based on filtered data for client-side pagination
     const filteredLength = this._filterData().length;
     return Math.max(1, Math.ceil(filteredLength / this.pageSize));
   }
@@ -83,7 +77,6 @@ export class ReusableTableComponent implements OnChanges {
     let startPage = Math.max(1, this.currentPage - Math.floor(maxButtons / 2));
     let endPage = Math.min(totalPages, startPage + maxButtons - 1);
     
-    // Adjust startPage if we're near the end
     if (endPage - startPage + 1 < maxButtons) {
       startPage = Math.max(1, endPage - maxButtons + 1);
     }
@@ -101,7 +94,6 @@ export class ReusableTableComponent implements OnChanges {
   onSearch(): void {
     this.searchChange.emit(this.searchTerm);
     
-    // Only reset page for client-side pagination
     if (this.totalItems === 0) {
       this.currentPage = 1;
       this._emitPageChange();

@@ -7,13 +7,17 @@ import { EventMapper } from '../../../../services/implementation/user/dashboard/
 import { IEventService } from '../../../../services/interfaces/user/dashboard/IEvent.service';
 import { IFileService } from '../../../../services/interfaces/user/dashboard/IFile.service';
 import { ForbiddenException, NotFoundException } from '../../../../error/error-handlers';
+import { IAnalyticsService } from '../../../../services/interfaces/user/analytics/IAnalytics.service';
 @injectable()
 export class DashboardController implements IDashboardController {
   constructor(
     @inject("EventService") private eventService: IEventService,
     @inject("FileService") private fileService: IFileService,
     @inject("UserAchievementService") private achievementService: IUserAchievementService,
-    @inject("EventMapper") private eventMapper: EventMapper
+    @inject("EventMapper") private eventMapper: EventMapper,
+    @inject("AnalyticsService") private analyticsService: IAnalyticsService,
+
+
   ) {}
 
   createEvent = async (req: Request, res: Response): Promise<void> => {
@@ -161,7 +165,7 @@ export class DashboardController implements IDashboardController {
 
   deleteEvent = async (req: Request, res: Response): Promise<void> => {
     try {
-      const eventId = req.params.id;
+      const eventId = req.params.eventId;
       const userId = req.user.id;
       
       await this.eventService.verifyEventOwnership(eventId, userId);
@@ -186,6 +190,42 @@ export class DashboardController implements IDashboardController {
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ 
         success: false, 
         error: 'Failed to delete event' 
+      });
+    }
+  };
+
+  getEventAnalytics = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const eventId = req.params.eventId;
+      const userId = req.user._id;
+
+      const analytics = await this.analyticsService.getEventAnalytics(eventId, userId);
+
+      res.status(StatusCode.OK).json({
+        success: true,
+        data: analytics
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(StatusCode.NOT_FOUND).json({ 
+          success: false, 
+          message: error.message 
+        });
+        return;
+      }
+
+      if (error instanceof ForbiddenException) {
+        res.status(StatusCode.FORBIDDEN).json({ 
+          success: false, 
+          message: error.message 
+        });
+        return;
+      }
+
+      console.error('Get event analytics error:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Failed to fetch event analytics'
       });
     }
   };

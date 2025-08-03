@@ -37,5 +37,9 @@ export class UserDashboardService {
   getEventById(eventId: string): Observable<EventResponse> {
     return this.http.get<EventResponse>(`${this.apiUrl}/events/${eventId}`);
   }
+  
+  getEventAnalytics(eventId: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/analytics/event/${eventId}`);
+  }
 }
 
