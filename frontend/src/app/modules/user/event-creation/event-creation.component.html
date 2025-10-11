@@ -1,6 +1,6 @@
 <button (click)="showDialog()"
   class="group relative px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#00ff66] to-[#00cc52] text-white text-sm sm:text-base font-medium rounded-lg cursor-pointer overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl hover:shadow-[#00ff66]/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95">
-    
+  
   <span class="relative z-10 flex items-center">
     <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -14,10 +14,11 @@
           [draggable]="false" 
           [resizable]="false" 
           header="CREATE YOUR EVENT"
-          [style]="{width: '95%', maxWidth: '1280px', 'z-index': '60'}" 
+          [style]="{width: '95%', maxWidth: '1280px'}" 
           [contentStyle]="{'max-height': '90vh', 'overflow': 'auto'}"
-          styleClass="event-dialog z-60" 
-          [closeOnEscape]="true">
+          styleClass="event-dialog" 
+          [closeOnEscape]="true"
+          (onHide)="closeDialog()">
       <ng-template pTemplate="header">
         <div class="flex justify-between items-center w-full">
           <h2 class="text-[#00c853] text-xl font-semibold">CREATE YOUR EVENT</h2>
@@ -296,17 +297,23 @@
           </div>
           <!-- Submit Buttons Section -->
           <div class="col-span-1 md:col-span-2 flex justify-end mt-6 space-x-4">
-            <button type="button" pButton class="p-button-text" label="Cancel" (click)="visible = false"></button>
-            <button type="submit" pButton class="p-button-success" label="Create Event"
-              [loading]="loading"></button>
+            <button type="button" pButton class="p-button-text" label="Cancel" (click)="closeDialog()"></button>
+            <button type="submit" pButton class="p-button-success" label="Create Event" [loading]="loading"></button>
           </div>
         </div>
       </form>
     </p-dialog>
 
     <!-- Success Dialog -->
-    <p-dialog [(visible)]="successDialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
-      [style]="{width: '90%', maxWidth: '500px'}" [showHeader]="false" [dismissableMask]="true" styleClass="success-dialog neon-theme">
+    <p-dialog [(visible)]="successDialogVisible" 
+          [modal]="true" 
+          [draggable]="false" 
+          [resizable]="false"
+          [style]="{width: '90%', maxWidth: '500px'}" 
+          [showHeader]="false" 
+          [dismissableMask]="true" 
+          styleClass="success-dialog neon-theme"
+          (onHide)="closeSuccessDialog()">
       <div class="bg-black text-white rounded-lg overflow-hidden">
         <div class="bg-green-500 p-6 text-center">
           <div class="animate-pulse mb-4">
@@ -348,9 +355,9 @@
         </div>
         <div class="flex justify-between p-6 bg-[#1E1E1E]">
           <button type="button" pButton class="p-button-outlined p-button-secondary"
-            label="Create Another Event" (click)="successDialogVisible = false; showDialog()"></button>
+            label="Create Another Event" (click)="createAnotherEvent()"></button>
           <button type="button" pButton class="p-button-success"
-            label="View Events" (click)="successDialogVisible = false; onEventCreated.emit(createdEvent ?? undefined)"></button>
+            label="View Events" (click)="viewEvents()"></button>
         </div>
       </div>
     </p-dialog>

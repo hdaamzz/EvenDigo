@@ -1,129 +1,649 @@
-Custom styles for PrimeNG components
 
-:host ::ng-deep .custom-dialog .p-dialog-header {
-  background-color: #1F2937;
-  border-color: #374151;
-  color: white;
-  padding: 1.5rem;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-}
-
-:host ::ng-deep .custom-dialog .p-dialog-content {
-  background-color: #1F2937;
-  color: white;
-  padding: 1.5rem;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-}
-
-:host ::ng-deep .p-button {
-  background: linear-gradient(to right, #00ff66, #00aa44);
-  border: none;
-  color: black;
-  font-weight: bold;
+.glass-card {
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
 }
 
-:host ::ng-deep .p-button:hover {
-  background: linear-gradient(to right, #00aa44, #00ff66);
-  transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+.glass-card:hover {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
 }
 
-:host ::ng-deep .p-button.p-button-secondary {
-  background: #4B5563;
+.glass-info-card {
+  background: rgba(26, 26, 26, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-footer {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ============================================
+   VERIFICATION BADGES
+   ============================================ */
+
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.verification-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.verification-badge.verified {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(0, 255, 102, 0.8));
+  border: 1px solid rgba(0, 255, 102, 0.3);
+}
+
+.verification-badge.pending {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.8), rgba(250, 204, 21, 0.8));
+  color: #000;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.verification-badge.rejected {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.8), rgba(239, 68, 68, 0.8));
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.verification-badge.incomplete {
+  background: linear-gradient(135deg, rgba(75, 85, 99, 0.8), rgba(107, 114, 128, 0.8));
+  border: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+.verification-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6, #00ff66);
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 255, 102, 0.3);
+}
+
+.verification-btn:hover {
+  background: linear-gradient(135deg, #00ff66, #3b82f6);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 255, 102, 0.4);
+}
+
+/* ============================================
+   WARNING MESSAGES
+   ============================================ */
+
+.glass-warning {
+  background: rgba(217, 119, 6, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  max-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glass-warning span {
+  font-size: 12px;
+  color: #fbbf24;
+  line-height: 1.4;
+}
+
+/* ============================================
+   ACHIEVEMENT BADGES
+   ============================================ */
+
+.badge-container {
+  position: relative;
+}
+
+.badge-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge-container:hover .badge-wrapper {
+  transform: translateY(-4px) scale(1.1);
+}
+
+.badge-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.badge-container:hover .badge-tooltip {
+  opacity: 1;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.95);
+  border-right: 1px solid rgba(0, 255, 102, 0.3);
+  border-bottom: 1px solid rgba(0, 255, 102, 0.3);
+}
+
+/* ============================================
+   INFO ITEMS
+   ============================================ */
+
+.info-item {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 255, 102, 0.2);
+  transform: translateX(4px);
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-icon {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.info-item:hover .info-icon {
+  transform: scale(1.2);
+}
+
+.info-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  word-break: break-word;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #00ff66 0%, #00cc52 100%);
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0, 255, 102, 0.3);
+}
+
+.action-btn.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #00cc52 0%, #00b347 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 102, 0.4);
+}
+
+.action-btn.secondary {
+  background: rgba(75, 85, 99, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+}
+
+.action-btn.secondary:hover:not(:disabled) {
+  background: rgba(0, 255, 102, 0.1);
+  border-color: rgba(0, 255, 102, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   DIALOG STYLES
+   ============================================ */
+
+:host ::ng-deep .custom-dialog .p-dialog {
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+:host ::ng-deep .custom-dialog .p-dialog-header {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
+  padding: 1.5rem;
+  border-radius: 16px 16px 0 0;
 }
 
-:host ::ng-deep .p-button.p-button-secondary:hover {
-  background: #6B7280;
+:host ::ng-deep .custom-dialog .p-dialog-header .p-dialog-title {
+  font-weight: 700;
+  font-size: 20px;
+  background: linear-gradient(135deg, #fff, #00ff66);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+:host ::ng-deep .custom-dialog .p-dialog-content {
+  background: transparent;
+  color: white;
+  padding: 0;
+  border-radius: 0 0 16px 16px;
+}
+
+.dialog-content {
+  padding: 1.5rem;
+}
+
+.dialog-subtitle {
+  display: block;
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* ============================================
+   FORM STYLES
+   ============================================ */
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #d1d5db;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #00ff66;
+  box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.1);
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.form-input::placeholder {
+  color: #6b7280;
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Password Input Wrapper */
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.password-toggle:hover {
+  color: #00ff66;
+}
+
+/* Form Errors */
+.form-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #f87171;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.strength-label {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.strength-bar-container {
+  height: 6px;
+  width: 100%;
+  background: rgba(75, 85, 99, 0.3);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 50px;
+}
+
+.strength-bar.weak {
+  width: 33%;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.strength-bar.medium {
+  width: 66%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.strength-bar.strong {
+  width: 100%;
+  background: linear-gradient(90deg, #00ff66, #00cc52);
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   PRIMENG CUSTOMIZATION
+   ============================================ */
+
+:host ::ng-deep .p-button {
+  background: linear-gradient(135deg, #00ff66, #00cc52);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+:host ::ng-deep .p-button:hover {
+  background: linear-gradient(135deg, #00cc52, #00b347);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 102, 0.4);
+}
+
+:host ::ng-deep .p-inputtext {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  color: #fff;
+  border-radius: 10px;
 }
 
 :host ::ng-deep .p-inputtext:enabled:focus {
-  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.1);
   border-color: #00ff66;
 }
 
 :host ::ng-deep .p-autocomplete-panel {
-  background-color: #1F2937;
-  border: 1px solid #374151;
-  color: white;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 :host ::ng-deep .p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item {
   color: white;
-  padding: 0.75rem 1rem;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
 }
 
 :host ::ng-deep .p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item:hover {
-  background-color: #374151;
+  background: rgba(0, 255, 102, 0.1);
+  color: #00ff66;
 }
 
 :host ::ng-deep .p-datepicker {
-  background-color: #1F2937;
-  border: 1px solid #374151;
-  color: white;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 :host ::ng-deep .p-datepicker .p-datepicker-header {
-  background-color: #111827;
-  border-color: #374151;
+  background: rgba(17, 24, 39, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
   color: white;
-}
-
-:host ::ng-deep .p-datepicker .p-datepicker-calendar th {
-  color: #9CA3AF;
+  border-radius: 12px 12px 0 0;
 }
 
 :host ::ng-deep .p-datepicker .p-datepicker-calendar td > span {
   color: white;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-:host ::ng-deep .p-datepicker .p-datepicker-calendar td.p-datepicker-today > span {
-  background-color: rgba(0, 255, 102, 0.2);
+:host ::ng-deep .p-datepicker .p-datepicker-calendar td > span:hover {
+  background: rgba(0, 255, 102, 0.1);
   color: #00ff66;
 }
 
-:host ::ng-deep .p-datepicker .p-datepicker-calendar td > span.p-highlight {
-  background-color: #00ff66;
-  color: black;
+:host ::ng-deep .p-datepicker .p-datepicker-calendar td.p-datepicker-today > span {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  font-weight: 700;
 }
 
-/* Custom scrollbar */
+:host ::ng-deep .p-datepicker .p-datepicker-calendar td > span.p-highlight {
+  background: linear-gradient(135deg, #00ff66, #00cc52);
+  color: #000;
+  font-weight: 700;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1F2937;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #4B5563;
+  background: rgba(31, 41, 55, 0.5);
   border-radius: 4px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.8);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ff66;
+  background: rgba(0, 255, 102, 0.8);
 }
 
-/* Animation for badges */
-@keyframes badge-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
 }
 
-.badge-pulse {
-  animation: badge-pulse 2s infinite;
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Gradient text effect */
-.gradient-text {
-  background: linear-gradient(to right, #00ff66, #3b82f6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.shadow-neon {
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.4), 0 0 40px rgba(0, 255, 102, 0.2);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .glass-card {
+    border-radius: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+  
+  .badge-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

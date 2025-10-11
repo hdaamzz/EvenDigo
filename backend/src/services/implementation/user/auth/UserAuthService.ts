@@ -28,6 +28,9 @@ export class UserAuthService implements IUserAuthService {
         role: 'user',
         status: 'active',
         verified: false,
+        bio:'',
+        location:'',
+        phone:''
       });
 
       return user;

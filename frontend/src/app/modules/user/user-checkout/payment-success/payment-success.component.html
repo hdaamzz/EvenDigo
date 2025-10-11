@@ -1,116 +1,212 @@
 <app-user-nav></app-user-nav>
 
-
 <div class="bg-[#1E1E1E] text-white p-8 pt-20">
-  <div class="max-w-7xl mx-auto mb-8 bg-green-500 p-5 rounded-xl text-center">
-      <h1 class="text-2xl mb-2 font-semibold">Booking Confirmed!</h1>
-      <p>Your tickets for {{booking?.eventId?.eventTitle}} have been confirmed. Booking ID: #{{booking?.bookingId}}</p>
-  </div>
+    <!-- Success Message -->
+    <div *ngIf="booking?.paymentStatus === 'Completed'"
+        class="max-w-7xl mx-auto mb-8 bg-green-500 p-5 rounded-xl text-center">
+        <h1 class="text-2xl mb-2 font-semibold">Booking Confirmed!</h1>
+        <p>Your tickets for {{booking?.eventId?.eventTitle}} have been confirmed. Booking ID: #{{booking?.bookingId}}
+        </p>
+    </div>
 
-  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="md:col-span-2">
-          <div class="bg-[#121212] rounded-xl p-6 mb-5">
-              <h2 class="text-xl mb-5 text-green-500 flex items-center gap-2">
-                  <i class="fas fa-info-circle"></i>
-                  Order Information
-              </h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                  <div class="bg-[#1E1E1E] p-4 rounded-lg">
-                      <h3 class="text-gray-300 text-sm mb-1">Event Date & Time</h3>
-                      <p class="text-base">{{ booking?.eventId?.startDate | date:'MMMM d, yyyy' }}, {{ booking?.eventId?.startTime | date:'h:mm a' }} IST</p>
-                  </div>
-                  <div class="bg-[#1E1E1E] p-4 rounded-lg">
-                      <h3 class="text-gray-300 text-sm mb-1">Venue</h3>
-                      <p class="text-base">{{booking?.eventId?.venueName}}, {{booking?.eventId?.city}}</p>
-                  </div>
-                  <div class="bg-[#1E1E1E] p-4 rounded-lg">
-                      <h3 class="text-gray-300 text-sm mb-1">Ticket Type</h3>
-                      @for (ticket of booking?.tickets; track $index) {
-                      <p class="text-base">{{ticket.type}} ({{ticket.quantity}} tickets)</p>
-                      }
-                  </div>
-                  <div class="bg-[#1E1E1E] p-4 rounded-lg">
-                      <h3 class="text-gray-300 text-sm mb-1">Payment Method</h3>
-                      <p class="text-base">{{booking?.paymentType}}</p>
-                  </div>
-              </div>
+    <!-- Failed Payment Message -->
+    <div *ngIf="booking?.paymentStatus === 'Failed'"
+        class="max-w-7xl mx-auto mb-8 bg-red-500 p-5 rounded-xl text-center">
+        <h1 class="text-2xl mb-2 font-semibold">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            Payment Failed
+        </h1>
+        <p class="mb-3">Unfortunately, your payment for {{booking?.eventId?.eventTitle}} could not be processed.</p>
+        <p class="text-sm">Booking ID: #{{booking?.bookingId}}</p>
+        <div *ngIf="booking?.failureReason" class="mt-3 p-3 bg-red-600 rounded-lg">
+            <p class="text-sm"><strong>Reason:</strong> {{booking?.failureReason}}</p>
+        </div>
+        <div class="mt-4 text-sm">
+            <p *ngIf="isWalletRefunded" class="bg-green-600 p-2 rounded">
+                <i class="fas fa-check-circle mr-1"></i>
+                Amount has been refunded to your wallet
+            </p>
+        </div>
+    </div>
 
-              <div>
-                  <div class="bg-[#1E1E1E] p-5 rounded-lg mb-4 flex justify-between items-center">
-                      <div class="flex items-center gap-4">
-                          <div class="bg-[#121212] w-12 h-12 rounded-lg flex items-center justify-center text-2xl text-green-500">
-                              <i class="fas fa-ticket-alt"></i>
-                          </div>
-                          <div>
-                              <h3 class="font-medium mb-1">Event Tickets</h3>
-                              <p class="text-gray-300 text-sm">Download your tickets (PDF)</p>
-                          </div>
-                      </div>
-                      <button class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white" 
-                      (click)="downloadTickets()" 
-                      [disabled]="isLoading">
-                  <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-download'"></i>
-                  Download
-              </button>
-                  </div>
+    <!-- Pending Payment Message -->
+    <div *ngIf="booking?.paymentStatus === 'Pending'"
+        class="max-w-7xl mx-auto mb-8 bg-yellow-500 p-5 rounded-xl text-center">
+        <h1 class="text-2xl mb-2 font-semibold">
+            <i class="fas fa-clock mr-2"></i>
+            Payment Processing
+        </h1>
+        <p>Your payment for {{booking?.eventId?.eventTitle}} is being processed. Please wait...</p>
+        <p class="text-sm">Booking ID: #{{booking?.bookingId}}</p>
+    </div>
 
-                  <div class="bg-[#1E1E1E] p-5 rounded-lg mb-4 flex justify-between items-center">
-                      <div class="flex items-center gap-4">
-                          <div class="bg-[#121212] w-12 h-12 rounded-lg flex items-center justify-center text-2xl text-green-500">
-                              <i class="fas fa-file-invoice"></i>
-                          </div>
-                          <div>
-                              <h3 class="font-medium mb-1">Invoice</h3>
-                              <p class="text-gray-300 text-sm">Download payment invoice (PDF)</p>
-                          </div>
-                      </div>
-                      <button class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white" 
-                      (click)="downloadInvoice()" 
-                      [disabled]="isLoading">
-                  <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-download'"></i>
-                  Download
-              </button>
-                  </div>
-              </div>
-          </div>
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2">
+            <div class="bg-[#121212] rounded-xl p-6 mb-5">
+                <h2 class="text-xl mb-5 flex items-center gap-2" [ngClass]="{
+              'text-green-500': booking?.paymentStatus === 'Completed',
+              'text-red-500': booking?.paymentStatus === 'Failed',
+              'text-yellow-500': booking?.paymentStatus === 'Pending'
+            }">
+                    <i class="fas fa-info-circle"></i>
+                    Order Information
+                </h2>
 
-          <div class="text-center text-gray-300 mt-5">
-              <p>Need help with your booking?</p>
-              <div class="flex justify-center gap-5 mt-4">
-                  <a href="#" class="text-green-500 hover:underline">Contact Support</a>
-                  <a href="#" class="text-green-500 hover:underline">FAQs</a>
-                  <a href="#" class="text-green-500 hover:underline">Cancellation Policy</a>
-              </div>
-          </div>
-      </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                    <div class="bg-[#1E1E1E] p-4 rounded-lg">
+                        <h3 class="text-gray-300 text-sm mb-1">Event Date & Time</h3>
+                        <p class="text-base">{{ booking?.eventId?.startDate | date:'MMMM d, yyyy' }}, {{
+                            booking?.eventId?.startTime | date:'h:mm a' }} IST</p>
+                    </div>
+                    <div class="bg-[#1E1E1E] p-4 rounded-lg">
+                        <h3 class="text-gray-300 text-sm mb-1">Venue</h3>
+                        <p class="text-base">{{booking?.eventId?.venueName}}, {{booking?.eventId?.city}}</p>
+                    </div>
+                    <div class="bg-[#1E1E1E] p-4 rounded-lg">
+                        <h3 class="text-gray-300 text-sm mb-1">Ticket Type</h3>
+                        @for (ticket of booking?.tickets; track $index) {
+                        <p class="text-base">{{ticket.type}} ({{ticket.quantity}} tickets)</p>
+                        }
+                    </div>
+                    <div class="bg-[#1E1E1E] p-4 rounded-lg">
+                        <h3 class="text-gray-300 text-sm mb-1">Payment Method</h3>
+                        <p class="text-base">{{booking?.paymentType}}</p>
+                    </div>
+                    <div class="bg-[#1E1E1E] p-4 rounded-lg">
+                        <h3 class="text-gray-300 text-sm mb-1">Payment Status</h3>
+                        <p class="text-base flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full" [ngClass]="{
+                      'bg-green-500': booking?.paymentStatus === 'Completed',
+                      'bg-red-500': booking?.paymentStatus === 'Failed',
+                      'bg-yellow-500': booking?.paymentStatus === 'Pending'
+                    }"></span>
+                            {{booking?.paymentStatus}}
+                        </p>
+                    </div>
+                    <div class="bg-[#1E1E1E] p-4 rounded-lg">
+                        <h3 class="text-gray-300 text-sm mb-1">Total Amount</h3>
+                        <p class="text-base">₹{{booking?.totalAmount}}</p>
+                    </div>
+                </div>
 
-      <div>
-          <div class="bg-[#121212] rounded-xl p-6 text-center">
-              <h2 class="text-xl mb-5 text-green-500 flex items-center justify-center gap-2">
-                  <i class="fas fa-qrcode"></i>
-                  Entry Pass
-              </h2>
-              @for (ticket of booking?.tickets; track $index) {
+                <!-- Success Actions -->
+                <div *ngIf="booking?.paymentStatus === 'Completed'">
+                    <div class="bg-[#1E1E1E] p-5 rounded-lg mb-4 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="bg-[#121212] w-12 h-12 rounded-lg flex items-center justify-center text-2xl text-green-500">
+                                <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium mb-1">Event Tickets</h3>
+                                <p class="text-gray-300 text-sm">Download your tickets (PDF)</p>
+                            </div>
+                        </div>
+                        <button
+                            class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white"
+                            (click)="downloadTickets()" [disabled]="isLoading">
+                            <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+                            Download
+                        </button>
+                    </div>
+
+                    <div class="bg-[#1E1E1E] p-5 rounded-lg mb-4 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="bg-[#121212] w-12 h-12 rounded-lg flex items-center justify-center text-2xl text-green-500">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium mb-1">Invoice</h3>
+                                <p class="text-gray-300 text-sm">Download payment invoice (PDF)</p>
+                            </div>
+                        </div>
+                        <button
+                            class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded flex items-center gap-2 text-white"
+                            (click)="downloadInvoice()" [disabled]="isLoading">
+                            <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+                            Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Failed Payment Actions -->
+                <div *ngIf="booking?.paymentStatus === 'Failed'" class="space-y-4">
+                    <div class="bg-red-900/20 border border-red-500 p-5 rounded-lg">
+                        <h3 class="text-red-400 font-medium mb-2">What happened?</h3>
+                        <p class="text-sm text-gray-300 mb-4">
+                            Your payment could not be processed successfully. This might be due to:
+                        </p>
+                        <ul class="text-sm text-gray-300 space-y-1 ml-4">
+                            <li>• Tickets became unavailable after payment initiation</li>
+                            <li>• Technical issues during processing</li>
+                            <li>• Payment gateway errors</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center text-gray-300 mt-5">
+                <p *ngIf="booking?.paymentStatus === 'Completed'">Need help with your booking?</p>
+                <p *ngIf="booking?.paymentStatus === 'Failed'">Need assistance with this failed payment?</p>
+                <div class="flex justify-center gap-5 mt-4">
+                    <a href="#" class="text-green-500 hover:underline">Contact Support</a>
+                    <a href="#" class="text-green-500 hover:underline">FAQs</a>
+                    <a href="#" class="text-green-500 hover:underline">Refund Policy</a>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="booking?.paymentStatus === 'Completed'">
+            <div class="bg-[#121212] rounded-xl p-6 text-center">
+                <h2 class="text-xl mb-5 text-green-500 flex items-center justify-center gap-2">
+                    <i class="fas fa-qrcode"></i>
+                    Entry Pass
+                </h2>
+                @for (ticket of booking?.tickets; track $index) {
                 <h4 class="text-xl mb-5 text-green-500 flex items-center justify-center gap-2">
-                    
                     {{ticket.type | uppercase}}
                 </h4>
-              <img [src]="ticket.uniqueQrCode" alt="Event QR Code" class="w-48 h-48 mx-auto bg-white p-2 rounded-lg mb-4">
-              }
-              <p>Show this QR code at the venue entrance</p>
-              
-              <div class="flex justify-center gap-4 mt-5">
-                  <button class="bg-[#1E1E1E] hover:bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
-                      <i class="fas fa-share-alt"></i>
-                  </button>
-                  <button class="bg-[#1E1E1E] hover:bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
-                      <i class="fas fa-envelope"></i>
-                  </button>
-                  <button class="bg-[#1E1E1E] hover:bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
-                      <i class="fab fa-whatsapp"></i>
-                  </button>
-              </div>
-          </div>
-      </div>
-  </div>
+                <img [src]="ticket.uniqueQrCode" alt="Event QR Code"
+                    class="w-48 h-48 mx-auto bg-white p-2 rounded-lg mb-4">
+                }
+                <p>Show this QR code at the venue entrance</p>
+
+                <div class="flex justify-center gap-4 mt-5">
+                    <button
+                        class="bg-[#1E1E1E] hover:bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                    <button
+                        class="bg-[#1E1E1E] hover:bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                    <button
+                        class="bg-[#1E1E1E] hover:bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="booking?.paymentStatus === 'Failed'">
+            <div class="bg-[#121212] rounded-xl p-6 text-center">
+                <h2 class="text-xl mb-5 text-red-500 flex items-center justify-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Payment Failed
+                </h2>
+                <div class="space-y-4">
+                    <div class="bg-red-900/20 p-4 rounded-lg">
+                        <i class="fas fa-times-circle text-red-500 text-4xl mb-3"></i>
+                        <p class="text-sm text-gray-300">No tickets were issued for this transaction</p>
+                    </div>
+                    <div class="bg-blue-900/20 p-4 rounded-lg">
+                        <i class="fas fa-info-circle text-blue-400 text-2xl mb-3"></i>
+                        <p class="text-sm text-gray-300">If amount was deducted, it will be refunded to your wallet
+                            within 5-10 minutes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

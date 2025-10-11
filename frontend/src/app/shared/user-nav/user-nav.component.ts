@@ -25,7 +25,7 @@ export class UserNavComponent implements OnInit, OnDestroy {
   isMobileMenuOpen = false;
   isDropdownOpen = false;
   isNavbarVisible = true;
-  
+  confirmLogoutOpen = false;
   private _lastScrollTop = 0;
   private readonly _scrollThreshold = 80;
   private readonly _scrollSensitivity = 10;
@@ -94,6 +94,18 @@ export class UserNavComponent implements OnInit, OnDestroy {
   navigateTo(path: string): void {
     this._router.navigate([path]);
     this.isMobileMenuOpen = false;
+  }
+  openConfirmLogout(): void {
+    this.confirmLogoutOpen = true;
+  }
+
+  closeConfirmLogout(): void {
+    this.confirmLogoutOpen = false;
+  }
+
+  confirmLogout(): void {
+    this.logout(); 
+    this.closeConfirmLogout();
   }
 
 

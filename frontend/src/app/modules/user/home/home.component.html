@@ -13,16 +13,10 @@
 
                 <div
                     class="flex flex-wrap gap-8 md:gap-40 items-center justify-center md:justify-start py-8 border-t border-gray-800 px-4 md:px-10">
-                    <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318775/event-kerala-summit_hofmjl.webp"
-                        alt="Partner logo" class="h-8 md:h-10 partner-logo" />
-                    <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318775/event-scaleup-2024_z9qquu.webp"
-                        alt="Partner logo" class="h-8 md:h-10 partner-logo" />
-                    <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318776/event-science-expo_jllnlo.webp"
-                        alt="Partner logo" class="h-8 md:h-10 partner-logo" />
-                    <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318776/partner-initcrew_mgstmu.webp"
-                        alt="Partner logo" class="h-8 md:h-10 partner-logo" />
-                    <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318776/partner-pygrammers_brojhh.webp"
-                        alt="Partner logo" class="h-8 md:h-10 partner-logo" />
+                    <img *ngFor="let logo of partnersImages"
+                        [src]="logo"
+                        alt="Partner logo"
+                        class="h-8 md:h-10 partner-logo" />
                 </div>
             </header>
 
@@ -42,36 +36,373 @@
                     </div>
                 </section>
 
-                <!-- <section class="mb-12 md:mb-20">
-                    <h2 class="text-2xl mb-8">
-                        <span class="neon-bg px-4 py-1 rounded">Customize</span> Your Emails &
-                        <br>Tickets and Event <span class="neon-bg px-4 py-1 rounded">Seamlessly!</span>
-                    </h2>
-                    <div class="flex flex-wrap gap-4 md:gap-8 justify-center">
-                        <div
-                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg] overflow-hidden">
-                            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1751629323/2a09a6b1bf6ee8cd55463cda9789299a_fxcjv8.jpg" alt="Ticket Image" class="w-full h-full object-cover" />
+                <!-- Statistics Section -->
+                <section class="mb-12 md:mb-20">
+                    <h2 class="section-title text-2xl mb-8 text-center neon-green">The Event Industry is Booming</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="stat-card glass-card p-6 rounded-xl text-center">
+                            <div class="text-4xl md:text-5xl font-bold neon-green mb-2">$1.35T</div>
+                            <p class="text-gray-300">Global Events Market Value 2025</p>
                         </div>
-                        <div
-                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg] overflow-hidden">
-                            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1751629322/191ccf23a10b8cf02e0a8c97003aef92_no6vut.jpg" alt="Ticket Image" class="w-full h-full object-cover" />
+                        <div class="stat-card glass-card p-6 rounded-xl text-center">
+                            <div class="text-4xl md:text-5xl font-bold neon-green mb-2">78%</div>
+                            <p class="text-gray-300">Planners Adopting Hybrid Formats</p>
                         </div>
-                        <div
-                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg] overflow-hidden">
-                            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1751629323/2a09a6b1bf6ee8cd55463cda9789299a_fxcjv8.jpg" alt="Ticket Image" class="w-full h-full object-cover" />
-                        </div>
-                        <div
-                            class="w-40 h-56 md:w-56 md:h-72 ticket-card rounded-xl shadow-xl transform rotate-[5deg] overflow-hidden">
-                            <img src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1751629322/191ccf23a10b8cf02e0a8c97003aef92_no6vut.jpg" alt="Ticket Image" class="w-full h-full object-cover" />
+                        <div class="stat-card glass-card p-6 rounded-xl text-center">
+                            <div class="text-4xl md:text-5xl font-bold neon-green mb-2">40M</div>
+                            <p class="text-gray-300">Business Event Participants Annually</p>
                         </div>
                     </div>
-                </section> -->
+                </section>
 
+                <!-- How It Works Section -->
                 <section class="mb-12 md:mb-20">
+                    <h2 class="text-2xl mb-12 text-center">
+                        <span class="neon-bg px-4 py-1 rounded">Simple</span> 3-Step Process to
+                        <br class="hidden md:block">Launch Your Event
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="process-card glass-card p-8 rounded-xl text-center">
+                            <div
+                                class="process-number neon-bg rounded-full w-16 h-16 flex items-center justify-center text-3xl font-bold text-black mx-auto mb-4">
+                                1</div>
+                            <h3 class="text-xl font-bold mb-3 neon-green">Create Event</h3>
+                            <p class="text-gray-300">Set up your event details, customize tickets, and design your event
+                                page in minutes</p>
+                        </div>
+                        <div class="process-card glass-card p-8 rounded-xl text-center">
+                            <div
+                                class="process-number neon-bg rounded-full w-16 h-16 flex items-center justify-center text-3xl font-bold text-black mx-auto mb-4">
+                                2</div>
+                            <h3 class="text-xl font-bold mb-3 neon-green">Share & Manage</h3>
+                            <p class="text-gray-300">Share your event link, sell tickets online, and watch registrations
+                                flow in automatically</p>
+                        </div>
+                        <div class="process-card glass-card p-8 rounded-xl text-center">
+                            <div
+                                class="process-number neon-bg rounded-full w-16 h-16 flex items-center justify-center text-3xl font-bold text-black mx-auto mb-4">
+                                3</div>
+                            <h3 class="text-xl font-bold mb-3 neon-green">Check-In & Celebrate</h3>
+                            <p class="text-gray-300">Use mobile check-in, track attendance in real-time, and focus on
+                                making your event amazing</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Inspirational Quotes Section -->
+                <section class="mb-12 md:mb-20">
+                    <h2 class="section-title text-2xl mb-8 text-center neon-green">Words That Inspire</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="quote-card glass-card p-6 md:p-8 rounded-xl">
+                            <div class="quote-icon text-5xl neon-green mb-4">"</div>
+                            <p class="text-lg md:text-xl text-gray-200 mb-4 italic">Plans are nothing. Planning is
+                                everything.</p>
+                            <p class="text-sm text-gray-400">— Albert Einstein</p>
+                        </div>
+                        <div class="quote-card glass-card p-6 md:p-8 rounded-xl">
+                            <div class="quote-icon text-5xl neon-green mb-4">"</div>
+                            <p class="text-lg md:text-xl text-gray-200 mb-4 italic">To achieve great things, two things
+                                are needed: a plan and not quite enough time.</p>
+                            <p class="text-sm text-gray-400">— Leonard Bernstein</p>
+                        </div>
+                        <div class="quote-card glass-card p-6 md:p-8 rounded-xl">
+                            <div class="quote-icon text-5xl neon-green mb-4">"</div>
+                            <p class="text-lg md:text-xl text-gray-200 mb-4 italic">Events are not about the location,
+                                the décor, or the food. Events are about creating connections.</p>
+                            <p class="text-sm text-gray-400">— Event Industry Expert</p>
+                        </div>
+                        <div class="quote-card glass-card p-6 md:p-8 rounded-xl">
+                            <div class="quote-icon text-5xl neon-green mb-4">"</div>
+                            <p class="text-lg md:text-xl text-gray-200 mb-4 italic">The event starts at the very first
+                                touchpoint – that very first mention is when the attendee journey begins.</p>
+                            <p class="text-sm text-gray-400">— Ashley Priest</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Performance & Time Savings Section -->
+                <section class="mb-12 md:mb-20">
+                    <h2 class="text-2xl mb-8 text-center">
+                        <span class="neon-bg px-4 py-1 rounded">Supercharge</span> Your Event Performance
+                    </h2>
+                    <div class="glass-card p-6 md:p-10 rounded-xl">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="performance-item">
+                                <div class="flex items-start mb-4">
+                                    <div class="performance-icon neon-bg rounded-lg p-3 mr-4">
+                                        <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold neon-green mb-2">70% Faster Setup</h3>
+                                        <p class="text-gray-300">Launch events in minutes, not hours. Our streamlined
+                                            workflow cuts your setup time dramatically</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="performance-item">
+                                <div class="flex items-start mb-4">
+                                    <div class="performance-icon neon-bg rounded-lg p-3 mr-4">
+                                        <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold neon-green mb-2">Save 17+ Hours</h3>
+                                        <p class="text-gray-300">Eliminate manual tasks like check-ins, ticket
+                                            distribution, and attendee management</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="performance-item">
+                                <div class="flex items-start mb-4">
+                                    <div class="performance-icon neon-bg rounded-lg p-3 mr-4">
+                                        <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold neon-green mb-2">Real-Time Analytics</h3>
+                                        <p class="text-gray-300">Track ticket sales, attendance rates, and revenue
+                                            metrics with live dashboard updates</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="performance-item">
+                                <div class="flex items-start mb-4">
+                                    <div class="performance-icon neon-bg rounded-lg p-3 mr-4">
+                                        <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold neon-green mb-2">Reduce Costs by 40%</h3>
+                                        <p class="text-gray-300">Cut operational expenses with automated ticketing,
+                                            marketing tools, and integrated payments</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center pt-6 border-t border-gray-700">
+                            <p class="text-xl text-gray-200 mb-4">Join <span class="neon-green font-bold">10,000+</span>
+                                event organizers who've transformed their workflow</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Features Showcase Section -->
+                <section class="mb-12 md:mb-20">
+                    <h2 class="section-title text-2xl mb-8 text-center neon-green">Everything You Need, All in One Place
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="feature-card glass-card p-6 rounded-xl">
+                            <div class="feature-icon-wrapper mb-4">
+                                <svg class="w-12 h-12 neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Custom Ticket Design</h3>
+                            <p class="text-gray-300 text-sm">Create beautiful, branded tickets with QR codes for
+                                seamless check-ins</p>
+                        </div>
+                        <div class="feature-card glass-card p-6 rounded-xl">
+                            <div class="feature-icon-wrapper mb-4">
+                                <svg class="w-12 h-12 neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Email Automation</h3>
+                            <p class="text-gray-300 text-sm">Send confirmation emails, reminders, and post-event
+                                follow-ups automatically</p>
+                        </div>
+                        <div class="feature-card glass-card p-6 rounded-xl">
+                            <div class="feature-icon-wrapper mb-4">
+                                <svg class="w-12 h-12 neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Mobile Check-In</h3>
+                            <p class="text-gray-300 text-sm">Scan QR codes from any device for instant, contactless
+                                attendee verification</p>
+                        </div>
+                        <div class="feature-card glass-card p-6 rounded-xl">
+                            <div class="feature-icon-wrapper mb-4">
+                                <svg class="w-12 h-12 neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Secure Payments</h3>
+                            <p class="text-gray-300 text-sm">Accept payments through multiple methods with bank-grade
+                                security</p>
+                        </div>
+                        <div class="feature-card glass-card p-6 rounded-xl">
+                            <div class="feature-icon-wrapper mb-4">
+                                <svg class="w-12 h-12 neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Advanced Analytics</h3>
+                            <p class="text-gray-300 text-sm">Get insights on sales trends, demographics, and attendee
+                                behavior patterns</p>
+                        </div>
+                        <div class="feature-card glass-card p-6 rounded-xl">
+                            <div class="feature-icon-wrapper mb-4">
+                                <svg class="w-12 h-12 neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Attendee Management</h3>
+                            <p class="text-gray-300 text-sm">Manage registrations, track attendance, and communicate
+                                with attendees effortlessly</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Testimonials Section -->
+                <section class="mb-12 md:mb-20">
+                    <h2 class="section-title text-2xl mb-8 text-center neon-green">Trusted by Event Organizers</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="testimonial-card glass-card p-6 rounded-xl">
+                            <div class="flex items-center mb-4">
+                                <div
+                                    class="w-12 h-12 bg-gradient-to-br from-[#00ff66] to-[#00cc52] rounded-full flex items-center justify-center text-black font-bold text-xl mr-3">
+                                    R</div>
+                                <div>
+                                    <h4 class="font-bold">Rahul Krishnan</h4>
+                                    <p class="text-sm text-gray-400">Tech Conference Organizer</p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <span class="neon-green">★★★★★</span>
+                            </div>
+                            <p class="text-gray-300 text-sm italic">"Cut our event setup time by 75%. The mobile
+                                check-in feature is a game-changer for managing large crowds efficiently."</p>
+                        </div>
+                        <div class="testimonial-card glass-card p-6 rounded-xl">
+                            <div class="flex items-center mb-4">
+                                <div
+                                    class="w-12 h-12 bg-gradient-to-br from-[#00ff66] to-[#00cc52] rounded-full flex items-center justify-center text-black font-bold text-xl mr-3">
+                                    P</div>
+                                <div>
+                                    <h4 class="font-bold">Priya Sharma</h4>
+                                    <p class="text-sm text-gray-400">Corporate Events Manager</p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <span class="neon-green">★★★★★</span>
+                            </div>
+                            <p class="text-gray-300 text-sm italic">"The analytics dashboard gives us insights we never
+                                had before. We can now make data-driven decisions for future events."</p>
+                        </div>
+                        <div class="testimonial-card glass-card p-6 rounded-xl">
+                            <div class="flex items-center mb-4">
+                                <div
+                                    class="w-12 h-12 bg-gradient-to-br from-[#00ff66] to-[#00cc52] rounded-full flex items-center justify-center text-black font-bold text-xl mr-3">
+                                    A</div>
+                                <div>
+                                    <h4 class="font-bold">Arjun Mehta</h4>
+                                    <p class="text-sm text-gray-400">Music Festival Producer</p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <span class="neon-green">★★★★★</span>
+                            </div>
+                            <p class="text-gray-300 text-sm italic">"Managed 5,000+ attendees seamlessly. The custom
+                                branding options made our tickets look professional and unique."</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ Section -->
+                <section class="mb-12 md:mb-20">
+                    <h2 class="section-title text-2xl mb-8 text-center neon-green">Frequently Asked Questions</h2>
+                    <div class="glass-card p-6 md:p-10 rounded-xl">
+                        <div class="space-y-6">
+                            <div class="faq-item border-b border-gray-700 pb-6">
+                                <h3 class="text-lg font-bold mb-2 neon-green">How quickly can I set up my first event?
+                                </h3>
+                                <p class="text-gray-300">You can create and launch your first event in under 10 minutes.
+                                    Simply choose a plan, fill in your event details, customize your tickets, and start
+                                    selling immediately.</p>
+                            </div>
+                            <div class="faq-item border-b border-gray-700 pb-6">
+                                <h3 class="text-lg font-bold mb-2 neon-green">What payment methods do you support?</h3>
+                                <p class="text-gray-300">We support all major payment methods including credit/debit
+                                    cards, UPI, net banking, and digital wallets. All transactions are secured with
+                                    bank-grade encryption.</p>
+                            </div>
+                            <div class="faq-item border-b border-gray-700 pb-6">
+                                <h3 class="text-lg font-bold mb-2 neon-green">Is mobile check-in included in all plans?
+                                </h3>
+                                <p class="text-gray-300">Yes, mobile check-in with QR code scanning is available across
+                                    all subscription tiers, including the free Basic plan.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h3 class="text-lg font-bold mb-2 neon-green">What kind of support do you provide?</h3>
+                                <p class="text-gray-300">We offer email support for all users, with priority support and
+                                    dedicated account management available on Premium plans. Our help center includes
+                                    comprehensive guides and tutorials.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Final CTA Section -->
+                <section class="mb-12 md:mb-20">
+                    <div class="cta-banner glass-card p-8 md:p-12 rounded-xl text-center">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                            Ready to <span class="neon-bg px-4 py-1 rounded">Transform</span> Your Events?
+                        </h2>
+                        <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                            Join thousands of event organizers who've simplified their workflow, saved countless hours,
+                            and created memorable experiences.
+                        </p>
+                        <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                            <button (click)="router.navigate(['/premium/checkout'], { queryParams: { type: 'Basic' } })"
+                                class="neon-bg text-black font-bold py-3 px-8 rounded-md hover:opacity-90 transition-all duration-300 text-lg">
+                                Start Free Today
+                            </button>
+                            <button (click)="router.navigate(['/events'])"
+                                class="border-2 border-[#00ff66] text-[#00ff66] font-bold py-3 px-8 rounded-md hover:bg-[#00ff66] hover:text-black transition-all duration-300 text-lg">
+                                View Demo
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-6">No credit card required • Cancel anytime • Free plan
+                            available forever</p>
+                    </div>
+                </section>
+
+
+
+                <!-- <section class="mb-12 md:mb-20">
                     <h2 class="text-2xl mb-8">
                         Ready, Set, <span class="neon-bg px-4 py-1 rounded">Check-In!</span> With Just
                         <br><span class="neon-bg px-4 py-1 rounded">3 Clicks</span> You're Done!
                     </h2>
+
 
                     <h3 class="text-xl font-bold mb-6 neon-green text-center">Choose Your Event Plan</h3>
 
@@ -113,7 +444,6 @@
                             </div>
                         </div>
 
-                        <!-- Error State -->
                         <div *ngIf="!isLoading && plans.length === 0" class="text-center py-12">
                             <div class="text-gray-400 mb-4">
                                 <svg class="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24"
@@ -134,9 +464,8 @@
                             <p>All plans include event creation, basic analytics, and mobile check-in.</p>
                         </div>
                     </div>
-                </section>
+                </section> -->
             </main>
-            <div class="h-2.5"></div>
         </div>
         <app-user-footer></app-user-footer>
     </div>

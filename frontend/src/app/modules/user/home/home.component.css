@@ -357,6 +357,205 @@ button:disabled:hover {
     margin-right: 8px;
 }
 
+/* Statistics Section */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 102, 0.3);
+}
+
+/* Process Cards */
+.process-card {
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.process-card:hover {
+    transform: translateY(-8px);
+    border-color: #00ff66;
+}
+
+.process-number {
+    transition: all 0.3s ease;
+}
+
+.process-card:hover .process-number {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
+}
+
+/* Quote Cards */
+.quote-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quote-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 102, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.quote-card:hover::before {
+    left: 100%;
+}
+
+.quote-card:hover {
+    border-color: rgba(0, 255, 102, 0.3);
+}
+
+.quote-icon {
+    line-height: 0.5;
+    font-family: Georgia, serif;
+}
+
+/* Performance Items */
+.performance-item {
+    transition: all 0.3s ease;
+}
+
+.performance-icon {
+    transition: all 0.3s ease;
+}
+
+.performance-item:hover .performance-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+}
+
+/* Feature Cards */
+.feature-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: #00ff66;
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+}
+
+.feature-icon-wrapper {
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-wrapper svg {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 102, 0.6));
+}
+
+/* Testimonial Cards */
+.testimonial-card {
+    transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 102, 0.3);
+}
+
+/* FAQ Items */
+.faq-item {
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover h3 {
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* CTA Banner */
+.cta-banner {
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 2px solid rgba(0, 255, 102, 0.2);
+}
+
+.cta-banner:hover {
+    border-color: rgba(0, 255, 102, 0.4);
+}
+
+/* Animations for new sections */
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card,
+.process-card,
+.quote-card,
+.feature-card,
+.testimonial-card {
+    animation: floatIn 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+.process-card:nth-child(1) { animation-delay: 0.1s; }
+.process-card:nth-child(2) { animation-delay: 0.2s; }
+.process-card:nth-child(3) { animation-delay: 0.3s; }
+
+.feature-card:nth-child(1) { animation-delay: 0.1s; }
+.feature-card:nth-child(2) { animation-delay: 0.15s; }
+.feature-card:nth-child(3) { animation-delay: 0.2s; }
+.feature-card:nth-child(4) { animation-delay: 0.25s; }
+.feature-card:nth-child(5) { animation-delay: 0.3s; }
+.feature-card:nth-child(6) { animation-delay: 0.35s; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-card,
+    .process-card,
+    .quote-card,
+    .feature-card,
+    .testimonial-card {
+        animation-delay: 0s !important;
+    }
+    
+    .quote-icon {
+        font-size: 3rem;
+    }
+    
+    .performance-icon {
+        padding: 0.5rem;
+    }
+    
+    .performance-icon svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
+/* Gradient text effect */
+.gradient-text {
+    background: linear-gradient(135deg, #00ff66 0%, #00cc52 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

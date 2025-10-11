@@ -7,6 +7,12 @@ import { IBooking, ITicket } from '../../../../core/models/booking.interface';
 import { IEvent } from '../../../../core/models/event.interface';
 import { Router } from '@angular/router';
 
+interface GroupedBookings {
+  date: string;
+  displayDate: string;
+  bookings: IBooking[];
+}
+
 @Component({
   selector: 'app-profile-bookings',
   standalone: true,
@@ -16,6 +22,7 @@ import { Router } from '@angular/router';
 })
 export class ProfileBookingsComponent implements OnInit, OnDestroy {
   bookings: IBooking[] = [];
+  groupedBookings: GroupedBookings[] = [];
   showModal = false;
   showBookingDetailsModal = false;
   showQRModal = false;
@@ -48,10 +55,59 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
     const documentHeight = document.documentElement.scrollHeight;
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-    // Trigger loading when within 100 pixels of the bottom
     if (scrollTop + windowHeight >= documentHeight - 100 && this.hasMore && !this.isLoading) {
       this.loadMoreBookings();
     }
+  }
+
+  private _groupBookingsByCreationDate(): void {
+    const grouped = new Map<string, IBooking[]>();
+    
+    this.bookings.forEach(booking => {
+      const createdDate = new Date(booking.createdAt ?? '');
+      const dateKey = createdDate.toISOString().split('T')[0];
+      
+      if (!grouped.has(dateKey)) {
+        grouped.set(dateKey, []);
+      }
+      grouped.get(dateKey)!.push(booking);
+    });
+    
+    this.groupedBookings = Array.from(grouped.entries())
+      .map(([dateKey, bookings]) => ({
+        date: dateKey,
+        displayDate: this._formatDisplayDate(dateKey),
+        bookings: bookings.sort((a, b) => new Date(b.createdAt ?? '').getTime() - new Date(a.createdAt ??'').getTime())
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  private _formatDisplayDate(dateKey: string): string {
+    const date = new Date(dateKey);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+  }
+
+  trackByDate(index: number, group: GroupedBookings): string {
+    return group.date;
+  }
+
+  trackByBookingId(index: number, booking: IBooking): string {
+    return booking.bookingId;
   }
 
   showBookingDetails(booking: IBooking): void {
@@ -157,14 +213,15 @@ export class ProfileBookingsComponent implements OnInit, OnDestroy {
 
             this.totalCount = totalCount;
             this.hasMore = hasMore;
+            this._groupBookingsByCreationDate(); // Group after loading
           } else {
-            Notiflix.Notify.failure('Failed to load your events.');
+            Notiflix.Notify.failure('Failed to load your bookings.');
           }
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Error loading events:', error);
-          Notiflix.Notify.failure('Error loading your events.');
+          console.error('Error loading bookings:', error);
+          Notiflix.Notify.failure('Error loading your bookings.');
         },
       });
   }

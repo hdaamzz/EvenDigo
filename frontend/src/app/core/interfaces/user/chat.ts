@@ -34,6 +34,7 @@ export interface ChatMessage {
   id: string;
   chatId?: string;
   senderId: string | User;
+  senderName?:string
   content: string;
   timestamp: Date;
   isRead: boolean;
@@ -58,6 +59,7 @@ export interface ApiMessage {
   _id: string;
   sender: any;
   content: string;
+  senderName?:string;
   timestamp: string;
   read: boolean;
   messageType: 'text' | 'system' | 'image' | 'file';

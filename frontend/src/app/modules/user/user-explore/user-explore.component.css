@@ -1,23 +1,99 @@
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+
+.animate-slide-down-mobile {
+  animation: slideDownMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-::-webkit-scrollbar-track {
-  background: #121212;
+.animate-slide-up-mobile {
+  animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #00ff66;
-  border-radius: 3px;
+@keyframes slideDownMobile {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.8);
+    transform-origin: top;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    transform-origin: top;
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #00cc52;
+@keyframes slideUpMobile {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    transform-origin: top;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.8);
+    transform-origin: top;
+  }
 }
 
-/* Loading animation */
+.animate-slide-right-desktop {
+  animation: slideRightDesktop 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-left-desktop {
+  animation: slideLeftDesktop 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideRightDesktop {
+  from {
+    opacity: 0;
+    transform: translateX(-30px) scaleX(0.8);
+    transform-origin: left;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes slideLeftDesktop {
+  from {
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+    transform-origin: left;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px) scaleX(0.8);
+    transform-origin: left;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+button:hover svg {
+  transition: transform 0.2s ease-in-out;
+}
+
+button:hover {
+  transition: all 0.2s ease-in-out;
+}
+
+input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .animate-spin {
   animation: spin 1s linear infinite;
 }
@@ -30,111 +106,3 @@
     transform: rotate(360deg);
   }
 }
-
-/* Smooth transitions */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Focus states */
-input:focus {
-  box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.1);
-}
-
-button:focus {
-  outline: 2px solid #00ff66;
-  outline-offset: 2px;
-}
-
-/* Card hover effects */
-.group:hover {
-  transform: translateY(-2px);
-}
-
-/* Text truncation utilities */
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-}
-
-.line-clamp-2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-}
-
-/* Button active states */
-button:active {
-  transform: scale(0.98);
-}
-
-/* Responsive text */
-@media (max-width: 768px) {
-  .text-responsive {
-    font-size: 0.875rem;
-  }
-}
-
-/* Grid responsive adjustments */
-@media (max-width: 640px) {
-  .grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Modal backdrop */
-.modal-backdrop {
-  backdrop-filter: blur(4px);
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.dropdown-enter {
-      animation: dropdownSlideIn 0.2s ease-out;
-    }
-    
-    @keyframes dropdownSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    /* Focus ring improvements */
-    .focus-ring:focus {
-      box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.2);
-    }
-    
-    /* Button press animation */
-    .btn-press:active {
-      transform: scale(0.97);
-    }
-    
-    /* Smooth height transitions for mobile filters */
-    .mobile-filters-enter {
-      animation: slideDown 0.3s ease-out;
-    }
-    
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }

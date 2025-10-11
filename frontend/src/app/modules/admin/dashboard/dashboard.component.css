@@ -16,3 +16,13 @@ img {
   max-height: 10rem;
   object-fit: cover;
 }
+
+.neon-shadow {
+  box-shadow: 0 0 34px 0 #00ff6622, 0 2px 12px 0 #121212;
+}
+.drop-shadow-neon {
+  filter: drop-shadow(0 0 7px #00ff66);
+}
+.neon-btn-shadow {
+  box-shadow: 0 0 12px #00ff6650;
+}

@@ -311,10 +311,15 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
   verificationRequestDetails(): void {
     const sub = this.userProfileService.verificationRequestDetails().subscribe({
       next: (response) => {
+        if(response.data){
         this.verificationData = response.data;
-      },
-      error: (error) => {
-        console.error('Error getting verification profile:', error);
+        }else{
+          this.verificationData = {
+            user_id: '',
+            status: '',
+            note: ''
+          }
+        }        
       }
     });
     this.subscriptions.push(sub);

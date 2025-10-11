@@ -18,7 +18,6 @@ const transactionSchema = new Schema({
   amount: {
     type: Number,
     required: true,
-    min: 0
   },
   type: {
     type: String,

@@ -25,8 +25,8 @@ export class ServiceFinanceMapper {
     search?: string
   ): GetTransactionsByDateRangeDTO {
     return {
-      startDate: this._validateStartDate(startDate),
-      endDate: this._validateAndAdjustEndDate(endDate),
+      startDate: startDate,
+      endDate: endDate,
       page: this._validatePage(page),
       limit: this._validateLimit(limit),
       search: search?.trim() || undefined
@@ -55,8 +55,8 @@ export class ServiceFinanceMapper {
     search?: string
   ): GetRefundsByDateRangeDTO {
     return {
-      startDate: this._validateStartDate(startDate),
-      endDate: this._validateAndAdjustEndDate(endDate),
+      startDate: startDate,
+      endDate: endDate,
       page: this._validatePage(page),
       limit: this._validateLimit(limit),
       search: search?.trim() || undefined
@@ -73,20 +73,20 @@ export class ServiceFinanceMapper {
     return validatedLimit;
   }
 
-  private static _validateStartDate(startDate: Date): Date {
-    if (isNaN(startDate.getTime())) {
-      throw new Error('Invalid start date format');
-    }
-    return startDate;
-  }
+  // private static _validateStartDate(startDate: Date): Date {
+  //   if (isNaN(startDate.getTime())) {
+  //     throw new Error('Invalid start date format');
+  //   }
+  //   return startDate;
+  // }
 
-  private static _validateAndAdjustEndDate(endDate: Date): Date {
-    if (isNaN(endDate.getTime())) {
-      throw new Error('Invalid end date format');
-    }
-    endDate.setHours(23, 59, 59, 999);
-    return endDate;
-  }
+  // private static _validateAndAdjustEndDate(endDate: Date): Date {
+  //   if (isNaN(endDate.getTime())) {
+  //     throw new Error('Invalid end date format');
+  //   }
+  //   endDate.setHours(23, 59, 59, 999);
+  //   return endDate;
+  // }
 
   private static _validateUserId(userId: string): string {
     if (!userId || userId.trim().length === 0) {

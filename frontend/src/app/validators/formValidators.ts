@@ -61,10 +61,11 @@ export function repeateCharacterValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
       if (!value) return null;
-      const repeatedChars = /(.)\1/.test(value);
+      const repeatedChars = /(.)\1{2,}/.test(value);
       return repeatedChars ? { repeatedCharacters: true } : null;
     };
 }
+
 
 
 export function spacesValidator(): ValidatorFn {
@@ -133,7 +134,6 @@ export function otpPattern(): ValidatorFn {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
-    // Reset time components to compare just the dates
     start.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
     
@@ -168,7 +168,6 @@ export function otpPattern(): ValidatorFn {
     };
   }
   
-  // Custom validator function to check if threshold is within reasonable limits
   export function thresholdRangeValidator(min: number, max: number): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {

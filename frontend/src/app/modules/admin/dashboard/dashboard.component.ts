@@ -41,6 +41,8 @@ export class DashboardComponent implements OnInit {
   subscriptionSection: SubscriptionSectionType = null;
   activeView: ViewType = 'dashboard';
   sidebarOpen = false;
+  confirmLogoutOpen = false;
+
   
   get dashBoard(): boolean { return this.activeView === 'dashboard'; }
   get userList(): boolean { return this.activeView === 'users'; }
@@ -133,6 +135,18 @@ export class DashboardComponent implements OnInit {
   logout(): void {
     this._store.dispatch(AuthActions.logout());
     Notiflix.Notify.success('Admin Logout Successfully');
+  }
+  openConfirmLogout(): void {
+    this.confirmLogoutOpen = true;
+  }
+
+  closeConfirmLogout(): void {
+    this.confirmLogoutOpen = false;
+  }
+
+  confirmLogout(): void {
+    this.closeConfirmLogout();
+    this.logout();
   }
 
   

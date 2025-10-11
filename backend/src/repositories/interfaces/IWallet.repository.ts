@@ -10,4 +10,5 @@ export interface IWalletRepository {
     transactionData: Partial<ITransaction>
   ): Promise<IWallet | null>;
   getWalletWithTransactions(userId: Schema.Types.ObjectId | string, limit?: number): Promise<IWallet | null>;
+  addWithdrawalTransaction( userId: Schema.Types.ObjectId | string,amount: number,payoutId: string): Promise<IWallet | null>
 }

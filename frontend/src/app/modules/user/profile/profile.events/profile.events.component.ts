@@ -6,11 +6,18 @@ import Notiflix from "notiflix";
 
 import { IEvent } from "../../../../core/models/event.interface";
 import { UserProfileService } from "../../../../core/services/user/profile/user.profile.service";
+import { FormsModule } from "@angular/forms";
+
+interface GroupedEvents {
+  date: string;
+  displayDate: string;
+  events: IEvent[];
+}
 
 @Component({
   selector: 'app-profile-events',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,FormsModule],
   templateUrl: './profile.events.component.html',
   styleUrl: './profile.events.component.css'
 })
@@ -18,6 +25,7 @@ export class ProfileEventsComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
   
   events: IEvent[] = [];
+  groupedEvents: GroupedEvents[] = [];
   isLoadingEvents = false;
   isLoadingMore = false;
   selectedEventId: string | null = null; 
@@ -35,6 +43,7 @@ export class ProfileEventsComponent implements OnInit, OnDestroy {
   
   ngOnInit(): void {
     this._fetchEvents();
+    this._setupInfiniteScroll();
   }
 
   ngOnDestroy(): void {
@@ -62,6 +71,7 @@ export class ProfileEventsComponent implements OnInit, OnDestroy {
             }
             this.currentPage = response.data.currentPage;
             this.hasMore = response.data.hasMore;
+            this._groupEventsByCreationDate();
           }
         }),
         catchError((error) => {
@@ -76,6 +86,58 @@ export class ProfileEventsComponent implements OnInit, OnDestroy {
       )
       .subscribe();
   }
+
+  private _groupEventsByCreationDate(): void {
+    const grouped = new Map<string, IEvent[]>();
+    
+    this.events.forEach(event => {
+      const createdDate = new Date(event.createdAt);
+      const dateKey = createdDate.toISOString().split('T')[0];
+      
+      if (!grouped.has(dateKey)) {
+        grouped.set(dateKey, []);
+      }
+      grouped.get(dateKey)!.push(event);
+    });
+    
+    this.groupedEvents = Array.from(grouped.entries())
+      .map(([dateKey, events]) => ({
+        date: dateKey,
+        displayDate: this._formatDisplayDate(dateKey),
+        events: events.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  private _formatDisplayDate(dateKey: string): string {
+    const date = new Date(dateKey);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+  }
+
+  trackByDate(index: number, group: GroupedEvents): string {
+    return group.date;
+  }
+
+  trackByEventId(index: number, event: IEvent): string {
+    return event._id;
+  }
+
+  // ... rest of your existing methods remain the same
   private _setupInfiniteScroll(): void {
     const scrollHandler = () => {
       if (this.isLoadingMore || !this.hasMore) return;
@@ -89,7 +151,6 @@ export class ProfileEventsComponent implements OnInit, OnDestroy {
       }
     };
     
-
     window.addEventListener('scroll', scrollHandler);
     
     this._destroy$.subscribe(() => {

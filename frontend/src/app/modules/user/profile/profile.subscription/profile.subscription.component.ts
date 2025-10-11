@@ -5,7 +5,11 @@ import { Subject, catchError, delay, finalize, of, takeUntil } from 'rxjs';
 import { 
   PremiumService
 } from '../../../../core/services/user/subscription/premium.service';
-import { SubscriptionResponse, SubscriptionType } from '../../../../core/interfaces/user/premium';
+import { 
+  SubscriptionResponse, 
+  SubscriptionType 
+} from '../../../../core/interfaces/user/premium';
+import { SubscriptionPlan } from '../../../../core/interfaces/admin/subscriptionPlan';
 
 @Component({
   selector: 'app-profile-subscription',
@@ -21,7 +25,13 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
   isLoading = true;
   errorMessage: string | null = null;
   isCancelingSubscription = false;
+  
   showCancelDialog = false;
+  showPlanModal = false;
+  
+  subscriptionPlans: SubscriptionPlan[] = [];
+  plansLoading = false;
+  plansError: string | null = null;
 
   constructor(
     private _premiumService: PremiumService,
@@ -57,17 +67,49 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Show confirmation dialog
+  showPlanSelection(): void {
+    this.showPlanModal = true;
+    this.loadSubscriptionPlans();
+  }
+
+  hidePlanSelection(): void {
+    this.showPlanModal = false;
+    this.plansError = null;
+  }
+
+  loadSubscriptionPlans(): void {
+    this.plansLoading = true;
+    this.plansError = null;
+    
+    this._premiumService.getPlans()
+      .pipe(
+        takeUntil(this._destroy$),
+        catchError(err => {
+          this.plansError = err.message || 'Failed to load subscription plans';
+          return of({ success: false, data: [] });
+        }),
+        finalize(() => this.plansLoading = false)
+      )
+      .subscribe(response => {
+        if (response.success && response.data) {
+          this.subscriptionPlans = response.data;
+        }
+      });
+  }
+
+  selectPlan(plan: SubscriptionPlan): void {
+    this.hidePlanSelection();
+    this.navigateToCheckout(plan.type);
+  }
+
   showCancelConfirmation(): void {
     this.showCancelDialog = true;
   }
 
-  // Hide confirmation dialog
   hideCancelConfirmation(): void {
     this.showCancelDialog = false;
   }
 
-  // Confirm and proceed with cancellation
   confirmCancelSubscription(): void {
     this.hideCancelConfirmation();
     this.cancelSubscription();
@@ -80,13 +122,11 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
     
     this.isCancelingSubscription = true;
     this.errorMessage = null;
-    setTimeout(()=>{
-
-    },2000)
+    
     this._premiumService.cancelSubscription(this.subscription.subscriptionId)
       .pipe(
         takeUntil(this._destroy$),
-        delay(2000),
+        delay(1000), 
         catchError(err => {
           this.errorMessage = err.message || 'Failed to cancel subscription';
           return of({ success: false });
@@ -101,15 +141,12 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
       });
   }
 
-  subscribeToPlan(plan: string): void {
-    if (plan === 'premium') {
-      this._router.navigate(['/premium/checkout'], { 
-        queryParams: { 
-          type: plan
-        }
-      });
-      return;
-    }
+  navigateToCheckout(planType: string): void {
+    this._router.navigate(['/premium/checkout'], { 
+      queryParams: { 
+        type: planType.toLowerCase()
+      }
+    });
   }
 
   getFormattedSubscriptionType(): string {
@@ -167,13 +204,5 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
     if (elapsed > totalDuration) return 100;
     
     return Math.floor((elapsed / totalDuration) * 100);
-  }
-
-  navigateToCheckout(): void {
-    this._router.navigate(['/premium/checkout'], { 
-      queryParams: { 
-        type: "Premium"
-      }
-    });
   }
 }

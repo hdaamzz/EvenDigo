@@ -7,8 +7,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { WalletService } from '../../../../core/services/user/wallet/wallet.service';
 import { Transaction, TransactionTypeStyle } from '../../../../core/interfaces/user/wallet';
 
-
-
 @Component({
   selector: 'app-profile-wallet',
   standalone: true,
@@ -51,28 +49,37 @@ export class ProfileWalletComponent implements OnInit, OnDestroy {
   isMobile = false;
   showAllPages = false;
 
+  showWithdrawModal = false;
+  withdrawAmount: number | null = null;
+  withdrawError: string | null = null;
+  isWithdrawing = false;
+  withdrawSuccess = false;
+
   readonly currencySymbol = '₹';
-  readonly transactionTypes = ['all', 'credit', 'debit', 'refund'];
+  readonly transactionTypes = ['all', 'credit', 'debit', 'refund', 'withdrawal'];
   selectedType = 'all';
 
   currentPage = 1;
   pageSize = 5;
   totalPages = 1;
 
+  readonly MIN_WITHDRAW_AMOUNT = 100;
+  readonly MAX_WITHDRAW_AMOUNT = 50000;
+
   constructor(private _walletService: WalletService) { }
 
   ngOnInit(): void {
-  this._checkMobileView();
-  this._loadWalletData();
-}
-private _checkMobileView(): void {
-  this.isMobile = window.innerWidth < 768;
-  
-  // Listen for window resize
-  window.addEventListener('resize', () => {
+    this._checkMobileView();
+    this._loadWalletData();
+  }
+
+  private _checkMobileView(): void {
     this.isMobile = window.innerWidth < 768;
-  });
-}
+    
+    window.addEventListener('resize', () => {
+      this.isMobile = window.innerWidth < 768;
+    });
+  }
 
   ngOnDestroy(): void {
     document.body.style.overflow = 'auto';
@@ -90,9 +97,7 @@ private _checkMobileView(): void {
         next: (response) => {
           if (response.success) {
             this.currentBalance = response.data.walletBalance;
-            
             this.transactions = response.data.transactions;
-
             this._calculateTotalPages();
             this.isInitialLoadComplete = true;
           } else {
@@ -106,6 +111,105 @@ private _checkMobileView(): void {
           this.isLoading = false;
         }
       });
+  }
+
+  openWithdrawModal(): void {
+    this.showWithdrawModal = true;
+    this.withdrawAmount = null;
+    this.withdrawError = null;
+    this.withdrawSuccess = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeWithdrawModal(): void {
+    this.showWithdrawModal = false;
+    this.withdrawAmount = null;
+    this.withdrawError = null;
+    this.withdrawSuccess = false;
+    this.isWithdrawing = false;
+    document.body.style.overflow = 'auto';
+  }
+
+  validateWithdrawAmount(): string | null {
+    if (!this.withdrawAmount) {
+      return 'Please enter an amount';
+    }
+
+    if (this.withdrawAmount < this.MIN_WITHDRAW_AMOUNT) {
+      return `Minimum withdrawal amount is ${this.currencySymbol}${this.MIN_WITHDRAW_AMOUNT}`;
+    }
+
+    if (this.withdrawAmount > this.MAX_WITHDRAW_AMOUNT) {
+      return `Maximum withdrawal amount is ${this.currencySymbol}${this.MAX_WITHDRAW_AMOUNT.toLocaleString('en-IN')}`;
+    }
+
+    if (this.withdrawAmount > this.currentBalance) {
+      return 'Insufficient balance';
+    }
+
+    return null;
+  }
+
+  processWithdraw(): void {
+    this.withdrawError = this.validateWithdrawAmount();
+    
+    if (this.withdrawError) {
+      return;
+    }
+
+    this.isWithdrawing = true;
+    this.withdrawError = null;
+
+    this._walletService.withdrawMoney(this.withdrawAmount!)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.withdrawSuccess = true;
+            this.currentBalance = response.data.newBalance || (this.currentBalance - this.withdrawAmount!);
+            
+            const newTransaction: Transaction = {
+              transactionId: response.data.transactionId || 'TXN_' + Date.now(),
+              amount: -this.withdrawAmount!,
+              balance: this.currentBalance,
+              date: new Date(),
+              type: 'withdrawal',
+              description: `Withdrawal of ${this.currencySymbol}${this.withdrawAmount!.toLocaleString('en-IN')}`,
+              status: 'completed',
+              eventName: '',
+              eventId: ''
+            };
+            
+            this.transactions.unshift(newTransaction);
+            this._calculateTotalPages();
+            
+            setTimeout(() => {
+              this.closeWithdrawModal();
+            }, 2000);
+            
+          } else {
+            this.withdrawError = response.message || 'Withdrawal failed';
+          }
+          this.isWithdrawing = false;
+        },
+        error: (error) => {
+          console.error('Withdrawal error:', error);
+          this.withdrawError = error.error?.message || 'Network error. Please try again.';
+          this.isWithdrawing = false;
+        }
+      });
+  }
+
+  setQuickWithdrawAmount(amount: number): void {
+    if (amount <= this.currentBalance) {
+      this.withdrawAmount = amount;
+      this.withdrawError = null;
+    }
+  }
+
+  getQuickWithdrawAmounts(): number[] {
+    const amounts = [500, 1000, 2000, 5000];
+    return amounts.filter(amount => amount <= this.currentBalance);
   }
 
   private _calculateTotalPages(): void {
@@ -128,11 +232,13 @@ private _checkMobileView(): void {
       this.onFilterChange();
     }
   }
+
   getFilterButtonClass(type: string): string {
     return this.selectedType === type
       ? 'bg-[#00ff66] text-black font-medium'
       : 'bg-[#262626] text-gray-300 hover:bg-[#333333] hover:text-white';
   }
+
   trackByType(index: number, type: string): string {
     return type;
   }
@@ -153,48 +259,46 @@ private _checkMobileView(): void {
   }
 
   closeTransactionDetails(): void {
-  this.selectedTransaction = null;
-  document.body.style.overflow = 'auto';
-  
-  if (this.isMobile) {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.selectedTransaction = null;
+    document.body.style.overflow = 'auto';
+    
+    if (this.isMobile) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
-}
-
-
 
   getAmountClass(amount: number): string {
     return amount >= 0 ? 'text-[#00ff66]' : 'text-red-500';
   }
 
   formatAmount(amount: number): string {
-  const absAmount = Math.abs(amount);
-  const prefix = amount >= 0 ? '+' : '-';
-  
-  // Use shorter format on mobile for very large numbers
-  if (this.isMobile && absAmount >= 100000) {
-    const formatted = (absAmount / 100000).toFixed(1);
-    return `${prefix}${this.currencySymbol}${formatted}L`;
+    const absAmount = Math.abs(amount);
+    const prefix = amount >= 0 ? '+' : '-';
+    
+    if (this.isMobile && absAmount >= 100000) {
+      const formatted = (absAmount / 100000).toFixed(1);
+      return `${prefix}${this.currencySymbol}${formatted}L`;
+    }
+    
+    return `${prefix}${this.currencySymbol}${absAmount.toLocaleString('en-IN')}`;
   }
-  
-  return `${prefix}${this.currencySymbol}${absAmount.toLocaleString('en-IN')}`;
-}
-getTruncatedDescription(description: string, maxLength: number = 30): string {
-  if (!description) return '';
-  
-  if (this.isMobile && description.length > maxLength) {
-    return description.substring(0, maxLength) + '...';
+
+  getTruncatedDescription(description: string, maxLength: number = 30): string {
+    if (!description) return '';
+    
+    if (this.isMobile && description.length > maxLength) {
+      return description.substring(0, maxLength) + '...';
+    }
+    
+    return description;
   }
-  
-  return description;
-}
-onMobileCardClick(transaction: Transaction): void {
-  // Add haptic feedback for mobile
-  if (this.isMobile && 'vibrate' in navigator) {
-    navigator.vibrate(50);
+
+  onMobileCardClick(transaction: Transaction): void {
+    if (this.isMobile && 'vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    this.openTransactionDetails(transaction);
   }
-  this.openTransactionDetails(transaction);
-}
 
   getTransactionClass(transaction: Transaction): string {
     return this._transactionTypeStyles[transaction.type] || 'text-gray-300';
@@ -232,54 +336,53 @@ onMobileCardClick(transaction: Transaction): void {
   }
 
   getPageNumbers(): number[] {
-  const pages: number[] = [];
-  const maxVisiblePages = this.isMobile ? 3 : 5; // Show fewer pages on mobile
+    const pages: number[] = [];
+    const maxVisiblePages = this.isMobile ? 3 : 5;
 
-  if (this.totalPages <= maxVisiblePages) {
-    for (let i = 1; i <= this.totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    if (this.isMobile && !this.showAllPages) {
-      // For mobile, show current page and adjacent pages
-      let startPage = Math.max(1, this.currentPage - 1);
-      let endPage = Math.min(this.totalPages, this.currentPage + 1);
-      
-      // Ensure we always show 3 pages if possible
-      if (endPage - startPage + 1 < 3) {
-        if (startPage === 1) {
-          endPage = Math.min(this.totalPages, 3);
-        } else if (endPage === this.totalPages) {
-          startPage = Math.max(1, this.totalPages - 2);
-        }
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= this.totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Desktop or show all pages
-      let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
-      let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+      if (this.isMobile && !this.showAllPages) {
+        let startPage = Math.max(1, this.currentPage - 1);
+        let endPage = Math.min(this.totalPages, this.currentPage + 1);
+        
+        if (endPage - startPage + 1 < 3) {
+          if (startPage === 1) {
+            endPage = Math.min(this.totalPages, 3);
+          } else if (endPage === this.totalPages) {
+            startPage = Math.max(1, this.totalPages - 2);
+          }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i);
+        }
+      } else {
+        let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
 
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-      }
+        if (endPage - startPage + 1 < maxVisiblePages) {
+          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
 
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i);
+        }
       }
     }
+
+    return pages;
   }
 
-  return pages;
-}
-togglePageView(): void {
-  this.showAllPages = !this.showAllPages;
-}
-getResponsivePageSize(): number {
-  return this.isMobile ? 3 : this.pageSize;
-}
+  togglePageView(): void {
+    this.showAllPages = !this.showAllPages;
+  }
+
+  getResponsivePageSize(): number {
+    return this.isMobile ? 3 : this.pageSize;
+  }
 
   getMetadataKeys(transaction: Transaction): string[] {
     return transaction.metadata ? Object.keys(transaction.metadata) : [];

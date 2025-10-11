@@ -648,7 +648,8 @@ private async startChatWithUserId(userId: string) {
   }
 
   markMessagesAsRead(chatId: string, chatType: 'personal' | 'group') {
-    this.chatService.markMessagesAsRead(chatId, chatType).subscribe({
+    if(chatType=='personal'){
+      this.chatService.markMessagesAsRead(chatId, chatType).subscribe({
       next: () => {
         if (chatType === 'personal') {
           this.personalChats = this.chatHelper.clearUnreadCount(this.personalChats, chatId);
@@ -664,6 +665,7 @@ private async startChatWithUserId(userId: string) {
       },
       error: (error) => console.error('Error marking messages as read:', error)
     });
+    }
   }
 
   getFilteredChats() {

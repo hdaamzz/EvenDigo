@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import { AchievementEntityDTO } from '../../mappers/admin/acheivement/achievement.mapper';
 
 export interface IAchievement {
   _id?: Schema.Types.ObjectId;
@@ -24,4 +25,10 @@ export interface PaginationInfo {
     totalPages: number;
     currentPage: number;
     hasMore: boolean;
+}
+
+export interface AchievementRepositoryPaginationResult {
+  achievements: AchievementEntityDTO[];
+  totalCount: number;
+  hasMore: boolean;
 }

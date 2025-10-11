@@ -98,7 +98,7 @@ export class UserDashboardComponent implements OnInit {
   displayEventDialog: boolean = false;
   searchQuery: string = '';
   selectedFilter: string = 'newest';
-
+  isEventCreationModalOpen: boolean = false;
   isMobileMenuOpen: boolean = false;
 
 
@@ -237,6 +237,12 @@ export class UserDashboardComponent implements OnInit {
         return of(null);
       })
     ).subscribe();
+  }
+  onEventCreationModalToggle(isOpen: boolean): void {
+    this.isEventCreationModalOpen = isOpen;
+  }
+  shouldHideNavbar(): boolean {
+    return this.displayEventDialog || this.isEventCreationModalOpen;
   }
 
   getLowestTicketPrice(event: IEvent): number {

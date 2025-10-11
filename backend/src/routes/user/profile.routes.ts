@@ -48,7 +48,8 @@ profileRouter.post('/events/cancel', authMiddleware, (req, res) => profileBookin
 
 //wallet section
 profileRouter.get('/wallet', authMiddleware, (req, res) => profileWalletController.getUserWallet(req, res));
-
+profileRouter.post('/wallet/add-money', authMiddleware, (req, res) => profileWalletController.addMoney(req, res));
+profileRouter.post('/wallet/withdraw-money', authMiddleware, (req, res) => profileWalletController.withdrawMoney(req, res));
 
 
 export default profileRouter;

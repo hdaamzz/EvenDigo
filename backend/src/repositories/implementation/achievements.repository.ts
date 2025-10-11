@@ -3,12 +3,9 @@ import { injectable } from 'tsyringe';
 import { IAchievementRepository } from '../interfaces/IAchievements.repository';
 import AchievementModel from '../../models/AchievementsModel';
 import { AchievementEntityDTO } from '../../mappers/admin/acheivement/achievement.mapper';
+import { AchievementRepositoryPaginationResult } from '../../models/interfaces/achievements.interface';
 
-export interface AchievementRepositoryPaginationResult {
-  achievements: AchievementEntityDTO[];
-  totalCount: number;
-  hasMore: boolean;
-}
+
 
 @injectable()
 export class AchievementRepository implements IAchievementRepository {

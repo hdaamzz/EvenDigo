@@ -79,5 +79,42 @@ export class WalletRepository implements IWalletRepository {
         return wallet;
     }
 
+    async addWithdrawalTransaction(
+    userId: Schema.Types.ObjectId | string,
+    amount: number,
+    payoutId: string
+): Promise<IWallet | null> {
+    const wallet = await this.findWalletById(userId);
+    if (!wallet) return null;
+
+    const newBalance = wallet.walletBalance - amount;
+
+    const transaction = {
+        eventName: 'Wallet Withdrawal',
+        eventId: 'WITHDRAWAL',
+        amount: -amount, 
+        type: TransactionType.WITHDRAWAL,
+        description: `Withdrawal of ₹${amount.toLocaleString('en-IN')}`,
+        reference: payoutId,
+        date: new Date(),
+        transactionId: uuidv4(),
+        balance: newBalance,
+        status: 'completed' as const,
+        metadata: {
+            stripePayoutId: payoutId,
+            method: 'stripe_transfer'
+        }
+    };
+
+    return WalletModel.findOneAndUpdate(
+        { userId },
+        {
+            $set: { walletBalance: newBalance },
+            $push: { transactions: transaction }
+        },
+        { new: true }
+    ).exec();
+}
+
 
 }

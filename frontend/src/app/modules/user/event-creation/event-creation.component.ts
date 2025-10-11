@@ -24,6 +24,7 @@ export class EventCreationComponent implements OnInit {
   @Input() currentUser: any | null = null;
   @Input() isUserVerified: boolean = false;
   @Output() onEventCreated = new EventEmitter<IEvent>();
+  @Output() onModalToggle = new EventEmitter<boolean>(); 
 
   eventForm!: FormGroup;
   mainBannerPreview: string | null = null;
@@ -109,8 +110,13 @@ export class EventCreationComponent implements OnInit {
       return;
     }
     this.visible = true;
+    this.onModalToggle.emit(true);
   }
 
+  closeDialog() {
+    this.visible = false;
+    this.onModalToggle.emit(false);
+  }
   addTicketType(): void {
     if (this.currentTicketType &&
         this.currentTicketPrice !== null &&
@@ -215,6 +221,7 @@ export class EventCreationComponent implements OnInit {
         this.initForm();
         this.loading = false;
         this.visible = false;
+        this.closeDialog();
         this.promotionalImageFile = null;
         this.promotionalImagePreview = null;
         this.mainBannerPreview = null;
@@ -236,5 +243,16 @@ export class EventCreationComponent implements OnInit {
         Notiflix.Notify.failure('Failed to create event. Please try again.');
       }
     });
+  }
+  closeSuccessDialog() {
+    this.successDialogVisible = false;
+  }
+  createAnotherEvent() {
+    this.successDialogVisible = false;
+    this.showDialog();
+  }
+  viewEvents() {
+    this.closeSuccessDialog();
+    this.onEventCreated.emit(this.createdEvent ?? undefined);
   }
 }

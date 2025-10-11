@@ -1,6 +1,7 @@
+/* Custom scrollbar - minimal CSS needed */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #4a5568 #1a1a1a;
+  scrollbar-color: #00ff66 #1a1a1a;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -13,68 +14,42 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #4a5568;
+  background: linear-gradient(180deg, #00ff66, #00ff66/80);
   border-radius: 3px;
   transition: background-color 0.2s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280;
+  background: linear-gradient(180deg, #00ff66/90, #00ff66/60);
 }
 
-.ticket-card {
-  transition: all 0.3s ease;
+/* Line clamping utility */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.ticket-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.ticket-counter-btn {
-  transition: all 0.2s ease;
+/* Focus states */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #00ff66;
+  outline-offset: 2px;
 }
 
-.ticket-counter-btn:hover:not(:disabled) {
-  transform: scale(1.05);
-}
-
-.ticket-counter-btn:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.btn-gradient {
-  background-size: 200% 100%;
-  transition: all 0.3s ease;
-}
-
-.btn-gradient:hover:not(:disabled) {
-  background-position: right center;
-}
-
-@media (max-width: 768px) {
-  .custom-scrollbar {
-    max-height: 60vh;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.ticket-card {
-  animation: fadeIn 0.3s ease forwards;
-}
-
-@media (max-height: 600px) {
-  .custom-scrollbar {
-    max-height: 300px;
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

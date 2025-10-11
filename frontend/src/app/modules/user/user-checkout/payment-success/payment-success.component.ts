@@ -17,33 +17,34 @@ import { IBooking } from '../../../../core/models/booking.interface';
 export class PaymentSuccessComponent implements OnInit, OnDestroy {
   booking: IBooking | undefined;
   isLoading = false;
-  
+  isWalletRefunded = false;
+
   private readonly _destroy$ = new Subject<void>();
-  
+
   constructor(
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
     private readonly _paymentService: PaymentService
-  ) {}
-  
+  ) { }
+
   ngOnInit(): void {
     const sessionId = this._route.snapshot.queryParamMap.get('session_id');
-    
+
     if (sessionId) {
       this._fetchBookingDetails(sessionId);
     } else {
       this._navigateToHome();
     }
   }
-  
+
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
   }
-  
+
   downloadTickets(): void {
-    if (!this.booking?.bookingId) return;
-    
+    if (!this.booking?.bookingId || this.booking?.paymentStatus !== 'Completed') return;
+
     this.isLoading = true;
     this._paymentService.downloadTickets(this.booking.bookingId)
       .pipe(takeUntil(this._destroy$))
@@ -58,10 +59,10 @@ export class PaymentSuccessComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
+
   downloadInvoice(): void {
-    if (!this.booking?.bookingId) return;
-    
+    if (!this.booking?.bookingId || this.booking?.paymentStatus !== 'Completed') return;
+
     this.isLoading = true;
     this._paymentService.downloadInvoice(this.booking.bookingId)
       .pipe(takeUntil(this._destroy$))
@@ -76,13 +77,18 @@ export class PaymentSuccessComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
+
   private _fetchBookingDetails(sessionId: string): void {
     this._paymentService.getBooking(sessionId)
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (bookingDetails) => {
+          console.log(bookingDetails.data);
           this.booking = bookingDetails.data;
+
+          if (this.booking?.paymentStatus === 'Failed') {
+            this.isWalletRefunded = true;
+          }
         },
         error: (error) => {
           console.error('Error fetching booking details:', error);
@@ -90,16 +96,16 @@ export class PaymentSuccessComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
+
   private _navigateToHome(): void {
     this._router.navigate(['/']);
   }
-  
+
   private _downloadFile(data: Blob, fileName: string): void {
     const blob = new Blob([data], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    
+
     link.href = url;
     link.download = fileName;
     document.body.appendChild(link);

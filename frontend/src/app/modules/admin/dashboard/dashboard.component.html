@@ -126,7 +126,7 @@
             </div>
         </div>
 
-        <div (click)="logout()"
+        <div (click)="openConfirmLogout()"
             class="nav-item flex items-center gap-2 p-3 my-1 rounded-lg text-gray-600 hover:bg-green-500 hover:text-white hover:translate-x-2 transition-all">
             <i class="fa-solid fa-cog w-5 text-center"></i> Logout
         </div>
@@ -161,4 +161,37 @@
             <app-subscription-plans></app-subscription-plans>
         }
     </div>
+</div>
+
+<div
+  *ngIf="confirmLogoutOpen"
+  class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+  (click)="closeConfirmLogout()"
+>
+  
+    <div class="bg-white rounded-xl shadow-2xl neon-shadow p-7 max-w-sm w-full border border-[#00ff66]/30"
+    (click)="$event.stopPropagation()">
+    <div class="flex items-center mb-6">
+      <svg class="w-6 h-6 text-[#00ff66] mr-2 drop-shadow-neon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      <span class="text-xl font-bold text-[#00ff66] drop-shadow-neon">Logout Confirmation</span>
+    </div>
+    <p class="text-black mb-7 text-base">Are you sure you want to logout?</p>
+    <div class="flex justify-between mt-2 gap-3">
+      <button
+        class="bg-[#00ff66] text-black px-6 py-2 rounded-lg font-bold hover:bg-[#26ff80] transition focus:outline-none neon-btn-shadow"
+        (click)="confirmLogout()"
+      >
+        Yes, Logout
+      </button>
+      <button
+        class="bg-[#222] border border-[#00ff66] text-[#00ff66] px-6 py-2 rounded-lg font-bold hover:bg-[#333] hover:text-white transition focus:outline-none"
+        (click)="closeConfirmLogout()"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
 </div>

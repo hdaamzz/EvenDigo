@@ -1,4 +1,6 @@
-<app-user-nav></app-user-nav>
+@if(!shouldHideNavbar()) {
+  <app-user-nav></app-user-nav>
+}
 
 <div class="relative">
   <div class=" min-h-screen text-white font-sans pt-20">
@@ -7,7 +9,7 @@
       <!-- Mobile Menu -->
       <div class="lg:hidden mb-6">
         <button (click)="toggleMobileMenu()"
-          class="w-full flex items-center justify-between p-4 glass-card rounded-xl border border-gray-700 text-white hover:border-[#00ff66] transition-all duration-300"
+          class="w-full flex items-center justify-between p-4 glass-card rounded-xl border border-gray-700 text-white transition-all duration-300"
           [ngClass]="{'ring-2 ring-[#00ff66]': isMobileMenuOpen}">
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 bg-[#00ff66]/20 rounded-lg flex items-center justify-center">
@@ -188,17 +190,23 @@
 
         <!-- Create Event Button -->
         <div class="relative">
-          <app-event-creation [currentUser]="currentUser" [isUserVerified]="isUserVerified"
-            (onEventCreated)="fetchAllEvents()">
-          </app-event-creation>
+          <app-event-creation 
+          [currentUser]="currentUser" 
+          [isUserVerified]="isUserVerified"
+          (onEventCreated)="fetchAllEvents()"
+          (onModalToggle)="onEventCreationModalToggle($event)">
+        </app-event-creation>
         </div>
       </div>
 
       <!-- Mobile Create Event Button -->
       <div class="lg:hidden mb-6">
-        <app-event-creation [currentUser]="currentUser" [isUserVerified]="isUserVerified"
-          (onEventCreated)="fetchAllEvents()">
-        </app-event-creation>
+        <app-event-creation 
+        [currentUser]="currentUser" 
+        [isUserVerified]="isUserVerified"
+        (onEventCreated)="fetchAllEvents()"
+        (onModalToggle)="onEventCreationModalToggle($event)">
+      </app-event-creation>
       </div>
     </div>
 
@@ -222,7 +230,7 @@
       </div>
 
       <!-- Events Container -->
-      <div class="glass-card rounded-2xl border border-gray-700 p-6 shadow-2xl hover:border-[#00ff66] transition-all duration-300">
+      <div class="glass-card rounded-2xl border border-gray-700 p-6 shadow-2xl  transition-all duration-300">
         <div [@fadeSlide]="activeTab" [@cardStagger]="getCurrentEventList()?.length">
 
           <!-- Loading State -->

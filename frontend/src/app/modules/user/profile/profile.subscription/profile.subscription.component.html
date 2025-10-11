@@ -5,136 +5,284 @@
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400"></div>
     </div>
     
-    <!-- errorMessage state -->
-    <div *ngIf="errorMessage" class="bg-red-900 text-white p-4 rounded-lg mb-6">
-      <p>{{ errorMessage }}</p>
-      <button (click)="loadSubscriptionDetails()" class="mt-2 bg-red-700 hover:bg-red-600 px-4 py-2 rounded">
+    <!-- Error state -->
+    <div *ngIf="errorMessage" class="bg-red-900/20 border border-red-500 text-white p-4 rounded-lg mb-6">
+      <div class="flex items-center mb-2">
+        <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <h3 class="font-semibold">Error</h3>
+      </div>
+      <p class="mb-3">{{ errorMessage }}</p>
+      <button (click)="loadSubscriptionDetails()" 
+              class="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg transition-colors">
         Try Again
       </button>
     </div>
     
     <!-- No subscription state -->
-    <div *ngIf="!isLoading && !subscription && !errorMessage" class="bg-[#262626] rounded-lg p-6 mb-6">
+    <div *ngIf="!isLoading && !subscription && !errorMessage" class="bg-[#262626] rounded-lg p-8 mb-6">
       <div class="flex items-center justify-center flex-col text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-        <h2 class="text-xl font-bold mb-2">Not a Premium Member</h2>
-        <p class="text-gray-400 mb-4">Upgrade to premium to unlock all features and benefits</p>
-        <button (click)="subscribeToPlan('premium')" class="bg-green-500 hover:bg-green-400 text-black font-bold py-2 px-6 rounded-lg">
+        <div class="bg-gray-700 rounded-full p-4 mb-4">
+          <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">Not a Premium Member</h2>
+        <p class="text-gray-400 mb-6 max-w-md">
+          Upgrade to premium to unlock exclusive features, priority support, and enhanced event management capabilities
+        </p>
+        <button (click)="showPlanSelection()" 
+                class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all transform hover:scale-105">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
           Upgrade Now
         </button>
       </div>
     </div>
     
     <!-- Active subscription state -->
-    <div *ngIf="subscription" class="space-y-6">
+    <div *ngIf="subscription && !isLoading" class="space-y-6">
       <!-- Subscription Status Card -->
-      <div class="bg-green-500 rounded-lg p-6 text-black">
+      <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-black">
         <div class="flex justify-between items-start">
-          <div>
-            <h2 class="text-xl font-bold">{{ getFormattedSubscriptionType() }}</h2>
+          <div class="flex-1">
+            <div class="flex items-center mb-2">
+              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+              <h2 class="text-2xl font-bold">{{ getFormattedSubscriptionType() }}</h2>
+            </div>
             <div class="flex items-center mt-2">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" 
                     [ngClass]="{
-                      'bg-green-900 text-green-200': subscription.status === 'active',
-                      'bg-yellow-900 text-yellow-200': subscription.status === 'pending',
-                      'bg-red-900 text-red-200': subscription.status === 'cancelled' || subscription.status === 'expired'
+                      'bg-green-100 text-green-800': subscription.status === 'active',
+                      'bg-yellow-100 text-yellow-800': subscription.status === 'pending',
+                      'bg-red-100 text-red-800': subscription.status === 'cancelled' || subscription.status === 'expired'
                     }">
+                <span class="w-2 h-2 rounded-full mr-1" 
+                      [ngClass]="{
+                        'bg-green-500': subscription.status === 'active',
+                        'bg-yellow-500': subscription.status === 'pending',
+                        'bg-red-500': subscription.status === 'cancelled' || subscription.status === 'expired'
+                      }"></span>
                 {{ subscription.status | titlecase }}
               </span>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-3xl font-bold">₹{{ subscription.amount }}</p>
-            <p class="text-sm opacity-75">{{ subscription.paymentMethod | titlecase }}</p>
+            <p class="text-4xl font-bold">₹{{ subscription.amount }}</p>
+            <p class="text-sm opacity-75 flex items-center justify-end mt-1">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+              </svg>
+              {{ subscription.paymentMethod | titlecase }}
+            </p>
           </div>
         </div>
       </div>
       
       <!-- Subscription Details -->
       <div class="bg-[#262626] rounded-lg p-6">
-        <h3 class="text-lg font-semibold mb-4 text-white">Subscription Details</h3>
+        <div class="flex items-center mb-4">
+          <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <h3 class="text-lg font-semibold text-white">Subscription Details</h3>
+        </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="space-y-4">
-            <div>
-              <p class="text-gray-400 text-sm">Subscription ID</p>
-              <p class="font-mono">{{ subscription.subscriptionId }}</p>
+            <div class="bg-[#1a1a1a] p-4 rounded-lg">
+              <p class="text-gray-400 text-sm mb-1">Subscription ID</p>
+              <p class="font-mono text-sm">{{ subscription.subscriptionId }}</p>
             </div>
             
-            <div>
-              <p class="text-gray-400 text-sm">Start Date</p>
-              <p>{{ formatDate(subscription.startDate) }}</p>
+            <div class="bg-[#1a1a1a] p-4 rounded-lg">
+              <p class="text-gray-400 text-sm mb-1">Start Date</p>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <p>{{ formatDate(subscription.startDate) }}</p>
+              </div>
             </div>
             
-            <div>
-              <p class="text-gray-400 text-sm">End Date</p>
-              <p>{{ formatDate(subscription.endDate) }}</p>
+            <div class="bg-[#1a1a1a] p-4 rounded-lg">
+              <p class="text-gray-400 text-sm mb-1">End Date</p>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <p>{{ formatDate(subscription.endDate) }}</p>
+              </div>
             </div>
           </div>
           
           <div class="space-y-4">
-            <div *ngIf="subscription.stripeCustomerId">
-              <p class="text-gray-400 text-sm">Customer ID</p>
-              <p class="font-mono">{{ subscription.stripeCustomerId }}</p>
+            <div class="bg-[#1a1a1a] p-4 rounded-lg" *ngIf="subscription.stripeCustomerId">
+              <p class="text-gray-400 text-sm mb-1">Customer ID</p>
+              <p class="font-mono text-sm">{{ subscription.stripeCustomerId }}</p>
             </div>
             
-            <div *ngIf="subscription.stripeSubscriptionId">
-              <p class="text-gray-400 text-sm">Stripe Subscription ID</p>
-              <p class="font-mono">{{ subscription.stripeSubscriptionId }}</p>
+            <div class="bg-[#1a1a1a] p-4 rounded-lg" *ngIf="subscription.stripeSubscriptionId">
+              <p class="text-gray-400 text-sm mb-1">Stripe Subscription ID</p>
+              <p class="font-mono text-sm">{{ subscription.stripeSubscriptionId }}</p>
             </div>
             
-            <div>
-              <p class="text-gray-400 text-sm">Auto Renewal</p>
-              <p>{{ subscription.isActive ? 'Enabled' : 'Disabled' }}</p>
+            <div class="bg-[#1a1a1a] p-4 rounded-lg">
+              <p class="text-gray-400 text-sm mb-1">Auto Renewal</p>
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full mr-2" 
+                     [ngClass]="subscription.isActive ? 'bg-green-400' : 'bg-red-400'"></div>
+                <p>{{ subscription.isActive ? 'Enabled' : 'Disabled' }}</p>
+              </div>
             </div>
           </div>
         </div>
         
         <!-- Time remaining indicator -->
-        <div class="mt-6">
-          <div class="flex justify-between text-sm mb-1">
-            <span>Subscription Progress</span>
-            <span>{{ getRemainingDays() }} days remaining</span>
+        <div class="mt-6 bg-[#1a1a1a] p-4 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium">Subscription Progress</span>
+            <span class="text-sm text-gray-400">{{ getRemainingDays() }} days remaining</span>
           </div>
-          <div class="w-full bg-gray-700 rounded-full h-2.5">
-            <div class="bg-green-500 h-2.5 rounded-full" [style.width]="getProgressPercentage() + '%'"></div>
+          <div class="w-full bg-gray-700 rounded-full h-3">
+            <div class="bg-gradient-to-r from-green-400 to-green-500 h-3 rounded-full transition-all duration-500" 
+                 [style.width]="getProgressPercentage() + '%'"></div>
           </div>
         </div>
       </div>
       
       <!-- Actions -->
       <div class="bg-[#262626] rounded-lg p-6">
-        <h3 class="text-lg font-semibold mb-4 text-white">Manage Subscription</h3>
+        <div class="flex items-center mb-4">
+          <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
+          </svg>
+          <h3 class="text-lg font-semibold text-white">Manage Subscription</h3>
+        </div>
         
         <div class="flex flex-wrap gap-4">
           <button 
             *ngIf="subscription.status === 'active'"
             (click)="showCancelConfirmation()" 
-            class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg"
+            class="bg-red-600 hover:bg-red-500 text-white py-2 px-6 rounded-lg transition-colors flex items-center"
             [disabled]="isCancelingSubscription">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
             Cancel Subscription
           </button>
           
-          <a 
+          <button 
             *ngIf="subscription.status !== 'active'"
-            routerLink="/upgrade" 
-            class="bg-green-500 hover:bg-green-400 text-black py-2 px-4 rounded-lg">
+            (click)="showPlanSelection()" 
+            class="bg-green-500 hover:bg-green-400 text-black py-2 px-6 rounded-lg transition-colors flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
             Renew Subscription
-          </a>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Confirmation Dialog -->
-  <div *ngIf="showCancelDialog" class="fixed inset-0 backdrop-blur-sm   flex items-center justify-center z-50 animate-fadeIn p-4 transform transition-all duration-300 animate-scaleIn">
-    <div class="bg-[#262626] rounded-lg p-6 max-w-md w-full mx-4 ">
+  <!-- Plan Selection Modal -->
+  <div *ngIf="showPlanModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-[#262626] rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-2xl font-bold text-white">Choose Your Plan</h3>
+          <p class="text-gray-400 mt-1">Select the perfect plan for your needs</p>
+        </div>
+        <button (click)="hidePlanSelection()" 
+                class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Plans Loading -->
+      <div *ngIf="plansLoading" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-400"></div>
+      </div>
+      
+      <!-- Plans Grid -->
+      <div *ngIf="!plansLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div *ngFor="let plan of subscriptionPlans" 
+             class="relative bg-[#1a1a1a] rounded-lg p-6 border-2 transition-all hover:border-green-400 cursor-pointer"
+             [class.border-green-400]="plan.isPopular"
+             [class.border-gray-600]="!plan.isPopular"
+             (click)="selectPlan(plan)">
+          
+          <!-- Popular Badge -->
+          <div *ngIf="plan.isPopular" 
+               class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <span class="bg-green-500 text-black px-3 py-1 rounded-full text-xs font-bold">
+              MOST POPULAR
+            </span>
+          </div>
+          
+          <div class="text-center">
+            <h4 class="text-xl font-bold text-white mb-2">{{ plan.type | titlecase }}</h4>
+            <div class="mb-4">
+              <span class="text-4xl font-bold text-green-400">₹{{ plan.price }}</span>
+              <span class="text-gray-400 text-sm">{{ plan.billingCycle === 'monthly' ? '/month' : '/year' }}</span>
+            </div>
+            <p class="text-gray-300 mb-6">{{ plan.description }}</p>
+            
+            <!-- Features -->
+            <div class="text-left">
+              <h5 class="font-semibold text-white mb-3">Features included:</h5>
+              <ul class="space-y-2 mb-6">
+                <li *ngFor="let feature of plan.features" class="flex items-center text-sm text-gray-300">
+                  <svg class="w-4 h-4 text-green-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  {{ feature }}
+                </li>
+              </ul>
+            </div>
+            
+            <button class="w-full py-3 px-4 rounded-lg font-semibold transition-all"
+                    [class]="plan.isPopular ? 
+                      'bg-green-500 hover:bg-green-400 text-black' : 
+                      'bg-gray-700 hover:bg-gray-600 text-white'">
+              Choose {{ plan.type | titlecase }}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Plans Error -->
+      <div *ngIf="plansError" class="text-center py-12">
+        <div class="text-red-400 mb-4">
+          <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <p class="text-gray-300 mb-4">Failed to load subscription plans</p>
+        <button (click)="loadSubscriptionPlans()" 
+                class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg">
+          Retry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Confirmation Dialog -->
+  <div *ngIf="showCancelDialog" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-[#262626] rounded-lg p-6 max-w-md w-full">
       <div class="flex items-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
+        <div class="bg-red-500/20 p-3 rounded-full mr-3">
+          <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+        </div>
         <h3 class="text-lg font-semibold text-white">Cancel Subscription</h3>
       </div>
       
@@ -143,9 +291,10 @@
           Are you sure you want to cancel your subscription? This action cannot be undone.
         </p>
         
-        <div class="bg-red-900 bg-opacity-30 border border-red-500 rounded-lg p-3">
+        <div class="bg-red-900/20 border border-red-500 rounded-lg p-3">
           <p class="text-red-200 text-sm">
-            <strong>Important:</strong> You will lose access to premium features at the end of your current billing period.
+            <strong>Important:</strong> You will lose access to premium features at the end of your current billing period 
+            ({{ formatDate(subscription?.endDate || '') }}).
           </p>
         </div>
       </div>
@@ -160,16 +309,13 @@
         
         <button 
           (click)="confirmCancelSubscription()"
-          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center"
           [disabled]="isCancelingSubscription">
-          <span *ngIf="!isCancelingSubscription">Yes, Cancel</span>
-          <span *ngIf="isCancelingSubscription" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Cancelling...
-          </span>
+          <svg *ngIf="isCancelingSubscription" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isCancelingSubscription ? 'Cancelling...' : 'Yes, Cancel' }}
         </button>
       </div>
     </div>

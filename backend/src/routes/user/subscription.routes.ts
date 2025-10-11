@@ -15,6 +15,7 @@ router.get('/current', subscriptionController.getCurrentSubscription);
 router.post('/cancel', subscriptionController.cancelSubscription);
 router.get('/confirm/:sessionId', subscriptionController.getSubscriptionDetails);
 router.get('/type/:planType', (req,res)=>subscriptionPlanController.getByPlanType(req,res));
+router.get('/plans', (req,res)=>subscriptionPlanController.getAll(req,res));
 
 
 export default router;

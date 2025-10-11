@@ -1,7 +1,7 @@
-<div class="flex min-h-screen bg-[#121212]">
+<div class="flex min-h-screen bg-gradient-to-br from-[#121212] to-[#1a1a1a]">
   <!-- Mobile Backdrop -->
   <div 
-    class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity duration-300"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
     [ngClass]="{
       'opacity-100 pointer-events-auto': isMenuActive,
       'opacity-0 pointer-events-none': !isMenuActive
@@ -9,80 +9,87 @@
     (click)="toggleMenu()"
   ></div>
 
+  <!-- Sidebar -->
   <aside
     #sidebarRef
-    class="fixed top-0 left-0 rounded-2xl bg-[#1E1E1E] transition-all duration-400 z-50"
+    class="fixed top-0 left-0 glass-sidebar transition-all duration-400 z-50 border border-white/10"
     [ngClass]="{
-      'w-[85px] m-4 h-[calc(100vh-32px)]': isCollapsed && window.innerWidth >= 1024,
-      'w-[270px] m-4 h-[calc(100vh-32px)]': !isCollapsed && window.innerWidth >= 1024,
-      'w-[280px] h-full m-0 transform': window.innerWidth < 1024,
+      'w-[85px] m-4 h-[calc(100vh-32px)] rounded-2xl': isCollapsed && window.innerWidth >= 1024,
+      'w-[270px] m-4 h-[calc(100vh-32px)] rounded-2xl': !isCollapsed && window.innerWidth >= 1024,
+      'w-[280px] h-full m-0 rounded-none': window.innerWidth < 1024,
       'translate-x-0': isMenuActive || window.innerWidth >= 1024,
       '-translate-x-full': !isMenuActive && window.innerWidth < 1024
     }"
-    style="min-height: calc(100vh - 32px);"
   >
     <!-- Header -->
-    <header class="flex items-center justify-between p-6 lg:p-6 md:p-4 sticky top-0 z-20 bg-[#1E1E1E] rounded-t-2xl lg:rounded-t-2xl">
-      <a routerLink="/" class="header-logo">
+    <header class="flex items-center justify-between p-6 lg:p-6 md:p-4 sticky top-0 z-20 glass-header border-b border-white/10">
+      <a routerLink="/" class="header-logo group">
         <img 
           src="https://res.cloudinary.com/dfpezlzsy/image/upload/v1741318747/user.icon_slz5l0.png" 
           alt="Logo" 
-          class="h-10 w-10 object-contain rounded-full"
+          class="h-10 w-10 object-contain rounded-full transition-transform duration-300 group-hover:scale-110 ring-2 ring-[#00ff66]/20 group-hover:ring-[#00ff66]/50"
         />
       </a>
       
       <button 
-        class="h-8 w-8 flex lg:hidden items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer"
+        class="h-9 w-9 flex lg:hidden items-center justify-center bg-gradient-to-br from-[#00ff66] to-[#00cc52] text-black rounded-lg cursor-pointer hover:shadow-neon transition-all duration-300 hover:scale-105 active:scale-95"
         (click)="toggleMenu()"
         aria-label="Close mobile menu"
       >
-        <i class="fa fa-times"></i>
+        <i class="fa fa-times text-lg"></i>
       </button>
     </header>
     
-    <nav class="sidebar-nav flex flex-col justify-between overflow-hidden" style="height: calc(100vh - 112px);">
-      <div class="flex-1 overflow-y-auto">
-        <ul class="list-none flex flex-col gap-1 px-4 pt-4"
-            [ngClass]="{'translate-y-0': true}">
+    <!-- Navigation -->
+    <nav class="sidebar-nav flex flex-col justify-between overflow-hidden h-[calc(100%-88px)]">
+      <!-- Primary Navigation -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar">
+        <ul class="list-none flex flex-col gap-1 px-4 pt-4">
           @for (item of navItems; track item.path) {
-            <li class="relative start-card hover:translate-x-2 transition-all">
+            <li class="relative nav-item-wrapper">
               <a 
                 [routerLink]="item.path"
-                routerLinkActive="text-[#151A2D] bg-[#00ff66]"
+                routerLinkActive="nav-item-active"
                 [routerLinkActiveOptions]="{exact: item.exact || false}"
-                class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
+                class="nav-item group"
                 (click)="onNavItemClick()"
               >
-                <span class="nav-icon">
-                  <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
+                <span class="nav-icon-wrapper">
+                  <i class="fa transition-transform duration-300 group-hover:scale-110" [ngClass]="item.icon"></i>
                 </span>
-                <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed && window.innerWidth >= 1024}" class="transition-opacity duration-300"> 
+                <span 
+                  [ngClass]="{'opacity-0 pointer-events-none w-0': isCollapsed && window.innerWidth >= 1024}" 
+                  class="nav-label"> 
                   {{item.label}}
                 </span>
+                <span class="nav-item-glow"></span>
               </a>
             </li>
           }
         </ul>
       </div>
 
-      <!-- Secondary navigation -->
-      <div class="flex-shrink-0">
-        <ul class="list-none flex flex-col gap-1 px-4 pb-4">
+      <!-- Secondary Navigation -->
+      <div class="flex-shrink-0 border-t border-white/10">
+        <ul class="list-none flex flex-col gap-1 px-4 py-4">
           @for (item of secondaryNavItems; track item.path) {
-            <li class="relative start-card hover:translate-x-2 transition-all">
+            <li class="relative nav-item-wrapper">
               <a
                 [routerLink]="item.path"
-                routerLinkActive="text-[#151A2D] bg-[#00ff66]"
+                routerLinkActive="nav-item-active"
                 [routerLinkActiveOptions]="{exact: true}"
-                class="text-white flex gap-3 whitespace-nowrap rounded-lg p-3 items-center no-underline hover:text-[#151A2D] hover:bg-[#00ff66]"
+                class="nav-item group"
                 (click)="onNavItemClick()"
               >
-                <span class="nav-icon">
-                  <i class="fa" [ngClass]="item.icon" style="font-size: 22px;"></i>
+                <span class="nav-icon-wrapper">
+                  <i class="fa transition-transform duration-300 group-hover:scale-110" [ngClass]="item.icon"></i>
                 </span>
-                <span [ngClass]="{'opacity-0 pointer-events-none': isCollapsed && window.innerWidth >= 1024}" class="transition-opacity duration-300"> 
+                <span 
+                  [ngClass]="{'opacity-0 pointer-events-none w-0': isCollapsed && window.innerWidth >= 1024}" 
+                  class="nav-label"> 
                   {{item.label}}
                 </span>
+                <span class="nav-item-glow"></span>
               </a>
             </li>
           }
@@ -93,20 +100,20 @@
 
   <!-- Mobile Menu Toggle Button -->
   <button 
-    class="fixed top-4 left-4 h-12 w-12 flex lg:hidden items-center justify-center bg-[#00ff66] text-[#151A2D] rounded-lg cursor-pointer z-30 transition-all duration-300"
+    class="fixed top-4 left-4 h-12 w-12 flex lg:hidden items-center justify-center bg-gradient-to-br from-[#00ff66] to-[#00cc52] text-black rounded-xl cursor-pointer z-30 transition-all duration-300 shadow-neon hover:scale-110 active:scale-95"
     [ngClass]="{
-      'opacity-0 pointer-events-none': isMenuActive,
-      'opacity-100 pointer-events-auto': !isMenuActive
+      'opacity-0 pointer-events-none scale-75': isMenuActive,
+      'opacity-100 pointer-events-auto scale-100': !isMenuActive
     }"
     (click)="toggleMenu()"
     aria-label="Open mobile menu"
   >
-    <i class="fa fa-bars"></i>
+    <i class="fa fa-bars text-lg"></i>
   </button>
 
   <!-- Main Content -->
   <main 
-    class="flex-1 p-4 transition-all duration-400"
+    class="flex-1 p-4 lg:p-6 transition-all duration-400"
     [ngClass]="{
       'lg:ml-[117px]': isCollapsed && window.innerWidth >= 1024, 
       'lg:ml-[300px]': !isCollapsed && window.innerWidth >= 1024,

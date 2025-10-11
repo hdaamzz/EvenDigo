@@ -66,6 +66,9 @@ export class PremiumService {
       catchError(this.handleError)
     );
   }
+  getPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
+    return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.apiUrl}/plans`)
+  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';

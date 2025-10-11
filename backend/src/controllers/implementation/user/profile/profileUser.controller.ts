@@ -86,12 +86,12 @@ export class ProfileUserController implements IProfileUserController {
       }
       
       const response = await this.profileUserService.verificationRequestDetails(userId);
-      
-      if (response.success) {
-        ResponseHandler.success(res, response.data, response.message);
-      } else {
-        ResponseHandler.error(res, null, response.message, 404);
-      }
+      ResponseHandler.success(res, response.data, response.message);
+      // if (response.success) {
+      //   ResponseHandler.success(res, response.data, response.message);
+      // } else {
+      //   ResponseHandler.error(res, null, response.message, 404);
+      // }
     } catch (error) {
       ResponseHandler.error(res, error, "Failed to get verification request details");
     }

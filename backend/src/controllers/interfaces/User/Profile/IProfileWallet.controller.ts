@@ -5,4 +5,6 @@ import { AuthenticatedRequest } from '../../../../models/interfaces/profile.inte
 
 export interface IProfileWalletController {
   getUserWallet(req: AuthenticatedRequest, res: Response): Promise<void>;
+  addMoney(req: AuthenticatedRequest, res: Response): Promise<void>;
+  withdrawMoney(req: AuthenticatedRequest, res: Response): Promise<void>;
 }
