@@ -1,17 +1,25 @@
 import { AchievementDto } from "./achievement.dto";
+import { IAchievement } from "src/models/interfaces/achievements.interface";
+
+interface PaginationInfo {
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    hasMore: boolean;
+}
 
 export class AchievementResponseDto {
     success: boolean;
     data?: AchievementDto | AchievementDto[];
     message?: string;
-    pagination?: {
-        totalCount: number;
-        totalPages: number;
-        currentPage: number;
-        hasMore: boolean;
-    };
+    pagination?: PaginationInfo;
 
-    constructor(success: boolean, data?: any, message?: string, pagination?: any) {
+    constructor(
+        success: boolean, 
+        data?: IAchievement | IAchievement[], 
+        message?: string, 
+        pagination?: PaginationInfo
+    ) {
         this.success = success;
         if (data) {
             if (Array.isArray(data)) {
@@ -24,7 +32,10 @@ export class AchievementResponseDto {
         this.pagination = pagination;
     }
 
-    static success(data: any, pagination?: any): AchievementResponseDto {
+    static success(
+        data: IAchievement | IAchievement[], 
+        pagination?: PaginationInfo
+    ): AchievementResponseDto {
         return new AchievementResponseDto(true, data, undefined, pagination);
     }
 

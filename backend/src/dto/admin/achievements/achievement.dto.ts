@@ -1,3 +1,5 @@
+import { IAchievement } from "src/models/interfaces/achievements.interface";
+
 export class AchievementDto {
     _id: string;
     title: string;
@@ -10,8 +12,8 @@ export class AchievementDto {
     createdAt: Date;
     updatedAt: Date;
 
-    constructor(data: any) {
-        this._id = data._id?.toString() || data.id;
+    constructor(data: IAchievement) {
+        this._id = data._id?.toString() || '';
         this.title = data.title;
         this.description = data.description;
         this.category = data.category;
@@ -19,15 +21,15 @@ export class AchievementDto {
         this.threshold = data.threshold;
         this.icon = data.icon;
         this.isActive = data.isActive;
-        this.createdAt = data.createdAt;
-        this.updatedAt = data.updatedAt;
+        this.createdAt = data.createdAt || new Date();
+        this.updatedAt = data.updatedAt || new Date();
     }
 
-    static fromEntity(entity: any): AchievementDto {
+    static fromEntity(entity: IAchievement): AchievementDto {
         return new AchievementDto(entity);
     }
 
-    static fromEntities(entities: any[]): AchievementDto[] {
+    static fromEntities(entities: IAchievement[]): AchievementDto[] {
         return entities.map(entity => new AchievementDto(entity));
     }
 }

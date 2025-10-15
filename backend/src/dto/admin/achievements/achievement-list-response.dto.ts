@@ -1,6 +1,12 @@
 import { IAchievement } from "src/models/interfaces/achievements.interface";
 import { AchievementDto } from "./achievement.dto";
 
+interface ServicePaginationResult {
+    achievements: IAchievement[];
+    totalCount: number;
+    hasMore: boolean;
+}
+
 export class AchievementListResponseDto {
     success: boolean;
     data: AchievementDto[];
@@ -11,7 +17,13 @@ export class AchievementListResponseDto {
         hasMore: boolean;
     };
 
-    constructor(achievements: IAchievement[], totalCount: number, currentPage: number, limit: number, hasMore: boolean) {        
+    constructor(
+        achievements: IAchievement[], 
+        totalCount: number, 
+        currentPage: number, 
+        limit: number, 
+        hasMore: boolean
+    ) {        
         this.success = true;
         this.data = AchievementDto.fromEntities(achievements);
         this.pagination = {
@@ -22,7 +34,11 @@ export class AchievementListResponseDto {
         };
     }
 
-    static fromServiceResult(result: any, currentPage: number, limit: number): AchievementListResponseDto {
+    static fromServiceResult(
+        result: ServicePaginationResult, 
+        currentPage: number, 
+        limit: number
+    ): AchievementListResponseDto {
         return new AchievementListResponseDto(
             result.achievements,
             result.totalCount,

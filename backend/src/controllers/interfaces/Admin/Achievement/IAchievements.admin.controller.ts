@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 export interface IAchievementAdminController {
-    fetchAllAchievements(_req: Request, res: Response): Promise<void>;
+    fetchAllAchievements(req: Request, res: Response): Promise<void>;
     fetchAllAchievementsWithPagination(req: Request, res: Response): Promise<void>;
     getAchievementById(req: Request, res: Response): Promise<void>;
     createAchievement(req: Request, res: Response): Promise<void>;

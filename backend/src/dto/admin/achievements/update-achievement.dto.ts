@@ -1,13 +1,26 @@
+type AchievementCategory = 'event' | 'user' | 'sales' | 'engagement' | 'other';
+type AchievementCriteria = 'events_created' | 'events_attended' | 'vip_events_taker' | 'gold_events_taker';
+
+interface UpdateAchievementInput {
+    title?: string;
+    description?: string;
+    category?: AchievementCategory;
+    criteria?: AchievementCriteria;
+    threshold?: number;
+    icon?: string;
+    isActive?: boolean;
+}
+
 export class UpdateAchievementDto {
     title?: string;
     description?: string;
-    category?: 'event' | 'user' | 'sales' | 'engagement' | 'other';
-    criteria?: 'events_created' | 'events_attended' | 'vip_events_taker' | 'gold_events_taker';
+    category?: AchievementCategory;
+    criteria?: AchievementCriteria;
     threshold?: number;
     icon?: string;
     isActive?: boolean;
 
-    constructor(data: any) {
+    constructor(data: UpdateAchievementInput) {
         if (data.title !== undefined) this.title = data.title;
         if (data.description !== undefined) this.description = data.description;
         if (data.category !== undefined) this.category = data.category;
@@ -17,12 +30,12 @@ export class UpdateAchievementDto {
         if (data.isActive !== undefined) this.isActive = data.isActive;
     }
 
-    static fromRequest(requestBody: any): UpdateAchievementDto {
+    static fromRequest(requestBody: UpdateAchievementInput): UpdateAchievementDto {
         return new UpdateAchievementDto(requestBody);
     }
 
-    toEntity(): any {
-        const entity: any = {};
+    toEntity(): UpdateAchievementInput {
+        const entity: UpdateAchievementInput = {};
         if (this.title !== undefined) entity.title = this.title;
         if (this.description !== undefined) entity.description = this.description;
         if (this.category !== undefined) entity.category = this.category;

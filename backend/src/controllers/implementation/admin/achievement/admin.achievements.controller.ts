@@ -7,6 +7,7 @@ import { AchievementResponseDto } from '../../../../dto/admin/achievements/achie
 import { AchievementListResponseDto } from '../../../../dto/admin/achievements/achievement-list-response.dto';
 import { UpdateAchievementDto } from '../../../../dto/admin/achievements/update-achievement.dto';
 import { CreateAchievementDto } from '../../../../dto/admin/achievements/create-achievement.dto';
+import { IAchievement } from '../../../../models/interfaces/achievements.interface';
 
 @injectable()
 export class AchievementController implements IAchievementAdminController {
@@ -66,7 +67,8 @@ export class AchievementController implements IAchievementAdminController {
 
     async updateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = this._getAchievementIdFromParams(req);
+            
+            const achievementId = req.params.acheivementId;
             const updateDto = UpdateAchievementDto.fromRequest(req.body);
             const updateData = updateDto.toEntity();
             const updatedAchievement = await this._achievementService.updateAchievement(achievementId, updateData);
@@ -80,9 +82,10 @@ export class AchievementController implements IAchievementAdminController {
 
     async activateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = this._getAchievementIdFromParams(req);
+            const achievementId = req.params.acheivementId;
             const updatedAchievement = await this._achievementService.activateAchievement(achievementId);
-            const response = AchievementResponseDto.success(updatedAchievement);
+
+            const response = AchievementResponseDto.success(updatedAchievement as unknown as IAchievement);
             
             res.status(StatusCode.OK).json(response);
         } catch (error) {
@@ -92,9 +95,9 @@ export class AchievementController implements IAchievementAdminController {
 
     async deactivateAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = this._getAchievementIdFromParams(req);
+            const achievementId = req.params.acheivementId;
             const updatedAchievement = await this._achievementService.deactivateAchievement(achievementId);
-            const response = AchievementResponseDto.success(updatedAchievement);
+            const response = AchievementResponseDto.success(updatedAchievement as unknown as IAchievement);
             
             res.status(StatusCode.OK).json(response);
         } catch (error) {
@@ -104,7 +107,7 @@ export class AchievementController implements IAchievementAdminController {
 
     async deleteAchievement(req: Request, res: Response): Promise<void> {
         try {
-            const achievementId = this._getAchievementIdFromParams(req);
+            const achievementId = req.params.acheivementId;
             await this._achievementService.deleteAchievement(achievementId);
             
             res.status(StatusCode.NO_CONTENT).send();
@@ -113,7 +116,6 @@ export class AchievementController implements IAchievementAdminController {
         }
     }
 
-    // Private helper methods
     private _parsePageNumber(page: string): number {
         const parsedPage = parseInt(page);
         return isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
@@ -126,6 +128,8 @@ export class AchievementController implements IAchievementAdminController {
 
     private _getAchievementIdFromParams(req: Request): string {
         const achievementId = req.params.achievementId;
+        console.log(achievementId);
+        
         
         if (!achievementId) {
             throw new Error('Achievement ID is required');
