@@ -21,6 +21,7 @@ export interface IAchievementPagination {
 }
 
 export interface PaginationInfo {
+   achievements:IAchievement[]
     totalCount: number;
     totalPages: number;
     currentPage: number;

@@ -4,19 +4,20 @@ import { ICouponAdminService } from '../../../../services/interfaces/ICoupon.adm
 import StatusCode from '../../../../types/statuscode';
 import { inject, injectable } from 'tsyringe';
 import { CouponMapper } from '../../../../dto/admin/coupon/coupon.mapper';
-import { CreateCouponDTO, UpdateCouponDTO } from '../../../../dto/admin/coupon/coupon.dto';
+import { CouponListResponseDTO, CreateCouponDTO, UpdateCouponDTO } from '../../../../dto/admin/coupon/coupon.dto';
+import { ICoupon } from 'src/models/interfaces/coupon.interface';
 
 @injectable()
 export class CouponController implements ICouponAdminController {
     constructor(
         @inject("CouponService") private readonly _couponService: ICouponAdminService,
-    ) {}
+    ) { }
 
     async fetchAllCoupons(_req: Request, res: Response): Promise<void> {
         try {
             const coupons = await this._couponService.getAllCoupons();
             const couponDTOs = CouponMapper.toCouponListResponseDTOArray(coupons);
-            
+
             res.status(StatusCode.OK).json({ success: true, data: couponDTOs });
         } catch (error) {
             this._handleError(res, error, StatusCode.INTERNAL_SERVER_ERROR);
@@ -26,10 +27,10 @@ export class CouponController implements ICouponAdminController {
     async fetchAllCouponsWithPagination(req: Request, res: Response): Promise<void> {
         try {
             const { page, limit, search } = this._extractPaginationParams(req);
-            
+
             const result = await this._couponService.getAllCouponsWithPagination(page, limit, search);
             const couponDTOs = CouponMapper.toCouponListResponseDTOArray(result.coupons);
-            
+
             const response = this._buildPaginatedResponse(couponDTOs, result, page, limit);
             res.status(StatusCode.OK).json(response);
         } catch (error) {
@@ -42,7 +43,7 @@ export class CouponController implements ICouponAdminController {
             const couponData = this._extractCouponData(req);
             const newCoupon = await this._couponService.createCoupon(couponData);
             const couponDTO = CouponMapper.toCouponResponseDTO(newCoupon);
-            
+
             res.status(StatusCode.CREATED).json({ success: true, data: couponDTO });
         } catch (error) {
             this._handleError(res, error, StatusCode.BAD_REQUEST);
@@ -105,7 +106,7 @@ export class CouponController implements ICouponAdminController {
         try {
             const couponId = this._getCouponIdFromParams(req);
             await this._couponService.deleteCoupon(couponId);
-            
+
             res.status(StatusCode.NO_CONTENT).send();
         } catch (error) {
             this._handleError(res, error, StatusCode.BAD_REQUEST);
@@ -140,15 +141,19 @@ export class CouponController implements ICouponAdminController {
 
     private _getCouponIdFromParams(req: Request): string {
         const couponId = req.params.couponId;
-        
+
         if (!couponId) {
             throw new Error('Coupon ID is required');
         }
-        
+
         return couponId;
     }
 
-    private _buildPaginatedResponse(couponDTOs: any[], result: any, page: number, limit: number): object {
+    private _buildPaginatedResponse(couponDTOs: CouponListResponseDTO[], result: {
+        coupons: ICoupon[];
+        totalCount: number;
+        hasMore: boolean;
+    }, page: number, limit: number): object {        
         return {
             success: true,
             data: couponDTOs,
@@ -170,7 +175,7 @@ export class CouponController implements ICouponAdminController {
 
     private _handleError(res: Response, error: unknown, statusCode: number): void {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-        
+
         res.status(statusCode).json({
             success: false,
             message: errorMessage

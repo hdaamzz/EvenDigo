@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { EventAnalytics, EventAnalyticsService } from '../../../../core/services/user/dashboard/event.analytics.service';
+import { EventAnalyticsService } from '../../../../core/services/user/dashboard/event.analytics.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserNavComponent } from "../../../../shared/user-nav/user-nav.component";
 import { UserFooterComponent } from "../../../../shared/user-footer/user-footer.component";
+import { EventAnalytics } from '../../../../core/interfaces/user/dashboard';
 
 @Component({
   selector: 'app-event-analytics',

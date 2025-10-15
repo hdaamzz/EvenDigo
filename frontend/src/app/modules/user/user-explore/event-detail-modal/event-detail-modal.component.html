@@ -69,8 +69,18 @@
                 </div>
                 <div>
                   <p class="text-xs text-gray-400 uppercase tracking-wider">Date & Time</p>
-                  <p class="text-sm font-medium text-white">{{ eventData.startDate }}</p>
-                  <p class="text-xs text-gray-300">{{ eventData.startTime }}</p>
+                  <p class="text-sm font-medium text-white">{{ getFormattedDate(eventData.startDate) }}</p>
+                  <p class="text-xs text-gray-300">{{ getFormattedTime(eventData.startTime) }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-[#1a1a1a] border border-gray-800">
+                <div class="w-10 h-10 rounded-lg bg-[#00ff66]/10 flex items-center justify-center lg:w-10 lg:h-10">
+                  <lucide-icon [name]="Calendar" [size]="18" class="text-[#00ff66] lg:!w-5 lg:!h-5"></lucide-icon>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 uppercase tracking-wider">END DATE</p>
+                  <p class="text-sm font-medium text-white">{{ getFormattedDate(eventData.endingDate) }}</p>
                 </div>
               </div>
 

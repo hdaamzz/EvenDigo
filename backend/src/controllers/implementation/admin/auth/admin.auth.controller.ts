@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ILogin } from '../../../../models/interfaces/auth.interface';
+import { IAuthResponse, ILogin } from '../../../../models/interfaces/auth.interface';
 import { inject, injectable } from 'tsyringe';
 import { IAuthAdminController } from '../../../../controllers/interfaces/Admin/Auth/IAuth.admin.controller';
 import { IAuthAdminService } from '../../../../services/interfaces/IAuth.admin.service';
@@ -44,14 +44,14 @@ export class AdminAuthController implements IAuthAdminController {
     return !!(loginData?.email && loginData?.password);
   }
 
-  private _isSuccessfulLogin(result: any): boolean {
+  private _isSuccessfulLogin(result: IAuthResponse): boolean {    
     return !!(result?.success && result?.accessToken && result?.refreshToken && result?.user);
   }
 
-  private _setAuthCookies(res: Response, result: any): void {
+  private _setAuthCookies(res: Response, result: IAuthResponse): void {
     CookieUtils.setAuthCookies(res, {
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      accessToken: result.accessToken ?? '',
+      refreshToken: result.refreshToken ?? '',
     });
   }
 
@@ -62,17 +62,19 @@ export class AdminAuthController implements IAuthAdminController {
     });
   }
 
-  private _sendSuccessResponse(res: Response, result: any): void {
+  private _sendSuccessResponse(res: Response, result: IAuthResponse): void {
     res.status(StatusCode.OK).json({
       success: true,
       message: 'Login successful',
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        name: result.user.name,
-        role: result.user.role,
-        token: result.accessToken,
-      },
+      user: result.user
+        ? {
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name,
+            role: result.user.role,
+            token: result.accessToken,
+          }
+        : null,
     });
   }
 

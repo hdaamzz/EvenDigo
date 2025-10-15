@@ -1,3 +1,4 @@
+import { IAchievement } from "src/models/interfaces/achievements.interface";
 import { AchievementDto } from "./achievement.dto";
 
 export class AchievementListResponseDto {
@@ -10,7 +11,7 @@ export class AchievementListResponseDto {
         hasMore: boolean;
     };
 
-    constructor(achievements: any[], totalCount: number, currentPage: number, limit: number, hasMore: boolean) {
+    constructor(achievements: IAchievement[], totalCount: number, currentPage: number, limit: number, hasMore: boolean) {        
         this.success = true;
         this.data = AchievementDto.fromEntities(achievements);
         this.pagination = {

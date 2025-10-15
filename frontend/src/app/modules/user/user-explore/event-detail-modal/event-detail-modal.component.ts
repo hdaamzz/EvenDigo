@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, EventEmitter, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { LucideAngularModule, X, Calendar, MapPin, Users, Share2, Heart, MessageCircle, ArrowRight, Shield, ChevronUp, ChevronDown } from 'lucide-angular';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { UserDashboardService } from '../../../../core/services/user/dashboard/u
   selector: 'app-event-detail-modal',
   standalone: true,
   imports: [CommonModule, LucideAngularModule],
+  providers: [DatePipe],
   templateUrl: './event-detail-modal.component.html',
   styleUrls: ['./event-detail-modal.component.css'],
   animations: [
@@ -69,6 +70,8 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
     private readonly _dashboardService: UserDashboardService,
     private readonly _router: Router,
     private readonly _cdr: ChangeDetectorRef,
+    private readonly _datePipe: DatePipe
+
   ) {}
 
   ngOnInit(): void {
@@ -170,6 +173,30 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
     const ticketType = ticket.type.toLowerCase();
     return Math.max(0, ticket.quantity - (this.ticketCounts[ticketType] || 0));
   }
+  getFormattedDate(dateString: string): string {
+  if (!dateString) return 'Date TBA';
+  
+  const date = new Date(dateString);
+  return this._datePipe.transform(date, 'EEE, MMM d, y') || 'Invalid Date';
+  // Output: "Wed, Oct 30, 2025"
+}
+
+getFormattedTime(dateString: string): string {
+  if (!dateString) return 'Time TBA';
+  
+  const date = new Date(dateString);
+  return this._datePipe.transform(date, 'h:mm a') || 'Invalid Time';
+  // Output: "6:30 PM"
+}
+
+getFormattedDateTime(dateString: string): string {
+  if (!dateString) return 'Date & Time TBA';
+  
+  const date = new Date(dateString);
+  return this._datePipe.transform(date, 'EEE, MMM d, y \'at\' h:mm a') || 'Invalid DateTime';
+  // Output: "Wed, Oct 30, 2025 at 6:30 PM"
+}
+
 
   getTicketDescription(type: string): string {
     const descriptions: { [key: string]: string } = {
