@@ -3,6 +3,7 @@ import { IUserAchievementRepository } from '../interfaces/IBadge.repository';
 import AchievementModel from '../../models/AchievementsModel';
 import BadgeModal from '../../models/BadgeModal';
 import { Schema } from 'mongoose';
+import { IAchievement } from '../../models/interfaces/achievements.interface';
 
 @injectable()
 export class UserAchievementRepository implements IUserAchievementRepository {
@@ -34,7 +35,7 @@ export class UserAchievementRepository implements IUserAchievementRepository {
     }
   }
 
-  async getUserAchievements(userId: Schema.Types.ObjectId | string): Promise<any> {
+  async getUserAchievements(userId: Schema.Types.ObjectId | string): Promise<IAchievement[]> {
     const userAchievements = await BadgeModal.aggregate([
       { $match: { userId: userId } },
       {

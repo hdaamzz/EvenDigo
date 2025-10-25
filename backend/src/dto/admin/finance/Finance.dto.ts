@@ -1,3 +1,6 @@
+import { RevenueTransactions } from "src/services/interfaces/IRevenue.service";
+import { FinanceEventDTO, RevenueStats, ITicket, UserDTO, IBooking, ITransactionDTO } from "./finance.input.dto";
+
 export class RevenueStatsDto {
   totalRevenue: string;
   totalRevenueChange: number;
@@ -6,7 +9,7 @@ export class RevenueStatsDto {
   monthlyRevenue: string;
   monthlyRevenueChange: number;
 
-  constructor(data: any) {
+  constructor(data: RevenueStats) {
     this.totalRevenue = data.totalRevenue;
     this.totalRevenueChange = data.totalRevenueChange;
     this.todayRevenue = data.todayRevenue;
@@ -26,7 +29,7 @@ export class TicketDto {
   uniqueQrCode: string;
   status?: string;
 
-  constructor(ticket: any) {
+  constructor(ticket: ITicket) {    
     this.type = ticket.type;
     this.price = ticket.price;
     this.quantity = ticket.quantity;
@@ -43,7 +46,7 @@ export class BookingUserDto {
   name: string;
   email?: string;
 
-  constructor(user: any) {
+  constructor(user: UserDTO) {
     this._id = user._id;
     this.name = user.name;
     this.email = user.email;
@@ -55,7 +58,7 @@ export class BookingEventDto {
   eventTitle: string;
   user_id: BookingUserDto;
 
-  constructor(event: any) {
+  constructor(event: FinanceEventDTO) {
     this._id = event._id;
     this.eventTitle = event.eventTitle;
     this.user_id = event.user_id ? new BookingUserDto(event.user_id) : event.user_id;
@@ -77,7 +80,8 @@ export class RevenueTransactionDto {
   createdAt: Date;
   updatedAt?: Date;
 
-  constructor(booking: any) {
+  constructor(booking: IBooking) {
+    
     this._id = booking._id;
     this.bookingId = booking.bookingId;
     this.userId = booking.userId ? new BookingUserDto(booking.userId) : booking.userId;
@@ -101,13 +105,13 @@ export class RefundTransactionDto {
   amount: number;
   type: string;
   status: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, {}>;
   userId: string;
 
-  constructor(refund: any) {
+  constructor(refund: ITransactionDTO) {    
     this.transactionId = refund.transactionId;
     this.date = refund.date;
-    this.description = refund.description;
+    this.description = refund.description??"";
     this.amount = refund.amount;
     this.type = refund.type;
     this.status = refund.status;
@@ -122,8 +126,8 @@ export class PaginatedRevenueTransactionsDto {
   currentPage: number;
   totalPages: number;
 
-  constructor(response: any) {
-    this.data = response.data?.map((transaction: any) => new RevenueTransactionDto(transaction)) || [];
+  constructor(response: RevenueTransactions ) {
+    this.data = response.data?.map((transaction: IBooking) => new RevenueTransactionDto(transaction)) || [];
     this.totalItems = response.totalItems;
     this.currentPage = response.currentPage;
     this.totalPages = response.totalPages;
@@ -136,8 +140,8 @@ export class PaginatedRefundTransactionsDto {
   currentPage: number;
   totalPages: number;
 
-  constructor(response: any) {
-    this.data = response.data?.map((refund: any) => new RefundTransactionDto(refund)) || [];
+  constructor(response: RevenueTransactions) {    
+    this.data = response.data?.map((refund: ITransactionDTO) => new RefundTransactionDto(refund)) || [];
     this.totalItems = response.totalItems;
     this.currentPage = response.currentPage;
     this.totalPages = response.totalPages;

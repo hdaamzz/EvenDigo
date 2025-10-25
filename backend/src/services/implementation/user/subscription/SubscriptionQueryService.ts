@@ -190,7 +190,10 @@ export class SubscriptionQueryService implements ISubscriptionQueryService {
 
   async deleteAllPendingSubscriptions(): Promise<{ deletedCount: number; success: boolean; message: string }> {
     try {
+      console.log("deleteAllPendingSubscriptions Called");
+      
       const result = await this.subscriptionRepository.deleteAllPendingSubscriptions();
+
 
       return {
         deletedCount: result.deletedCount,

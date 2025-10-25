@@ -115,6 +115,8 @@ export class CouponRepository extends BaseRepository<ICoupon> implements ICoupon
                 }
             ];
         }
+        console.log("findAllCouponsPagination",searchFilter);
+        
 
         const result = await this.findWithPagination(searchFilter, { page, limit });
 

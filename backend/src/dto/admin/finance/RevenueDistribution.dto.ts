@@ -1,5 +1,6 @@
 import { ObjectId, Schema } from 'mongoose';
 import { IRevenueDistribution } from '../../../models/interfaces/distribution.interface';
+import { RevenueStats } from './finance.input.dto';
 
 export class RevenueDistributionDto {
   _id: string;
@@ -41,7 +42,7 @@ export class RevenueStatsDto {
   monthlyRevenue: string;
   monthlyRevenueChange: number;
 
-  constructor(data: any) {
+  constructor(data: RevenueStats) {
     this.totalRevenue = data.totalRevenue;
     this.totalRevenueChange = data.totalRevenueChange;
     this.todayRevenue = data.todayRevenue;

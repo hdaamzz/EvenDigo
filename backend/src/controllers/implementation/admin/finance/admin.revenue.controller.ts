@@ -27,7 +27,7 @@ export class FinanceController implements IFinanceController {
       
       const response = await this.financeService.getRevenueTransactions(dto);
 
-      if (response.success) {
+      if (response.success && response.data) {
         const responseDto = new PaginatedRevenueTransactionsDto(response.data);
         res.status(StatusCode.OK).json(responseDto);
       } else {
@@ -49,8 +49,11 @@ export class FinanceController implements IFinanceController {
       const response = await this.financeService.getRevenueStats();
 
       if (response.success) {
-        const dto = new RevenueStatsDto(response.data);
-        res.status(StatusCode.OK).json(dto);
+        if(response.data){
+            const dto = new RevenueStatsDto(response.data);
+            res.status(StatusCode.OK).json(dto);
+        }
+        
       } else {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
           success: false,
@@ -80,7 +83,7 @@ export class FinanceController implements IFinanceController {
 
       const response = await this.financeService.getTransactionsByDateRange(dto);
 
-      if (response.success) {
+      if (response.success && response.data) {
         const responseDto = new PaginatedRevenueTransactionsDto(response.data);
         res.status(StatusCode.OK).json(responseDto);
       } else {
@@ -108,7 +111,7 @@ export class FinanceController implements IFinanceController {
       
       const response = await this.financeService.getRefundTransactions(dto);
       
-      if (response.success) {
+      if (response.success && response.data) {
         const responseDto = new PaginatedRefundTransactionsDto(response.data);
         res.status(StatusCode.OK).json(responseDto);
       } else {
@@ -167,8 +170,8 @@ export class FinanceController implements IFinanceController {
       const dto = ServiceFinanceMapper.toGetTransactionsByUserDTO(userId, page, limit);
       
       const response = await this.financeService.getTransactionsByUser(dto);
-
-      if (response.success) {
+ 
+      if (response.success && response.data) {
         const responseDto = new PaginatedRevenueTransactionsDto(response.data);
         res.status(StatusCode.OK).json(responseDto);
       } else {

@@ -99,35 +99,6 @@ class BookingRepository implements IBookingRepository {
     }
   }
 
-  async findBookingEventByUserId(userId: Schema.Types.ObjectId | string): Promise<any[]> {
-    try {
-      if (!isValidObjectId(userId)) throw new Error("Invalid userId");
-
-      const bookings = await this.bookingModel
-        .find({ userId, paymentStatus: "Completed" })
-        .sort({ createdAt: -1 })
-        .populate({
-          path: 'eventId',
-          match: { endingDate: { $lt: new Date() } },
-          populate: {
-            path: 'user_id'
-          }
-        })
-        .exec();
-
-      return bookings
-        .filter(booking => booking.eventId)
-        .map(booking => ({
-          ...(booking.eventId as any)._doc,
-          bookingId: booking.bookingId
-        }));
-
-    } catch (error) {
-      console.error('Error in findBookingEventByUserId:', error);
-      throw new Error(`Failed to find finished bookings for user: ${(error as Error).message}`);
-    }
-  }
-
 
   async updateBookingStatus(bookingId: Schema.Types.ObjectId | string, status: string): Promise<IBooking | null> {
     return this.bookingModel.findByIdAndUpdate(
@@ -167,7 +138,7 @@ class BookingRepository implements IBookingRepository {
 
   async findBookingsByEventId(
     eventId: Schema.Types.ObjectId | string,
-    filters: Record<string, any> = {}
+    filters: Record<string ,{}> = {}
   ): Promise<IBooking[]> {
     try {
       return await this.bookingModel.find({
@@ -217,7 +188,7 @@ class BookingRepository implements IBookingRepository {
     userId: Schema.Types.ObjectId | string,
     page: number = 1,
     limit: number = 10
-  ): Promise<any[]> {
+  ): Promise<IBooking[]> {
     try {
       if (!isValidObjectId(userId)) throw new Error("Invalid userId");
 
@@ -278,6 +249,8 @@ class BookingRepository implements IBookingRepository {
           }
         }
       ]);
+      console.log(bookings);
+      
 
       return bookings;
 

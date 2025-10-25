@@ -1,4 +1,5 @@
 import { Document, Schema } from 'mongoose';
+import { IUser } from './auth.interface';
 
 interface Ticket {
   type: string;
@@ -45,6 +46,27 @@ export interface IEvent {
   ageRestriction: boolean;
   tickets: Ticket[];
   user_id: string;
+  createdAt: string;
+  updatedAt: string;
+  status: boolean;
+}
+
+export interface IEventUserPopulated {
+  _id: string;
+  eventTitle: string;
+  eventDescription: string;
+  eventType: string;
+  startDate: string;
+  endingDate: string;
+  startTime: string;
+  endTime: string;
+  venueName: string;
+  city: string;
+  eventVisibility: string;
+  promotionalImage: string;
+  ageRestriction: boolean;
+  tickets: Ticket[];
+  user_id: IUser;
   createdAt: string;
   updatedAt: string;
   status: boolean;

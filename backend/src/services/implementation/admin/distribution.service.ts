@@ -8,7 +8,7 @@ import { IWalletRepository } from '../../../repositories/interfaces/IWallet.repo
 import { IRevenueDistributionService } from '../../../services/interfaces/IDistribution.service';
 import { inject, injectable } from 'tsyringe';
 import { IEventRepository } from '../../../repositories/interfaces/IEvent.repository';
-import { IChatService } from '../../../services/interfaces/user/chat/IChat.service';
+// import { IChatService } from '../../../services/interfaces/user/chat/IChat.service';
 import { ISubscriptionQueryService } from '../../../services/interfaces/user/subscription/ISubscriptionQuery.service';
 
 
@@ -22,8 +22,8 @@ export class RevenueDistributionService implements IRevenueDistributionService {
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingRepository") private bookingRepository: IBookingRepository,
     @inject("EventRepository") private eventRepository: IEventRepository,
-    @inject("ChatService") private chatService: IChatService,
-    @inject("AdminSubscriptionService") private subscriptionService: ISubscriptionQueryService
+    // @inject("ChatService") private chatService: IChatService,
+    @inject("SubscriptionQueryService") private subscriptionService: ISubscriptionQueryService
 
   ) { }
 
@@ -43,14 +43,13 @@ export class RevenueDistributionService implements IRevenueDistributionService {
         this.subscriptionService.deleteAllPendingSubscriptions(),
         this.subscriptionService.deleteAllCancelledSubscriptions(),
         this.subscriptionService.updateExpiredSubscriptions()
-      ]);
-
+      ]);      
       let processedCount = 0;
       const eventProcessingPromises = finishedEvents.map(async (event) => {
         try {
           const [revenueResult] = await Promise.all([
             this.distributeEventRevenue(event._id as Schema.Types.ObjectId),
-            this.chatService.deleteGroupChatByEventId(event._id as string)
+            // this.chatService.deleteGroupChatByEventId(event._id as string)
           ]);
 
           return revenueResult.success;

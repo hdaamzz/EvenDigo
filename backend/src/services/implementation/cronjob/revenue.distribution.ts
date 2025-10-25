@@ -1,21 +1,21 @@
 import { injectable, inject } from 'tsyringe';
 import cron from 'node-cron';
-import {logger} from '../../../utils/logger'
+import { logger } from '../../../utils/logger'
 import { IRevenueDistributionCronService, IRevenueDistributionService } from '../../../services/interfaces/IDistribution.service';
 
 @injectable()
-export class RevenueDistributionCronService implements IRevenueDistributionCronService{
+export class RevenueDistributionCronService implements IRevenueDistributionCronService {
   constructor(
     @inject("RevenueDistributionService") private revenueDistributionService: IRevenueDistributionService,
-  ) {}
+  ) { }
 
   startCronJob(): void {
-    cron.schedule('0 0 * * *', async () => {
-      logger.info('Starting daily revenue distribution job');
-      
+    cron.schedule('* * * * *', async () => {
+      logger.info('Starting revenue distribution job (every 5 minutes)');
+
       try {
         const result = await this.revenueDistributionService.processFinishedEvents();
-        
+
         if (result.success) {
           logger.info(`Revenue distribution job completed successfully: ${result.message}`);
         } else {
@@ -26,6 +26,6 @@ export class RevenueDistributionCronService implements IRevenueDistributionCronS
       }
     });
 
-    logger.info('Revenue distribution cron job scheduled to run daily at midnight (12 AM)');
+    logger.info('Revenue distribution cron job scheduled to run every 5 minutes');
   }
 }

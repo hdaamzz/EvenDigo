@@ -5,9 +5,10 @@ import { ObjectId } from "mongoose";
 
 export class AdminEventMapper {
   static toAdminEventDTO(event: EventDocument): AdminEventDTO {
+    
     return {
       _id: (event._id as string),
-      user_id: (event.user_id as any),
+      user_id: (event.user_id as unknown as string),
       eventTitle: event.eventTitle,
       eventDescription: event.eventDescription,
       eventType: event.eventType,
@@ -36,7 +37,7 @@ export class AdminEventMapper {
   static toAdminEventListDTO(event: EventDocument): AdminEventListDTO {
     return {
       _id: (event._id as ObjectId).toString(),
-      user_id: (event.user_id as any),
+      user_id: (event.user_id as unknown as string),
       eventTitle: event.eventTitle,
       eventDescription: event.eventDescription,
       eventType: event.eventType,

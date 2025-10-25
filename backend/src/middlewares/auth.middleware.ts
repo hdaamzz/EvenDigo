@@ -4,6 +4,7 @@ import { ITokenService } from '../services/interfaces/user/auth/ITokenService';
 import StatusCode from '../types/statuscode';
 import { container } from '../configs/container';
 import { cookieConfig } from '../configs/cookie.config';
+import { IUser } from '../models/interfaces/auth.interface';
 
 declare global {
   namespace Express {
@@ -68,7 +69,7 @@ export const authMiddleware = async (
         req.user = user;
         return next();
         
-      } catch (tokenError: any) {
+      } catch (tokenError) {
         console.log('Access token expired or invalid, attempting refresh...');
         
         if (refreshToken) {
@@ -156,7 +157,7 @@ async function refreshAccessToken(
   refreshToken: string, 
   tokenService: ITokenService, 
   res: Response
-): Promise<{ success: boolean; user?: any; message?: string }> {
+): Promise<{ success: boolean; user?: IUser ; message?: string }> {
   try {
     const decodedRefresh = tokenService.verifyRefreshToken(refreshToken);
     const user = await UserModel.findById(decodedRefresh.userId).select('-password');
@@ -176,8 +177,7 @@ async function refreshAccessToken(
     res.cookie('accessToken', newAccessToken, cookieOptions.accessToken);
     res.cookie('refreshToken', newRefreshToken, cookieOptions.refreshToken);
     
-    console.log('Token refreshed successfully for user:', user.email);
-    
+    console.log('Token refreshed successfully for user:', user.email);    
     return { 
       success: true, 
       user: user 

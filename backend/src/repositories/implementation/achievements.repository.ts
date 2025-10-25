@@ -3,7 +3,7 @@ import { injectable } from 'tsyringe';
 import { IAchievementRepository } from '../interfaces/IAchievements.repository';
 import AchievementModel from '../../models/AchievementsModel';
 import { AchievementEntityDTO } from '../../mappers/admin/acheivement/achievement.mapper';
-import { AchievementRepositoryPaginationResult } from '../../models/interfaces/achievements.interface';
+import { AchievementRepositoryPaginationResult, IAchievement } from '../../models/interfaces/achievements.interface';
 
 
 
@@ -64,7 +64,8 @@ export class AchievementRepository implements IAchievementRepository {
         await AchievementModel.findByIdAndDelete(achievementId).exec();
     }
 
-    private mapToEntityDTO(mongooseDoc: any): AchievementEntityDTO {
+    private mapToEntityDTO(mongooseDoc: IAchievement): AchievementEntityDTO {
+
         return {
             _id: mongooseDoc._id,
             title: mongooseDoc.title,
