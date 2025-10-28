@@ -178,7 +178,6 @@ export class EventDetailModalComponent implements OnInit, OnDestroy {
   
   const date = new Date(dateString);
   return this._datePipe.transform(date, 'EEE, MMM d, y') || 'Invalid Date';
-  // Output: "Wed, Oct 30, 2025"
 }
 
 getFormattedTime(dateString: string): string {
@@ -186,7 +185,6 @@ getFormattedTime(dateString: string): string {
   
   const date = new Date(dateString);
   return this._datePipe.transform(date, 'h:mm a') || 'Invalid Time';
-  // Output: "6:30 PM"
 }
 
 getFormattedDateTime(dateString: string): string {
@@ -194,7 +192,6 @@ getFormattedDateTime(dateString: string): string {
   
   const date = new Date(dateString);
   return this._datePipe.transform(date, 'EEE, MMM d, y \'at\' h:mm a') || 'Invalid DateTime';
-  // Output: "Wed, Oct 30, 2025 at 6:30 PM"
 }
 
 

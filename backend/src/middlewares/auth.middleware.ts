@@ -6,15 +6,6 @@ import { container } from '../configs/container';
 import { cookieConfig } from '../configs/cookie.config';
 import { IUser } from '../models/interfaces/auth.interface';
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any; 
-      stripeEvent?: any;
-    }
-  }
-}
-
 export function validateFirebaseSignInRequest(
   req: Request, 
   res: Response, 

@@ -1,4 +1,12 @@
 import { CookieOptions } from 'express';
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any; 
+      stripeEvent?: any;
+    }
+  }
+}
 
 export interface TokenCookieConfig {
   accessToken: CookieOptions;
