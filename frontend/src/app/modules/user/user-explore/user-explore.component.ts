@@ -83,7 +83,7 @@ export class UserExploreComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:scroll', ['$event'])
-  onScroll(): void {
+  onScroll(event?: Event): void {
     if (this.isLoadingMore || !this.hasMoreEvents || this.allEventsLoaded) {
       return;
     }
