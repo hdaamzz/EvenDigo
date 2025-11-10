@@ -25,4 +25,10 @@ export interface IPaymentService {
   
   constructStripeEvent(payload: Buffer, signature: string, secret: string): Stripe.Event;
   processStripeWebhook(event: Stripe.Event): Promise<void>;
+  calculateOrderAmount(
+    eventId: string,
+    tickets: { [type: string]: number },
+    couponCode?: string,
+    discount?: number
+  ): Promise<number>
 }

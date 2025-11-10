@@ -237,7 +237,7 @@ onDesktopSearchBlur(): void {
   }
 
   onImageError(event: any): void {
-    event.target.src = 'assets/images/fallback-event.jpg'; // Add your fallback image
+    event.target.src = 'assets/images/fallback-event.jpg'; 
   }
 
   getLowestTicketPrice(event: IEvent): number {

@@ -220,37 +220,25 @@ getFormattedDateTime(dateString: string): string {
   }
 
   proceedToCheckout(): void {
-    if (this.totalTickets === 0) {
-      Notiflix.Notify.warning('Please select at least one ticket to proceed.', {
-        position: 'right-bottom'
-      });
-      return;
-    }
-
-    Notiflix.Loading.standard('Preparing checkout...', {
-      backgroundColor: 'rgba(0,0,0,0.8)',
-    });
-
-    const ticketFormData = {
-      tickets: this.ticketCounts,
-      totalAmount: this.calculateTotal(),
-      eventId: this.id,
-      eventTitle: this.eventData.eventTitle,
-    };
-
-    const queryParams = {
-      eventId: ticketFormData.eventId,
-      eventTitle: ticketFormData.eventTitle,
-      totalAmount: ticketFormData.totalAmount.toString(),
-      tickets: JSON.stringify(ticketFormData.tickets)
-    };
-
-    setTimeout(() => {
-      Notiflix.Loading.remove();
-      this._router.navigate(['/checkout'], { queryParams });
-      this.handleClose();
-    }, 1000);
+  if (this.totalTickets === 0) {
+    Notiflix.Notify.warning('Please select at least one ticket to proceed.');
+    return;
   }
+
+  Notiflix.Loading.standard('Preparing checkout...');
+
+  const queryParams = {
+    eventId: this.id,
+    tickets: JSON.stringify(this.ticketCounts)
+  };
+
+  setTimeout(() => {
+    Notiflix.Loading.remove();
+    this._router.navigate(['/checkout'], { queryParams });
+    this.handleClose();
+  }, 1000);
+}
+
 
   async handleChat(organizerId: string): Promise<void> {
     try {

@@ -42,19 +42,42 @@ export class ExploreController implements IExploreController {
   };
 
   checkout = async (req: Request, res: Response): Promise<void> => {
-    const { eventId, tickets, amount, successUrl, cancelUrl, paymentMethod, couponCode, discount } = req.body;
+    const { eventId, tickets, couponCode, discount, paymentMethod } = req.body;
     const userId = req.user._id;
-  
+    
+    // ❌ REMOVE: Don't accept 'amount' from client
+    // const { amount } = req.body; 
+
     try {
+      // ✅ Validate and calculate price on server
+      const calculatedAmount = await this.paymentService.calculateOrderAmount(
+        eventId, 
+        tickets, 
+        couponCode, 
+        discount
+      );
+      
       if (paymentMethod === 'wallet') {
         const booking = await this.paymentService.processWalletPayment(
-          eventId, tickets, amount, userId, couponCode, discount
+          eventId, 
+          tickets, 
+          calculatedAmount, // ✅ Use server-calculated amount
+          userId, 
+          couponCode, 
+          discount
         );
         
-        ResponseHandler.success(res, booking, 'Booking successful! Payment completed from wallet.');
+        ResponseHandler.success(res, booking, 'Booking successful!');
       } else {
         const session = await this.paymentService.createStripeCheckoutSession(
-          eventId, tickets, amount, successUrl, cancelUrl, userId, couponCode, discount
+          eventId, 
+          tickets, 
+          calculatedAmount, // ✅ Use server-calculated amount
+          req.body.successUrl, 
+          req.body.cancelUrl, 
+          userId, 
+          couponCode, 
+          discount
         );
         
         ResponseHandler.success(res, { sessionId: session.id });

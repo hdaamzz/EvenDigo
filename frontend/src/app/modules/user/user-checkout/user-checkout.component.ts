@@ -27,7 +27,7 @@ import { Coupon, TicketData } from '../../../core/interfaces/user/checkout';
 })
 export class UserCheckoutComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
-  
+
   public event!: IEvent;
   public wallet!: IWallet;
   public ticketData!: TicketData;
@@ -57,7 +57,7 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
 
   public async ngOnInit(): Promise<void> {
     if (!this.ticketData) return;
-  
+
     this.basePrice = this.ticketData.totalAmount ?? 0;
     this._loadCoupons();
     this._getUserWallet();
@@ -88,9 +88,9 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const coupon = this.couponsList.find(c => 
+    const coupon = this.couponsList.find(c =>
       c.code.toUpperCase() === this.couponCode.toUpperCase());
-      
+
     if (coupon && this._canApplyCoupon(coupon)) {
       this.appliedCoupon = coupon;
       Notiflix.Notify.success(`Coupon "${coupon.code}" applied successfully`);
@@ -121,8 +121,8 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
   }
 
   public calculateTotal(): number {
-    let total = this.basePrice + this.convenienceFee - 
-                this.earlyBirdDiscount - this.walletCashback;
+    let total = this.basePrice + this.convenienceFee -
+      this.earlyBirdDiscount - this.walletCashback;
 
     if (this.appliedCoupon) {
       if (this.appliedCoupon.discountType === 'percentage') {
@@ -132,34 +132,34 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
         total -= this.appliedCoupon.discount;
       }
     }
-    
+
     return Math.max(total, 0);
   }
 
   public getCouponDiscount(): number {
     if (!this.appliedCoupon) return 0;
 
-    const subtotal = this.basePrice + this.convenienceFee - 
-                    this.earlyBirdDiscount - this.walletCashback;
-                    
+    const subtotal = this.basePrice + this.convenienceFee -
+      this.earlyBirdDiscount - this.walletCashback;
+
     if (this.appliedCoupon.discountType === 'percentage') {
       return (subtotal * this.appliedCoupon.discount) / 100;
     }
-    
+
     return this.appliedCoupon.discount;
   }
 
   public async completePurchase(): Promise<void> {
     this.proceedLoading = true;
-    
+
     if (!this._stripe) {
       Notiflix.Notify.failure('Payment service not initialized. Please refresh the page.');
       this.proceedLoading = false;
       return;
     }
-    
+
     const payload: PayloadData = this._createPayloadData();
-  
+
     try {
       if (this.selectedPaymentMethod === 'wallet') {
         this._handleWalletPayment(payload);
@@ -174,7 +174,7 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
   private _initTicketData(): void {
     try {
       const queryParams = this._route.snapshot.queryParams;
-      
+
       if (!queryParams['eventId'] || !queryParams['tickets']) {
         this._router.navigate(['/']);
         return;
@@ -183,15 +183,11 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       this.ticketData = {
         eventId: queryParams['eventId'],
         tickets: JSON.parse(queryParams['tickets']),
-        totalAmount: parseFloat(queryParams['totalAmount']) || 0,
-        eventTitle: queryParams['eventTitle'] || ''
+        totalAmount: 0, // Will be calculated after fetching event
+        eventTitle: ''
       };
 
-      if (!this.ticketData.eventId || !this.ticketData.tickets) {
-        this._router.navigate(['/']);
-        return;
-      }
-
+      // ✅ Fetch event details first, then calculate price on client for display
       this._showEventDetails(this.ticketData.eventId);
     } catch (error) {
       this._router.navigate(['/']);
@@ -205,6 +201,13 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
         tap((response) => {
           if (response.data) {
             this.event = response.data;
+
+            // ✅ Calculate price from fetched event data
+            this.basePrice = this._calculatePriceFromEvent(
+              this.event,
+              this.ticketData.tickets
+            );
+            this.ticketData.totalAmount = this.basePrice;
           }
         }),
         catchError((error) => {
@@ -212,6 +215,25 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  private _calculatePriceFromEvent(
+    event: IEvent,
+    tickets: { [key: string]: number }
+  ): number {
+    let total = 0;
+
+    for (const [type, quantity] of Object.entries(tickets)) {
+      const ticketInfo = event.tickets.find(
+        t => t.type.toLowerCase() === type.toLowerCase()
+      );
+
+      if (ticketInfo && quantity > 0) {
+        total += ticketInfo.price * quantity;
+      }
+    }
+
+    return total;
   }
 
   private _getUserWallet(): void {
@@ -261,10 +283,10 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
 
   private _processCoupons(coupons: any[]): Coupon[] {
     const currentDate = new Date();
-    
+
     return coupons
-      .filter(coupon => 
-        coupon.isActive && 
+      .filter(coupon =>
+        coupon.isActive &&
         (!coupon.expiryDate || new Date(coupon.expiryDate) > currentDate)
       )
       .map(coupon => ({
@@ -286,13 +308,13 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       Notiflix.Notify.failure(`Coupon "${coupon.code}" has reached its usage limit`);
       return false;
     }
-    
-    if (coupon.minAmount > this.calculateTotal()) { 
+
+    if (coupon.minAmount > this.calculateTotal()) {
       Notiflix.Notify.warning(
         `Minimum amount of $${coupon.minAmount} required to apply "${coupon.code}"`);
       return false;
     }
-    
+
     return true;
   }
 
@@ -315,11 +337,11 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.proceedLoading = false;
-          
+
           if (response.success) {
-            this._router.navigate(['/payment/success'], { 
-              queryParams: { 
-                session_id: response.data.stripeSessionId 
+            this._router.navigate(['/payment/success'], {
+              queryParams: {
+                session_id: response.data.stripeSessionId
               }
             });
             Notiflix.Notify.success('Payment successful! Your booking is confirmed.');
@@ -343,7 +365,7 @@ export class UserCheckoutComponent implements OnInit, OnDestroy {
 
       const sessionId = response.data.sessionId;
       this.proceedLoading = false;
-      
+
       if (!this._stripe) {
         throw new Error('Stripe not initialized');
       }

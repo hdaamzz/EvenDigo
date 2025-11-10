@@ -10,6 +10,7 @@ import { BadRequestException } from '../../../../error/error-handlers';
 import { IWallet, TransactionType } from '../../../../models/interfaces/wallet.interface';
 import { generateRandomId } from '../../../../utils/helpers';
 import { IChatService } from '../../../../services/interfaces/user/chat/IChat.service';
+import { ICouponRepository } from 'src/repositories/interfaces/ICoupon.repository';
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -20,7 +21,8 @@ export class PaymentService implements IPaymentService {
     @inject("WalletRepository") private walletRepository: IWalletRepository,
     @inject("BookingService") private bookingService: IBookingService,
     @inject("EventRepository") private eventRepository: IEventRepository,
-    @inject('ChatService') private chatService: IChatService
+    @inject('ChatService') private chatService: IChatService,
+    @inject('CouponRepository') private couponRepository :ICouponRepository
 
   ) {
     const stripeKey = process.env.STRIPE_KEY;
@@ -56,7 +58,7 @@ export class PaymentService implements IPaymentService {
 
       const genaratedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
       const ticketDetails = await this.bookingService.prepareTicketDetails(eventId, tickets, genaratedBookingId);
-      
+
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -74,10 +76,10 @@ export class PaymentService implements IPaymentService {
         mode: 'payment',
         success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: cancelUrl,
-        metadata: { 
-          userId: userId.toString(), 
-          eventId, 
-          paymentType: 'event_booking', 
+        metadata: {
+          userId: userId.toString(),
+          eventId,
+          paymentType: 'event_booking',
           couponCode: couponCode || '',
           tickets: JSON.stringify(tickets)
         },
@@ -103,90 +105,90 @@ export class PaymentService implements IPaymentService {
   }
 
   async processWalletPayment(
-  eventId: string,
-  tickets: { [type: string]: number },
-  amount: number,
-  userId: string,
-  couponCode: string | null,
-  discount: number
-): Promise<IBooking> {
-  try {
-    const wallet: IWallet | null = await this.walletRepository.findWalletById(userId);
-    
-    if (!wallet) {
-      throw new BadRequestException('Wallet not found for this user');
-    }
-    
-    if (wallet.walletBalance < amount) {
-      throw new BadRequestException('Insufficient wallet balance');
-    }
-    
-    const event = await this.eventRepository.findEventById(eventId);
-    if (!event) {
-      throw new BadRequestException('Event not found');
-    }
-
-    if (!event.tickets || event.tickets.length === 0) {
-      throw new BadRequestException('No tickets available for this event');
-    }
-    
-    this.validateCheckoutParams(eventId, userId, tickets, amount);
-    
+    eventId: string,
+    tickets: { [type: string]: number },
+    amount: number,
+    userId: string,
+    couponCode: string | null,
+    discount: number
+  ): Promise<IBooking> {
     try {
-      await this.eventRepository.updateTicketQuantities(eventId, tickets);
-    } catch (ticketError) {
-      throw new BadRequestException('Tickets no longer available');
-    }
-    
-    const generatedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
-    const ticketDetails = await this.bookingService.prepareTicketDetails(eventId, tickets, generatedBookingId);
-    const sessionId = generateRandomId();
-    
-    const booking = await this.bookingRepository.createBooking({
-      bookingId: generatedBookingId,
-      userId,
-      eventId,
-      tickets: ticketDetails,
-      totalAmount: amount,
-      paymentType: 'wallet',
-      discount,
-      coupon: couponCode,
-      paymentStatus: 'Completed',
-      stripeSessionId: sessionId
-    });
+      const wallet: IWallet | null = await this.walletRepository.findWalletById(userId);
 
-    const groupChat = await this.chatService.getGroupChatByEventId(eventId);
-    if (groupChat) {
-      await this.chatService.addParticipantToGroupChat(groupChat._id.toString(), userId);
-    } else {
-      console.warn(`No group chat found for event ${eventId}`);
-    }
-
-    await this.walletRepository.addTransaction(
-      userId,
-      {
-        eventName: event.eventTitle,
-        eventId: eventId,
-        amount: amount,
-        type: TransactionType.DEBIT,
-        description: `Payment for booking #${generatedBookingId}`,
-        reference: generatedBookingId,
-        metadata: {
-          bookingId: generatedBookingId,
-          tickets: ticketDetails.map(ticket => ({
-            type: ticket.type,
-            quantity: ticket.quantity
-          }))
-        }
+      if (!wallet) {
+        throw new BadRequestException('Wallet not found for this user');
       }
-    );
-    
-    return booking;
-  } catch (error) {
-    console.error('Wallet payment error:', error);
-    throw new Error(`${(error as Error).message}`);
+
+      if (wallet.walletBalance < amount) {
+        throw new BadRequestException('Insufficient wallet balance');
+      }
+
+      const event = await this.eventRepository.findEventById(eventId);
+      if (!event) {
+        throw new BadRequestException('Event not found');
+      }
+
+      if (!event.tickets || event.tickets.length === 0) {
+        throw new BadRequestException('No tickets available for this event');
+      }
+
+      this.validateCheckoutParams(eventId, userId, tickets, amount);
+
+      try {
+        await this.eventRepository.updateTicketQuantities(eventId, tickets);
+      } catch (ticketError) {
+        throw new BadRequestException('Tickets no longer available');
+      }
+
+      const generatedBookingId = `BK${Date.now()}${Math.floor(Math.random() * 10000)}`;
+      const ticketDetails = await this.bookingService.prepareTicketDetails(eventId, tickets, generatedBookingId);
+      const sessionId = generateRandomId();
+
+      const booking = await this.bookingRepository.createBooking({
+        bookingId: generatedBookingId,
+        userId,
+        eventId,
+        tickets: ticketDetails,
+        totalAmount: amount,
+        paymentType: 'wallet',
+        discount,
+        coupon: couponCode,
+        paymentStatus: 'Completed',
+        stripeSessionId: sessionId
+      });
+
+      const groupChat = await this.chatService.getGroupChatByEventId(eventId);
+      if (groupChat) {
+        await this.chatService.addParticipantToGroupChat(groupChat._id.toString(), userId);
+      } else {
+        console.warn(`No group chat found for event ${eventId}`);
+      }
+
+      await this.walletRepository.addTransaction(
+        userId,
+        {
+          eventName: event.eventTitle,
+          eventId: eventId,
+          amount: amount,
+          type: TransactionType.DEBIT,
+          description: `Payment for booking #${generatedBookingId}`,
+          reference: generatedBookingId,
+          metadata: {
+            bookingId: generatedBookingId,
+            tickets: ticketDetails.map(ticket => ({
+              type: ticket.type,
+              quantity: ticket.quantity
+            }))
+          }
+        }
+      );
+
+      return booking;
+    } catch (error) {
+      console.error('Wallet payment error:', error);
+      throw new Error(`${(error as Error).message}`);
+    }
   }
-}
 
   constructStripeEvent(payload: Buffer, signature: string, secret: string): Stripe.Event {
     try {
@@ -197,7 +199,7 @@ export class PaymentService implements IPaymentService {
   }
 
   async processStripeWebhook(event: Stripe.Event): Promise<void> {
-    try {      
+    try {
       switch (event.type) {
         case 'checkout.session.completed':
           const session = event.data.object as Stripe.Checkout.Session;
@@ -217,90 +219,90 @@ export class PaymentService implements IPaymentService {
   }
 
   private async updateBookingPaymentStatus(sessionId: string, metadata: any): Promise<void> {
-  try {
-    const booking = await this.bookingRepository.findByStripeSessionId(sessionId);
-    
-    if (!booking) {
-      throw new Error(`No booking found with session ID: ${sessionId}`);
-    }
-    
-    if (booking.paymentStatus === 'Completed') {
-      console.log(`Booking ${booking.bookingId} already completed`);
-      return;
-    }
-    
-    const eventId = booking.eventId as unknown as string;
-    const userId = booking.userId as unknown as string;
-    
     try {
-      const tickets = JSON.parse(metadata.tickets);
-      const success = await this.eventRepository.updateTicketQuantities(eventId, tickets);
-      
-      if (success) {
-        booking.paymentStatus = 'Completed';
-        await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
-        
-        const groupChat = await this.chatService.getGroupChatByEventId(eventId);
-        if (groupChat) {
-          await this.chatService.addParticipantToGroupChat(groupChat._id.toString(), userId);
-        }
-      }
-    } catch (ticketError) {
-      console.error(`Ticket allocation failed for booking ${booking.bookingId}:`, ticketError);
-      
-      booking.paymentStatus = 'Failed';
-      await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
-      
-      await this.refundToWallet(userId, booking.totalAmount, booking.bookingId, eventId);
-      
-      throw new Error('Booking failed: Tickets no longer available');
-    }
-    
-  } catch (error) {
-    console.error("Error in updateBookingPaymentStatus:", error);
-    throw error;
-  }
-}
+      const booking = await this.bookingRepository.findByStripeSessionId(sessionId);
 
-private async refundToWallet(
-  userId: string, 
-  amount: number, 
-  bookingId: string, 
-  eventId: string
-): Promise<void> {
-  try {
-    const event = await this.eventRepository.findEventById(eventId);
-    const eventName = event?.eventTitle || 'Unknown Event';
-    
-    await this.walletRepository.addTransaction(
-      userId,
-      {
-        eventName: eventName,
-        eventId: eventId,
-        amount: amount,
-        type: TransactionType.REFUND,
-        description: `Refund for failed booking #${bookingId} - Tickets unavailable`,
-        reference: bookingId,
-        metadata: {
-          bookingId: bookingId,
-          refundReason: 'Tickets no longer available',
-          originalPaymentMethod: 'card',
-          refundDate: new Date().toISOString()
-        }
+      if (!booking) {
+        throw new Error(`No booking found with session ID: ${sessionId}`);
       }
-    );
-    
-    console.log(`Refund of ₹${amount} processed to wallet for user ${userId} - Booking ${bookingId}`);
-  } catch (error) {
-    console.error(`Failed to refund to wallet for booking ${bookingId}:`, error);
+
+      if (booking.paymentStatus === 'Completed') {
+        console.log(`Booking ${booking.bookingId} already completed`);
+        return;
+      }
+
+      const eventId = booking.eventId as unknown as string;
+      const userId = booking.userId as unknown as string;
+
+      try {
+        const tickets = JSON.parse(metadata.tickets);
+        const success = await this.eventRepository.updateTicketQuantities(eventId, tickets);
+
+        if (success) {
+          booking.paymentStatus = 'Completed';
+          await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
+
+          const groupChat = await this.chatService.getGroupChatByEventId(eventId);
+          if (groupChat) {
+            await this.chatService.addParticipantToGroupChat(groupChat._id.toString(), userId);
+          }
+        }
+      } catch (ticketError) {
+        console.error(`Ticket allocation failed for booking ${booking.bookingId}:`, ticketError);
+
+        booking.paymentStatus = 'Failed';
+        await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
+
+        await this.refundToWallet(userId, booking.totalAmount, booking.bookingId, eventId);
+
+        throw new Error('Booking failed: Tickets no longer available');
+      }
+
+    } catch (error) {
+      console.error("Error in updateBookingPaymentStatus:", error);
+      throw error;
+    }
   }
-}
+
+  private async refundToWallet(
+    userId: string,
+    amount: number,
+    bookingId: string,
+    eventId: string
+  ): Promise<void> {
+    try {
+      const event = await this.eventRepository.findEventById(eventId);
+      const eventName = event?.eventTitle || 'Unknown Event';
+
+      await this.walletRepository.addTransaction(
+        userId,
+        {
+          eventName: eventName,
+          eventId: eventId,
+          amount: amount,
+          type: TransactionType.REFUND,
+          description: `Refund for failed booking #${bookingId} - Tickets unavailable`,
+          reference: bookingId,
+          metadata: {
+            bookingId: bookingId,
+            refundReason: 'Tickets no longer available',
+            originalPaymentMethod: 'card',
+            refundDate: new Date().toISOString()
+          }
+        }
+      );
+
+      console.log(`Refund of ₹${amount} processed to wallet for user ${userId} - Booking ${bookingId}`);
+    } catch (error) {
+      console.error(`Failed to refund to wallet for booking ${bookingId}:`, error);
+    }
+  }
 
 
   private async handleExpiredSession(sessionId: string): Promise<void> {
     try {
       const booking = await this.bookingRepository.findByStripeSessionId(sessionId);
-      
+
       if (booking && booking.paymentStatus === 'Pending') {
         booking.paymentStatus = 'Failed';
         await this.bookingRepository.updateBookingDetails(booking.bookingId, booking);
@@ -317,25 +319,25 @@ private async refundToWallet(
     }
 
     for (const [type, requestedQuantity] of Object.entries(tickets)) {
-      if(requestedQuantity>0){
+      if (requestedQuantity > 0) {
         const availableTicket = event.tickets.find(t => t.type.toLowerCase() === type.toLowerCase());
-      
-      if (!availableTicket) {
-        throw new BadRequestException(`Ticket type ${type} not found`);
+
+        if (!availableTicket) {
+          throw new BadRequestException(`Ticket type ${type} not found`);
+        }
+
+        if (availableTicket.quantity < requestedQuantity) {
+          throw new BadRequestException(`Insufficient tickets available for ${type}. Available: ${availableTicket.quantity}, Requested: ${requestedQuantity}`);
+        }
       }
-      
-      if (availableTicket.quantity < requestedQuantity) {
-        throw new BadRequestException(`Insufficient tickets available for ${type}. Available: ${availableTicket.quantity}, Requested: ${requestedQuantity}`);
-      }
-      }
-      
+
     }
   }
 
   private validateCheckoutParams(
-    eventId: string, 
-    userId: string, 
-    tickets: { [type: string]: number }, 
+    eventId: string,
+    userId: string,
+    tickets: { [type: string]: number },
     amount: number,
     successUrl?: string,
     cancelUrl?: string
@@ -343,19 +345,89 @@ private async refundToWallet(
     if (!eventId || !userId) {
       throw new BadRequestException('Event ID and User ID are required');
     }
-    
+
     if (!Object.keys(tickets).length) {
       throw new BadRequestException('At least one ticket is required');
     }
-    
+
     if (amount <= 0) {
       throw new BadRequestException('Amount must be greater than 0');
     }
-    
+
     if (successUrl !== undefined && cancelUrl !== undefined) {
       if (!successUrl || !cancelUrl) {
         throw new BadRequestException('Success and cancel URLs are required');
       }
     }
+  }
+
+  async calculateOrderAmount(
+    eventId: string,
+    tickets: { [type: string]: number },
+    couponCode?: string,
+    discount?: number
+  ): Promise<number> {
+    const event = await this.eventRepository.findEventById(eventId);
+
+    if (!event) {
+      throw new BadRequestException('Event not found');
+    }
+
+    let totalAmount = 0;
+
+    for (const [type, quantity] of Object.entries(tickets)) {
+      if (quantity <= 0) continue;
+
+      const ticketInfo = event.tickets.find(
+        t => t.type.toLowerCase() === type.toLowerCase()
+      );
+
+      if (!ticketInfo) {
+        throw new BadRequestException(`Invalid ticket type: ${type}`);
+      }
+
+      if (quantity > ticketInfo.quantity) {
+        throw new BadRequestException(
+          `Not enough ${type} tickets available`
+        );
+      }
+
+      totalAmount += ticketInfo.price * quantity;
+    }
+
+    totalAmount += 40;
+
+    if (couponCode) {
+      const validatedDiscount = await this.validateAndCalculateCouponDiscount(
+        couponCode,
+        totalAmount
+      );
+      totalAmount -= validatedDiscount;
+    }
+
+    return Math.max(totalAmount, 0);
+  }
+
+  private async validateAndCalculateCouponDiscount(
+    couponCode: string,
+    amount: number
+  ): Promise<number> {
+    const coupon = await this.couponRepository.findByCode(couponCode);
+
+    if (!coupon || !coupon.isActive) {
+      throw new BadRequestException('Invalid coupon code');
+    }
+
+    if (coupon.minAmount && amount < coupon.minAmount) {
+      throw new BadRequestException(
+        `Minimum amount of ${coupon.minAmount} required`
+      );
+    }
+
+    if (coupon.discountType === 'percentage') {
+      return (amount * coupon.discount) / 100;
+    }
+
+    return coupon.discount;
   }
 }
