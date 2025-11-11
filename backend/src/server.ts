@@ -19,7 +19,7 @@ import configureSocketIO from "./configs/socket";
 
 
 const PORT: string | undefined = process.env.PORT;
-
+const revenueDistributionCron = container.resolve(RevenueDistributionCronService);
 const app=express();
 const server = http.createServer(app);
 const corsOptions={
@@ -30,12 +30,13 @@ const corsOptions={
 };
 const io = configureSocketIO(server);
 
-const revenueDistributionCron = container.resolve(RevenueDistributionCronService);
-revenueDistributionCron.startCronJob();
-app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
-
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
+
+
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookRouter);
+
+
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
@@ -52,6 +53,8 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
 });
 
+
+revenueDistributionCron.startCronJob();
 
 if(!PORT) {
     throw new Error('PORT is not defined in env')

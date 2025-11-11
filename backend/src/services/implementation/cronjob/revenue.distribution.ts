@@ -10,7 +10,7 @@ export class RevenueDistributionCronService implements IRevenueDistributionCronS
   ) { }
 
   startCronJob(): void {
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('*/30 * * * *', async () => {
       logger.info('Starting revenue distribution job (every 5 minutes)');
 
       try {
